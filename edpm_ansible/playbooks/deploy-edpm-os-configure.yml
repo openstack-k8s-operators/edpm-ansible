@@ -1,0 +1,60 @@
+---
+# Copyright 2022 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
+  name: Deploy EDPM Operating System Configure
+  strategy: edpm_free
+  gather_facts: "{{ gather_facts | default(false) }}"
+  any_errors_fatal: true
+  become: true
+  tasks:
+    - name: Configure edpm_podman
+      import_role:
+        name: edpm_podman
+        tasks_from: configure.yml
+      tags:
+        - edpm_podman
+    - name: Manage edpm container services
+      import_role:
+        name: edpm_container_manage
+        tasks_from: shutdown.yml
+      tags:
+        - edpm_container_manage
+    - name: Configure edpm_sshd
+      import_role:
+        name: edpm_sshd
+        tasks_from: configure.yml
+      tags:
+        - edpm_sshd
+    - name: Configure chrony
+      import_role:
+        name: chrony
+        tasks_from: config.yml
+      tags:
+        - chrony
+    - name: Configure edpm_timezone
+      import_role:
+        name: edpm_timezone
+        tasks_from: configure.yml
+      tags:
+        - edpm_timezone
+    - name: Configure edpm_ovn
+      import_role:
+        name: edpm_ovn
+        tasks_from: configure.yml
+      tags:
+        - edpm_ovn

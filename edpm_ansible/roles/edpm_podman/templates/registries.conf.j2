@@ -1,0 +1,29 @@
+# This file is managed via edpm-ansible
+
+unqualified-search-registries = {{ edpm_podman_unqualified_search_registries | list }}
+
+# registries configuration
+{% for reg in edpm_podman_registries %}
+[[registry]]
+prefix = "{{ reg.prefix }}"
+location = "{{ reg.location | default(reg.prefix) }}"
+insecure = {{ reg.insecure | default(False) | bool | ternary('true', 'false') }}
+blocked = {{ reg.blocked | default(False) | bool | ternary('true', 'false') }}
+{% if 'mirrors' in reg %}
+{% for mirror in reg.mirrors %}
+[[registry.mirror]]
+location = "{{ mirror.location }}"
+insecure = {{ mirror.insecure | default(False) | bool | ternary('true', 'false') }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% if edpm_podman_insecure_registries is defined %}
+# insecure registry list
+{% for reg in edpm_podman_insecure_registries %}
+[[registry]]
+prefix = "{{ reg }}"
+insecure = true
+location = "{{ reg }}"
+{% endfor %}
+{% endif %}

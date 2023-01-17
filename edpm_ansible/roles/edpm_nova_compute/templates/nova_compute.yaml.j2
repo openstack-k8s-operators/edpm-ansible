@@ -1,0 +1,32 @@
+start_order: 3
+image: {{ edpm_nova_compute_container_image }}
+ulimit: {{ edpm_nova_compute_docker_ulimit }}
+ipc: host
+net: host
+privileged: true
+user: nova
+restart: always
+depends_on:
+  - edpm_nova_libvirt.target
+volumes:
+  {% set nova_compute_volumes = [] %}
+  {%- set nova_compute_volumes =
+        nova_compute_volumes +
+        edpm_nova_compute_common_volumes +
+        edpm_nova_compute_volumes +
+        edpm_nova_compute_opt_volumes -%}
+  {%- if edpm_nova_compute_multipathd_enable|bool -%}
+  {%- set nova_compute_volumes =
+        nova_compute_volumes +
+        ['/etc/multipath:/etc/multipath:z'] +
+        ['/etc/multipath.conf:/etc/multipath.conf:ro'] -%}
+  {%- endif %}
+  {%- set nova_compute_volumes =
+        nova_compute_volumes +
+        edpm_nova_compute_logging_volumes -%}
+  {{ nova_compute_volumes }}
+environment:
+  {% set nova_compute_env = edpm_nova_compute_opt_env_vars %}
+  {%- set _ = nova_compute_env.update({'KOLLA_CONFIG_STRATEGY':'COPY_ALWAYS'}) -%}
+  {%- set _ = nova_compute_env.update({'LIBGUESTFS_BACKEND':'direct'}) -%}
+  {{ nova_compute_env }}

@@ -1,0 +1,41 @@
+command:
+{%- if edpm_nova_compute_startup_delay != 0 -%}
+  '/var/lib/nova/delay-nova-compute --delay {{ edpm_nova_compute_startup_delay }} --nova-binary'
+{% elif edpm_nova_compute_enable_instance_ha -%}
+  '/var/lib/nova/instanceha/check-run-nova-compute'
+{% else %}
+  '/usr/bin/nova-compute'
+{% endif -%}
+config_files:
+  - source: "/var/lib/kolla/config_files/src/*"
+    dest: "/"
+    merge: true
+    preserve_properties: true
+  # (TODO: slagle) This must be commented out until files exist at this path
+  # otherwise kolla-start fails. This can be enabled once the edpm_iscsid
+  # role is actually generating configuration.
+  # - source: "/var/lib/kolla/config_files/src-iscsid/*"
+  #   dest: "/etc/iscsi/"
+  #   merge: true
+  #   preserve_properties: true
+  - source: "/var/lib/kolla/config_files/src-ceph/"
+    dest: "/etc/ceph/"
+    merge: true
+    preserve_properties: true
+permissions:
+  - path: /var/log/nova
+    owner: nova:nova
+    recurse: true
+  - path: {{ "/etc/ceph/" ~ edpm_nova_compute_ceph_cluster_name ~ ".client." ~ edpm_nova_compute_ceph_client_user_name ~ ".keyring" }}
+    owner: nova:nova
+    perm: '0600'
+{% for _, store in edpm_nova_compute_glance_multistore_config.items() %}
+  - path: /etc/ceph/{{ store.CephClusterName | default(edpm_nova_compute_ceph_cluster_name) }}.client.{{ store.CephClientUserName | default(edpm_nova_compute_ceph_client_user_name) }}.keyring
+    owner: nova:nova
+    perm: '0600'
+{% endfor %}
+{% for _, store in edpm_nova_compute_cinder_rbd_multi_config.items() %}
+  - path: /etc/ceph/{{ store.CephClusterName | default(edpm_nova_compute_ceph_cluster_name) }}.client.{{ store.CephClientUserName | default(edpm_nova_compute_ceph_client_user_name) }}.keyring
+    owner: nova:nova
+    perm: '0600'
+{% endfor %}

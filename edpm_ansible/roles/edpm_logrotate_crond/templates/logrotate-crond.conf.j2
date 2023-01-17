@@ -1,0 +1,25 @@
+/var/log/containers/*/*log /var/log/containers/*/*/*log /var/log/containers/*/*err {
+  {{ edpm_logrotate_crond_rotation }}
+  rotate {{ edpm_logrotate_crond_rotate }}
+  maxage {{ edpm_logrotate_crond_purge_after_days }}
+  # minsize 1 is required for GDPR compliance, all files in
+  # /var/log/containers not managed with logrotate will be purged!
+  minsize {{ edpm_logrotate_crond_minsize | default(1) }}
+  # Do not use size as it's not compatible with time-based rotation rules
+  # required for GDPR compliance.
+  maxsize {{ edpm_logrotate_crond_maxsize | default(1) }}
+  missingok
+  {{ edpm_logrotate_crond_notifempty | ternary('notifempty', '', omit) }}
+  {{ edpm_logrotate_crond_copytruncate | ternary('copytruncate', '', omit) }}
+  {{ edpm_logrotate_crond_delaycompress | ternary('delaycompress', '', omit) }}
+  {{ edpm_logrotate_crond_compress | ternary('compress', '', omit) }}
+{% if edpm_logrotate_crond_dateext -%}
+  dateext
+  {% if edpm_logrotate_crond_dateformat -%}
+  dateformat {{ edpm_logrotate_crond_dateformat }}
+  {% endif -%}
+  {% if edpm_logrotate_crond_dateyesterday -%}
+  dateyesterday {{ edpm_logrotate_crond_dateyesterday }}
+  {% endif -%}
+{% endif -%}
+}

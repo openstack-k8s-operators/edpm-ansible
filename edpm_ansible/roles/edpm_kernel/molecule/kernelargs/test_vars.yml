@@ -1,0 +1,3 @@
+expected_line: 'GRUB_EDPM_HEAT_TEMPLATE_KERNEL_ARGS=" test=1 "'
+edpm_kernel_args: test=1
+_mocked_cmdline: ""

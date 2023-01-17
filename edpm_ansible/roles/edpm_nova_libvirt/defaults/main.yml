@@ -1,0 +1,211 @@
+---
+# Copyright 2022 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# All variables intended for modification should be placed in this file.
+
+# All variables within this role should have a prefix of "edpm_nova_libvirt"
+edpm_nova_libvirt_rootless_podman: false
+edpm_nova_libvirt_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
+edpm_nova_libvirt_deploy_identifier: "{{ edpm_deploy_identifier | default('') }}"
+edpm_nova_libvirt_hide_sensitive_logs: true
+edpm_nova_libvirt_container_image: "quay.io/edpmmastercentos9/openstack-nova-libvirt:current-edpm"  # role specific
+edpm_nova_libvirt_container_config_image: "quay.io/edpmmastercentos9/openstack-nova-libvirt:current-edpm"  # role specific
+edpm_nova_libvirt_container_ulimit: ['nofile=131072', 'nproc=126960']
+edpm_nova_libvirt_container_pid: host
+edpm_nova_libvirt_container_pids_limit: 65536
+edpm_nova_libvirt_ceph_config_path: "{{
+  edpm_ceph_config_path | default('/var/lib/edpm-config/ceph', true) }}"
+edpm_nova_libvirt_ceph_client_user_name: "{{
+  edpm_ceph_client_user_name | default('openstack', true) }}"
+edpm_nova_libvirt_enable_internal_tls: "{{ edpm_enable_internal_tls | default (false) }}"
+edpm_nova_libvirt_use_tls_transport_for_live_migration: "{{
+  edpm_use_tls_transport_for_live_migration | default(true) }}"
+edpm_nova_libvirt_enable_rbd_backend: false  # role specific
+edpm_nova_libvirt_cinder_enable_rbd_backend: "{{ edpm_cinder_enable_rbd_backend | default(false) }}"
+edpm_nova_libvirt_ceph_client_key: "{{ edpm_ceph_client_key | default('', true) }}"  # sensitive data
+edpm_nova_libvirt_ceph_cluster_fsid: "{{ edpm_ceph_cluster_fsid | default('', true) }}"
+edpm_nova_libvirt_ceph_cluster_name: "{{ edpm_ceph_cluster_name | default('ceph', true) }}"
+edpm_nova_libvirt_cinder_rbd_multi_config: "{{ edpm_cinder_rbd_multi_config | default({}, true) }}"
+edpm_nova_libvirt_use_tls_transport_for_vnc: true
+edpm_nova_libvirt_use_tls_transport_for_nbd: true
+edpm_nova_libvirt_internal_tlsca_file: "{{ edpm_internal_tls_ca_file | default('/etc/ipa/ca.crt', true) }}"
+edpm_nova_libvirt_libvirt_ca_cert_real: "{{ edpm_nova_libvirt_libvirt_ca_cert | default(edpm_nova_libvirt_internal_tlsca_file) }}"
+edpm_nova_libvirt_qemu_ca_cert_real: "{{ edpm_nova_libvirt_qemu_ca_cert | default(edpm_nova_libvirt_internal_tlsca_file) }}"
+edpm_nova_libvirt_certificate_key_size_real: "{{
+  edpm_nova_libvirt_certificate_key_size |
+    default(edpm_certificate_key_size |
+      default('2048', true)
+    ) }}"
+edpm_nova_libvirt_qemu_server_certificate_key_size_real: "{{
+  edpm_nova_libvirt_qemu_server_certificate_key_size |
+    default(edpm_certificate_key_size |
+      default('2048', true)
+    ) }}"
+edpm_nova_libvirt_qemu_client_certificate_key_size_real: "{{
+  edpm_nova_libvirt_qemu_client_certificate_key_size |
+    default(edpm_certificate_key_size |
+      default('2048', true)
+    ) }}"
+edpm_nova_libvirt_vhostuser_socket_group: qemu  # role specific
+edpm_nova_libvirt_qemu_memory_backing_dir: ""  # role specific
+edpm_nova_libvirt_nova_compute_libvirt_type: kvm
+edpm_nova_libvirt_enabled_perf_events: []
+edpm_nova_libvirt_monitoring_subscription: overcloud-nova-libvirt
+edpm_nova_libvirt_migration_ssh_key: >
+  {{ edpm_migration_ssh_key | default({"public_key": "", "private_key": ""}, true) }}
+edpm_nova_libvirt_migration_ssh_port: "{{ edpm_migration_ssh_port | default('2022'. true) }}"
+edpm_nova_libvirt_tls_password: ""  # sensitive, assert not empty
+edpm_nova_libvirt_qemu_default_tls_verify: true
+edpm_nova_libvirt_virtlogd_wrapper_virtlogd_process_wrapper: /var/lib/container-config-scripts/virtlogd_wrapper
+
+# TODO(bogdando): config it with ansible, by converting logic implemented in tht with these hiera mappings:
+edpm_nova_libvirt_manage_libvirt_services: false
+edpm_nova_libvirt_migration_support: false
+edpm_nova_libvirt_qemu_configure_qemu: true # dup for edpm_nova_libvirt_migration_qemu_configure_qemu in puppet/hiera
+edpm_nova_libvirt_qemu_max_files: 32768
+edpm_nova_libvirt_qemu_max_processes: 131072
+edpm_nova_libvirt_migration_qemu_migration_port_min: 61152
+edpm_nova_libvirt_migration_qemu_migration_port_max: 61215
+edpm_nova_libvirt_migration_client_libvirt_enabled: true
+# TODO(bogdando): use IP / FQDN on edpm_nova_libvirt_network
+edpm_nova_libvirt_migration_libvirt_listen_address: 0.0.0.0
+edpm_nova_libvirt_migration_libvirt_live_migration_inbound_addr: "{{ ansible_facts['fqdn'] }}"
+edpm_nova_libvirt_vncserver_listen: 0.0.0.0
+edpm_nova_libvirt_migration_client_libvirt_tls: "{{
+  edpm_nova_libvirt_enable_internal_tls | bool and
+  edpm_nova_libvirt_use_tls_transport_for_live_migration | bool }}"
+edpm_nova_libvirt_qemu_nbd_tls: &edpm_nova_libvirt_use_tls_for_nbd "{{
+  edpm_nova_libvirt_enable_internal_tls | bool or
+  edpm_nova_libvirt_use_tls_transport_for_nbd | bool  }}"
+edpm_nova_libvirt_migration_libvirt_live_migration_with_native_tls: *edpm_nova_libvirt_use_tls_for_nbd
+edpm_nova_libvirt_qemu_vnc_tls: &edpm_nova_libvirt_use_tls_for_vnc "{{
+      edpm_nova_libvirt_enable_internal_tls | bool or
+      edpm_nova_libvirt_use_tls_transport_for_vnc | bool  }}"
+edpm_nova_libvirt_qemu_vnc_tls_verify: *edpm_nova_libvirt_use_tls_for_vnc
+edpm_nova_libvirt_rbd_libvirt_images_rbd_ceph_conf: /etc/ceph/{{ edpm_nova_libvirt_ceph_cluster_name }}.conf
+edpm_nova_libvirt_rbd_rbd_keyring: client.{{ edpm_nova_libvirt_ceph_client_user_name }}
+
+# Redundant mappings, keep it for validation to not complain about missing hiera mappings
+#edpm_nova_libvirt_migration_client_ssh_private_key: "{{ edpm_nova_libvirt_migration_ssh_key.private_key }}"
+#edpm_nova_libvirt_virtlogd_wrapper_virtlogd_image: "{{ edpm_nova_libvirt_container_image }}"
+
+# FIXME(bogdando): monolithic libvirt is not supported, remove these once removed from puppet and tht
+# but keep it for new for the mappings validations to not complain about missing hiera mappings
+#edpm_nova_libvirt_modular_libvirt
+#edpm_nova_libvirt_services_modular_libvirt
+#edpm_nova_libvirt_migration_libvirt_modular_libvirt
+
+edpm_nova_libvirt_services:
+  # TODO(bogdando): restore _wrapper handling conditions and add back create_virtlogd_wrapper,
+  # and conditional nova_virtlogd or nova_virtlogd_wrapper containers to start
+  - virtlogd
+  - virtsecretd
+  - virtnodedevd
+  - virtstoraged
+  - virtqemud
+  - virtproxyd
+
+# logging configuration options
+edpm_nova_libvirt_virtlogd_log_filters: "1:logging 4:object 4:json 4:event 1:util"
+edpm_nova_libvirt_virtsecretd_log_filters: &logfilters "1:qemu 1:libvirt 4:object 4:json 4:event 1:util"
+edpm_nova_libvirt_virtnodedevd_log_filters: *logfilters
+edpm_nova_libvirt_virtstoraged_log_filters: *logfilters
+edpm_nova_libvirt_virtqemud_log_filters: *logfilters
+edpm_nova_libvirt_virtproxyd_log_filters: *logfilters
+# a new one, for ansible config templates engine, has yet a tht mapping
+edpm_nova_libvirt_virtnwfilterd_log_filters: *logfilters
+
+edpm_nova_libvirt_virtlogd_log_outputs: "1:file:/var/log/libvirt/virtlogd.log"
+edpm_nova_libvirt_virtsecretd_log_outputs: "1:file:/var/log/libvirt/virtsecretd.log"
+edpm_nova_libvirt_virtnodedevd_log_outputs: "1:file:/var/log/libvirt/virtnodedevd.log"
+edpm_nova_libvirt_virtstoraged_log_outputs: "1:file:/var/log/libvirt/virtstoraged.log"
+edpm_nova_libvirt_virtqemud_log_outputs: "1:file:/var/log/libvirt/virtqemud.log"
+edpm_nova_libvirt_virtproxyd_log_outputs: "1:file:/var/log/libvirt/virtproxyd.log"
+# a new one, for ansible config templates engine, has yet a tht mapping
+edpm_nova_libvirt_virtnwfilterd_log_outputs: "1:file:/var/log/libvirt/virtnwfilterd.log"
+
+edpm_nova_libvirt_tls_priority: "NORMAL:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2"
+edpm_nova_libvirt_opt_volumes: []  # role specific
+edpm_nova_libvirt_enable_virtlogd_container_wrapper: false
+edpm_nova_libvirt_virtlogd_wrapper_debug: false
+edpm_nova_libvirt_rbd_disk_cachemodes: "{{
+  edpm_rbd_disk_cachemodes |
+    default(['network=writeback'], true) }}"
+edpm_nova_libvirt_network: internal_api
+edpm_nova_libvirt_idm_realm: "{{
+  edpm_idm_realm |
+    default(
+      lookup('ini', 'realm default=DEFAULT section=global file=/etc/ipa/default.conf')
+    ) }}"
+
+edpm_nova_libvirt_config_use_ansible: true
+edpm_nova_libvirt_config_dir: /var/lib/config-data/ansible-generated/nova_libvirt
+
+# TODO: align with facts set for https://review.opendev.org/839762
+edpm_nova_libvirt_common_volumes:
+  - /lib/modules:/lib/modules:ro
+  - /dev:/dev
+  - /run:/run
+  - /sys/fs/cgroup:/sys/fs/cgroup
+  - /sys/fs/selinux:/sys/fs/selinux
+  - /etc/selinux/config:/etc/selinux/config:ro
+  - /etc/libvirt:/etc/libvirt:shared
+  - /etc/ssh/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro
+  - /run/libvirt:/run/libvirt:shared
+  - /var/lib/nova:/var/lib/nova:shared
+  - /var/lib/libvirt:/var/lib/libvirt:shared
+  - /var/cache/libvirt:/var/cache/libvirt:shared
+  - /var/lib/vhost_sockets:/var/lib/vhost_sockets
+  - /var/log/containers/libvirt:/var/log/libvirt:shared,z  # +qemu subdir
+  - "{{ edpm_nova_libvirt_config_dir ~
+        ':/var/lib/kolla/config_files/src:ro' }}"
+
+edpm_nova_libvirt_internal_tls_volumes: "{{
+  edpm_nova_libvirt_enable_internal_tls |
+    ternary(
+      ['/etc/pki/CA/cacert.pem:/etc/pki/CA/cacert.pem:ro',
+       '/etc/pki/libvirt:/etc/pki/libvirt:ro',
+       '/etc/pki/qemu:/etc/pki/qemu:ro'],
+      []) }}"
+
+edpm_nova_libvirt_qemu_memory_backing_dir_volumes: "{{
+  edpm_nova_libvirt_qemu_memory_backing_dir |
+    ternary(
+      [edpm_nova_libvirt_qemu_memory_backing_dir ~ ':'
+       ~ edpm_nova_libvirt_qemu_memory_backing_dir],
+      []) }}"
+
+edpm_nova_libvirt_ceph_volumes:
+      - "{{ edpm_nova_libvirt_ceph_config_path ~
+            ':/var/lib/kolla/config_files/src-ceph:ro' }}"
+
+# TODO: restore facts and volumes for Ceph multiconfig info, keyring paths,
+# Kolla permissions - and use the latter for actual kolla permissions
+edpm_nova_libvirt_volumes: "{{
+  edpm_container_standalone_volumes | default([]) +
+  edpm_nova_libvirt_common_volumes +
+  edpm_nova_libvirt_internal_tls_volumes +
+  edpm_nova_libvirt_qemu_memory_backing_dir_volumes +
+  edpm_nova_libvirt_ceph_volumes +
+  edpm_nova_libvirt_opt_volumes }}"
+
+# TODO(bogdando): implement edpm_nova_libvirt_config, like we do for nova compute
+# but also supporting '' empty config section, like its puppet providers
+edpm_nova_libvirt_config:
+    virtnwfilterd:
+      log_filters: '{{ edpm_nova_libvirt_virtnwfilterd_log_filters }}'
+      log_outputs: '{{ edpm_nova_libvirt_virtnwfilterd_log_outputs }}'
