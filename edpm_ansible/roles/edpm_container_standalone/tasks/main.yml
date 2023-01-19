@@ -1,0 +1,66 @@
+---
+# Copyright 2022 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# "edpm_container_standalone" will search for and load any operating system variable file
+
+# found within the "vars/" path. If no OS files are found the task will skip.
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - skip: true
+      files:
+        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
+        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
+        - "{{ ansible_facts['distribution'] | lower }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}.yml"
+  tags:
+    - always
+
+- name: Ensure {{ edpm_container_standalone_kolla_config_dir }} exists
+  file:
+    path: "{{ edpm_container_standalone_kolla_config_dir }}"
+    state: directory
+    recurse: true
+    setype: container_file_t
+
+- name: Create kolla config files
+  copy:
+    content: "{{ item.value | to_nice_json }}"
+    dest: "{{ edpm_container_standalone_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
+    mode: 0600
+  loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
+
+- name: Create {{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}
+  file:
+    path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
+    state: directory
+
+- name: Render {{ edpm_container_standalone_service }} container definitions
+  copy:
+    content: "{{ item.value | to_nice_json }}"
+    dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
+  loop: "{{ edpm_container_standalone_container_defs | dict2items }}"
+
+- name: Run {{ edpm_container_standalone_service }}  containers
+  include_role:
+    name: edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
+    edpm_container_manage_config_patterns: "*.json"
+    edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"
