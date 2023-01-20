@@ -123,7 +123,7 @@
       failed_when: true
 
     - name: Configure nova.conf
-      config_template:
+      openstack.config_template.config_template:
         remote_src: true
         src: "{{ edpm_nova_compute_config_dir }}/etc/nova/nova.conf"
         dest: "{{ edpm_nova_compute_config_dir }}/etc/nova/nova.conf"

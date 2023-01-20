@@ -15,12 +15,6 @@
 # under the License.
 
 roles:
-  - name: config_template
-    scm: git
-    src: https://opendev.org/openstack/ansible-config_template
-    version: master
-    trackbranch: master
-
   - name: chrony
     scm: git
     src: https://opendev.org/openstack/ansible-role-chrony
@@ -31,3 +25,6 @@ collections:
   - ansible.posix
   - community.general
   - containers.podman
+  - name: https://opendev.org/openstack/ansible-config_template
+    version: master
+    type: git
