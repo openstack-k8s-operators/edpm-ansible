@@ -22,8 +22,8 @@ edpm_nova_libvirt_rootless_podman: false
 edpm_nova_libvirt_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_nova_libvirt_deploy_identifier: "{{ edpm_deploy_identifier | default('') }}"
 edpm_nova_libvirt_hide_sensitive_logs: true
-edpm_nova_libvirt_container_image: "quay.io/edpmmastercentos9/openstack-nova-libvirt:current-edpm"  # role specific
-edpm_nova_libvirt_container_config_image: "quay.io/edpmmastercentos9/openstack-nova-libvirt:current-edpm"  # role specific
+edpm_nova_libvirt_container_image: "quay.io/tripleomastercentos9/openstack-nova-libvirt:current-tripleo"  # role specific
+edpm_nova_libvirt_container_config_image: "quay.io/tripleomastercentos9/openstack-nova-libvirt:current-tripleo"  # role specific
 edpm_nova_libvirt_container_ulimit: ['nofile=131072', 'nproc=126960']
 edpm_nova_libvirt_container_pid: host
 edpm_nova_libvirt_container_pids_limit: 65536

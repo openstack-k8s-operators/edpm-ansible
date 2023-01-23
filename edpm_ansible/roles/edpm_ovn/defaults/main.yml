@@ -12,7 +12,7 @@ edpm_ovn_sb_server_port: 6642
 edpm_ovn_of_probe_interval: 60
 edpm_ovn_remote_probe_interval: 60000
 edpm_ovn_ofctrl_wait_before_clear: 8000
-edpm_ovn_controller_image: "quay.io/edpmmastercentos9/openstack-ovn-controller:current-edpm"
+edpm_ovn_controller_image: "quay.io/tripleomastercentos9/openstack-ovn-controller:current-tripleo"
 edpm_ovn_encap_ip: "{{ tenant_ip }}"
 edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% endif %}"
 
