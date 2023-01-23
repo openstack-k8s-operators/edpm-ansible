@@ -26,7 +26,7 @@ _edpm_bootstrap_packages_bootstrap:
   - os-net-config
   - python3-libselinux
   - python3-pyyaml
-  - puppet-edpm
+  - puppet-tripleo
   - rsync
   - tmpwatch
   - sysstat

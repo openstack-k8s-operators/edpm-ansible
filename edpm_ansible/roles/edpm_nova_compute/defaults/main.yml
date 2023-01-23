@@ -21,7 +21,7 @@
 edpm_nova_compute_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_nova_compute_deploy_identifier: "{{ edpm_deploy_identifier | default('') }}"
 edpm_nova_compute_hide_sensitive_logs: true
-edpm_nova_compute_container_image: "quay.io/edpmmastercentos9/openstack-nova-compute:current-edpm"  # role specific
+edpm_nova_compute_container_image: "quay.io/tripleomastercentos9/openstack-nova-compute:current-tripleo"  # role specific
 edpm_nova_compute_container_nova_libvirt_config_image: "{{ edpm_nova_libvirt_container_config_image | default(edpm_nova_compute_container_image) }}"
 edpm_nova_compute_docker_ulimit: ['nofile=131072', 'memlock=67108864']
 edpm_nova_compute_logging_source:
