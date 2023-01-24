@@ -46,8 +46,6 @@ edpm_container_standalone_common_volumes:
   - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
   # Syslog socket
   - /dev/log:/dev/log
-  # required for bootstrap_host_exec
-  - /etc/puppet:/etc/puppet:ro
 
 # List of volumes included when internal tls is enabled
 edpm_container_standalone_internal_tls_volumes:
