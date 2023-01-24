@@ -26,14 +26,14 @@
     - name: create kernelargs entry with the older name
       lineinfile:
         dest: /etc/default/grub
-        regexp: '^EDPM_HEAT_TEMPLATE_KERNEL_ARGS.*'
+        regexp: '^EDPM_KERNEL_ARGS.*'
         insertafter: '^GRUB_CMDLINE_LINUX.*'
-        line: 'EDPM_HEAT_TEMPLATE_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
+        line: 'EDPM_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
     - name: create append entry with older name
       lineinfile:
         dest: /etc/default/grub
-        line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${EDPM_HEAT_TEMPLATE_KERNEL_ARGS}"'
-        insertafter: '^EDPM_HEAT_TEMPLATE_KERNEL_ARGS.*'
+        line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${EDPM_KERNEL_ARGS}"'
+        insertafter: '^EDPM_KERNEL_ARGS.*'
     - include_role:
         name: "edpm_kernel"
         tasks_from: kernelargs.yml

@@ -23,7 +23,7 @@
     - name: Check if the kernel args is applied to the grub file
       lineinfile:
         path: /etc/default/grub
-        line: 'GRUB_EDPM_HEAT_TEMPLATE_KERNEL_ARGS=" test=1 "'
+        line: 'GRUB_EDPM_KERNEL_ARGS=" test=1 "'
         state: present
       check_mode: true
       register: grub
@@ -31,7 +31,7 @@
     - name: Check if the older name entries are removed
       lineinfile:
         path: /etc/default/grub
-        regexp: '^EDPM_HEAT_TEMPLATE_KERNEL_ARGS.*'
+        regexp: '^EDPM_KERNEL_ARGS.*'
         state: absent
       check_mode: true
       register: grub
@@ -39,7 +39,7 @@
     - name: Check if the older name entries are removed for append
       lineinfile:
         path: /etc/default/grub
-        regexp: '.*{EDPM_HEAT_TEMPLATE_KERNEL_ARGS}.*'
+        regexp: '.*{EDPM_KERNEL_ARGS}.*'
         state: absent
       check_mode: true
       register: grub

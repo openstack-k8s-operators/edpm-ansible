@@ -1,4 +1,4 @@
-expected_line: 'GRUB_EDPM_HEAT_TEMPLATE_KERNEL_ARGS=" test=1 test3=4 default_hugepagesz=2048 hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 hugepagesz=1048576 hugepages=12 "'
+expected_line: 'GRUB_EDPM_KERNEL_ARGS=" test=1 test3=4 default_hugepagesz=2048 hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 hugepagesz=1048576 hugepages=12 "'
 _mocked_cmdline: test=1 default_hugepagesz=1GB hugepagesz=1G hugepages=12 hugepagesz=4096 hugepages=5
 edpm_kernel_args: "test=1 default_hugepagesz=1GB hugepagesz=1G hugepages=12 hugepagesz=4096 hugepages=5 test3=4"
 edpm_kernel_hugepages:
