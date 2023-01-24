@@ -1,0 +1,29 @@
+exclude_paths:
+    - releasenotes/
+    - ../
+parseable: true
+quiet: false
+rulesdir:
+    - .ansible-lint_rules/
+verbosity: 1
+# Mocking modules is not recommended as it prevents testing of invalid
+# arguments or lack of their presence at runtime. It is preffered to
+# make use of requirements.yml to declare them.
+mock_roles:
+    - ceph-defaults
+    - ceph-facts
+mock_modules:
+    - baremetal_nodes_validate
+    - ceph_crush_rule
+    - ceph_dashboard_user
+    - ceph_key
+    - ceph_fs
+    - ceph_pool
+    - ceph_mkspec
+    - ceph_spec_bootstrap
+    - config_template
+    - container_startup_config
+    - lvm2_physical_devices_facts
+    - metalsmith_instances
+    - os_baremetal_clean_node
+    - os_baremetal_provide_node
