@@ -1,4 +1,4 @@
-expected_line: 'GRUB_EDPM_HEAT_TEMPLATE_KERNEL_ARGS="  default_hugepagesz=2048 hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 "'
+expected_line: 'GRUB_EDPM_KERNEL_ARGS="  default_hugepagesz=2048 hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 "'
 _mocked_cmdline: default_hugepagesz=2M hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 hugepagesz=10240 hugepages=10
 edpm_kernel_hugepages_remove: true
 edpm_kernel_hugepages:
