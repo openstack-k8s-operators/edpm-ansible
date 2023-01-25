@@ -1,0 +1,14 @@
+---
+- name: Create chrony-online.service unit file
+  become: True
+  copy:
+    src: files/chrony-online.service
+    dest: /etc/systemd/system/chrony-online.service
+
+- name: Enable chrony-online.service
+  become: True
+  systemd:
+    state: started
+    name: chrony-online.service
+    enabled: true
+    daemon-reload: true

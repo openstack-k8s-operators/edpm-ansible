@@ -1,0 +1,7 @@
+---
+- name: Upgrade chronyd package
+  package:
+    name: chronyd
+    statue: latest
+  when: chrony_manage_package|bool
+  notify: Restart chronyd

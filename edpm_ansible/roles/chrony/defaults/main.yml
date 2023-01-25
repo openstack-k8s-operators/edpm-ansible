@@ -1,0 +1,21 @@
+---
+chrony_debug: False
+chrony_role_action: all
+chrony_global_server_settings: iburst minpoll 6 maxpoll 10
+chrony_global_pool_settings: iburst minpoll 6 maxpoll 10
+chrony_ntp_servers:
+  - '0.pool.ntp.org'
+  - '1.pool.ntp.org'
+  - '2.pool.ntp.org'
+  - '3.pool.ntp.org'
+chrony_ntp_pools: []
+chrony_ntp_peers: []
+chrony_bind_addresses:
+    - 127.0.0.1
+    - ::1
+chrony_acl_rules: ['deny all']
+chrony_service_name: chronyd
+chrony_manage_service: True
+chrony_manage_package: True
+chrony_service_state: started
+chrony_extra_options: []
