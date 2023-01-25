@@ -16,10 +16,7 @@
 
 import ast
 import json
-import os
 import re
-
-from ansible import errors
 
 
 # cmp() doesn't exist on python3
@@ -68,7 +65,7 @@ class FilterModule(object):
                 continue
 
             # Don't delete containers NOT managed by edpm* or paunch*
-            elif not re.findall(r"(?=("+'|'.join(['edpm', 'paunch'])+r"))",
+            elif not re.findall(r"(?=(" + '|'.join(['edpm', 'paunch']) + r"))",
                                 managed_by):
                 to_skip += [c_name]
                 continue

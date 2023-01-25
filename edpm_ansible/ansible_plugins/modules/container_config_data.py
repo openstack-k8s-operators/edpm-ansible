@@ -17,7 +17,6 @@
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.parsing.convert_bool import boolean
 
 import glob
 import json
@@ -129,7 +128,7 @@ class ContainerConfigDataManager(object):
 
             # Merge the config dict with given overrides
             self.results['configs'] = self._merge_with_overrides(
-                    config_dict, config_overrides)
+                config_dict, config_overrides)
         else:
             self.module.debug(
                 msg='{} does not exists, skipping step'.format(config_path))

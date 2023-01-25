@@ -18,13 +18,11 @@
 import copy
 import yaml
 import logging
-import os
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.openstack.cloud.plugins.module_utils.openstack import openstack_full_argument_spec
 from ansible_collections.openstack.cloud.plugins.module_utils.openstack import openstack_module_kwargs
 
-from edpm_common import constants
 from edpm_common.image import image_uploader
 from edpm_common.image import kolla_builder
 from edpm_common.utils.locks import processlock

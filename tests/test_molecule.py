@@ -14,7 +14,6 @@
 import os
 import subprocess
 
-import pytest
 import yaml
 
 

@@ -257,17 +257,14 @@ def fake_testtree(testtree):
                                     side_effect=fake_stat) as fake_stat:
                         with mock.patch(
                                 'os.unlink',
-                                side_effect=fake_unlink
-                                ) as fake_unlink:
+                                side_effect=fake_unlink) as fake_unlink:
                             with mock.patch(
                                     'selinux.lgetfilecon',
                                     side_effect=fake_lgetfilecon,
-                                    return_value=[10, 'newcontext']
-                                    ) as fake_lgetfilecon:
+                                    return_value=[10, 'newcontext']) as fake_lgetfilecon:
                                 with mock.patch(
                                         'selinux.lsetfilecon',
-                                        side_effect=fake_lsetfilecon,
-                                        ) as fake_lsetfilecon:
+                                        side_effect=fake_lsetfilecon) as fake_lsetfilecon:
                                     yield (fake_chown,
                                            fake_exists,
                                            fake_listdir,
@@ -281,8 +278,7 @@ def assert_ids(testtree, path, uid, gid):
     statinfo = testtree[path]['stat']
     assert (uid, gid) == (statinfo.st_uid, statinfo.st_gid), \
         "{}: expected ownership {}:{} actual {}:{}".format(
-            path, uid, gid, statinfo.st_uid, statinfo.st_gid
-        )
+            path, uid, gid, statinfo.st_uid, statinfo.st_gid)
 
 
 class PathManagerCase(base.BaseTestCase):
