@@ -11,6 +11,5 @@ verbosity: 1
 # make use of requirements.yml to declare them.
 # mock_roles:
 mock_modules:
-    - baremetal_nodes_validate
     - config_template
     - container_startup_config
