@@ -14,16 +14,5 @@ mock_roles:
     - ceph-facts
 mock_modules:
     - baremetal_nodes_validate
-    - ceph_crush_rule
-    - ceph_dashboard_user
-    - ceph_key
-    - ceph_fs
-    - ceph_pool
-    - ceph_mkspec
-    - ceph_spec_bootstrap
     - config_template
     - container_startup_config
-    - lvm2_physical_devices_facts
-    - metalsmith_instances
-    - os_baremetal_clean_node
-    - os_baremetal_provide_node
