@@ -26,6 +26,8 @@ import json
 
 from concurrent.futures import ThreadPoolExecutor
 
+from ansible_collections.containers.podman.plugins.module_utils.podman.podman_container_lib import PodmanManager, ARGUMENTS_SPEC_CONTAINER  # noqa: F402
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -90,9 +92,6 @@ EXAMPLES = """
     config_id: edpm_step1
     config_dir: /var/lib/edpm-config/container-startup-config/step_1
 """
-
-
-from ansible_collections.containers.podman.plugins.module_utils.podman.podman_container_lib import PodmanManager, ARGUMENTS_SPEC_CONTAINER  # noqa: F402
 
 
 class ExecFailure(Exception):

@@ -17,16 +17,12 @@
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.parsing.convert_bool import boolean
-from datetime import datetime
 
-import base64
 import copy
 import fnmatch
 import json
 import os
 import shutil
-import tempfile
 import yaml
 
 
@@ -444,7 +440,6 @@ class ContainerPuppetManager:
         :returns: string
         """
         hashfile = "%s.md5sum" % config_volume
-        hash_data = ''
         if self._exists(hashfile):
             return self._slurp(hashfile).strip('\n')
 

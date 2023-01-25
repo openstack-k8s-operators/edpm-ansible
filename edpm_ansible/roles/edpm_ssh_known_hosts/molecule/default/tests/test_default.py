@@ -27,6 +27,6 @@ def test_ssh_host_keys(host):
     expected = [
         '[10.0.0.1]*,[centos.ctlplane.localdomain]*,[10.0.1.1]*,[centos.internalapi.localdomain]*,[centos.localdomain]*,[centos]* ssh-rsa AAAATEST',
     ]
-    known_hosts = host.file("/etc/ssh/ssh_known_hosts").content_string
+
     for line in expected:
         assert line in host.file("/etc/ssh/ssh_known_hosts").content_string

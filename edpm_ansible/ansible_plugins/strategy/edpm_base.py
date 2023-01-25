@@ -153,11 +153,10 @@ class EdpmBase(StrategyBase):
         """
         self._debug('process_includes...')
         include_files = IncludedFile.process_include_results(
-                host_results,
-                iterator=self._iterator,
-                loader=self._loader,
-                variable_manager=self._variable_manager
-        )
+            host_results,
+            iterator=self._iterator,
+            loader=self._loader,
+            variable_manager=self._variable_manager)
 
         include_success = True
         if len(include_files) == 0:
