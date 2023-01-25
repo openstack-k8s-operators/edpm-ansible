@@ -9,9 +9,7 @@ verbosity: 1
 # Mocking modules is not recommended as it prevents testing of invalid
 # arguments or lack of their presence at runtime. It is preffered to
 # make use of requirements.yml to declare them.
-mock_roles:
-    - ceph-defaults
-    - ceph-facts
+# mock_roles:
 mock_modules:
     - baremetal_nodes_validate
     - config_template
