@@ -59,3 +59,6 @@ edpm_kernel_sysctl_extra_settings:
     value: 1
   fs.inotify.max_user_instances:
     value: 1024
+
+# This should be synced with edpm_nova_compute role
+edpm_nova_compute_config_dir: /var/lib/config-data/ansible-generated/nova_libvirt
