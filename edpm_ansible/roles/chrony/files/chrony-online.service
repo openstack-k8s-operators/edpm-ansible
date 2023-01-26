@@ -1,0 +1,12 @@
+[Unit]
+Description=chronyd online sources service
+After=network-online.target chronyd.service
+Wants=network-online.target chronyd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/chronyc online
+User=root
+
+[Install]
+WantedBy=multi-user.target

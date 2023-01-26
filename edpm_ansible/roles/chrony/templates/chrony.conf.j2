@@ -1,0 +1,63 @@
+# Do not manually edit this file.
+# Managed by ansible-role-chrony
+{% for server in chrony_ntp_servers -%}
+{% if server is mapping %}
+server {{ server.server_host }} {{ server.server_settings }}
+{% else %}
+server {{ server }} {{ chrony_global_server_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% for pool in chrony_ntp_pools -%}
+{% if pool is mapping %}
+pool {{ pool.pool_host }} {{ pool.pool_settings }}
+{% else %}
+pool {{ pool }} {{ chrony_global_pool_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% for peer in chrony_ntp_peers -%}
+{% if peer is mapping %}
+peer {{ peer.peer_host }} {{ peer.peer_settings }}
+{% else %}
+peer {{ peer }} {{ chrony_global_peer_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% if chrony_bind_addresses is defined and chrony_bind_addresses|length > 0 -%}
+{% for bind_addr in chrony_bind_addresses %}
+bindcmdaddress {{ bind_addr }}
+{% endfor %}
+{% endif -%}
+
+{% if chrony_acl_rules is defined and chrony_acl_rules|length > 0 -%}
+{{ chrony_acl_rules|join("\n") }}
+{% endif -%}
+
+{% if chrony_keyfile_path is defined -%}
+keyfile {{ chrony_keyfile_path }}
+{% endif -%}
+
+{% if chrony_driftfile_path is defined -%}
+driftfile {{ chrony_driftfile_path }}
+{% endif -%}
+
+{% if chrony_logdir_path is defined -%}
+logdir {{ chrony_logdir_path }}
+{% endif -%}
+
+{% if chrony_rtc_settings is defined -%}
+{{ chrony_rtc_settings|join("\n") }}
+{% endif -%}
+
+{% if chrony_log_options is defined -%}
+log {{ chrony_log_options }}
+{% endif -%}
+
+{% if chrony_makestep is defined -%}
+makestep {{ chrony_makestep }}
+{% endif -%}
+
+{% if chrony_extra_options -%}
+{{ chrony_extra_options|join("\n") }}
+{% endif -%}

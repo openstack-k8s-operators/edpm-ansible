@@ -1,0 +1,15 @@
+---
+- name: Create chrony-online.service unit file
+  become: true
+  ansible.builtin.copy:
+    src: files/chrony-online.service
+    dest: /etc/systemd/system/chrony-online.service
+    mode: 0644
+
+- name: Enable chrony-online.service
+  become: true
+  ansible.builtin.systemd:
+    state: started
+    name: chrony-online.service
+    enabled: true
+    daemon-reload: true
