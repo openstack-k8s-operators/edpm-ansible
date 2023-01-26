@@ -16,14 +16,14 @@
 
 
 - name: Load distro-specific variables
-  include_tasks: vars.yml
+  ansible.builtin.include_tasks: vars.yml
 
 - name: Ensure chronyd is running
-  service:
-    enabled: "{{ (chrony_service_state|default('started') in ['running', 'started']) |bool }}"
+  ansible.builtin.service:
+    enabled: "{{ (chrony_service_state | default('started') in ['running', 'started']) | bool }}"
     name: "{{ chrony_service_name }}"
-    state: "{{ chrony_service_state|default('started') }}"
-  when: chrony_manage_service|bool
+    state: "{{ chrony_service_state | default('started') }}"
+  when: chrony_manage_service | bool
 
 # ansible sometimes ignores handlers when invoked elsewhere. Since we will
 # likely want to restart chrony after a configuration update, let's do it here
@@ -31,7 +31,7 @@
 # This won't have any effect if chrony_manage_service is set to false.
 # See also https://github.com/ansible/ansible/issues/37512
 - name: Force chronyd restart
-  service:
+  ansible.builtin.service:
     name: "{{ chrony_service_name }}"
     state: restarted
   when:

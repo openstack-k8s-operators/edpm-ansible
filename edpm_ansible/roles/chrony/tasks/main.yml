@@ -15,28 +15,28 @@
 # # under the License.
 
 - name: Load distro-specific variables
-  include_tasks: vars.yml
+  ansible.builtin.include_tasks: vars.yml
 
 - name: Install chronyd
-  include_tasks: install.yml
+  ansible.builtin.include_tasks: install.yml
   when: chrony_role_action in ['all', 'install']
 
 - name: Upgrade chronyd
-  include_tasks: upgrade.yml
+  ansible.builtin.include_tasks: upgrade.yml
   when: chrony_role_action in ['upgrade']
 
 - name: Configure chronyd
-  include_tasks: config.yml
+  ansible.builtin.include_tasks: config.yml
   when: chrony_role_action in ['all', 'config']
 
 - name: Run chronyd
-  include_tasks: run.yml
+  ansible.builtin.include_tasks: run.yml
   when: chrony_role_action in ['all', 'config', 'run']
 
 - name: Enable online service
-  include_tasks: online.yml
+  ansible.builtin.include_tasks: online.yml
   when: chrony_role_action in ['all', 'online']
 
 - name: Sync chronyc
-  include_tasks: sync.yml
+  ansible.builtin.include_tasks: sync.yml
   when: chrony_role_action in ['all', 'sync']

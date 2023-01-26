@@ -1,6 +1,6 @@
 ---
 - name: Upgrade chronyd package
-  package:
+  ansible.builtin.package:
     name: chronyd
     statue: latest
   when: chrony_manage_package|bool

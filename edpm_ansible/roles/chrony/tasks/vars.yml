@@ -15,7 +15,7 @@
 # # under the License.
 
 - name: Load distro-specific variables
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_facts['distribution'] }}.yml"
     - "{{ ansible_facts['os_family'] }}.yml"

@@ -16,7 +16,7 @@
 
 
 - name: Force NTP sync
-  command: chronyc makestep
+  ansible.builtin.command: chronyc makestep
 
 - name: Ensure system is NTP time synced
-  command: chronyc waitsync 30
+  ansible.builtin.command: chronyc waitsync 30
