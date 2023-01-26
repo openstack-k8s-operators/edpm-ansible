@@ -1,6 +1,6 @@
 galaxy_info:
   role_name: chrony
-  author: tripleo
+  author: EDPM team
   description: chrony role
   company: Red Hat
   license: Apache 2.0
