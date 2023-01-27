@@ -20,7 +20,7 @@ galaxy_info:
   description: EDPM OpenStack Role -- edpm_iscsid
   company: Red Hat
   license: Apache-2.0
-  min_ansible_version: 2.7
+  min_ansible_version: '2.9'
   namespace: openstack
   #
   # Provide a list of supported platforms, and for each platform a list of versions.
@@ -29,10 +29,10 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
-    - name: CentOS
+    - name: 'EL'
       versions:
-        - 8
-        - 9
+        - '8'
+        - '9'
 
   galaxy_tags:
     - edpm
