@@ -15,58 +15,58 @@
 # under the License.
 
 
-- name: "check if {{ container }} service healthcheck exists in systemd"
-  stat:
+- name: "Check if {{ container }} service healthcheck exists in systemd"
+  ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.service"
   register: systemd_healthcheck_exists
 
-- name: "tear-down {{ container }} healthcheck"
+- name: "Tear-down {{ container }} healthcheck"
   when:
     - systemd_healthcheck_exists.stat.exists
   block:
-    - name: "stop and disable {{ container }} healthcheck"
-      systemd:
+    - name: "Stop and disable {{ container }} healthcheck"
+      ansible.builtin.systemd:
         name: "edpm_{{ container }}_healthcheck"
         state: stopped
         enabled: false
 
-    - name: "remove {{ container }} healthcheck service"
-      file:
+    - name: "Remove {{ container }} healthcheck service"
+      ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.service"
         state: absent
 
-    - name: "remove {{ container }} healthcheck timer"
-      file:
+    - name: "Remove {{ container }} healthcheck timer"
+      ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.timer"
         state: absent
 
-- name: "check if {{ container }} service exists in systemd"
-  stat:
+- name: "Check if {{ container }} service exists in systemd"
+  ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}.service"
   register: systemd_exists
 
-- name: "tear-down {{ container }} container"
+- name: "Tear-down {{ container }} container"
   when:
     - systemd_exists.stat.exists
   block:
-    - name: "stop and disable {{ container }}"
-      systemd:
+    - name: "Stop and disable {{ container }}"
+      ansible.builtin.systemd:
         name: "edpm_{{ container }}"
         state: stopped
         enabled: false
 
-    - name: "remove {{ container }} systemd service"
-      file:
+    - name: "Remove {{ container }} systemd service"
+      ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}.service"
         state: absent
 
-- name: "check if {{ container }} service requires exists in systemd"
-  stat:
+- name: "Check if {{ container }} service requires exists in systemd"
+  ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}.service.requires"
   register: systemd_requires_exists
 
-- name: "remove {{ container }} systemd requires"
-  file:
+- name: "Remove {{ container }} systemd requires"
+  ansible.builtin.file:
     path: "/etc/systemd/system/edpm_{{ container }}.service.requires"
     state: absent
   when:
@@ -75,7 +75,7 @@
 - name: Reload systemd services if needed
   when:
     - systemd_healthcheck_exists.stat.exists or systemd_exists.stat.exists or systemd_requires_exists.stat.exists
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
 
 - name: Stop and remove container if exists
