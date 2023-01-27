@@ -14,12 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: configure tmpwatch on the host
+- name: Configure tmpwatch on the host
   become: true
   block:
     - name: Push script
-      copy:
+      ansible.builtin.copy:
         dest: /usr/local/sbin/containers-tmpwatch
         owner: root
         group: root
@@ -30,10 +29,10 @@
             -X "/var/log/containers/*/*log" \
             -X "/var/log/containers/*/*/*log" \
             -X "/var/log/containers/*/*err" \
-            {{ edpm_logrotate_crond_purge_after_days|int + 1 }}d \
+            {{ edpm_logrotate_crond_purge_after_days | int + 1 }}d \
             /var/log/containers/ 2>&1 | logger -t container-tmpwatch
     - name: Insert cronjob in root crontab
-      cron:
+      ansible.builtin.cron:
         name: "Remove old logs"
         special_time: "daily"
         user: "root"
@@ -44,7 +43,7 @@
   when: edpm_logrotate_crond_config_use_ansible
   block:
     - name: Ensure config directories exist
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         recurse: true
@@ -53,12 +52,13 @@
         - "{{ edpm_logrotate_crond_config_dir }}/var/spool/cron"
 
     - name: Render logrotate-crond.conf
-      template:
+      ansible.builtin.template:
         src: logrotate-crond.conf.j2
         dest: "{{ edpm_logrotate_crond_config_dir }}/etc/logrotate-crond.conf"
+        mode: 0644
 
     - name: Configure cron entry command
-      cron:
+      ansible.builtin.cron:
         cron_file: "{{ edpm_logrotate_crond_config_dir }}/var/spool/cron/root"
         user: root
         minute: 0
@@ -71,7 +71,7 @@
         job: sleep `expr ${RANDOM} \% 90`; /usr/sbin/logrotate -s /var/lib/logrotate/logrotate-crond.status /etc/logrotate-crond.conf 2>&1|logger -t logrotate-crond
 
     - name: Configure cron entry $PATH env var
-      cron:
+      ansible.builtin.cron:
         cron_file: "{{ edpm_logrotate_crond_config_dir }}/var/spool/cron/root"
         user: root
         env: true
@@ -79,7 +79,7 @@
         job: /bin:/usr/bin:/usr/sbin
 
     - name: Configure cron entry $SHELL env var
-      cron:
+      ansible.builtin.cron:
         cron_file: "{{ edpm_logrotate_crond_config_dir }}/var/spool/cron/root"
         user: root
         env: true
