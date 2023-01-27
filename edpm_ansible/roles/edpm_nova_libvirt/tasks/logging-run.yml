@@ -16,12 +16,13 @@
 
 
 - name: Ensure /var/lib/container-config-scripts exists
-  file:
+  ansible.builtin.file:
     path: /var/lib/container-config-scripts
     state: directory
+    mode: 0755
 
 - name: Manage nova_virtqemud_init_logs container
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: nova_virtqemud_init_logs

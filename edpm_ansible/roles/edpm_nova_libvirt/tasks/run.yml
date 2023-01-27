@@ -15,18 +15,18 @@
 # under the License.
 
 - name: Manage containers for Nova
-  become: "{{ not edpm_nova_libvirt_rootless_podman|bool }}"
+  become: "{{ not edpm_nova_libvirt_rootless_podman | bool }}"
   block:
     - name: Ensure /usr/libexec/edpm-start-podman-container exists
-      import_role:
+      ansible.builtin.import_role:
         name: edpm_container_manage
         tasks_from: shutdown.yml
 
     - name: Init logs for nova_virtqemud container
-      import_tasks: logging-run.yml
+      ansible.builtin.import_tasks: logging-run.yml
 
     - name: Run nova_libvirt containers
-      include_role:
+      ansible.builtin.include_role:
         name: edpm_container_standalone
       vars:
         edpm_container_standalone_service: nova_libvirt
@@ -48,18 +48,18 @@
           nova_virtstoraged: "{{ lookup('file', 'files/nova_virtstoraged.yaml') | from_yaml }}"
 
     - name: Ensure /var/lib/container-config-scripts exists
-      file:
+      ansible.builtin.file:
         path: /var/lib/container-config-scripts
         state: directory
 
     - name: Copy nova_libvirt_init_secret.sh to /var/lib/container-config-scripts
-      copy:
+      ansible.builtin.copy:
         src: files/nova_libvirt_init_secret.sh
         dest: /var/lib/container-config-scripts/nova_libvirt_init_secret.sh
 
     - name: Create libvirt secret for ceph now that nova_virtsecretd is running
       when: edpm_nova_libvirt_need_libvirt_secret|bool
-      include_role:
+      ansible.builtin.include_role:
         name: edpm_container_standalone
       vars:
         edpm_container_standalone_service: nova_libvirt_init_secret

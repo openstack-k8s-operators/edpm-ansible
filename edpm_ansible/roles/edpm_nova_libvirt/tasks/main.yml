@@ -19,7 +19,7 @@
 
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -33,16 +33,16 @@
     - always
 
 - name: Include host prep tasks for Nova libvirt
-  import_tasks: install.yml
+  ansible.builtin.import_tasks: install.yml
   tags:
     - install
 
 - name: Configure Nova libvirt
-  import_tasks: configure.yml
+  ansible.builtin.import_tasks: configure.yml
   tags:
     - configure
 
 - name: Ensure containers running for Nova libvirt
-  import_tasks: run.yml
+  ansible.builtin.import_tasks: run.yml
   tags:
     - run
