@@ -24,7 +24,7 @@
 - name: "Delete orphan containers managed by Podman for {{ edpm_container_manage_config }}"
   when:
     - edpm_container_manage_systemd_teardown | bool
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_rm
   vars:
     edpm_container_cli: "{{ edpm_container_manage_cli }}"
