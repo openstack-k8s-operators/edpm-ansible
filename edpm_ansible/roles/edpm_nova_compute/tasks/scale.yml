@@ -15,14 +15,15 @@
 # under the License.
 
 - name: Remove openstack-nova-compute and python-nova package during upgrade
-  package:
+  ansible.builtin.package:
     name:
       - openstack-nova-compute
       - python-nova
     state: removed
   failed_when: false
 
-- tags: down
+- name: Scale down
+  tags: down
   become: true
   environment:
     OS_CLOUD: >-
@@ -31,20 +32,20 @@
     # Some tasks are running from the Undercloud which has
     # the OpenStack clients installed.
     - name: Get nova-compute service ID
-      command: openstack compute service list --service nova-compute --column ID --column Host --format yaml
+      ansible.builtin.command: openstack compute service list --service nova-compute --column ID --column Host --format yaml
       register: nova_compute_service_result
       delegate_to: "{{ groups['Undercloud'] | first }}"
       check_mode: false
       changed_when: false
 
     - name: Set fact for nova_compute services
-      set_fact:
+      ansible.builtin.set_fact:
         nova_compute_service: "{{ nova_compute_service_result.stdout | from_yaml | selectattr('Host', 'match', ansible_facts['fqdn'] ~ '.*') | list }}"
       delegate_to: "{{ groups['Undercloud'] | first }}"
       check_mode: false
 
     - name: Check search output
-      fail:
+      ansible.builtin.fail:
         msg: >-
           Found multiple `{{ ansible_facts['fqdn'] }}`, which is unexpected.
           This means that the FQDN of the selected device to disable is
@@ -60,14 +61,14 @@
         - (nova_compute_service | length) == 1
       block:
         - name: Disable nova-compute service
-          command: openstack compute service set {{ nova_compute_service[0].Host }} nova-compute --disable
+          ansible.builtin.command: openstack compute service set {{ nova_compute_service[0].Host }} nova-compute --disable
           delegate_to: "{{ groups['Undercloud'] | first }}"
           check_mode: false
           when:
             - not edpm_nova_compute_additional_cell|bool
 
         - name: Stop nova-compute container
-          service:
+          ansible.builtin.service:
             name: edpm_nova_compute
             state: stopped
             enabled: false
@@ -78,6 +79,6 @@
             ('rc' in stop_nova_compute and stop_nova_compute.rc != 0)"
 
         - name: Delete nova-compute service
-          command: openstack compute service delete {{ nova_compute_service[0].ID }}
+          ansible.builtin.command: openstack compute service delete {{ nova_compute_service[0].ID }}
           delegate_to: "{{ groups['Undercloud'] | first }}"
           check_mode: false

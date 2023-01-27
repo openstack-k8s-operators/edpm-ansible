@@ -16,17 +16,19 @@
 
 
 - name: Ensure /var/lib/container-config-scripts exists
-  file:
+  ansible.builtin.file:
     path: /var/lib/container-config-scripts
     state: directory
+    mode: 0755
 
 - name: Copy nova_statedir_ownership.py to /var/lib/container-config-scripts
-  copy:
+  ansible.builtin.copy:
     src: files/nova_statedir_ownership.py
     dest: /var/lib/container-config-scripts/nova_statedir_ownership.py
+    mode: 0644
 
 - name: Manage nova_compute_statedir_owner container
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: nova_compute_statedir_owner
@@ -34,7 +36,7 @@
       nova_compute_statedir_owner: "{{ lookup('template', 'nova_compute_statedir_owner.yaml.j2') | from_yaml }}"
 
 - name: Manage nova_compute_init_log container
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: nova_compute_init_log
@@ -43,7 +45,7 @@
 
 - name: Manage nova_wait_for_compute_service container
   when: edpm_nova_compute_additional_cell|bool
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: nova_wait_for_compute_service
@@ -53,7 +55,7 @@
       nova_wait_for_compute_service: "{{ lookup('file', 'files/nova_wait_for_compute_service.yaml') | from_yaml }}"
 
 - name: Manage nova_compute container
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: nova_compute

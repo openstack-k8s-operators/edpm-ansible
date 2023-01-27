@@ -16,4 +16,4 @@
 
 
 - name: Remove nova_compute_config container
-  shell: podman rm -f nova_compute_config
+  ansible.builtin.command: podman rm -f nova_compute_config
