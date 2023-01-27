@@ -17,6 +17,6 @@
 
 - name: Ensure old cron.daily is absent
   become: true
-  file:
+  ansible.builtin.file:
     path: /etc/cron.daily/containers-tmpwatch
     state: absent

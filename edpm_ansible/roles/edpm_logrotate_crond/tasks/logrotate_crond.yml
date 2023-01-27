@@ -16,7 +16,7 @@
 
 
 - name: Manage logroate_crond containers
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: logrotate_crond

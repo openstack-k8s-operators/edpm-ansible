@@ -23,7 +23,7 @@ edpm_container_standalone_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_container_standalone_hide_sensitive_logs: true
 
 # Service name. Use for creating directories, container labels, etc
-edpm_container_standalone_service : ""
+edpm_container_standalone_service: ""
 # Directory for kolla config files
 edpm_container_standalone_kolla_config_dir: /var/lib/kolla/config_files
 # Directory for container startup configs
@@ -66,6 +66,6 @@ edpm_container_standalone_volumes: "{{
         edpm_container_standalone_common_volumes)
   }}"
 
-edpm_debug: False
+edpm_debug: false
 edpm_deploy_identifier: ''
 edpm_iscsid_config_volume: /var/lib/config-data/ansible-generated/iscsid

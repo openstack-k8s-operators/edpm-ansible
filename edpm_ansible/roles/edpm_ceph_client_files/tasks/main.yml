@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Fail if edpm_ceph_client_files_source is missing
-  fail:
+  ansible.builtin.fail:
     msg: >-
       edpm_ceph_client_files_source must be set to a path that
       already exists on the Ansible host which contains Ceph
@@ -28,20 +28,21 @@
 - name: Get list ceph files to copy from localhost edpm_ceph_client_files_source
   delegate_to: localhost
   become: true
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_ceph_client_dist: "{{ lookup('fileglob',
                                   edpm_ceph_client_files_source ~ '/*',
                                   wantlist=True) | list }}"
 
 - name: Ensure edpm_ceph_client_config_home exists on all hosts
-  file:
+  ansible.builtin.file:
     path: "{{ edpm_ceph_client_files_config_home }}"
     state: directory
+    mode: 0755
   become: true
 
 - name: Push files from edpm_ceph_client_files_source to all hosts
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ edpm_ceph_client_files_config_home }}/{{ item | basename }}"
     mode: "{{ '600' if item | regex_search('.*.keyring$') else '644' }}"

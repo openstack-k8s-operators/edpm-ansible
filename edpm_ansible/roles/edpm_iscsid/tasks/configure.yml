@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure {{ edpm_iscsid_config_dir }}/etc/iscsi  exists
-  file:
+- name: Ensure {{ edpm_iscsid_config_dir }}/etc/iscsi exists
+  ansible.builtin.file:
     path: "{{ edpm_iscsid_config_dir }}/etc/iscsi"
     state: directory
     recurse: true
