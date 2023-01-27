@@ -1,0 +1,6 @@
+---
+
+- name: Update /etc/hosts contents (if changed)
+  become: true
+  # cp preserves the inode of the existing file edpm_hosts_entries_hosts_path
+  ansible.builtin.command: cp "{{ edpm_hosts_entries_tmp_hosts.path }}" "{{ edpm_hosts_entries_hosts_path }}"

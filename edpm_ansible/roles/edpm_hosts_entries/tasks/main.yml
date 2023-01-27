@@ -17,7 +17,7 @@
 
 - name: Create temporary file for hosts
   become: true
-  tempfile:
+  ansible.builtin.tempfile:
     state: file
     suffix: tmphosts
   register: edpm_hosts_entries_tmp_hosts
@@ -27,7 +27,7 @@
 
 - name: Prepare temporary /etc/hosts
   become: true
-  copy:
+  ansible.builtin.copy:
     remote_src: true
     src: "{{ edpm_hosts_entries_hosts_path }}"
     dest: "{{ edpm_hosts_entries_tmp_hosts.path }}"
@@ -37,7 +37,7 @@
 
 - name: Render out the hosts entries
   run_once: true
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_hosts_entries_block: |
       {% for host in edpm_hosts_entries_overcloud_hosts_entries | default([]) +
            edpm_hosts_entries_undercloud_hosts_entries | default([]) +
@@ -49,8 +49,9 @@
 
 - name: Prepare new /etc/hosts
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
     create: true
+    mode: 0644
     path: "{{ edpm_hosts_entries_tmp_hosts.path }}"
     # BOF denotes the beginning of the file.
     insertbefore: BOF
@@ -61,18 +62,11 @@
   register: edpm_hosts_entries_new_entries
   tags:
     - edpm_hosts_entries
-
-- name: Update /etc/hosts contents (if changed)
-  become: true
-  # cp preserves the inode of the existing file edpm_hosts_entries_hosts_path
-  command: cp "{{ edpm_hosts_entries_tmp_hosts.path }}" "{{ edpm_hosts_entries_hosts_path }}"
-  when: edpm_hosts_entries_new_entries.changed
-  tags:
-    - edpm_hosts_entries
+  notify: Update /etc/hosts contents (if changed)
 
 - name: Clean up temporary hosts file
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ edpm_hosts_entries_tmp_hosts.path }}"
     state: absent
   when: edpm_hosts_entries_tmp_hosts.path is defined
