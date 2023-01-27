@@ -64,6 +64,9 @@
     - edpm_hosts_entries
   notify: Update /etc/hosts contents (if changed)
 
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: Clean up temporary hosts file
   become: true
   ansible.builtin.file:
