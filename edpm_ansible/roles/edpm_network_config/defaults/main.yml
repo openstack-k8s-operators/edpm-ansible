@@ -18,7 +18,7 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_network_config"
-edpm_network_config_update: False
+edpm_network_config_update: false
 edpm_network_config_async_poll: 3
 edpm_network_config_async_timeout: 300
 edpm_network_config_bridge_name: br-ex
