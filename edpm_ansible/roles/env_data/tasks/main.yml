@@ -16,7 +16,9 @@
 
 
 - name: Gather all installed packages
-  ansible.builtin.shell: rpm -qa | sort
+  ansible.builtin.shell: |
+    set -o pipefail
+    rpm -qa | sort
   register: package_list
 - name: Gather repository list
   ansible.builtin.command: dnf repolist
