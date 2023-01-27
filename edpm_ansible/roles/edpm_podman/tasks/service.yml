@@ -19,6 +19,7 @@
   ansible.builtin.file:
     path: "{{ edpm_podman_socket_path | dirname }}"
     state: directory
+    mode: 0755
 
 - name: Create required systemd unit file for podman service
   become: true

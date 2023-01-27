@@ -20,6 +20,6 @@ test_deps_selinux_packages:
   - python3-libselinux
   - python2-libselinux
 test_deps_edpm_packages:
-  - python3-edpmclient
+  - python3-tripleoclient
   - python3-openstacksdk
-test_deps_edpm_repos: current-edpm
+test_deps_tripleo_repos: current-tripleo

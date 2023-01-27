@@ -215,7 +215,7 @@ edpm_nova_compute_vendordata_dynamic_auth_project_domain_name: Default
 edpm_nova_compute_vendordata_dynamic_auth_user_domain_name: Default
 edpm_nova_compute_vif_plug_ovs_ovsdb_connection: ''
 edpm_nova_compute_vnc_enabled: true
-edpm_nova_compute_vncproxy_host: '' # EndpointMap, NovaPublic, host_nobrackets
+edpm_nova_compute_vncproxy_host: ''   # EndpointMap, NovaPublic, host_nobrackets
 edpm_nova_compute_vnc_server_listen: '{{ hostvars[inventory_hostname][service_net_map["nova_libvirt_network"] ~ "_ip"] }}'
 edpm_nova_compute_vncserver_proxyclient_address: '{{ hostvars[inventory_hostname][service_net_map["nova_libvirt_network"] ~ "_ip"] }}'
 
@@ -225,7 +225,7 @@ edpm_nova_compute_rbd_libvirt_images_rbd_ceph_conf: /etc/ceph/ + {{ edpm_nova_co
 edpm_nova_compute_rbd_rbd_keyring: client. + {{ edpm_nova_compute_ceph_client_user_name }}
 edpm_nova_compute_libvirt_migration_support: false
 edpm_nova_compute_migration_client_enabled: true
-edpm_nova_compute_migration_client_ssh_private_key: '' # MigrationSshKey, private_key
+edpm_nova_compute_migration_client_ssh_private_key: ''  # MigrationSshKey, private_key
 # False, if is realtime set, or comes from RoleParametersValue nova_permit_auto_converge/nova_permit_post_copy
 edpm_nova_compute_migration_libvirt_live_migration_permit_auto_converge: false
 edpm_nova_compute_migration_libvirt_live_migration_permit_post_copy: false

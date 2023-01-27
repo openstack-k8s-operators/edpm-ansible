@@ -18,7 +18,7 @@
 # "edpm_nvdimm" will search for and load any operating system variable file
 
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -31,8 +31,8 @@
   tags:
     - always
 
-- name: install dependencies
-  package:
+- name: Install dependencies
+  ansible.builtin.package:
     name: "{{ pkgs }}"
     state: present
     releasever: "{{ ansible_facts['distribution_major_version'] }}"
@@ -41,15 +41,16 @@
       - ndctl
       - jq
 
-- name: look for libnvdimm kernel module
-  shell: |
+- name: Look for libnvdimm kernel module
+  ansible.builtin.shell: |
+    set -o pipefail
     lsmod | grep -q libnvdimm
   register: nvdimm_kernel_mod
   check_mode: false
   failed_when: false
 
-- name: create namespaces
-  include_tasks: create_namespaces.yml
+- name: Create namespaces
+  ansible.builtin.include_tasks: create_namespaces.yml
   loop: "{{ edpm_nvdimm_pmem_namespaces.split(',') }}"
   vars:
     input: "{{ item.split(':') }}"

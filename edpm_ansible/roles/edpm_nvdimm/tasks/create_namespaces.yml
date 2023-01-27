@@ -14,13 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: list current namespaces
-  shell: |
+- name: List current namespaces
+  ansible.builtin.shell: |
+    set -o pipefail
     ndctl list -X | jq -r ".[].name"
   register: namespaces
   changed_when: false
-- name: create namespace
-  command: >-
+- name: Create namespace
+  ansible.builtin.command: >-
     ndctl create-namespace -s {{ input[0] }} -m devdax -M mem -n {{ input[1] }}
   when:
     - namespaces.stdout_lines is defined

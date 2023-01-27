@@ -16,7 +16,7 @@
 
 
 - name: Configure timezone
-  import_tasks: configure.yml
+  ansible.builtin.import_tasks: configure.yml
 
 - name: Run timezone
-  import_tasks: run.yml
+  ansible.builtin.import_tasks: run.yml

@@ -16,7 +16,7 @@
 
 
 - name: Restart time services
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ time_svc }}"
     state: restarted
   loop_control:

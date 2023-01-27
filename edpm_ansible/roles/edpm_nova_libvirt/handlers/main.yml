@@ -16,6 +16,6 @@
 
 
 - name: Remove nova_libvirt_config container
-  shell: podman rm -f nova_libvirt_config
+  ansible.builtin.shell: podman rm -f nova_libvirt_config
   changed_when: false
   failed_when: false

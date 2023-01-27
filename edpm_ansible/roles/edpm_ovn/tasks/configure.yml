@@ -15,28 +15,28 @@
 # under the License.
 
 - name: Set DVR setting when enabled
+  when: edpm_enable_dvr|default(true)
   block:
     - name: Set enable-chassis-as-gw
-      set_fact:
+      ansible.builtin.set_fact:
         cms_options:
           ovn-cms-options: "enable-chassis-as-gw"
 
     - name: Append CMS options to external_ids
-      set_fact:
+      ansible.builtin.set_fact:
         edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(cms_options) }}"
-  when: edpm_enable_dvr|default(true)
 
 - name: Configure hw-offload when required
+  when: edpm_enable_hw_offload | default(false)
   block:
     - name: Add hw-offload if enabled
-      set_fact:
+      ansible.builtin.set_fact:
         hw_offload:
-          hw-offload: True
+          hw-offload: true
 
-    - name: append other_config with hw-offload
-      set_fact:
-         other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
-  when: edpm_enable_hw_offload|default(false)
+    - name: Append other_config with hw-offload
+      ansible.builtin.set_fact:
+        other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
 
 - name: Configure OVS external_ids
   ansible.builtin.shell: >
