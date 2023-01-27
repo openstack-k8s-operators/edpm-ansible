@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Get the command line args of the node
-  command: cat /proc/cmdline
+  ansible.builtin.command: cat /proc/cmdline
   register: cmdline
 
 - name: TSX KernelArgs compute node reboot prevention
@@ -23,23 +23,23 @@
     - '"nova_libvirt" in groups'
   block:
     - name: Check if node has a nova.conf
-      stat:
+      ansible.builtin.stat:
         path: /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf
       register: nova_conf_check
 
     - name: Enabling defer_reboot when TSX was added or appended
       when:
-      - nova_conf_check.stat.exists
-      - edpm_kernel_args is regex("^[\s]*tsx=[\S]+[\s]*$")
+        - nova_conf_check.stat.exists
+        - edpm_kernel_args is regex("^[\s]*tsx=[\S]+[\s]*$")
       block:
         - name: Warn operator about workload protection
-          debug:
+          ansible.builtin.debug:
             msg: |
               Automated reboot for this node has been defered because it is already provisionned.
               Please schedule a manual reboot after this deployment is completed.
 
         - name: Setting workload protection fact
-          set_fact:
+          ansible.builtin.set_fact:
             _workload_protection: true
 
 - name: EDPM Hugepages configuration
@@ -50,8 +50,8 @@
   when: edpm_kernel_hugepages | length
   block:
     - name: Rewrite edpm_kernel_hugepages to use integers as keys
-      set_fact:
-        _edpm_kernel_hugepages: "{{ _edpm_kernel_hugepages | default({}) | combine({ hp.key | int: hp.value }) }}"
+      ansible.builtin.set_fact:
+        _edpm_kernel_hugepages: "{{ _edpm_kernel_hugepages | default({}) | combine({hp.key | int: hp.value}) }}"
       loop: "{{ edpm_kernel_hugepages | dict2items }}"
       loop_control:
         loop_var: hp
@@ -59,18 +59,18 @@
     - name: Parsing running hugepage configuration from /proc/cmdline
       when: >
         "default_hugepagesz" in cmdline.stdout
-      import_tasks: hugepages_parsing.yaml
+      ansible.builtin.import_tasks: hugepages_parsing.yaml
       vars:
         cmdline_text: "{{ cmdline.stdout }}"
 
     - name: Validating hugepage config from /proc/cmdline against EDPM parameter
-      import_tasks: hugepages_validations.yaml
+      ansible.builtin.import_tasks: hugepages_validations.yaml
 
     - name: Rewrite kernel args
       when: _hugepages_modification
       block:
         - name: Warn about possible modifications
-          debug:
+          ansible.builtin.debug:
             msg: |
               EDPM hugepage modification differs from how the host is actually having.
               Current default pagesize: {{ _configured_default_size | default("None configured") }}
@@ -92,7 +92,7 @@
               {% endif %}
 
         - name: Remove hugepage settings from kernelargs
-          set_fact:
+          ansible.builtin.set_fact:
             _kernel_args: >-
               {{ edpm_kernel_args | regex_replace('[\s]*(default_)*hugepages[z]*=[\S]+[\s]*', ' ') }}
               default_hugepagesz={{ _desired_default_hugepages }}
@@ -106,7 +106,7 @@
               {% endif -%}
 
         - name: Cleaning up whitespaces
-          set_fact:
+          ansible.builtin.set_fact:
             edpm_kernel_args: >-
               {{ _kernel_args |
                  regex_replace('[\s]+default_hugepagesz=', ' default_hugepagesz=') |
@@ -115,7 +115,7 @@
               }}
 
 - name: Check if the kernelargs entry is already present in the file
-  replace:
+  ansible.builtin.replace:
     regexp: EDPM_KERNEL_ARGS
     dest: /etc/default/grub
     replace: ''
@@ -123,29 +123,35 @@
   register: grub_file_entry_check
 
 # Kernel Args Configuration
-- block:
+- name: Kernel args configuration
+  become: true
+  when:
+    - cmdline.stdout_lines is defined
+    - edpm_kernel_args|string
+    - edpm_kernel_args not in cmdline.stdout
+  block:
     # Leapp does not recognise grun entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
     # In order to fix it for FFU (queens to train), EDPM_KERNEL_ARGS has been renamed
     # Ensure the fresh deployment is also alinged with the same name
     - name: Delete older name EDPM_KERNEL_ARGS entries if present
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/default/grub
         regexp: 'EDPM_KERNEL_ARGS'
         state: absent
     - name: Ensure the kernel args ( {{ edpm_kernel_args }} ) is present as GRUB_EDPM_KERNEL_ARGS
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/default/grub
         regexp: '^GRUB_EDPM_KERNEL_ARGS.*'
         insertafter: '^GRUB_CMDLINE_LINUX.*'
         line: 'GRUB_EDPM_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
     - name: Add GRUB_EDPM_KERNEL_ARGS to the GRUB_CMDLINE_LINUX parameter
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/default/grub
         line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${GRUB_EDPM_KERNEL_ARGS}"'
         insertafter: '^GRUB_EDPM_KERNEL_ARGS.*'
     - name: Check grub config paths
-      stat:
+      ansible.builtin.stat:
         path: "{{ item }}"
       register: grub_stat
       loop:
@@ -154,54 +160,50 @@
         - /boot/efi/EFI/centos
         - /boot/efi/EFI/fedora
     - name: Generate grub config
-      command: "grub2-mkconfig -o /boot/grub2/grub.cfg"
+      ansible.builtin.command: "grub2-mkconfig -o /boot/grub2/grub.cfg"
 
     - name: Generate EFI grub config
-      command: "grub2-mkconfig -o {{ item.stat.path }}/grub.cfg"
+      ansible.builtin.command: "grub2-mkconfig -o {{ item.stat.path }}/grub.cfg"
       when: item.stat.exists|bool
       loop: "{{ grub_stat.results }}"
 
     - name: Copy grubenv to EFI directory
-      copy:
+      ansible.builtin.copy:
         remote_src: true
         src: /boot/grub2/grubenv
         dest: "{{ item.stat.path }}/grubenv"
+        mode: 0644
       when: item.stat.exists|bool
       loop: "{{ grub_stat.results }}"
 
     - name: Check for active tuned profile
-      stat:
+      ansible.builtin.stat:
         path: "/etc/tuned/active_profile"
       register: tuned_active_profile
 
     - name: Ensure $tuned_params is restored to /boot/loader/entries files
-      shell: >-
+      ansible.builtin.shell: >-
         tuned-adm profile $(cat /etc/tuned/active_profile)
       environment:
         PATH: "/bin:/usr/bin:/sbin:/usr/sbin"
       when:
-      - tuned_active_profile.stat.exists
-      - tuned_active_profile.stat.size | int > 0
+        - tuned_active_profile.stat.exists
+        - tuned_active_profile.stat.size | int > 0
 
     - name: Set reboot required fact
-      set_fact:
+      ansible.builtin.set_fact:
         reboot_required: true
-  become: true
-  when:
-    - cmdline.stdout_lines is defined
-    - edpm_kernel_args|string
-    - edpm_kernel_args not in cmdline.stdout
 
 # Apply DPDK workarounds before reboot
 - name: Apply DPDK workarounds
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_ovs_dpdk
     tasks_from: workarounds.yml
   when: reboot_required is defined and reboot_required
 
 # Kernel modules loading
 - name: Load type1 IOMMU driver for VFIO on boot
-  import_role:
+  ansible.builtin.import_role:
     name: edpm_module_load
   vars:
     modules:
@@ -215,12 +217,12 @@
     - not _workload_protection|default(false)|bool
   block:
     - name: Reboot tasks
-      include_tasks: reboot.yaml
+      ansible.builtin.include_tasks: reboot.yaml
       when:
         - grub_file_entry_check is not changed
 
     - name: Skipping reboot for deployed node
-      debug:
+      ansible.builtin.debug:
         msg: "Reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
       when:
         - grub_file_entry_check is changed
