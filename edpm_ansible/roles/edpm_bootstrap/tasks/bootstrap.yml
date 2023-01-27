@@ -19,7 +19,7 @@
 
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -39,23 +39,23 @@
     - (edpm_bootstrap_release_version_package |list | length) > 0
   block:
     - name: Check release version package is installed
-      command: "rpm -q --whatprovides {{ edpm_bootstrap_release_version_package | join(' ') }}"
+      ansible.builtin.command: "rpm -q --whatprovides {{ edpm_bootstrap_release_version_package | join(' ') }}"
       register: rpm_query_result
       failed_when: false
     - name: Deploy release version package
       become: true
-      package:
+      ansible.builtin.package:
         name: "{{ edpm_bootstrap_release_version_package }}"
         state: present
       when:
         - rpm_query_result.rc > 0
 
 - name: Import packages tasks
-  import_tasks: packages.yml
+  ansible.builtin.import_tasks: packages.yml
 
 - name: Enable openvswitch service if installed
   become: true
-  service:
+  ansible.builtin.service:
     name: openvswitch
     enabled: true
     state: started
@@ -66,9 +66,10 @@
 
 - name: Create /var/lib/heat-config/edpm-config-download directory for deployment data
   become: true
-  file:
+  ansible.builtin.file:
     path: /var/lib/heat-config/edpm-config-download
     state: directory
+    mode: 0755
 
 - name: Deploy and enable network service
   become: true
@@ -76,19 +77,19 @@
     - (edpm_bootstrap_legacy_network_packages | length) > 0
   block:
     - name: Check required legacy network packages for bootstrap EDPM is installed
-      command: "rpm -q --whatprovides {{ edpm_bootstrap_legacy_network_packages | join(' ') }}"
+      ansible.builtin.command: "rpm -q --whatprovides {{ edpm_bootstrap_legacy_network_packages | join(' ') }}"
       register: rpm_query_result
       failed_when: false
 
     - name: Deploy network-scripts required for deprecated network service
-      package:
+      ansible.builtin.package:
         name: "{{ edpm_bootstrap_legacy_network_packages }}"
         state: present
       when:
         - rpm_query_result.rc > 0
 
     - name: Ensure network service is enabled
-      systemd:
+      ansible.builtin.systemd:
         name: "{{ edpm_bootstrap_network_service }}"
         enabled: true
 
@@ -97,7 +98,7 @@
   when: edpm_bootstrap_network_service == 'NetworkManager'
   block:
     - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
-      ini_file:
+      community.general.ini_file:
         path: /etc/NetworkManager/NetworkManager.conf
         state: present
         no_extra_spaces: true
@@ -105,8 +106,9 @@
         option: dns
         value: none
         backup: true
+        mode: 0644
     - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
-      ini_file:
+      community.general.ini_file:
         path: /etc/NetworkManager/NetworkManager.conf
         state: present
         no_extra_spaces: true
@@ -114,7 +116,8 @@
         option: rc-manager
         value: unmanaged
         backup: true
+        mode: 0644
     - name: Reload NetworkManager
-      service:
+      ansible.builtin.service:
         name: NetworkManager
         state: reloaded

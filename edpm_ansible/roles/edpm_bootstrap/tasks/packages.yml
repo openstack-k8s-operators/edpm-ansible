@@ -15,15 +15,15 @@
 # under the License.
 
 - name: Gather facts if they don't exist
-  setup:
+  ansible.builtin.setup:
     gather_subset: min
   when: "'distribution' not in ansible_facts"
   tags:
     - always
 
-  # found within the "vars/" path. If no OS files are found the task will skip.
+# found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -37,13 +37,13 @@
     - always
 
 - name: Check required packages to bootstrap EDPM is installed
-  command: "rpm -q --whatprovides {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
+  ansible.builtin.command: "rpm -q --whatprovides {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
   register: rpm_query_result
   failed_when: false
 
 - name: Deploy required packages to bootstrap EDPM
   become: true
-  package:
+  ansible.builtin.package:
     name: "{{ edpm_bootstrap_packages_bootstrap }}"
     state: present
   # When a node is deployed with overcloud-minimal, OVS isn't required so let's
@@ -60,7 +60,7 @@
 
 - name: Ensure packages are actually well installed
   become: true
-  command: "rpm -V {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
+  ansible.builtin.command: "rpm -V {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
   register: rpm_verify_result
   failed_when:
     - "'%verify' in rpm_verify_result.stderr"

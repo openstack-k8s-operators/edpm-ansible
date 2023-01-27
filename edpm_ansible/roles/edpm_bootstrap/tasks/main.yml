@@ -16,4 +16,4 @@
 
 
 - name: Import edpm_bootstrap bootstrap tasks
-  import_tasks: bootstrap.yml
+  ansible.builtin.import_tasks: bootstrap.yml
