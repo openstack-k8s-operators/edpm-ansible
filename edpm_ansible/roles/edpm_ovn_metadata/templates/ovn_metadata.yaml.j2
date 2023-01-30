@@ -1,0 +1,30 @@
+ovn_metadata_agent:
+  start_order: 1
+  image: "{{ edpm_ovn_metadata_haproxy_image }}""
+  net: host
+  pid: host
+  cgroupns: host
+  privileged: true
+  restart: always
+  healthcheck:
+    test: /openstack/healthcheck
+  volumes:
+      {% set edpm_ovn_metadata_volumes = [] %}
+      {%- set edpm_ovn_metadata_volumes = 
+              edpm_ovn_metadata_volumes +
+      	edpm_ovn_metadata_common_volumes %}
+      {%- if edpm_enable_internal_tls|bool -%}
+      {%- set edpm_ovn_metadata_volumes =
+              edpm_ovn_metadata_volumes +
+      	edpm_ovn_metadata_common_volumes +
+      	edpm_ovn_metadata_tls_volumes -%}
+      {% endif %}
+      {%- if edpm_ovn_metadata_enable_haproxy_wrapper|bool -%}
+      {%- set edpm_ovn_metadata_volumes = 
+              edpm_ovn_metadata_volumes +
+      	edpm_ovn_metadata_common_volumes +
+              "/var/lib/neutron/ovn_metadata_haproxy_wrapper:/usr/local/bin/haproxy:ro" %}
+      {% endif %}
+      {{ edpm_ovn_metadata_volumes }}
+  environment:
+    KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
