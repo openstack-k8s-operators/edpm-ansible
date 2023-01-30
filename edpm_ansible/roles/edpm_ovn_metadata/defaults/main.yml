@@ -1,0 +1,18 @@
+---
+edpm_ovn_metadata_enable_haproxy_wrapper: true
+edpm_ovn_metadata_haproxy_process_wrapper: '/var/lib/neutron/ovn_metadata_haproxy_wrapper'
+edpm_ovn_metadata_haproxy_image: 
+edpm_ovn_metadata_agent_wrappers_debug: false
+edpm_ovn_metadata_shared_secret: ""
+edpm_ovn_metadata_host: ""
+edpm_ovn_metadata_ovsdb_connection_timeout: 180
+edpm_ovn_metadata_ovsdb_probe_interval: 60000
+edpm_ovn_metadata_southbound_port: 6642
+edpm_ovn_metadata_debug: false
+edpm_ovn_metadata_protocol: "{% if edpm_enable_internal_tls | bool %}https{% else %}http{% end %}"
+edpm_ovn_metadata_workers: 0
+edpm_ovn_metadata_ovn_sb_ca_cert: "/etc/ipa/ca.crt"
+edpm_ovn_metadata_protocol: 'ssl'
+edpm_ovn_metadata_ovn_sb_certificate: '/etc/pki/tls/certs/ovn_metadata.crt'
+edpm_ovn_metadata_ovn_sb_private_key: '/etc/pki/tls/private/ovn_metadata.key'
+edpm_ovn_metadata_certificate_key_size: ""
