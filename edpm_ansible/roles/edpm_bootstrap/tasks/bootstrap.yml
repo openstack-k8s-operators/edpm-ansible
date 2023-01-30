@@ -64,13 +64,6 @@
     - not 'Could not find the requested service' in openvswitch_service_start.msg|default('')
     - openvswitch_service_start is failed
 
-- name: Create /var/lib/heat-config/edpm-config-download directory for deployment data
-  become: true
-  ansible.builtin.file:
-    path: /var/lib/heat-config/edpm-config-download
-    state: directory
-    mode: 0755
-
 - name: Deploy and enable network service
   become: true
   when:
