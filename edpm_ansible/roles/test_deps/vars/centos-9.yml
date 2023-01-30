@@ -19,7 +19,6 @@ test_deps_yaml_packages:
 test_deps_selinux_packages:
   - python3-libselinux
 test_deps_edpm_packages:
-  - python3-tripleoclient
   - python3-openstacksdk
   - openssh
-test_deps_tripleo_repos: current-tripleo
+

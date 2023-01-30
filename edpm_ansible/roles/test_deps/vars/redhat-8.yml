@@ -23,4 +23,4 @@ test_deps_selinux_packages:
 test_deps_edpm_packages:
   - python3-tripleoclient
   - python3-openstacksdk
-test_deps_tripleo_repos: current-tripleo
+
