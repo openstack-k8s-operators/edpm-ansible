@@ -21,4 +21,3 @@ test_deps_selinux_packages:
 test_deps_edpm_packages:
   - python3-openstacksdk
   - openssh
-

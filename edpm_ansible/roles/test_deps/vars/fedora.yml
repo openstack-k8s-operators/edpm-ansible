@@ -21,4 +21,3 @@ test_deps_selinux_packages:
   - python2-libselinux
 test_deps_edpm_packages:
   - python3-openstacksdk
-
