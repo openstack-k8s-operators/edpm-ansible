@@ -16,4 +16,4 @@
 
 
 - name: Include logrotate-crond update tasks
-  ansible.builtin.include_tasks: update.yaml
+  ansible.builtin.include_tasks: update.yml

@@ -21,19 +21,19 @@
   become: true
   block:
     - name: Install additional packages
-      package:
+      ansible.builtin.package:
         name: "{{ item.key }}"
         state: "{{ item.opt.state | default('present') }}"
       loop: "{{ edpm_kernel_extra_packages | dict2items(key_name='key', value_name='opt') }}"
       register: _install_packages_result
 
     - name: Remove dracut-config-generic
-      package:
+      ansible.builtin.package:
         name: 'dracut-config-generic'
         state: absent
 
     - name: Ensure the /etc/modules-load.d/ directory exists
-      file:
+      ansible.builtin.file:
         path: /etc/modules-load.d
         state: directory
         mode: 0755
@@ -42,7 +42,7 @@
         setype: etc_t
 
     - name: Write list of modules to load at boot
-      template:
+      ansible.builtin.template:
         src: "edpm-modprobe.conf.j2"
         dest: "/etc/modules-load.d/99-edpm.conf"
         mode: 0644
@@ -52,14 +52,14 @@
       register: _modprobe_result
 
     - name: Modules reload
-      systemd:
+      ansible.builtin.systemd:
         name: systemd-modules-load.service
         state: restarted
       when:
         - _install_packages_result.changed or _modprobe_result.changed
 
     - name: Set default sysctl options
-      template:
+      ansible.builtin.template:
         src: "edpm-sysctl.conf.j2"
         dest: "/etc/sysctl.d/99-edpm.conf"
         mode: 0644
@@ -69,7 +69,7 @@
       register: _default_sysctl_result
 
     - name: Set extra sysctl options
-      sysctl:
+      ansible.posix.sysctl:
         name: "{{ setting.key }}"
         value: "{{ setting.opt.value }}"
         sysctl_set: "{{ setting.opt.set | default(true) }}"
@@ -83,7 +83,7 @@
       register: _extra_sysctl_result
 
     - name: Sysctl reload
-      systemd:
+      ansible.builtin.systemd:
         name: systemd-sysctl.service
         state: restarted
       when:

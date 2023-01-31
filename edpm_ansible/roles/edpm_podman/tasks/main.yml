@@ -15,25 +15,25 @@
 # under the License.
 
 - name: Load vars
-  import_tasks: load_vars.yaml
+  ansible.builtin.import_tasks: load_vars.yaml
 
 - name: Podman install
-  import_tasks: install.yml
+  ansible.builtin.import_tasks: install.yml
 
 - name: Rsyslog configuration
-  import_tasks: rsyslog.yml
+  ansible.builtin.import_tasks: rsyslog.yml
 
 - name: Podman purge
-  import_tasks: purge.yml
+  ansible.builtin.import_tasks: purge.yml
 
 - name: Podman install
-  import_tasks: login.yml
+  ansible.builtin.import_tasks: login.yml
   when:
     - edpm_container_registry_login | bool
     - edpm_container_registry_logins
 
 - name: Buildah setup
-  import_tasks: buildah_login.yml
+  ansible.builtin.import_tasks: buildah_login.yml
   when:
     - edpm_podman_buildah_login | bool
     - edpm_container_registry_login | bool

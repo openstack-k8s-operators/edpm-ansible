@@ -14,7 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- include_tasks: "edpm_{{ edpm_container_cli }}_container_rm.yml"
+- name: "Include edpm container rm task file"
+  ansible.builtin.include_tasks: "edpm_{{ edpm_container_cli }}_container_rm.yml"
   loop: "{{ edpm_containers_to_rm }}"
   loop_control:
     loop_var: container

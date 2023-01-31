@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: create ovn mac address for {{ edpm_role_name }} role nodes
+- name: Create ovn mac address for {{ edpm_role_name }} role nodes
   edpm_ovn_mac_addresses:
     playbook_dir: "{{ playbook_dir }}"
     stack_name: "{{ stack_name }}"

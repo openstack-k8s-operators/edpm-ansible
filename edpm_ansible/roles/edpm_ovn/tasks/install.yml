@@ -14,18 +14,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: create persistent directories
+- name: Create persistent directories
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     setype: "{{ item.setype }}"
-    mode: "{{ item.mode|default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { 'path': /var/log/containers/openvswitch, 'setype': container_file_t, 'mode': '0750' }
-    - { 'path': /var/lib/openvswitch/ovn, 'setype': container_file_t }
+    - {'path': /var/log/containers/openvswitch, 'setype': container_file_t, 'mode': '0750'}
+    - {'path': /var/lib/openvswitch/ovn, 'setype': container_file_t}
 
-- name: enable virt_sandbox_use_netlink for healthcheck
-  ansible.builtin.seboolean:
+- name: Enable virt_sandbox_use_netlink for healthcheck
+  ansible.posix.seboolean:
     name: virt_sandbox_use_netlink
     persistent: true
     state: true
@@ -45,6 +45,7 @@
     src: neutron-cleanup.service
     dest: '/usr/lib/systemd/system/neutron-cleanup.service'
     force: true
+    mode: '0644'
 
 - name: Enabling the cleanup service
   ansible.builtin.service:

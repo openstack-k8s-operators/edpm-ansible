@@ -5,13 +5,9 @@
 #       cleanup of unneeded rsyslog configuration since sensubility is fetching
 #       data straight from podman socket
 
-- name: remove unneeded podman-related rsyslog configuration
+- name: Remove unneeded podman-related rsyslog configuration
   ansible.builtin.file:
     path: /etc/rsyslog.d/openstack-healthcheck.conf
     state: absent
-  ignore_errors: yes
-  register: rmcfg
-- when: rmcfg is changed
-  service:
-    name: rsyslog
-    state: restarted
+  ignore_errors: true
+  notify: Restart rsyslog

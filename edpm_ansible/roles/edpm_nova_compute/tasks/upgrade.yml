@@ -14,5 +14,5 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Inlcude update tasks to upgrade Nova Libvirt
-  include_tasks: update.yml
+- name: Include update tasks to upgrade Nova Libvirt
+  ansible.builtin.include_tasks: update.yml

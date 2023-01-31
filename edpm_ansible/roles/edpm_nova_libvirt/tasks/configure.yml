@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Set facts for conditions
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_nova_libvirt_need_libvirt_secret: "{{
       edpm_nova_libvirt_enable_rbd_backend | bool or
       edpm_nova_libvirt_cinder_enable_rbd_backend | bool }}"
@@ -23,15 +23,15 @@
 - name: Set facts for Ceph multiconfig keyring paths
   vars:
     _keyrings:
-      - "{{ edpm_nova_libvirt_ceph_cluster_name}}.client.{{ edpm_nova_libvirt_ceph_client_user_name}}.keyring"
-  set_fact:
+      - "{{ edpm_nova_libvirt_ceph_cluster_name }}.client.{{ edpm_nova_libvirt_ceph_client_user_name }}.keyring"
+  ansible.builtin.set_fact:
     edpm_nova_libvirt_ceph_multiconfig_keyrings: "{{ edpm_nova_libvirt_ceph_multiconfig_keyrings | default([]) +
                                                     [item.value['CephClusterName'] | default(edpm_nova_libvirt_ceph_cluster_name) ~ '.client.' ~
                                                     item.value['CephClientUserName'] | default(edpm_nova_libvirt_ceph_client_user_name) ~ '.keyring'] }}"
   with_items: "{{ (_keyrings + edpm_nova_libvirt_cinder_rbd_multi_config | dict2items) | unique }}"
 
 - name: Set facts for Ceph multiconfig Kolla permissions
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_nova_libvirt_ceph_multiconfig_permissions: "{{ edpm_nova_libvirt_ceph_multiconfig_permissions | default([]) +
                                                        [{'owner': 'nova:nova', 'perm': '0600', 'path': '/etc/ceph/' ~ item}] }}"
   with_items: "{{ edpm_nova_libvirt_ceph_multiconfig_keyrings }}"
@@ -40,7 +40,7 @@
   vars:
     _multiconfig_info:
       - "{{ edpm_nova_libvirt_ceph_cluster_name }}:{{ edpm_nova_libvirt_ceph_client_user_name }}"
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_nova_libvirt_ceph_multiconfig_info: "{{ edpm_nova_libvirt_ceph_multiconfig_info | default([]) +
                                                 [item.value['CephClusterName'] | default(edpm_nova_libvirt_ceph_cluster_name) ~ ':' ~
                                                 item.value['CephClientUserName'] | default(edpm_nova_libvirt_ceph_client_user_name)] }}"
@@ -50,7 +50,7 @@
   when: edpm_nova_libvirt_enable_internal_tls|bool
   block:
     - name: Create dirs for certificates and keys
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         serole: object_r
@@ -60,7 +60,8 @@
         - '/etc/pki/libvirt'
         - '/etc/pki/libvirt/private'
         - '/etc/pki/qemu'
-    - include_role:
+    - name: Create certificates
+      ansible.builtin.include_role:
         name: linux-system-roles.certificate
       vars:
         certificate_requests:
@@ -123,23 +124,23 @@
   when: edpm_nova_libvirt_config_use_ansible|bool
   block:
     - name: Ensure {{ edpm_nova_libvirt_config_dir }}/etc/libvirt exists
-      file:
+      ansible.builtin.file:
         path: "{{ edpm_nova_libvirt_config_dir }}/etc/libvirt"
         state: directory
         recurse: true
 
     - name: Remove nova_libvirt_config container if exists
-      shell: podman rm -f nova_libvirt_config
+      ansible.builtin.shell: podman rm -f nova_libvirt_config
       changed_when: false
       failed_when: false
 
     - name: Run nova_libvirt_config container
-      shell: podman run --detach --name nova_libvirt_config {{ edpm_nova_libvirt_container_config_image }} sleep infinity
+      ansible.builtin.shell: podman run --detach --name nova_libvirt_config {{ edpm_nova_libvirt_container_config_image }} sleep infinity
       notify: Remove nova_libvirt_config container
       register: config_container_id
 
     - name: Copy initial config files from nova_libvirt_config container
-      shell: |
+      ansible.builtin.shell: |
         mount_dir=$(podman mount nova_libvirt_config)
         cp -a ${mount_dir}/{{ item }} {{ edpm_nova_libvirt_config_dir }}/etc/libvirt
       failed_when: false
@@ -156,7 +157,7 @@
         - /etc/libvirt/virtstoraged.conf
 
     - name: Check for failure
-      debug:
+      ansible.builtin.debug:
         msg: |
           Copying config files failed
           {{ copy_config_files.results | map(attribute='stdout') | list }}
@@ -166,7 +167,7 @@
       failed_when: true
 
     - name: Configure common nova_libvirt config values
-      ini_file:
+      community.general.ini_file:
         path: "{{ edpm_nova_libvirt_config_dir }}/etc/libvirt/{{ item.1 ~ '.conf' }}"
         section: "{{ item.0.section }}"
         option: "{{ item.0.option }}"
@@ -191,7 +192,7 @@
             value: "'none'"
 
     - name: Configure nova_libvirt log_filters config values
-      ini_file:
+      community.general.ini_file:
         path: "{{ edpm_nova_libvirt_config_dir }}/etc/libvirt/{{ item ~ '.conf' }}"
         section: null
         option: log_filters
@@ -199,7 +200,7 @@
       loop: "{{ edpm_nova_libvirt_services }}"
 
     - name: Configure nova_libvirt log_outputs config values
-      ini_file:
+      community.general.ini_file:
         path: "{{ edpm_nova_libvirt_config_dir }}/etc/libvirt/{{ item ~ '.conf' }}"
         section: null
         option: log_outputs

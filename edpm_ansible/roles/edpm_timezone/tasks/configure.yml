@@ -16,10 +16,10 @@
 
 
 - name: Set timezone
-  timezone:
+  community.general.timezone:
     name: "{{ edpm_timezone }}"
   register: _timezone_result
 
 - name: Set fact for timezone result
-  set_fact:
+  ansible.builtin.set_fact:
     _timezone_result_changed: _timezone_result.changed

@@ -4,10 +4,10 @@ edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
 edpm_ovn_encap_type: geneve
 edpm_ovn_dbs: []
-edpm_enable_dvr: True
-edpm_enable_hw_offload: False
-edpm_ovn_multi_rhel: False
-edpm_enable_internal_tls: False
+edpm_enable_dvr: true
+edpm_enable_hw_offload: false
+edpm_ovn_multi_rhel: false
+edpm_enable_internal_tls: false
 edpm_ovn_sb_server_port: 6642
 edpm_ovn_of_probe_interval: 60
 edpm_ovn_remote_probe_interval: 60000
@@ -32,11 +32,11 @@ edpm_ovn_controller_tls_volumes:
 edpm_ovn_ovs_external_ids:
   hostname: "{{ ansible_facts['fqdn'] }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
-  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings|join(', ') }}"
+  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(', ') }}"
   ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
-  ovn-match-northd-version: True
-  ovn-monitor-all: True
+  ovn-match-northd-version: true
+  ovn-monitor-all: true
   ovn-openflow-probe-interval: "{{ edpm_ovn_of_probe_interval }}"
   ovn-remote: "{% set db_addresses = [] %}{% for host in edpm_ovn_dbs %}{{ db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) }}{% endfor %}{{ db_addresses | join(',') }}"
   ovn-remote-probe-interval: "{{ edpm_ovn_remote_probe_interval }}"
