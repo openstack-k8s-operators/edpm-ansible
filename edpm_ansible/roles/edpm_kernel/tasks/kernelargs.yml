@@ -24,7 +24,7 @@
   block:
     - name: Check if node has a nova.conf
       ansible.builtin.stat:
-        path: /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf
+        path: "{{ edpm_nova_compute_config_dir }}/etc/nova/nova.conf"
       register: nova_conf_check
 
     - name: Enabling defer_reboot when TSX was added or appended
