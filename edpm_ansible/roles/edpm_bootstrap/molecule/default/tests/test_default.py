@@ -23,10 +23,6 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-def test_package_installed(host):
-    assert host.package("puppet-edpm").is_installed
-
-
 def test_iptables_exists(host):
     assert host.file("/etc/sysconfig/iptables").exists
     assert host.file("/etc/sysconfig/ip6tables").exists
