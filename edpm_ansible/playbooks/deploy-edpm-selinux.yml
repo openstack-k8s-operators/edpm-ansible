@@ -16,7 +16,6 @@
 
 
 - hosts: "{{ deploy_target_host | default('overcloud') }}"
-  strategy: edpm_linear
   name: Manage SELinux
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true

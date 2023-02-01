@@ -16,7 +16,6 @@
 
 
 - hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
-  strategy: edpm_free
   name: Deploy EDPM Pre Network
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
