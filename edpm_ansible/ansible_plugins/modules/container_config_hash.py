@@ -166,9 +166,7 @@ class ContainerConfigHashManager:
         # volume's base, where the hashed config file resides
         path = volume
         base = prefix.rstrip(os.path.sep)
-        # TODO(tkajinam): we have to check actual usage of this and update
-        #                 the base path.
-        base_generated = os.path.join(base, 'puppet-generated')
+        base_generated = os.path.join(base, 'ansible-generated')
         while path.startswith(prefix):
             dirname = os.path.dirname(path)
             if dirname == base or dirname == base_generated:
