@@ -62,9 +62,9 @@
   become: true
   block:
     - name: "Update container configs with new config hashes"
-      ansible.builtin.include_tasks: puppet_config.yml
+      container_config_hash:
       when:
-        - edpm_container_manage_check_puppet_config|bool
+        - edpm_container_manage_update_config_hash|bool
     - name: "Delete orphan containers from {{ edpm_container_manage_config }}"
       ansible.builtin.include_tasks: delete_orphan.yml
       when:
