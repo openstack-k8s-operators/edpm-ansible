@@ -17,7 +17,7 @@
 - name: Basic config steps and basic rules
   become: true
   block:
-    - name: Create snipets directory
+    - name: Create snippets directory
       ansible.builtin.file:
         path: "{{ edpm_nftables_src }}"
         state: directory
