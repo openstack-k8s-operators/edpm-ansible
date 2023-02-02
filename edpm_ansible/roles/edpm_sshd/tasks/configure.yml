@@ -91,3 +91,20 @@
     - name: Set sshd config changed fact
       ansible.builtin.set_fact:
         _sshd_config_result_changed: _sshd_config_result.changed
+
+    - name: Configure firewall for the service
+      when:
+        - edpm_sshd_configure_firewall|bool
+      block:
+        - name: Ensure directory is present
+          ansible.builtin.file:
+            path: '/var/lib/edpm-config/firewall'
+            state: directory
+            owner: root
+            group: root
+            mode: 0750
+
+        - name: Inject firewall configuration for sshd opening
+          ansible.builtin.template:
+            dest: '/var/lib/edpm-config/firewall/sshd-networks.yaml'
+            src: 'firewall.yaml.j2'

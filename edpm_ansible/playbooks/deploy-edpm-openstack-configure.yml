@@ -50,3 +50,9 @@
         tasks_from: configure.yml
       tags:
         - edpm_nova_compute
+    - name: Configure nftables
+      import_role:
+        name: edpm_nftables
+        tasks_from: configure.yml
+      tags:
+        - edpm_firewall

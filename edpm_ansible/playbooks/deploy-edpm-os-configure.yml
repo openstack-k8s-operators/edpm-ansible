@@ -34,6 +34,12 @@
         tasks_from: shutdown.yml
       tags:
         - edpm_container_manage
+    - name: Prepare nftables
+      import_role:
+        name: edpm_nftables
+        tasks_from: service-bootstrap.yml
+      tags:
+        - edpm_firewall
     - name: Configure edpm_sshd
       import_role:
         name: edpm_sshd
