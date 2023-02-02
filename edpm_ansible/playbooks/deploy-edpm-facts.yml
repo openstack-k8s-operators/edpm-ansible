@@ -26,7 +26,7 @@
 
 - hosts: "{{ deploy_source_host | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
   name: Gather facts
-  strategy: edpm_free
+  strategy: free
   gather_facts: true
   tasks:
     - name: Set legacy facts

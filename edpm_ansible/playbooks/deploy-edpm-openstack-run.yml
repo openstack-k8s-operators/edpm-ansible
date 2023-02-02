@@ -17,7 +17,7 @@
 
 - hosts: "{{ deploy_target_host | default('overcloud') }}"
   name: Deploy EDPM OpenStack Run
-  strategy: edpm_free
+  strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   tasks:
