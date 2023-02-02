@@ -1,0 +1,23 @@
+command: /usr/bin/ovn-bgp-agent --config-dir /etc/ovn-bgp-agent
+config_files:
+  - source: /var/lib/kolla/config_files/src/*
+    dest: /
+    merge: true
+    preserve_properties: true
+permissions:
+  - path: /etc/ovn-bgp-agent
+    owner: ovn-bgp:ovn-bgp
+    recurse: true
+  - path: /var/log/ovn-bgp-agent
+    owner: ovn-bgp:ovn-bgp
+    recurse: true
+{% if edpm_ovn_bgp_agent_internal_tls_enable == true %}
+  - path: /etc/pki/tls/certs/ovn_bgp_agent.crt
+    owner: ovn-bgp:ovn-bgp
+    optional: true
+    perm: '0644'
+  - path: /etc/pki/tls/private/ovn_bgp_agent.key
+    owner: ovn-bgp:ovn-bgp
+    optional: true
+    perm: '0640'
+{% endif %}

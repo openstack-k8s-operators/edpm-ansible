@@ -1,0 +1,127 @@
+! {{ ansible_managed }}
+
+frr version {{ edpm_frr_version }}
+frr defaults {{ edpm_frr_defaults }}
+hostname {{ edpm_frr_hostname }}
+log file /var/log/frr/frr.log {{ edpm_frr_log_level }}
+log timestamp precision {{ edpm_frr_log_timestamp_precision }}
+service integrated-vtysh-config
+line vty
+{{ edpm_frr_conf_custom_globals }}
+
+router bgp {{ edpm_frr_bgp_asn }}
+  bgp router-id {{ hostvars[inventory_hostname][edpm_frr_bgp_ipv4_src_network ~ '_ip'] }}
+  bgp log-neighbor-changes
+  bgp graceful-shutdown
+  no bgp default ipv4-unicast
+  no bgp ebgp-requires-policy
+  {{ edpm_frr_conf_custom_router_bgp }}
+
+  neighbor uplink peer-group
+  neighbor uplink remote-as {{ edpm_frr_bgp_uplinks_scope }}
+{% if edpm_frr_bgp_neighbor_password|length %}
+  neighbor uplink password {{ edpm_frr_bgp_neighbor_password }}
+{% endif %}
+  ! neighbor uplink capability extended-nexthop
+{% if edpm_frr_bfd %}
+  neighbor uplink bfd
+  neighbor uplink bfd profile edpm
+{% endif %}
+{% if edpm_frr_bgp_peers %}
+{% for peer in edpm_frr_bgp_peers %}
+  neighbor {{ peer }} peer-group uplink
+{% endfor %}
+{% else %}
+{% for iface in edpm_frr_bgp_uplinks_mapped %}
+  neighbor {{ iface }} interface peer-group uplink
+{% endfor %}
+{% endif %}
+
+{% if edpm_frr_bgp_neighbor_ttl_security_hops | int > 0 %}
+  neighbor uplink ttl-security hops {{ edpm_frr_bgp_neighbor_ttl_security_hops }}
+{% endif %}
+{% if edpm_frr_bgp_l2vpn|bool and edpm_frr_bgp_l2vpn_peers|length %}
+  neighbor evpn-peer peer-group
+  neighbor evpn-peer remote-as {{ edpm_frr_bgp_l2vpn_peers_scope }}
+{% if edpm_frr_bgp_l2vpn_ebgp_multihop | int > 0 %}
+  neighbor evpn-peer ebgp-multihop {{ edpm_frr_bgp_l2vpn_ebgp_multihop }}
+{% endif %}
+{% endif %}
+
+{% if edpm_frr_bgp_ipv4 %}
+  address-family ipv4 unicast
+    redistribute connected
+    neighbor uplink activate
+{% if edpm_frr_bgp_ipv4_allowas_in %}
+    neighbor uplink allowas-in origin
+{% endif %}
+{% if edpm_frr_bgp_expose_only_host %}
+    neighbor uplink prefix-list only-host-prefixes out
+{% endif %}
+  exit-address-family
+{% endif %}
+
+{% if edpm_frr_bgp_ipv6 %}
+  address-family ipv6 unicast
+    redistribute connected
+    neighbor uplink activate
+{% if edpm_frr_bgp_ipv6_allowas_in %}
+    neighbor uplink allowas-in origin
+{% endif %}
+{% if edpm_frr_bgp_expose_only_host %}
+    neighbor uplink prefix-list only-host-prefixes out
+{% endif %}
+  exit-address-family
+{% endif %}
+
+{% if edpm_frr_bgp_l2vpn %}
+  address-family l2vpn evpn
+{% if edpm_frr_bgp_l2vpn_uplink_activate|bool %}
+    neighbor uplink activate
+{% endif %}
+{% if edpm_frr_bgp_l2vpn_peers|length %}
+    neighbor evpn-peer activate
+{% endif %}
+    advertise-all-vni
+  exit-address-family
+{% endif %}
+
+{% if edpm_frr_bgp_ipv4 %}
+ip prefix-list only-default permit 0.0.0.0/0
+ip prefix-list only-host-prefixes permit 0.0.0.0/0 ge 32
+
+route-map rm-only-default permit 10
+{% if not edpm_frr_bgp_learning_routes %}
+  match ip address prefix-list only-default
+{% endif %}
+  set src {{ hostvars[inventory_hostname][edpm_frr_bgp_ipv4_src_network ~ '_ip'] }}
+
+ip protocol bgp route-map rm-only-default
+{{ edpm_frr_conf_custom_ipv4 }}
+{% endif %} {# edpm_frr_bgp_ipv4 #}
+
+{% if edpm_frr_bgp_ipv6 %}
+ipv6 prefix-list only-default permit ::/0
+ipv6 prefix-list only-host-prefixes permit ::/0 ge 128
+
+route-map rm-only-default permit 11
+{% if not edpm_frr_bgp_learning_routes %}
+  match ipv6 address prefix-list only-default
+{% endif %}
+  set src {{ hostvars[inventory_hostname][edpm_frr_bgp_ipv6_src_network ~ '_ip'] }}
+
+ipv6 protocol bgp route-map rm-only-default
+{{ edpm_frr_conf_custom_ipv6 }}
+{% endif %}
+
+{% if edpm_frr_zebra_nht_resolve_via_default %}
+ip nht resolve-via-default
+{% endif %}
+
+{% if edpm_frr_bfd %}
+bfd
+  profile edpm
+    detect-multiplier {{ edpm_frr_bfd_detect_multiplier }}
+    transmit-interval {{ edpm_frr_bfd_transmit_interval }}
+    receive-interval {{ edpm_frr_bfd_receive_interval }}
+{% endif %}
