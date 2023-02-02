@@ -15,7 +15,6 @@
 #    under the License.
 __metaclass__ = type
 
-import hashlib
 import os
 import yaml
 
@@ -82,9 +81,9 @@ class main():
 
     result = dict(sucess=False, error="", changed=False)
     module = AnsibleModule(
-            argument_spec=yaml.safe_load(DOCUMENTATION)['options'],
-            supports_check_mode=False,
-            )
+        argument_spec=yaml.safe_load(DOCUMENTATION)['options'],
+        supports_check_mode=False,
+    )
 
     dest = module.params.get('dest', None)
     content = module.params.get('content', None)
@@ -105,7 +104,7 @@ class main():
         result['error'] = 'Destination directory does not exist'
         result['msg'] = ("Directory {} doesn't exist, please create it "
                          "before trying to push files in there").format(
-                                 os.path.dirname(dest))
+            os.path.dirname(dest))
         module.fail_json(**result)
 
     if state == 'present':
@@ -131,6 +130,7 @@ class main():
 
     result['success'] = True
     module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()

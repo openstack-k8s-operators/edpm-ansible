@@ -80,9 +80,9 @@ class main():
 
     result = dict(sucess=False, error="")
     module = AnsibleModule(
-            argument_spec=yaml.safe_load(DOCUMENTATION)['options'],
-            supports_check_mode=False,
-            )
+        argument_spec=yaml.safe_load(DOCUMENTATION)['options'],
+        supports_check_mode=False,
+    )
 
     dir_src = module.params.get('src', None)
     if dir_src is None:
@@ -110,6 +110,7 @@ class main():
     result['rules'] = sorted(rules, key=lambda r: r['rule_name'])
     result['success'] = True
     module.exit_json(**result)
+
 
 if __name__ == '__main__':
     main()
