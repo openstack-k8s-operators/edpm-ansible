@@ -1,4 +1,4 @@
-FROM quay.io/ansible/ansible-runner:latest
+FROM quay.io/ansible/creator-ee:v0.13.0
 ARG EDPM_LOCAL_REPO=""
 USER root
 RUN chmod g=u /etc/passwd /etc/group
