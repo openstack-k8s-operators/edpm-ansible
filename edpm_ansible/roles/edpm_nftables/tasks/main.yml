@@ -14,7 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-# - ansible.builtin.include_tasks: service-bootstrap.yml
-# - ansible.builtin.include_tasks: configure.yml
-# - ansible.builtin.include_tasks: run.yml
+- name: Fail on main
+  ansible.builtin.fail:
+    msg: "This role should not be called via main.yml, import tasks using tasks_from."
