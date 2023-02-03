@@ -66,7 +66,7 @@
         current_nft: "{{ nft_current_rules }}"
         nft_is_update: false
         edpm_nftables_rules: "{{ edpm_nftables_rules_list['rules'] }}"
-        edpm_nftables_rules_prefix: "{{ edpm_nftables_default_rules_prefix }}"
+        edpm_nftables_chains_prefix: "{{ edpm_nftables_default_chains_prefix }}"
       ansible.builtin.template:
         dest: /etc/nftables/edpm-jumps.nft
         src: jump-chain.j2
@@ -81,7 +81,7 @@
         current_nft: "{{ nft_current_rules }}"
         nft_is_update: true
         edpm_nftables_rules: "{{ edpm_nftables_rules_list['rules'] }}"
-        edpm_nftables_rules_prefix: "{{ edpm_nftables_default_rules_prefix }}"
+        edpm_nftables_chains_prefix: "{{ edpm_nftables_default_chains_prefix }}"
       ansible.builtin.template:
         dest: /etc/nftables/edpm-update-jumps.nft
         src: jump-chain.j2
@@ -92,7 +92,7 @@
       register: nft_flushes
       vars:
         edpm_nftables_rules: "{{ edpm_nftables_rules_list['rules'] }}"
-        edpm_nftables_rules_prefix: "{{ edpm_nftables_default_rules_prefix }}"
+        edpm_nftables_chains_prefix: "{{ edpm_nftables_default_chains_prefix }}"
       ansible.builtin.template:
         dest: /etc/nftables/edpm-flushes.nft
         src: flush-chain.j2
@@ -101,7 +101,7 @@
       register: nft_chains
       vars:
         edpm_nftables_rules: "{{ edpm_nftables_rules_list['rules'] }}"
-        edpm_nftables_rules_prefix: "{{ edpm_nftables_default_rules_prefix }}"
+        edpm_nftables_chains_prefix: "{{ edpm_nftables_default_chains_prefix }}"
       ansible.builtin.template:
         dest: /etc/nftables/edpm-chains.nft
         src: chains.j2
@@ -110,7 +110,7 @@
       register: nft_ruleset
       vars:
         edpm_nftables_rules: "{{ edpm_nftables_rules_list['rules'] }}"
-        edpm_nftables_rules_prefix: "{{ edpm_nftables_default_rules_prefix }}"
+        edpm_nftables_chains_prefix: "{{ edpm_nftables_default_chains_prefix }}"
       ansible.builtin.template:
         dest: /etc/nftables/edpm-rules.nft
         src: ruleset.j2
