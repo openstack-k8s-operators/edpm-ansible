@@ -20,4 +20,3 @@
 # All variables within this role should have a prefix of "edpm_nftables_"
 edpm_nftables_src: /var/lib/edpm-config/firewall
 edpm_nftables_default_rules_prefix: EDPM
-
