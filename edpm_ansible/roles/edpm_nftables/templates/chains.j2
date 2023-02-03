@@ -6,8 +6,8 @@
 {%    set chain_key = rule.get('chain', 'INPUT') ~ rule.get('table', 'filter') %}
 {%-   if chain_key not in chains.chains %}
 {%-     if 'extras' not in rule or rule['extras'].get('ensure', 'present') in ['enabled', 'present'] %}
-# Create chain EDPM_{{ rule.get('chain', 'INPUT') }} in {{rule.get('table', 'filter') }} table
-add chain inet {{ rule.get('table', 'filter') }} EDPM_{{ rule.get('chain', 'INPUT') }}
+# Create chain {{ edpm_nftables_rules_prefix }}_{{ rule.get('chain', 'INPUT') }} in {{rule.get('table', 'filter') }} table
+add chain inet {{ rule.get('table', 'filter') }} {{ edpm_nftables_rules_prefix }}_{{ rule.get('chain', 'INPUT') }}
 {%      endif %}
 {%      set _ = chains.chains.append(chain_key) %}
 {%    endif %}

@@ -9,7 +9,7 @@
 # {{ rule.get('rule_name', name) }} {{ rule }}
 add rule
 {%-     include 'templates/ipversion.j2' %}
- {{ rule.get('table', 'filter') }} EDPM_{{ rule.get('chain', 'INPUT') }}
+ {{ rule.get('table', 'filter') }} {{ edpm_nftables_rules_prefix }}_{{ rule.get('chain', 'INPUT') }}
 {%-     include 'templates/interface.j2' %}
 {%-     include 'templates/source.j2' %}
 {%-     include 'templates/sport.j2' %}
