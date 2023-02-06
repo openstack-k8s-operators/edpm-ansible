@@ -22,6 +22,9 @@ import fnmatch
 import json
 import os
 import yaml
+import tarfile
+import tempfile
+import hashlib
 
 
 ANSIBLE_METADATA = {
@@ -35,6 +38,7 @@ DOCUMENTATION = """
 module: container_config_hash
 author:
   - "Emilien Macchi (@EmilienM)"
+  - "Roberto Alfieri (@rebtoor)"
 version_added: '2.9'
 short_description: Generate config hashes for container startup configs
 notes: []
@@ -53,16 +57,6 @@ options:
       - Config volume prefix
     type: str
     default: '/var/lib/config-data'
-  debug:
-    description:
-      - Enable debug
-    type: bool
-    default: False
-  step:
-    description:
-      - Step number
-    default: 6
-    type: int
 """
 
 EXAMPLES = """
@@ -145,6 +139,42 @@ class ContainerConfigHashManager:
         os.chmod(path, 0o600)
         self.results['changed'] = True
 
+    def _tar_cleanup(self, tarinfo):
+        tarinfo.mtime = 0
+        return tarinfo
+
+    def _create_checksum(self, config_volume):
+        """Create an hash from a tar-ed version of the given
+        folder
+
+        :param config_volume: string
+        :returns: string
+        """
+
+        total_hash = hashlib.new('md5')
+        tmp = tempfile.TemporaryFile()
+        tar = tarfile.open(fileobj=tmp, mode="w:")
+        tar.add(config_volume, recursive=True, filter=self._tar_cleanup)
+        tar.close
+        tmp.flush()
+        tmp.seek(0)
+        tar = tarfile.open(fileobj=tmp, mode='r:')
+        chunk_size = 100 * 1024
+
+        for member in tar:
+            if not member.isfile():
+                continue
+            f = tar.extractfile(member)
+            data = f.read(chunk_size)
+            while data:
+                total_hash.update(data)
+                data = f.read(chunk_size)
+        tar.close()
+
+        tmp.close()
+        h = total_hash.hexdigest()
+        return h
+
     def _get_config_hash(self, config_volume):
         """Returns a config hash from a config_volume.
 
@@ -154,6 +184,19 @@ class ContainerConfigHashManager:
         hashfile = "%s.md5sum" % config_volume
         if os.path.exists(hashfile):
             return self._slurp(hashfile).strip('\n')
+
+    def _set_config_hash(self, config_volume):
+        """Create a config hash for a config_volume.
+        :param config_volume: string
+        :returns: string
+        """
+        hash = self._create_checksum(config_volume)
+        hashfile = "%s.md5sum" % config_volume
+        with open(hashfile, 'w') as f:
+            f.write(hash)
+        os.chmod(hashfile, 0o600)
+
+        return hash
 
     def _get_config_base(self, prefix, volume):
         """Returns a config base path for a specific volume.
@@ -209,29 +252,28 @@ class ContainerConfigHashManager:
                 continue
             startup_config_json = json.loads(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
-            config_hashes = [
-                self._get_config_hash(vol_path) for vol_path in config_volumes
-            ]
-            config_hashes = filter(None, config_hashes)
-            if 'environment' in startup_config_json:
-                old_config_hash = startup_config_json['environment'].get(
-                    'EDPM_CONFIG_HASH', '')
-            if config_hashes is not None and config_hashes:
-                config_hash = '-'.join(config_hashes)
-                if config_hash == old_config_hash:
-                    # config doesn't need an update
-                    continue
-                self.module.debug(
-                    'Config change detected for {}, new hash: {}'.format(
-                        cname,
-                        config_hash
-                    )
-                )
-                if 'environment' not in startup_config_json:
-                    startup_config_json['environment'] = {}
-                startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
-                    config_hash)
-                self._update_container_config(config, startup_config_json)
+            if config_volumes:
+                config_hashes = [
+                    self._get_config_hash(vol_path) for vol_path in config_volumes
+                ]
+                if 'environment' in startup_config_json:
+                    old_config_hash = startup_config_json['environment'].get(
+                        'EDPM_CONFIG_HASH', '')
+                if config_hashes is not None and config_hashes:
+                    new_hashes = [
+                        self._set_config_hash(vol_path) for vol_path in config_volumes
+                    ]
+                    new_hash = '-'.join(new_hashes)
+                    if new_hash != old_config_hash:
+                        if 'environment' not in startup_config_json:
+                            startup_config_json['environment'] = {}
+                        startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
+                            new_hash)
+                        self._update_container_config(
+                            config, startup_config_json)
+                    else:
+                        # config doesn't need an update
+                        continue
 
 
 def main():
