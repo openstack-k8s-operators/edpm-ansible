@@ -1,0 +1,68 @@
+name: OpenStackAnsibleEE runner builder
+
+on:
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+      - .gitignore
+      - .pull_request_pipeline
+      - LICENSE
+      - README.rst
+      - .github/
+      - docs/
+      - tests/
+
+env:
+  imageregistry: 'quay.io'
+  imagenamespace: ${{ secrets.IMAGENAMESPACE || secrets.QUAY_USERNAME }}
+  latesttag: latest
+
+jobs:
+
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets are set
+        id: have-secrets
+        if: "${{ env.imagenamespace != '' }}"
+        run: echo "::set-output name=ok::true"
+    outputs:
+      have-secrets: ${{ steps.have-secrets.outputs.ok }}
+
+  build-openstack-ansibleee-runner:
+    name: Build openstack-ansibleee-runner image using buildah
+    runs-on: ubuntu-latest
+    needs: [check-secrets]
+    if: needs.check-secrets.outputs.have-secrets == 'true'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get branch name
+      id: branch-name
+      uses: tj-actions/branch-names@v5
+
+    - name: Set latest tag for non main branch
+      if: "${{ steps.branch-name.outputs.current_branch != 'main' }}"
+      run: |
+        echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
+
+    - name: Buildah Action
+      id: build-openstack-ansibleee-runner
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: openstack-ansibleee-runner
+        tags: ${{ env.latesttag }} ${{ github.sha }}
+        context: ./openstack_ansibleee/
+        containerfiles: |
+          ./openstack_ansibleee/Dockerfile
+
+    - name: Push openstack-ansibleee-runner To ${{ env.imageregistry }}
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-openstack-ansibleee-runner.outputs.image }}
+        tags: ${{ steps.build-openstack-ansibleee-runner.outputs.tags }}
+        registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
