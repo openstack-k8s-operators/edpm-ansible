@@ -26,7 +26,7 @@ jobs:
       - name: Check secrets are set
         id: have-secrets
         if: "${{ env.imagenamespace != '' }}"
-        run: echo "::set-output name=ok::true"
+        run: echo "ok=true" >> $GITHUB_OUTPUT
     outputs:
       have-secrets: ${{ steps.have-secrets.outputs.ok }}
 
