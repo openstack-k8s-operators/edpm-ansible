@@ -1,0 +1,8 @@
+{%- if 'destination' in rule %}
+{%-   if 'ipversion' in rule and rule['ipversion'] == 'ipv6'  or ':' in rule['destination'] %}
+ ip6
+{%-   else %}
+ ip
+{%-   endif %}
+ daddr {{ rule['destination'] }}
+{%- endif %}

@@ -1,0 +1,13 @@
+---
+# Generated via edpm_sshd
+{% set merged_ranges = edpm_sshd_allowed_ranges -%}
+{% if net_cidr_map is defined and net_cidr_map.ctlplane is defined -%}
+{%   set merged_ranges = edpm_sshd_allowed_ranges.append(net_cidr_map.ctlplane) -%}
+{% endif -%}
+{% for range in merged_ranges -%}
+- rule_name: 003 Allow ssh from {{ range }}
+  rule:
+    proto: tcp
+    dport: {{ edpm_sshd_firewall_port }}
+    source: "{{ range }}"
+{% endfor %}

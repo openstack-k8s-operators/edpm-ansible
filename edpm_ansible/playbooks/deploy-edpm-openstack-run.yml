@@ -21,6 +21,14 @@
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   tasks:
+    - name: Apply nftables configuration
+      when:
+        - deploy_edpm_openstack_run_firewall|default(true)|bool
+      import_role:
+        name: edpm_nftables
+        tasks_from: run.yml
+      tags:
+        - edpm_firewall
     - name: Run edpm_logrotate_crond
       import_role:
         name: edpm_logrotate_crond

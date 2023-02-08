@@ -51,3 +51,10 @@ edpm_sshd_server_options:
     - 'LC_IDENTIFICATION LC_ALL LANGUAGE'
     - 'XMODIFIERS'
   Subsystem: 'sftp /usr/libexec/openssh/sftp-server'
+
+# Firewall configuration part
+edpm_sshd_configure_firewall: false
+edpm_sshd_allowed_ranges: []
+# Since we can override the port using the edpm_sshd_server_options,
+# we'd rather ensure we can set the appropriate value here as well.
+edpm_sshd_firewall_port: 22
