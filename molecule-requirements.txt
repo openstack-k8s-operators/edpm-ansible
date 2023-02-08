@@ -1,0 +1,24 @@
+# this is required for the molecule jobs
+ansi2html
+dogpile.cache>=0.9.2
+openstacksdk
+pytest
+pytest-cov
+pytest-html
+pytest-testinfra
+pytest-xdist
+mock
+molecule>=3.3.4
+molecule-plugins[podman]
+ruamel.yaml
+netaddr
+jinja2
+jmespath
+ansible-core
+
+# Upstream requirements from constraints.txt
+tripleo-common
+os-net-config  # Apache-2.0
+# Allows to unpin cryptography
+pyOpenSSL>=22.1.0
+
