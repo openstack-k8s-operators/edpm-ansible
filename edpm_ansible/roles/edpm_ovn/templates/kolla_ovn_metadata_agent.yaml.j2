@@ -1,0 +1,16 @@
+command: "/usr/bin/networking-ovn-metadata-agent --config-file {{ edpm_ovn_metadata_agent_config_dir }}/neutron.conf --config-file {{ edpm_ovn_metadata_agent_config_dir }}/plugins/networking-ovn/networking-ovn-metadata-agent.ini --log-file={{ edpm_ovn_metadata_agent_log_dir }}/ovn-metadata-agent.log"
+permissions:
+  - owner: neutron:neutron
+    path: /var/log/neutron
+    recurse: true
+  - owner: neutron:neutron
+    path: /var/lib/neutron
+    recurse: true
+  - optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/certs/ovn_metadata.crt
+    perm: 0644
+    optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/private/ovn_metadata.key
+    perm: 0644
