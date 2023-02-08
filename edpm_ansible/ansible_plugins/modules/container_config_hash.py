@@ -66,6 +66,7 @@ EXAMPLES = """
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
 BUF_SIZE = 65536
 
+
 class ContainerConfigHashManager:
     """Notes about this module.
 
@@ -170,27 +171,12 @@ class ContainerConfigHashManager:
         h = total_hash.hexdigest()
         return h
 
-    def _get_config_hash(self, config_volume):
-        """Returns a config hash from a config_volume.
-
-        :param config_volume: string
-        :returns: string
-        """
-        hashfile = "%s.md5sum" % config_volume
-        if os.path.exists(hashfile):
-            return self._slurp(hashfile).strip('\n')
-
     def _set_config_hash(self, config_volume):
         """Create a config hash for a config_volume.
         :param config_volume: string
         :returns: string
         """
         hash = self._create_checksum(config_volume)
-        hashfile = "%s.md5sum" % config_volume
-        with open(hashfile, 'w') as f:
-            f.write(hash)
-        os.chmod(hashfile, 0o600)
-
         return hash
 
     def _get_config_base(self, prefix, volume):
@@ -248,9 +234,6 @@ class ContainerConfigHashManager:
             startup_config_json = json.loads(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
             if config_volumes:
-                config_hashes = [
-                    self._get_config_hash(vol_path) for vol_path in config_volumes
-                ]
                 if 'environment' in startup_config_json:
                     old_config_hash = startup_config_json['environment'].get(
                         'EDPM_CONFIG_HASH', '')
