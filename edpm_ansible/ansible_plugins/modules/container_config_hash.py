@@ -22,8 +22,7 @@ import fnmatch
 import json
 import os
 import yaml
-import tarfile
-import tempfile
+import glob
 import hashlib
 
 
@@ -65,7 +64,7 @@ EXAMPLES = """
 """
 
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
-
+BUF_SIZE = 65536
 
 class ContainerConfigHashManager:
     """Notes about this module.
@@ -139,39 +138,35 @@ class ContainerConfigHashManager:
         os.chmod(path, 0o600)
         self.results['changed'] = True
 
-    def _tar_cleanup(self, tarinfo):
-        tarinfo.mtime = 0
-        return tarinfo
+    def _read_file(self, file):
+        """Read a given file and return its content
+        :param file: string
+        :returns: bytes
+        """
 
-    def _create_checksum(self, config_volume):
+        r = b''
+        with open(file, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                r += data
+                if not data:
+                    break
+        return r
+
+    def _create_checksum(self, config_volume, exclusions=[]):
         """Create an hash from a tar-ed version of the given
         folder
 
         :param config_volume: string
+        :param exclusions: list
         :returns: string
         """
 
         total_hash = hashlib.new('md5')
-        tmp = tempfile.TemporaryFile()
-        tar = tarfile.open(fileobj=tmp, mode="w:")
-        tar.add(config_volume, recursive=True, filter=self._tar_cleanup)
-        tar.close
-        tmp.flush()
-        tmp.seek(0)
-        tar = tarfile.open(fileobj=tmp, mode='r:')
-        chunk_size = 100 * 1024
+        for file in glob.glob(config_volume + '/**/*', recursive=True):
+            if os.path.isfile(file) and file not in exclusions:
+                total_hash.update(self._read_file(file))
 
-        for member in tar:
-            if not member.isfile():
-                continue
-            f = tar.extractfile(member)
-            data = f.read(chunk_size)
-            while data:
-                total_hash.update(data)
-                data = f.read(chunk_size)
-        tar.close()
-
-        tmp.close()
         h = total_hash.hexdigest()
         return h
 
@@ -259,21 +254,20 @@ class ContainerConfigHashManager:
                 if 'environment' in startup_config_json:
                     old_config_hash = startup_config_json['environment'].get(
                         'EDPM_CONFIG_HASH', '')
-                if config_hashes is not None and config_hashes:
-                    new_hashes = [
-                        self._set_config_hash(vol_path) for vol_path in config_volumes
-                    ]
-                    new_hash = '-'.join(new_hashes)
-                    if new_hash != old_config_hash:
-                        if 'environment' not in startup_config_json:
-                            startup_config_json['environment'] = {}
-                        startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
-                            new_hash)
-                        self._update_container_config(
-                            config, startup_config_json)
-                    else:
-                        # config doesn't need an update
-                        continue
+                new_hashes = [
+                    self._set_config_hash(vol_path) for vol_path in config_volumes
+                ]
+                new_hash = '-'.join(new_hashes)
+                if new_hash != old_config_hash:
+                    if 'environment' not in startup_config_json:
+                        startup_config_json['environment'] = {}
+                    startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
+                        new_hash)
+                    self._update_container_config(
+                        config, startup_config_json)
+                else:
+                    # config doesn't need an update
+                    continue
 
 
 def main():
