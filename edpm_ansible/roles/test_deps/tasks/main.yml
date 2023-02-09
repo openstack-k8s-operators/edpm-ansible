@@ -82,10 +82,10 @@
         dest: /etc/yum.repos.d/delorean.repo
         mode: 0644
 
-- name: Install edpm-repos package
+- name: Install tripleo-repos package
   become: true
   ansible.builtin.package:
-    name: "python*edpm-repos"
+    name: "python*tripleo-repos"
     state: present
 
 - name: Tripleo setup block
