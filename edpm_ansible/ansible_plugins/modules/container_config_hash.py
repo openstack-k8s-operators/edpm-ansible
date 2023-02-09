@@ -239,7 +239,7 @@ class ContainerConfigHashManager:
                     old_config_hash = startup_config_json['environment'].get(
                         'EDPM_CONFIG_HASH', '')
                     exclude_from_hash = startup_config_json['environment'].get(
-                        'EDPM_EXCLUDE_FROM_HASH', '')
+                        'EDPM_EXCLUDE_FROM_HASH', '').split(':')
                 new_hashes = [
                     self._set_config_hash(vol_path,exclude_from_hash) for vol_path in config_volumes
                 ]
