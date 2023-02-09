@@ -165,18 +165,19 @@ class ContainerConfigHashManager:
 
         total_hash = hashlib.new('md5')
         for file in glob.glob(config_volume + '/**/*', recursive=True):
-            if os.path.isfile(file) and file not in exclusions:
+            file_relpath = '/' + os.path.relpath(file, config_volume)
+            if os.path.isfile(file) and file_relpath not in exclusions:
                 total_hash.update(self._read_file(file))
 
         h = total_hash.hexdigest()
         return h
 
-    def _set_config_hash(self, config_volume):
+    def _set_config_hash(self, config_volume, exclude_from_hash):
         """Create a config hash for a config_volume.
         :param config_volume: string
         :returns: string
         """
-        hash = self._create_checksum(config_volume)
+        hash = self._create_checksum(config_volume, exclude_from_hash)
         return hash
 
     def _get_config_base(self, prefix, volume):
@@ -237,8 +238,10 @@ class ContainerConfigHashManager:
                 if 'environment' in startup_config_json:
                     old_config_hash = startup_config_json['environment'].get(
                         'EDPM_CONFIG_HASH', '')
+                    exclude_from_hash = startup_config_json['environment'].get(
+                        'EDPM_EXCLUDE_FROM_HASH', '')
                 new_hashes = [
-                    self._set_config_hash(vol_path) for vol_path in config_volumes
+                    self._set_config_hash(vol_path,exclude_from_hash) for vol_path in config_volumes
                 ]
                 new_hash = '-'.join(new_hashes)
                 if new_hash != old_config_hash:
