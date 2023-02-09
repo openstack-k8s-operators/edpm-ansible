@@ -40,9 +40,7 @@ function run_pip {
                                   -r "${PROJECT_DIR}/requirements.txt" \
                                   -r "${PROJECT_DIR}/test-requirements.txt" \
                                   -r "${PROJECT_DIR}/molecule-requirements.txt" ${@:-}
-    ansible-galaxy collection install ansible.posix \
-                                  community.general \
-                                  containers.podman                                  
+    "${HOME}/test-python/bin/ansible-galaxy" collection install -r "${PROJECT_DIR}/requirements.yml"
 }
 
 ## Main ----------------------------------------------------------------------
