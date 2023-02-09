@@ -1,6 +1,6 @@
 ---
 driver:
-  name: delegated 
+  name: delegated
   options:
     managed: false
     login_cmd_template: >-

@@ -21,4 +21,3 @@ tripleo-common
 os-net-config  # Apache-2.0
 # Allows to unpin cryptography
 pyOpenSSL>=22.1.0
-

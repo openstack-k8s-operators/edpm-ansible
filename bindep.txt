@@ -39,4 +39,3 @@ gzip
 
 # Required to build language docs
 gettext
-

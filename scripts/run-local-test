@@ -98,4 +98,4 @@ PS1="[\u@\h \W]\$" source "${HOME}/test-python/bin/activate"
 
 cd "${PROJECT_DIR}/edpm_ansible/roles/${ROLE_NAME}"
 
-molecule test 
+molecule test
