@@ -172,12 +172,13 @@ class ContainerConfigHashManager:
         h = total_hash.hexdigest()
         return h
 
-    def _set_config_hash(self, config_volume, exclude_from_hash):
+    def _set_config_hash(self, config_volume, exclusions=[]):
         """Create a config hash for a config_volume.
         :param config_volume: string
+        :param exclusions: list
         :returns: string
         """
-        hash = self._create_checksum(config_volume, exclude_from_hash)
+        hash = self._create_checksum(config_volume, exclusions)
         return hash
 
     def _get_config_base(self, prefix, volume):
