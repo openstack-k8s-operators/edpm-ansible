@@ -1,0 +1,101 @@
+---
+
+- hosts: all
+  pre_tasks:
+    - name: Create directories
+      ansible.builtin.import_tasks: directories.yml
+    - name: Set project path fact
+      ansible.builtin.set_fact:
+        edpm_ansible_project_path: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}"
+
+    - name: Ensure pip is available
+      ansible.builtin.include_role:
+        name: ensure-pip
+
+    - name: Setup bindep
+      ansible.builtin.pip:
+        name: "bindep"
+        virtualenv: "{{ ansible_user_dir }}/test-python"
+        virtualenv_command: "{{ ensure_pip_virtualenv_command }}"
+        virtualenv_site_packages: true
+
+    - name: Run bindep
+      shell: |-
+        . {{ ansible_user_dir }}/test-python/bin/activate
+        {{ edpm_ansible_project_path }}/scripts/bindep-install
+      become: true
+
+    - name: Ensure a recent version of pip is installed in virtualenv
+      ansible.builtin.pip:
+        name: "pip<20.3.0"
+        virtualenv: "{{ ansible_user_dir }}/test-python"
+        virtualenv_command: "{{ ensure_pip_virtualenv_command }}"
+        state: latest
+
+    - name: Setup test-python
+      ansible.builtin.pip:
+        requirements: "{{ edpm_ansible_project_path }}/molecule-requirements.txt"
+        virtualenv: "{{ ansible_user_dir }}/test-python"
+        virtualenv_command: "{{ ensure_pip_virtualenv_command }}"
+        virtualenv_site_packages: true
+        extra_args: >-
+          --constraint "{{ edpm_ansible_project_path }}/ansible-requirements.txt"
+
+    - name: Display test-python virtualenv package versions
+      ansible.builtin.shell: |-
+        . {{ ansible_user_dir }}/test-python/bin/activate
+        pip freeze
+
+    - name: Basic ci setup
+      become: true
+      block:
+        - name: Set an appropriate fs.file-max
+          ansible.posix.sysctl:
+            name: fs.file-max
+            value: 2048000
+            sysctl_set: true
+            state: present
+            reload: true
+
+        - name: Set container_manage_cgroup boolean
+          ansible.posix.seboolean:
+            name: container_manage_cgroup
+            state: true
+            persistent: true
+          failed_when: false
+
+        - name: Create limits file for containers
+          ansible.builtin.copy:
+            content: |
+              * soft nofile 102400
+              * hard nofile 204800
+              * soft nproc 2048
+              * hard nproc 4096
+            dest: /etc/security/limits.d/containers.conf
+
+        - name: Reset ssh connection
+          ansible.builtin.meta: reset_connection
+  tasks:
+      # (ralfieri): I commented this task because both bugs seem to be fixed.
+      # FIXME(chandankumar): Downgrade ontainers-common due to
+      # https://bugs.launchpad.net/edpm/+bug/1988500 and
+      # https://bugzilla.redhat.com/show_bug.cgi?id=2123611
+    # - name: Downgrade containers-common
+    #   ansible.builtin.shell: |
+    #     if [ -n "$(rpm -qa containers-common)" ];then dnf -y downgrade containers-common-1-40.el9; fi
+    #   become: true
+    - name: Get Ansible Galaxy roles
+      ansible.builtin.command: >-
+        {{ ansible_user_dir }}/test-python/bin/ansible-galaxy install --timeout 300
+        -fr
+        {{ edpm_ansible_project_path }}/edpm_ansible/requirements.yml
+      environment:
+        ANSIBLE_ROLES_PATH: "{{ edpm_ansible_project_path }}/edpm_ansible/roles.galaxy"
+
+    - name: Get Ansible Galaxy collections
+      command: >-
+        {{ ansible_user_dir }}/test-python/bin/ansible-galaxy collection install --timeout 300
+        -fr
+        {{ edpm_ansible_project_path }}/edpm_ansible/requirements.yml
+      environment:
+        ANSIBLE_ROLES_PATH: "{{ edpm_ansible_project_path }}/edpm_ansible/roles.galaxy"
