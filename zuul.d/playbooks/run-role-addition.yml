@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Set basic zuul fact
+      ansible.builtin.set_fact:
+        zuul:
+          projects:
+            "github.com/openstack-k8s-operators/edpm-ansible":
+              src_dir: "{{ edpm_src }}"
+
+    - name: Create directories
+      ansible.builtin.import_tasks: directories.yml
+
+- name: Import skeleton_test role
+  ansible.builtin.import_playbook: ../../role-addition.yml
+  vars:
+    role_name: "skeleton_test"
