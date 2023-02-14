@@ -21,7 +21,7 @@
 
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -35,8 +35,8 @@
     - always
 
 - name: Set facts for conditions
-  set_fact:
+  ansible.builtin.set_fact:
     edpm_nova_compute_compute_startup_delay: "{{ edpm_nova_compute_startup_delay != 0 and not edpm_nova_compute_enable_instance_ha }}"
-    edpm_nova_compute_use_tls_for_live_migration: "{{ edpm_nova_compute_enable_internal_tls|bool and edpm_nova_compute_use_tls_transport_for_live_migration|bool }}"
+    edpm_nova_compute_use_tls_for_live_migration: "{{ edpm_nova_compute_enable_internal_tls | bool and edpm_nova_compute_use_tls_transport_for_live_migration | bool }}"
     edpm_nova_compute_libvirt_file_backed_memory_enabled: "{{ edpm_nova_compute_file_backed_memory == '' or edpm_nova_compute_file_backed_memory == 0 }}"
     edpm_nova_compute_is_realtime: "{{ edpm_tuned_profile_name | default('throughput-performance') != 'realtime-virtual-host' }}"

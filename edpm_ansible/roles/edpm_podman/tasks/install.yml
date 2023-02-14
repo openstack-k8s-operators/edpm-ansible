@@ -15,21 +15,21 @@
 # under the License.
 
 - name: Load vars id needed
-  when: edpm_podman_packages is undefined or edpm_podman_packages|length == 0
-  import_tasks: load_vars.yaml
+  when: edpm_podman_packages is undefined or edpm_podman_packages | length == 0
+  ansible.builtin.import_tasks: load_vars.yaml
 
 - name: Install block
   become: true
   block:
-    - name: ensure podman and deps are installed
-      package:
+    - name: Ensure podman and deps are installed
+      ansible.builtin.package:
         name: "{{ edpm_podman_packages }}"
         state: present
 
     - name: Ensure we get the ansible interfaces facts
       when:
         - ansible_facts['interfaces'] is undefined
-      setup:
+      ansible.builtin.setup:
         gather_subset:
           - '!all'
           - '!min'
@@ -37,38 +37,40 @@
         filter: 'ansible_interfaces'
 
     - name: Delete legacy cni0 interface (podman < 1.6)
-      command: ip link delete cni0
+      ansible.builtin.command: ip link delete cni0
       when:
         - '"cni0" in ansible_facts["interfaces"]'
 
     # don't update the network config if the network is already running
     # meaning cni-podman0 is running somewhere
     - name: Update default network configuration if possible
-      block:
-      - name: Make sure /etc/cni/net.d folder exists
-        file:
-          path: /etc/cni/net.d
-          state: directory
-          recurse: true
-          mode: 0755
-          owner: root
-          group: root
-
-      - name: Update default network configuration if possible
-        copy:
-          dest: /etc/cni/net.d/87-podman-bridge.conflist
-          content: "{{ edpm_podman_default_network_config | to_json }}"
-          mode: '0644'
-          owner: root
-          group: root
       when:
         - '"cni-podman0" not in ansible_facts["interfaces"]'
         - edpm_container_default_network_backend == 'cni'
+      block:
+        - name: Make sure /etc/cni/net.d folder exists
+          ansible.builtin.file:
+            path: /etc/cni/net.d
+            state: directory
+            recurse: true
+            mode: 0755
+            owner: root
+            group: root
+
+        - name: Update default network configuration if possible
+          ansible.builtin.copy:
+            dest: /etc/cni/net.d/87-podman-bridge.conflist
+            content: "{{ edpm_podman_default_network_config | to_json }}"
+            mode: '0644'
+            owner: root
+            group: root
 
     - name: Update netavark container network configuration
+      when:
+        - edpm_container_default_network_backend == 'netavark'
       block:
         - name: Make sure /etc/containers/networks exists
-          file:
+          ansible.builtin.file:
             path: /etc/containers/networks
             state: directory
             recurse: true
@@ -76,11 +78,11 @@
             owner: root
             group: root
         - name: Get current podman network
-          shell: |
+          ansible.builtin.shell: |
             podman network inspect podman
           register: podman_network_inspect
         - name: Update the default network configuration
-          template:
+          ansible.builtin.template:
             src: podman_network_config.j2
             dest: /etc/containers/networks/podman.json
             mode: '0644'
@@ -88,11 +90,9 @@
             group: root
           when:
             - podman_network_inspect is not skipped
-      when:
-        - edpm_container_default_network_backend == 'netavark'
 
     - name: Write containers registries.conf
-      template:
+      ansible.builtin.template:
         src: registries.conf.j2
         dest: /etc/containers/registries.conf
         owner: root
@@ -101,7 +101,7 @@
         mode: '0644'
 
     - name: Write containers.conf
-      ini_file:
+      community.general.ini_file:
         path: /etc/containers/containers.conf
         owner: root
         group: root
@@ -120,15 +120,15 @@
           value: "\"{{ edpm_container_events_logger_mechanism }}\""
         - section: engine
           option: runtime
-          value:  "\"{{ edpm_container_default_runtime }}\""
+          value: "\"{{ edpm_container_default_runtime }}\""
         - section: network
           option: network_backend
-          value:  "\"{{ edpm_container_default_network_backend }}\""
+          value: "\"{{ edpm_container_default_network_backend }}\""
 
     - name: Enable podman.socket service
       when:
         - edpm_podman_enable_socket | bool
-      systemd:
+      ansible.builtin.systemd:
         name: podman.socket
         state: started
         enabled: true

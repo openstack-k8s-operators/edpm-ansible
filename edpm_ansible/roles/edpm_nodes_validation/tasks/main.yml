@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Collect default network fact
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -23,7 +23,7 @@
     filter: 'ansible_default_ipv4'
 
 - name: Check Default IPv4 Gateway availability
-  command: "ping -w 10 -c 5 {{ ansible_facts.default_ipv4.gateway }}"
+  ansible.builtin.command: "ping -w 10 -c 5 {{ ansible_facts.default_ipv4.gateway }}"
   retries: 10
   delay: 60
   changed_when: false
@@ -37,7 +37,7 @@
 
 # Ping test the gateway IPs before nodes, see RHBZ#1875962
 - name: Check all networks Gateway availability
-  command: "{{ (':' in gateway_ip) | ternary('ping6', 'ping') }} -w 10 -c 5 {{ gateway_ip }}"
+  ansible.builtin.command: "{{ (':' in gateway_ip) | ternary('ping6', 'ping') }} -w 10 -c 5 {{ gateway_ip }}"
   retries: 10
   delay: 60
   loop_control:
@@ -52,7 +52,7 @@
     - edpm_nodes_validation_ping_test_gateway_ips | length > 0
 
 - name: Check Controllers availability
-  include_tasks:
+  ansible.builtin.include_tasks:
     file: ping.yml
     apply:
       check_mode: false
@@ -64,7 +64,7 @@
     - edpm_nodes_validation_ping_test_ips | length > 0
 
 - name: Verify the configured FQDN vs /etc/hosts
-  shell: |
+  ansible.builtin.shell: |
     HOSTNAME=$(hostname)
     SHORT_NAME=$(hostname -s)
     FQDN_FROM_HOSTS=$(awk '$3 == "'${SHORT_NAME}'"{print $2}' /etc/hosts)

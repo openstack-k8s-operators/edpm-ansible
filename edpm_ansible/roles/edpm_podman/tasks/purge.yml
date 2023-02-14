@@ -19,13 +19,13 @@
   become: true
   block:
     - name: Clean podman images
-      command: podman image prune -a -f
+      ansible.builtin.command: podman image prune -a -f
   rescue:
     # In case -f isn't available yet, we fallback to old way.
     # https://bugs.launchpad.net/edpm/+bug/1889418
     - name: Clean podman images
-      command: podman image prune -a
+      ansible.builtin.command: podman image prune -a
 
 - name: Clean podman volumes
   become: true
-  command: podman volume prune -f
+  ansible.builtin.command: podman volume prune -f

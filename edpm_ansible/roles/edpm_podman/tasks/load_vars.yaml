@@ -20,7 +20,7 @@
 # Putting this in a dedicated file allows to just include it wherever is needed.
 # Please check https://bugs.launchpad.net/edpm/+bug/1891465 for more context.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:

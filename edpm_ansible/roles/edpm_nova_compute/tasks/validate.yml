@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: validate nova-compute container state
+- name: Validate nova-compute container state
   containers.podman.podman_container_info:
     name: nova_compute
   register: nova_compute_infos

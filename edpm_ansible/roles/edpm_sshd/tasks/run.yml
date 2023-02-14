@@ -18,17 +18,17 @@
   become: true
   block:
     - name: Enable sshd
-      systemd:
+      ansible.builtin.systemd:
         name: sshd
         enabled: true
 
     - name: Start sshd
-      systemd:
+      ansible.builtin.systemd:
         name: sshd
         state: started
 
     - name: Restart sshd due to config change
-      systemd:
+      ansible.builtin.systemd:
         name: sshd
         state: reloaded
       when:

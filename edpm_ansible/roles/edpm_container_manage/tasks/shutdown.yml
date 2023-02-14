@@ -18,7 +18,7 @@
   become: true
   block:
     - name: "Deploy edpm-container-shutdown and edpm-start-podman-container"
-      copy:
+      ansible.builtin.copy:
         src: "{{ role_path }}/files/{{ item }}"
         dest: "/usr/libexec/{{ item }}"
         mode: '0700'
@@ -28,41 +28,41 @@
         - 'edpm-container-shutdown'
         - 'edpm-start-podman-container'
     - name: "Create /usr/lib/systemd/system/edpm-container-shutdown.service"
-      copy:
+      ansible.builtin.copy:
         src: "{{ role_path }}/files/edpm-container-shutdown-service"
         dest: "/usr/lib/systemd/system/edpm-container-shutdown.service"
         mode: '0644'
         owner: root
         group: root
     - name: "Create /usr/lib/systemd/system-preset/91-edpm-container-shutdown.preset"
-      copy:
+      ansible.builtin.copy:
         src: "{{ role_path }}/files/91-edpm-container-shutdown-preset"
         dest: "/usr/lib/systemd/system-preset/91-edpm-container-shutdown.preset"
         mode: '0644'
         owner: root
         group: root
     - name: Enable and start edpm-container-shutdown
-      systemd:
+      ansible.builtin.systemd:
         name: edpm-container-shutdown
         state: started
         enabled: true
         daemon_reload: true
     - name: "Create /usr/lib/systemd/system/netns-placeholder.service"
-      copy:
+      ansible.builtin.copy:
         src: "{{ role_path }}/files/netns-placeholder-service"
         dest: "/usr/lib/systemd/system/netns-placeholder.service"
         mode: '0644'
         owner: root
         group: root
     - name: "Create /usr/lib/systemd/system-preset/91-netns-placeholder.preset"
-      copy:
+      ansible.builtin.copy:
         src: "{{ role_path }}/files/91-netns-placeholder-preset"
         dest: "/usr/lib/systemd/system-preset/91-netns-placeholder.preset"
         mode: '0644'
         owner: root
         group: root
     - name: Enable and start netns-placeholder
-      systemd:
+      ansible.builtin.systemd:
         name: netns-placeholder
         state: started
         enabled: true

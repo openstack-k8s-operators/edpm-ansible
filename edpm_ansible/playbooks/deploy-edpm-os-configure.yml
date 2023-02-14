@@ -17,7 +17,7 @@
 
 - hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
   name: Deploy EDPM Operating System Configure
-  strategy: edpm_free
+  strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   become: true
@@ -34,6 +34,12 @@
         tasks_from: shutdown.yml
       tags:
         - edpm_container_manage
+    - name: Prepare nftables
+      import_role:
+        name: edpm_nftables
+        tasks_from: service-bootstrap.yml
+      tags:
+        - edpm_firewall
     - name: Configure edpm_sshd
       import_role:
         name: edpm_sshd

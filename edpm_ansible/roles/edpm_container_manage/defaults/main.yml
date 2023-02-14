@@ -21,19 +21,13 @@ edpm_container_manage_debug: "{{ ((ansible_verbosity | int) >= 2) | bool }}"
 edpm_container_manage_clean_orphans: true
 
 # All variables within this role should have a prefix of "edpm_container_manage"
-edpm_container_manage_check_puppet_config: false
+edpm_container_manage_update_config_hash: false
 edpm_container_manage_cli: podman
 edpm_container_manage_concurrency: 1
 edpm_container_manage_config: "/var/lib/edpm-config/"
 edpm_container_manage_config_id: edpm
 edpm_container_manage_config_overrides: {}
 edpm_container_manage_config_patterns: '*.json'
-# Some containers where Puppet is run, can take up to 10 minutes to finish
-# in slow environments.
-edpm_container_manage_create_retries: 120
-# Default delay is 5s so 120 retries makes a timeout of 10 minutes which is
-# what we have observed a necessary value for nova and neutron db-sync execs.
-edpm_container_manage_exec_retries: 120
 edpm_container_manage_healthcheck_disabled: false
 edpm_container_manage_log_path: '/var/log/containers/stdouts'
 edpm_container_manage_systemd_teardown: true

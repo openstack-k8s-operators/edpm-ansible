@@ -14,21 +14,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: create persistent directories
-  file:
+- name: Create persistent directories
+  ansible.builtin.file:
     path: "{{ item.path }}"
     setype: "{{ item.setype }}"
     state: directory
     mode: "{{ item.mode | default(omit) }}"
   with_items:
-    - { 'path': /var/lib/nova, 'setype': container_file_t }
-    - { 'path': /var/lib/_nova_secontext, 'setype': container_file_t}
-    - { 'path': /var/lib/nova/instances, 'setype': container_file_t }
-    - { 'path': /var/lib/libvirt, 'setype': container_file_t }
-    - { 'path': /var/log/containers/nova, 'setype': container_file_t, 'mode': '0750' }
+    - {'path': /var/lib/nova, 'setype': container_file_t}
+    - {'path': /var/lib/_nova_secontext, 'setype': container_file_t}
+    - {'path': /var/lib/nova/instances, 'setype': container_file_t}
+    - {'path': /var/lib/libvirt, 'setype': container_file_t}
+    - {'path': /var/log/containers/nova, 'setype': container_file_t, 'mode': '0750'}
 
 - name: Mount Nova NFS Share
-  mount:
+  ansible.posix.mount:
     name: /var/lib/nova/instances
     state: mounted
     fstype: nfs4
@@ -37,7 +37,7 @@
   when: edpm_nova_compute_nfs_enabled|bool
 
 - name: Set up systemd target for libvirt services
-  copy:
+  ansible.builtin.copy:
     dest: /etc/systemd/system/edpm_nova_libvirt.target
     mode: '0644'
     owner: root
@@ -57,19 +57,20 @@
   register: libvirt_target_result
 
 - name: Reload systemd
-  systemd:
+  ansible.builtin.systemd:
     name: edpm_nova_libvirt.target
     enabled: true
     state: restarted
     daemon_reload: true
   when: libvirt_target_result.changed
 
-- name: install edpm_nova_libvirt_guests systemd unit file (podman)
+- name: Install edpm_nova_libvirt_guests systemd unit file (podman)
   when: edpm_nova_compute_resume_guests_state_on_host_boot|bool
   block:
-    - name: libvirt-guests unit to stop nova_compute container before shutdown VMs
-      copy:
+    - name: Copy libvirt-guests unit to stop nova_compute container before shutdown VMs
+      ansible.builtin.copy:
         dest: /etc/systemd/system/edpm_nova_libvirt_guests.service
+        mode: 0644
         content: |
           [Unit]
           Description=Suspend libvirt Guests in edpm
@@ -94,26 +95,28 @@
           WantedBy=multi-user.target
 
     - name: Making sure virt-guest-shutdown.target is present
-      copy:
+      ansible.builtin.copy:
         dest: /etc/systemd/system/virt-guest-shutdown.target
+        mode: 0644
         content: |
           [Unit]
           Description=Libvirt guests shutdown
           Documentation=https://libvirt.org
 
-    - name: edpm_nova_libvirt_guests enable VM shutdown on compute reboot/shutdown
-      systemd:
+    - name: Enable edpm_nova_libvirt_guests to enable VM shutdown on compute reboot/shutdown
+      ansible.builtin.systemd:
         name: edpm_nova_libvirt_guests
         enabled: true
         daemon_reload: true
 
-- name: ensure ceph configurations exist
-  file:
+- name: Ensure ceph configurations exist
+  ansible.builtin.file:
     path: "{{ edpm_nova_compute_ceph_config_path }}"
     state: directory
+    mode: 0755
 
-- name: enable virt_sandbox_use_netlink for healthcheck
-  seboolean:
+- name: Enable virt_sandbox_use_netlink for healthcheck
+  ansible.posix.seboolean:
     name: virt_sandbox_use_netlink
     persistent: true
     state: true
@@ -121,36 +124,38 @@
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
 
-- name: install Instance HA recovery script
+- name: Install Instance HA recovery script
   when: edpm_nova_compute_enable_instance_ha|bool
   block:
-  - name: prepare Instance HA script directory
-    file:
-      path: /var/lib/nova/instanceha
-      state: directory
+    - name: Prepare Instance HA script directory
+      ansible.builtin.file:
+        path: /var/lib/nova/instanceha
+        state: directory
+        mode: 0755
 
-  - name: install Instance HA script that runs nova-compute
-    copy:
-      content: check-run-nova-compute
-      dest: /var/lib/nova/instanceha/check-run-nova-compute
-      mode: 0755
+    - name: Install Instance HA script that runs nova-compute
+      ansible.builtin.copy:
+        content: check-run-nova-compute
+        dest: /var/lib/nova/instanceha/check-run-nova-compute
+        mode: 0755
 
-  - name: If instance HA is enabled on the node activate the evacuation completed check
-    file:
-      path: /var/lib/nova/instanceha/enabled
-      state: touch
-    when: inventory_hostname in groups["compute_instanceha"] | default([])
+    - name: If instance HA is enabled on the node activate the evacuation completed check
+      ansible.builtin.file:
+        path: /var/lib/nova/instanceha/enabled
+        state: touch
+        mode: 0644
+      when: inventory_hostname in groups["compute_instanceha"] | default([])
 
-  - name: install nova-compute delay wrapper script
-    copy:
-      content: delay-nova-compute
-      dest: /var/lib/nova/delay-nova-compute
-      mode: 0755
-    when: edpm_nova_compute_startup_delay|int > 0
+    - name: Install nova-compute delay wrapper script
+      ansible.builtin.copy:
+        content: delay-nova-compute
+        dest: /var/lib/nova/delay-nova-compute
+        mode: 0755
+      when: edpm_nova_compute_startup_delay|int > 0
 
-  - name: disable irqbalance service on compute
-    when: edpm_nova_compute_disable_irq_balance|bool
-    service:
-      name: irqbalance.service
-      state: stopped
-      enabled: false
+    - name: Disable irqbalance service on compute
+      when: edpm_nova_compute_disable_irq_balance|bool
+      ansible.builtin.service:
+        name: irqbalance.service
+        state: stopped
+        enabled: false

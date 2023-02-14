@@ -15,12 +15,22 @@
 # under the License.
 
 - name: Ensure /usr/libexec/edpm-start-podman-container exists
-  import_role:
+  ansible.builtin.import_role:
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
-- name: Run ovn_controller container
+- name: Run ovn_metadata_agent container
   include_role:
+    name: edpm_container_standalone
+  vars:
+    edpm_container_standalone_service: ovn_metadata_agent
+    edpm_container_standalone_container_defs:
+      ovn_metadata_agent: "{{ lookup('template', 'ovn_metadata_agent.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_kolla_config_files:
+      ovn_metadata_agent: "{{ lookup('template', 'kolla_ovn_metadata_agent.yaml.j2') | from_yaml }}"
+
+- name: Run ovn_controller container
+  ansible.builtin.include_role:
     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: ovn_controller

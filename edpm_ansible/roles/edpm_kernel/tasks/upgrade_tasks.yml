@@ -14,13 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: fix grub entries to have name start with GRUB_
-  replace:
+- name: Fix grub entries to have name start with GRUB_
+  ansible.builtin.replace:
     path: '/etc/default/grub'
     regexp: '^(EDPM_KERNEL_ARGS)(.*)'
     replace: 'GRUB_\1\2'
-- name: fix grub entries in append statement
-  replace:
+- name: Fix grub entries in append statement
+  ansible.builtin.replace:
     path: '/etc/default/grub'
     regexp: '(.*){(EDPM_KERNEL_ARGS)}(.*)'
     replace: '\1{GRUB_\2}\3'

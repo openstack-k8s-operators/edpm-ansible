@@ -15,6 +15,6 @@
 # under the License.
 
 - name: Remove old tmpfiles.d config
-  file:
+  ansible.builtin.file:
     path: /etc/tmpfiles.d/var-run-libvirt.conf
     state: absent

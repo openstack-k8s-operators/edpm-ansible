@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2020 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,7 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-#
-- name: Update config hashes for container startup configs
-  container_puppet_config:
-    update_config_hash_only: true
+
+
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_nftables"
+  tasks:
+    - name: Cleanup nftables
+      import_role:
+        name: edpm_nftables
+        tasks_from: cleanup.yml

@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2021 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,13 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-test_deps_repo: https://trunk.rdoproject.org/centos7/current
-test_deps_yaml_packages:
-  - PyYAML
-test_deps_selinux_packages:
-  - libselinux-python
-test_deps_edpm_packages:
-  - python-edpmclient
-  - python-openstacksdk
-test_deps_edpm_repos: current-edpm-dev
+# Custom Roles and collections not shipped as a part of edpm-ansible
+collections: []
+roles: []

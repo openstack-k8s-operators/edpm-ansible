@@ -19,7 +19,7 @@
 
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -33,11 +33,12 @@
     - always
 
 - name: Create container logs path
-  file:
+  ansible.builtin.file:
     path: "{{ edpm_container_manage_log_path }}"
     state: directory
     owner: root
     group: root
+    mode: 0755
   become: true
 
 - name: Generate containers configs data
@@ -51,7 +52,7 @@
         debug: "{{ edpm_container_manage_debug }}"
       register: container_config_data
     - name: Finalise hashes for all containers
-      set_fact:
+      ansible.builtin.set_fact:
         all_containers_hash: "{{ container_config_data.configs }}"
 
 - name: "Manage containers from {{ edpm_container_manage_config }}"
@@ -61,12 +62,12 @@
   become: true
   block:
     - name: "Update container configs with new config hashes"
-      include_tasks: puppet_config.yml
+      container_config_hash:
       when:
-        - edpm_container_manage_check_puppet_config|bool
+        - edpm_container_manage_update_config_hash|bool
     - name: "Delete orphan containers from {{ edpm_container_manage_config }}"
-      include_tasks: delete_orphan.yml
+      ansible.builtin.include_tasks: delete_orphan.yml
       when:
         - edpm_container_manage_clean_orphans|bool
     - name: "Create containers from {{ edpm_container_manage_config }}"
-      include_tasks: create.yml
+      ansible.builtin.include_tasks: create.yml

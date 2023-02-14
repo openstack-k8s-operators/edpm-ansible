@@ -1,13 +1,14 @@
+---
 - name: Find desired default hugepage size
   when: hp.value.default | default(false) | bool
-  set_fact:
+  ansible.builtin.set_fact:
     _edpm_default_hugepages: "{{ hp.key }}"
   loop: "{{ _edpm_kernel_hugepages | dict2items }}"
   loop_control:
     loop_var: hp
 
 - name: Storing non-configured hugepages
-  set_fact:
+  ansible.builtin.set_fact:
     _nonconfig_hugepages: >-
       {% if (hp.key | int not in _edpm_kernel_hugepages) -%}
       {{ _nonconfig_hugepages |
@@ -22,10 +23,8 @@
   loop_control:
     loop_var: hp
 
-
-
 - name: Validating against hugepages config received from EDPM
-  set_fact:
+  ansible.builtin.set_fact:
     _validated_hugepages: >-
       {% set validated = false -%}
       {% set _tmp_dict = {} -%}
@@ -47,17 +46,17 @@
       {{ _tmp_dict }}
 
 - name: Determining the default hugepagesz
-  set_fact:
+  ansible.builtin.set_fact:
     _desired_default_hugepages: "{{ _edpm_default_hugepages | default(_configured_default_size | default(0)) | int }}"
 
 - name: Determining if any hugepage configuration needs to be re-written
-  set_fact:
+  ansible.builtin.set_fact:
     _hugepages_modification: >-
       {{ (not _validated_hugepages.values() is all) | bool -}}
 
 - name: Making sure that we have a default hugepagesz
   when: _desired_default_hugepages | int == 0
-  fail:
+  ansible.builtin.fail:
     msg: |
       Unable to determine a default hugepagesize.
       Please enable the default flag on at least one pagesize parameter.

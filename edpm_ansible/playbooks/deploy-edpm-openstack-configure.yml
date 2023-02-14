@@ -17,7 +17,7 @@
 
 - hosts: "{{ deploy_target_host | default('overcloud') }}"
   name: Deploy EDPM OpenStack Configure
-  strategy: edpm_free
+  strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   tasks:
@@ -50,3 +50,9 @@
         tasks_from: configure.yml
       tags:
         - edpm_nova_compute
+    - name: Configure nftables
+      import_role:
+        name: edpm_nftables
+        tasks_from: configure.yml
+      tags:
+        - edpm_firewall

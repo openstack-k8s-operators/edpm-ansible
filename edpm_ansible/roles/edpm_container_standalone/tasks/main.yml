@@ -19,7 +19,7 @@
 
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -33,32 +33,34 @@
     - always
 
 - name: Ensure {{ edpm_container_standalone_kolla_config_dir }} exists
-  file:
+  ansible.builtin.file:
     path: "{{ edpm_container_standalone_kolla_config_dir }}"
     state: directory
     recurse: true
     setype: container_file_t
 
 - name: Create kolla config files
-  copy:
+  ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
     mode: 0600
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
 - name: Create {{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}
-  file:
+  ansible.builtin.file:
     path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
+    mode: 0755
 
 - name: Render {{ edpm_container_standalone_service }} container definitions
-  copy:
+  ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
+    mode: 0644
   loop: "{{ edpm_container_standalone_container_defs | dict2items }}"
 
 - name: Run {{ edpm_container_standalone_service }}  containers
-  include_role:
+  ansible.builtin.include_role:
     name: edpm_container_manage
   vars:
     edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"

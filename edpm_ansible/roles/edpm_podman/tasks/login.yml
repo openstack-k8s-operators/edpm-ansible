@@ -17,7 +17,7 @@
 
 - name: Perform container registry login(s) with podman
   become: true
-  shell: |-
+  ansible.builtin.shell: |-
     podman login --username=$REGISTRY_USERNAME \
                  --password=$REGISTRY_PASSWORD \
                  $REGISTRY

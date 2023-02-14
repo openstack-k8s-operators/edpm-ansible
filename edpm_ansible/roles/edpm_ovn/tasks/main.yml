@@ -14,16 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 - name: Include host prep tasks
-  import_tasks: install.yml
+  ansible.builtin.import_tasks: install.yml
 
 - name: Include bootstrap tasks
-  import_tasks: bootstrap.yml
+  ansible.builtin.import_tasks: bootstrap.yml
 
 - name: Configure OVS
-  import_tasks: configure.yml
+  ansible.builtin.import_tasks: configure.yml
 
 - name: Ensure ovn_controller is running
-  import_tasks: run.yml
+  ansible.builtin.import_tasks: run.yml
 
 - name: Cleanup unwanted OVS keys
-  import_tasks: cleanup.yml
+  ansible.builtin.import_tasks: cleanup.yml

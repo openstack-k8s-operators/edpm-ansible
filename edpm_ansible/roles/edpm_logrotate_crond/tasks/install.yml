@@ -15,15 +15,15 @@
 # under the License.
 
 
-- name: install cronie
+- name: Install cronie
   become: true
-  package:
+  ansible.builtin.package:
     name: "{{ edpm_logrotate_crond_cronie_package }}"
     state: present
 
-- name: allow logrotate to read inside containers
+- name: Allow logrotate to read inside containers
   become: true
-  seboolean:
+  ansible.posix.seboolean:
     name: logrotate_read_inside_containers
     persistent: true
     state: true

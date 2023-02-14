@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Gather variables for each operating system for installing buildah
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -26,15 +26,15 @@
         - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
         - "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: ensure buildah is installed
+- name: Ensure buildah is installed
   become: true
-  package:
+  ansible.builtin.package:
     name: "{{ edpm_buildah_packages }}"
     state: present
 
 - name: Perform container registry login(s) with buildah
   become: true
-  shell: |-
+  ansible.builtin.shell: |-
     buildah login --username=$REGISTRY_USERNAME \
                   --password=$REGISTRY_PASSWORD \
                   $REGISTRY

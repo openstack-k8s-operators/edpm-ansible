@@ -16,7 +16,7 @@
 
 
 - name: Check rsyslog service state
-  systemd:
+  ansible.builtin.systemd:
     name: rsyslog
   become: true
   failed_when: false
@@ -29,16 +29,17 @@
       ((rsyslog_service_state.status['SubState'] | lower) == 'running')
   block:
     - name: Forward logging to podman.log file
-      blockinfile:
+      ansible.builtin.blockinfile:
         block: |-
           if $programname == 'podman' then -/var/log/podman.log
           & stop
         create: true
         path: /etc/rsyslog.d/podman.conf
+        mode: 0644
       register: logconfig
 
     - name: Restart rsyslog service after logging conf change
-      service:
+      ansible.builtin.service:
         name: rsyslog
         state: restarted
       when: logconfig is changed

@@ -21,12 +21,12 @@
   become: true
   block:
     - name: Set nic_config_file fact
-      set_fact:
+      ansible.builtin.set_fact:
         nic_config_file: "/etc/os-net-config/config.yaml"
     - name: Render overidden network config
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
-      copy:
-        content: "{{edpm_network_config_override | to_yaml}}"
+      ansible.builtin.copy:
+        content: "{{ edpm_network_config_override | to_yaml }}"
         dest: "{{ nic_config_file }}"
         mode: 0644
         backup: true
@@ -34,7 +34,7 @@
         - edpm_network_config_override.keys()|length > 0
     - name: Render network_config from template
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
-      template:
+      ansible.builtin.template:
         src: "{{ edpm_network_config_template }}"
         dest: "{{ nic_config_file }}"
         mode: 0644
@@ -44,11 +44,11 @@
     - name: Run edpm_os_net_config_module with network_config
       edpm_os_net_config:
         config_file: "{{ nic_config_file }}"
-        debug: "{{ edpm_network_config_debug|bool }}"
+        debug: "{{ edpm_network_config_debug | bool }}"
         detailed_exit_codes: true
         safe_defaults: "{{ edpm_network_config_safe_defaults | bool }}"
         use_nmstate: "{{ edpm_network_config_nmstate | bool }}"
       async: "{{ edpm_network_config_async_timeout }}"
       poll: "{{ edpm_network_config_async_poll }}"
-      register: NetworkConfig_result
+      register: network_config_result
       when: not ansible_check_mode

@@ -15,4 +15,4 @@
 # under the License.
 
 - name: Inlcude update tasks to upgrade Nova Libvirt
-  include_tasks: update.yaml
+  ansible.builtin.include_tasks: update.yml

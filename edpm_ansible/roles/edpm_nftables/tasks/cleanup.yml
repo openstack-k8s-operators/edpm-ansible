@@ -1,0 +1,34 @@
+---
+- name: Execute nftables cleaning tasks as root
+  become: true
+  block:
+    - name: Empty ruleset
+      ansible.builtin.command: nft flush ruleset
+
+    - name: Remove generated files
+      ansible.builtin.file:
+        path: "/etc/nftables/{{ item }}"
+        state: absent
+      loop:
+        - iptables.nft
+        - edpm-chains.nft
+        - edpm-flushes.nft
+        - edpm-jumps.nft
+        - edpm-rules.nft
+        - edpm-update-jumps.nft
+
+    - name: Clean sysconfig content
+      ansible.builtin.blockinfile:
+        path: /etc/sysconfig/nftables.conf
+        state: absent
+        backup: false
+        block: |
+          include "/etc/nftables/iptables.nft"
+          include "/etc/nftables/edpm-chains.nft"
+          include "/etc/nftables/edpm-rules.nft"
+          include "/etc/nftables/edpm-jumps.nft"
+
+    - name: Remove snippets directory
+      ansible.builtin.file:
+        path: "{{ edpm_nftables_src }}"
+        state: absent

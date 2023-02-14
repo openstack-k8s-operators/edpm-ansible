@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Gather facts if they don't exist
-  setup:
+  ansible.builtin.setup:
     gather_subset: min
   when: "'distribution' not in ansible_facts"
   tags:
@@ -24,7 +24,7 @@
 # "{{ role_name }}" will search for and load any operating system variable file
 # found within the "vars/" path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - skip: true
       files:
@@ -38,7 +38,7 @@
     - always
 
 - name: Detect mirrors file
-  stat:
+  ansible.builtin.stat:
     path: "{{ test_deps_mirrors_file_path }}"
   register: mirrors_file
 
@@ -49,14 +49,14 @@
     - mirrors_file.stat.exists | bool
   block:
     - name: Disable ubi host subscription-manager integration
-      file:
+      ansible.builtin.file:
         path: /etc/rhsm-host
         state: absent
 
     - name: Disable ubi 9 repos
       when: ansible_facts['distribution_major_version'] is version(9, '>=')
       become: true
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: "{{ item }}"
         state: absent
         keepcache: false
@@ -65,59 +65,60 @@
         - ubi-9-baseos
         - ubi-9-codeready-builder
 
-- name: edpm-repos Block
+- name: Block for tripleo-repos
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
   block:
     - name: Fetch latest repo version
-      uri:
+      ansible.builtin.uri:
         url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current/delorean.repo
         return_content: true
       register: edpm_packages
 
     - name: Create default repo file
-      copy:
+      ansible.builtin.copy:
         content: "{{ edpm_packages.content }}"
         dest: /etc/yum.repos.d/delorean.repo
+        mode: 0644
 
-- name: Install edpm-repos package
+- name: Install tripleo-repos package
   become: true
-  package:
-    name: "python*edpm-repos"
+  ansible.builtin.package:
+    name: "python*tripleo-repos"
     state: present
 
-- name: edpm setup block
+- name: Tripleo setup block
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
     - test_deps_setup_edpm | bool
   block:
-    - name: Create edpm repos
-      command: edpm-repos -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
-          -b master current-edpm {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
+    - name: Create tripleo repos
+      ansible.builtin.command: tripleo-repos -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
+          -b master current-tripleo {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
 
-    - name: look for redhat-release rpm
-      shell: |
+    - name: Look for redhat-release rpm
+      ansible.builtin.shell: |
         rpm -qe redhat-release
       register: rpm_found
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Workaround of redhat-release binary on ubi9
       when: rpm_found.rc == 0
       block:
         - name: Remove redhat-release
-          shell: |
+          ansible.builtin.shell: |
             rpm -e --nodeps redhat-release
 
         - name: Install centos-stream-release
-          package:
+          ansible.builtin.package:
             name: "centos-stream-release"
             state: latest
             releasever: "{{ ansible_facts['distribution_major_version'] }}"
 
     - name: Install edpm packages
-      package:
+      ansible.builtin.package:
         name: "{{ test_deps_edpm_packages }}"
         state: present
         releasever: "{{ ansible_facts['distribution_major_version'] }}"
@@ -126,7 +127,7 @@
   become: true
   block:
     - name: Install selinux python libs
-      package:
+      ansible.builtin.package:
         name: "{{ test_deps_selinux_packages }}"
         state: present
         releasever: "{{ ansible_facts['distribution_major_version'] }}"
@@ -134,7 +135,7 @@
         - (ansible_facts['os_family'] | lower) == 'redhat'
 
     - name: Install python yaml libs
-      package:
+      ansible.builtin.package:
         name: "{{ test_deps_yaml_packages }}"
         state: present
         releasever: "{{ ansible_facts['distribution_major_version'] }}"
@@ -142,7 +143,7 @@
         - (ansible_facts['os_family'] | lower) == 'redhat'
 
     - name: Install extra packages
-      package:
+      ansible.builtin.package:
         name: "{{ test_deps_extra_packages }}"
         state: present
         releasever: "{{ ansible_facts['distribution_major_version'] }}"

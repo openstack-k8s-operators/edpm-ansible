@@ -19,7 +19,5 @@ test_deps_yaml_packages:
 test_deps_selinux_packages:
   - python3-libselinux
 test_deps_edpm_packages:
-  - python3-edpmclient
   - python3-openstacksdk
   - openssh
-test_deps_edpm_repos: current-edpm

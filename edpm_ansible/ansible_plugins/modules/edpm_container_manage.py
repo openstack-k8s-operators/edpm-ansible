@@ -43,7 +43,7 @@ version_added: '2.9'
 short_description: Create containers from a set of json configurations
 notes: []
 description:
-  - Generate puppet containers configs
+  - Create containers from a set of json configurations
 requirements:
   - None
 options:

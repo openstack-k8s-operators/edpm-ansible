@@ -15,13 +15,13 @@
 # under the License.
 
 - name: Import sshd load_vars tasks
-  import_tasks: load_vars.yml
+  ansible.builtin.import_tasks: load_vars.yml
 
 - name: Run sshd tasks as root
   become: true
   block:
     - name: PasswordAuthentication notice
-      debug:
+      ansible.builtin.debug:
         msg: >-
           Notice - The option `edpm_sshd_password_authentication` is set to
           "{{ edpm_sshd_password_authentication }}" but `PermitRootLogin` is
@@ -33,7 +33,7 @@
         - not ('PermitRootLogin' in edpm_sshd_server_options)
 
     - name: PasswordAuthentication duplication notice
-      debug:
+      ansible.builtin.debug:
         msg: >-
           WARNING - The PasswordAuthentication has been configured in
           `edpm_sshd_server_options` but the values are different.
@@ -43,7 +43,7 @@
         - edpm_sshd_password_authentication != edpm_sshd_server_options['PasswordAuthentication']
 
     - name: Motd duplication notice
-      debug:
+      ansible.builtin.debug:
         msg: >-
           WARNING - The Banner or PrintMotd has been configured in
           `edpm_sshd_server_options`. These options may be ignored and
@@ -53,21 +53,23 @@
         - ('Banner' in edpm_sshd_server_options or 'PrintMotd' in edpm_sshd_server_options)
 
     - name: Configure the banner text
-      copy:
+      ansible.builtin.copy:
         content: "{{ edpm_sshd_banner_text }}"
         dest: /etc/issue
+        mode: 0644
       when:
         - edpm_sshd_banner_enabled | bool
 
     - name: Configure the motd banner
-      copy:
+      ansible.builtin.copy:
         content: "{{ edpm_sshd_message_of_the_day }}"
         dest: /etc/motd
+        mode: 0644
       when:
         - edpm_sshd_motd_enabled | bool
 
     - name: Update sshd configuration options from vars
-      set_fact:
+      ansible.builtin.set_fact:
         edpm_sshd_server_options: |-
          {% set _ = edpm_sshd_server_options.__setitem__('PasswordAuthentication', edpm_sshd_password_authentication) %}
          {% if edpm_sshd_banner_enabled %}
@@ -79,12 +81,30 @@
          {{ edpm_sshd_server_options }}
 
     - name: Adjust ssh server configuration
-      template:
+      ansible.builtin.template:
         dest: /etc/ssh/sshd_config
         src: sshd_config_block.j2
+        mode: 0600
         validate: '/usr/sbin/sshd -T -f %s'
       register: _sshd_config_result
 
     - name: Set sshd config changed fact
-      set_fact:
+      ansible.builtin.set_fact:
         _sshd_config_result_changed: _sshd_config_result.changed
+
+    - name: Configure firewall for the service
+      when:
+        - edpm_sshd_configure_firewall|bool
+      block:
+        - name: Ensure directory is present
+          ansible.builtin.file:
+            path: '/var/lib/edpm-config/firewall'
+            state: directory
+            owner: root
+            group: root
+            mode: 0750
+
+        - name: Inject firewall configuration for sshd opening
+          ansible.builtin.template:
+            dest: '/var/lib/edpm-config/firewall/sshd-networks.yaml'
+            src: 'firewall.yaml.j2'
