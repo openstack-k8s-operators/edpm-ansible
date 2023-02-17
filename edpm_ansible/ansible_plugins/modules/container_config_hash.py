@@ -234,20 +234,14 @@ class ContainerConfigHashManager:
             startup_config_json = json.loads(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
             if config_volumes:
-                if 'environment' in startup_config_json:
-                    old_config_hash = startup_config_json['environment'].get(
-                        'EDPM_CONFIG_HASH', '')
-                    exclude_from_hash = startup_config_json['environment'].get(
-                        'EDPM_EXCLUDE_FROM_HASH', '').split(':')
+                old_config_hash = startup_config_json['edpm_config_hash'] or ''
+                exclude_from_hash = startup_config_json['edpm_exclude_from_hash'] or []
                 new_hashes = [
                     self._set_config_hash(vol_path, exclude_from_hash) for vol_path in config_volumes
                 ]
                 new_hash = '-'.join(new_hashes)
                 if new_hash != old_config_hash:
-                    if 'environment' not in startup_config_json:
-                        startup_config_json['environment'] = {}
-                    startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
-                        new_hash)
+                    startup_config_json['edpm_config_hash'] = (new_hash)
                     self._update_container_config(
                         config, startup_config_json)
                 else:
