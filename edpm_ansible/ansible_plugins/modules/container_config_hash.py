@@ -169,8 +169,7 @@ class ContainerConfigHashManager:
             if os.path.isfile(file) and file_relpath not in exclusions:
                 total_hash.update(self._read_file(file))
 
-        h = total_hash.hexdigest()
-        return h
+        return total_hash.hexdigest()
 
     def _set_config_hash(self, config_volume, exclusions=[]):
         """Create a config hash for a config_volume.
@@ -178,8 +177,7 @@ class ContainerConfigHashManager:
         :param exclusions: list
         :returns: string
         """
-        hash = self._create_checksum(config_volume, exclusions)
-        return hash
+        return self._create_checksum(config_volume, exclusions)
 
     def _get_config_base(self, prefix, volume):
         """Returns a config base path for a specific volume.
