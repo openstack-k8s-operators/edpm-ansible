@@ -19,11 +19,11 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 
 import fnmatch
+import glob
+import hashlib
 import json
 import os
 import yaml
-import glob
-import hashlib
 
 
 ANSIBLE_METADATA = {
