@@ -21,7 +21,7 @@ edpm_container_manage_debug: "{{ ((ansible_verbosity | int) >= 2) | bool }}"
 edpm_container_manage_clean_orphans: true
 
 # All variables within this role should have a prefix of "edpm_container_manage"
-edpm_container_manage_update_config_hash: false
+edpm_container_manage_update_config_hash: true
 edpm_container_manage_cli: podman
 edpm_container_manage_concurrency: 1
 edpm_container_manage_config: "/var/lib/edpm-config/"

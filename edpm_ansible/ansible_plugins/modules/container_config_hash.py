@@ -19,6 +19,8 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 
 import fnmatch
+import glob
+import hashlib
 import json
 import os
 import yaml
@@ -35,6 +37,7 @@ DOCUMENTATION = """
 module: container_config_hash
 author:
   - "Emilien Macchi (@EmilienM)"
+  - "Roberto Alfieri (@rebtoor)"
 version_added: '2.9'
 short_description: Generate config hashes for container startup configs
 notes: []
@@ -53,16 +56,6 @@ options:
       - Config volume prefix
     type: str
     default: '/var/lib/config-data'
-  debug:
-    description:
-      - Enable debug
-    type: bool
-    default: False
-  step:
-    description:
-      - Step number
-    default: 6
-    type: int
 """
 
 EXAMPLES = """
@@ -71,6 +64,7 @@ EXAMPLES = """
 """
 
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
+BUF_SIZE = 65536
 
 
 class ContainerConfigHashManager:
@@ -145,15 +139,37 @@ class ContainerConfigHashManager:
         os.chmod(path, 0o600)
         self.results['changed'] = True
 
-    def _get_config_hash(self, config_volume):
-        """Returns a config hash from a config_volume.
+    def _read_file(self, file):
+        """Read a given file and return its content
+        :param file: string
+        :returns: bytes
+        """
+
+        r = b''
+        with open(file, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                r += data
+                if not data:
+                    break
+        return r
+
+    def _calculate_checksum(self, config_volume, exclusions=[]):
+        """Calculate an md5 hash from a list of files from the given folder
+           and if needed exclude files from that list.
 
         :param config_volume: string
+        :param exclusions: list
         :returns: string
         """
-        hashfile = "%s.md5sum" % config_volume
-        if os.path.exists(hashfile):
-            return self._slurp(hashfile).strip('\n')
+
+        total_hash = hashlib.new('md5')
+        for file in glob.glob(config_volume + '/**/*', recursive=True):
+            file_relpath = '/' + os.path.relpath(file, config_volume)
+            if os.path.isfile(file) and file_relpath not in exclusions:
+                total_hash.update(self._read_file(file))
+
+        return total_hash.hexdigest()
 
     def _get_config_base(self, prefix, volume):
         """Returns a config base path for a specific volume.
@@ -209,29 +225,23 @@ class ContainerConfigHashManager:
                 continue
             startup_config_json = json.loads(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
-            config_hashes = [
-                self._get_config_hash(vol_path) for vol_path in config_volumes
-            ]
-            config_hashes = filter(None, config_hashes)
-            if 'environment' in startup_config_json:
+            if config_volumes:
                 old_config_hash = startup_config_json['environment'].get(
                     'EDPM_CONFIG_HASH', '')
-            if config_hashes is not None and config_hashes:
-                config_hash = '-'.join(config_hashes)
-                if config_hash == old_config_hash:
+                exclude_from_hash = startup_config_json.get(
+                    'edpm_exclude_files_from_hash', [])
+                new_hashes = [
+                    self._calculate_checksum(vol_path, exclude_from_hash) for vol_path in config_volumes
+                ]
+                new_hash = '-'.join(new_hashes)
+                if new_hash != old_config_hash:
+                    startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
+                        new_hash)
+                    self._update_container_config(
+                        config, startup_config_json)
+                else:
                     # config doesn't need an update
                     continue
-                self.module.debug(
-                    'Config change detected for {}, new hash: {}'.format(
-                        cname,
-                        config_hash
-                    )
-                )
-                if 'environment' not in startup_config_json:
-                    startup_config_json['environment'] = {}
-                startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
-                    config_hash)
-                self._update_container_config(config, startup_config_json)
 
 
 def main():
