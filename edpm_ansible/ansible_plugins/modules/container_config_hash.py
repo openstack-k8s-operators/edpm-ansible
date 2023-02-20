@@ -155,7 +155,8 @@ class ContainerConfigHashManager:
         return r
 
     def _calculate_checksum(self, config_volume, exclusions=[]):
-        """Calculate an hash from a list of the given folder
+        """Calculate an md5 hash from a list of files from the given folder
+           and if needed exclude files from that list.
 
         :param config_volume: string
         :param exclusions: list
