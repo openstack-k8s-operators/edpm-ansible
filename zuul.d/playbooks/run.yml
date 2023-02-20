@@ -1,0 +1,34 @@
+---
+
+- hosts: all
+  environment:
+    ANSIBLE_LOG_PATH: "{{ ansible_user_dir }}/zuul-output/logs/ansible-execution.log"
+  pre_tasks:
+
+    - name: Set project path fact
+      ansible.builtin.set_fact:
+        edpm_ansible_project_path: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}"
+
+    - name: Set role or plugin path fact
+      ansible.builtin.set_fact:
+        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/edpm_ansible/roles/{{ edpm_role_name }}"
+      when: edpm_role_name is defined and edpm_role_name
+
+    - name: Set role or plugin path fact
+      ansible.builtin.set_fact:
+        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/edpm_ansible/ansible_plugins/tests"
+      when: edpm_role_name is not defined
+
+  tasks:
+    - name: Run role test job
+      ansible.builtin.shell: |-
+        . {{ ansible_user_dir }}/test-python/bin/activate
+        . {{ edpm_ansible_project_path }}/ansible-test-env.rc
+        pytest --color=no \
+              --html={{ ansible_user_dir }}/zuul-output/logs/reports.html \
+              --self-contained-html \
+              --ansible-args='{{ edpm_job_ansible_args | default('') }}' \
+              {{ edpm_ansible_project_path }}/tests/test_molecule.py
+      args:
+        chdir: "{{ edpm_ansible_testdir }}"
+        executable: /bin/bash
