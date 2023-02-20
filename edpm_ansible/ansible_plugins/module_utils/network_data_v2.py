@@ -30,7 +30,7 @@ def validate_playbook_dir(playbook_dir_path):
 
 
 def tags_to_dict(resource_tags):
-    tag_dict = dict()
+    tag_dict = {}
     for tag in resource_tags:
         if not tag.startswith('edpm_'):
             continue
