@@ -19,10 +19,8 @@ from concurrent import futures
 import os
 import yaml
 
-try:
-    from ansible.module_utils import network_data_v2
-except ImportError:
-    from edpm_ansible.ansible_plugins.module_utils import network_data_v2
+
+from edpm_ansible.ansible_plugins.module_utils import network_data_v2
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.openstack.cloud.plugins.module_utils.openstack import openstack_full_argument_spec
 from ansible_collections.openstack.cloud.plugins.module_utils.openstack import openstack_module_kwargs
@@ -173,7 +171,7 @@ def validate_ovn_bridge_mac_addr_var_file(ovn_bridge_mac_addr_var_file):
 def write_vars_file(conn, playbook_dir, net_id, tags, static_mappings):
 
     playbook_dir_path = os.path.abspath(playbook_dir)
-    network_data_v2.validate_playbook_dir(playbook_dir)
+    network_data_v2.validate_playbook_dir(playbook_dir_path)
 
     ovn_bridge_mac_addr_var_file = os.path.join(
         playbook_dir_path, 'ovn_bridge_mac_address_vars.yaml')
