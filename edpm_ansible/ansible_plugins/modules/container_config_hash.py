@@ -154,9 +154,8 @@ class ContainerConfigHashManager:
                     break
         return r
 
-    def _create_checksum(self, config_volume, exclusions=[]):
-        """Create an hash from a tar-ed version of the given
-        folder
+    def _calculate_checksum(self, config_volume, exclusions=[]):
+        """Calculate an hash from a list of the given folder
 
         :param config_volume: string
         :param exclusions: list
@@ -170,14 +169,6 @@ class ContainerConfigHashManager:
                 total_hash.update(self._read_file(file))
 
         return total_hash.hexdigest()
-
-    def _set_config_hash(self, config_volume, exclusions=[]):
-        """Create a config hash for a config_volume.
-        :param config_volume: string
-        :param exclusions: list
-        :returns: string
-        """
-        return self._create_checksum(config_volume, exclusions)
 
     def _get_config_base(self, prefix, volume):
         """Returns a config base path for a specific volume.
@@ -234,10 +225,12 @@ class ContainerConfigHashManager:
             startup_config_json = json.loads(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
             if config_volumes:
-                old_config_hash = startup_config_json.get('edpm_config_hash', '')
-                exclude_from_hash = startup_config_json.get('edpm_exclude_from_hash', [])
+                old_config_hash = startup_config_json.get(
+                    'edpm_config_hash', '')
+                exclude_from_hash = startup_config_json.get(
+                    'edpm_exclude_from_hash', [])
                 new_hashes = [
-                    self._set_config_hash(vol_path, exclude_from_hash) for vol_path in config_volumes
+                    self._calculate_checksum(vol_path, exclude_from_hash) for vol_path in config_volumes
                 ]
                 new_hash = '-'.join(new_hashes)
                 if new_hash != old_config_hash:
