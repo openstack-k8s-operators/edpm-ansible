@@ -17,6 +17,7 @@
 
 import os
 
+
 def validate_playbook_dir(playbook_dir_path):
     if not os.path.exists(playbook_dir_path):
         raise Exception('ERROR: Playbook directory {} does not exist.'.format(
