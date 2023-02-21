@@ -32,7 +32,7 @@ ansible-errors.json
 pytestdebug.log
 
 # doc
-doc/build/*
+docs/build/*
 
 # JetBrain
 .idea/
