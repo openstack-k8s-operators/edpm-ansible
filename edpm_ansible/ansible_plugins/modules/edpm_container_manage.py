@@ -88,7 +88,7 @@ options:
 
 EXAMPLES = """
 - name: Run containers
-  edpm_container_manage
+  edpm_container_manage:
     config_id: edpm_step1
     config_dir: /var/lib/edpm-config/container-startup-config/step_1
 """
