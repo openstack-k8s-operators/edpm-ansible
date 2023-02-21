@@ -53,6 +53,12 @@
 - name: Import packages tasks
   ansible.builtin.import_tasks: packages.yml
 
+- name: Set selinux state
+  become: true
+  selinux:
+    policy: targeted
+    state: "{{ edpm_bootstrap_selinux_mode }}"
+
 - name: Enable openvswitch service if installed
   become: true
   ansible.builtin.service:
