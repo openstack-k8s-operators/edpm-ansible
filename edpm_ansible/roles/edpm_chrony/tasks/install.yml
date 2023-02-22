@@ -18,12 +18,21 @@
 - name: Load distro-specific variables
   ansible.builtin.include_tasks: vars.yml
 
-- name: Install chrony configuration file
-  ansible.builtin.template:
-    src: chrony.conf.j2
-    dest: "{{ chrony_config_file_location }}"
-    owner: root
-    group: root
-    mode: 0644
-  register: chrony_config
-  notify: Restart chronyd
+- name: Populate services_facts
+  ansible.builtin.service_facts:
+
+- name: Disable NTP before configuring Chrony
+  ansible.builtin.service:
+    name: ansible_facts.services['ntpd.service']['name']
+    state: stopped
+    enabled: false
+  when:
+    - not ansible_check_mode
+    - ansible_facts.services['ntpd.service'] is defined
+    - ansible_facts.services['ntpd.service']['state'] == 'running' or ansible_facts.services['ntpd.service']['status'] == 'enabled'
+
+- name: Install chronyd package
+  ansible.builtin.package:
+    name: "{{ epdm_chrony_package_name }}"
+    state: present
+  when: epdm_chrony_manage_package|bool

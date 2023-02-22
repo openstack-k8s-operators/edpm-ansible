@@ -1,0 +1,21 @@
+---
+epdm_chrony_debug: false
+epdm_chrony_role_action: all
+epdm_chrony_global_server_settings: iburst minpoll 6 maxpoll 10
+epdm_chrony_global_pool_settings: iburst minpoll 6 maxpoll 10
+epdm_chrony_ntp_servers:
+  - '0.pool.ntp.org'
+  - '1.pool.ntp.org'
+  - '2.pool.ntp.org'
+  - '3.pool.ntp.org'
+epdm_chrony_ntp_pools: []
+epdm_chrony_ntp_peers: []
+epdm_chrony_bind_addresses:
+  - 127.0.0.1
+  - ::1
+epdm_chrony_acl_rules: ['deny all']
+epdm_chrony_service_name: chronyd
+epdm_chrony_manage_service: true
+epdm_chrony_manage_package: true
+epdm_chrony_service_state: started
+epdm_chrony_extra_options: []

@@ -28,24 +28,24 @@
         tasks_from: run.yml
       tags:
         - edpm_sshd
-    - name: Run chrony
+    - name: Run edpm_chrony
       import_role:
-        name: chrony
+        name: edpm_chrony
         tasks_from: run.yml
       tags:
-        - chrony
-    - name: Run chrony (online)
+        - edpm_chrony
+    - name: Run edpm_chrony (online)
       import_role:
-        name: chrony
+        name: edpm_chrony
         tasks_from: online.yml
       tags:
-        - chrony
-    - name: Run chrony (sync)
+        - edpm_chrony
+    - name: Run edpm_chrony (sync)
       import_role:
-        name: chrony
+        name: edpm_chrony
         tasks_from: sync.yml
       tags:
-        - chrony
+        - edpm_chrony
     - name: Run edpm_timezone
       import_role:
         name: edpm_timezone

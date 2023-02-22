@@ -1,7 +1,7 @@
 galaxy_info:
-  role_name: chrony
+  role_name: edpm_chrony
   author: EDPM team
-  description: chrony role
+  description: EDPM OpenStack Role -- edpm_chrony
   company: Red Hat
   license: Apache 2.0
   min_ansible_version: '2.9'
