@@ -24,7 +24,6 @@
   ansible.builtin.package:
     name: "{{ edpm_tuned_system_packages }}"
     state: present
-  register: _edpm_tuned_install_result
   when:
     - rpm_query_result.rc > 0
 
@@ -34,5 +33,3 @@
     name: tuned
     state: restarted
     enabled: true
-  when:
-    - _edpm_tuned_install_result.changed
