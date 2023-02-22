@@ -20,20 +20,20 @@
 
 - name: Ensure chronyd is running
   ansible.builtin.service:
-    enabled: "{{ (chrony_service_state | default('started') in ['running', 'started']) | bool }}"
-    name: "{{ chrony_service_name }}"
-    state: "{{ chrony_service_state | default('started') }}"
-  when: chrony_manage_service | bool
+    enabled: "{{ (epdm_chrony_service_state | default('started') in ['running', 'started']) | bool }}"
+    name: "{{ epdm_chrony_service_name }}"
+    state: "{{ epdm_chrony_service_state | default('started') }}"
+  when: epdm_chrony_manage_service | bool
 
 # ansible sometimes ignores handlers when invoked elsewhere. Since we will
 # likely want to restart chrony after a configuration update, let's do it here
 # always. The handler will still trigger for upgrades/updates later as well.
-# This won't have any effect if chrony_manage_service is set to false.
+# This won't have any effect if epdm_chrony_manage_service is set to false.
 # See also https://github.com/ansible/ansible/issues/37512
 - name: Force chronyd restart
   ansible.builtin.service:
-    name: "{{ chrony_service_name }}"
+    name: "{{ epdm_chrony_service_name }}"
     state: restarted
   when:
-    - chrony_manage_service|bool
-    - chrony_config.changed|default(false)
+    - epdm_chrony_manage_service|bool
+    - epdm_chrony_config.changed|default(false)

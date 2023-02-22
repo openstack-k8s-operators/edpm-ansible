@@ -46,12 +46,12 @@
         tasks_from: configure.yml
       tags:
         - edpm_sshd
-    - name: Configure chrony
+    - name: Configure edpm_chrony
       import_role:
-        name: chrony
+        name: edpm_chrony
         tasks_from: config.yml
       tags:
-        - chrony
+        - edpm_chrony
     - name: Configure edpm_timezone
       import_role:
         name: edpm_timezone

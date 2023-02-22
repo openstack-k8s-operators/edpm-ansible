@@ -44,12 +44,12 @@
         tasks_from: install.yml
       tags:
         - edpm_sshd
-    - name: Install chrony
+    - name: Install edpm_chrony
       import_role:
-        name: chrony
+        name: edpm_chrony
         tasks_from: install.yml
       tags:
-        - chrony
+        - edpm_chrony
     - name: Install edpm_ovn
       import_role:
         name: edpm_ovn

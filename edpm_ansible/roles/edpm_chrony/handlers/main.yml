@@ -1,0 +1,6 @@
+---
+- name: Restart chronyd
+  ansible.builtin.service:
+    name: "{{ epdm_chrony_service_name }}"
+    state: restarted
+  when: epdm_chrony_manage_service|bool
