@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -32,21 +32,10 @@
     - always
 
 - name: Install packages
-  ansible.builtin.include_tasks: tuned_install.yml
-  when:
-    - (edpm_tuned_system_packages | length) > 0
-
-- name: Check for tuned-adm
-  ansible.builtin.command: >-
-    which tuned-adm
-  environment:
-    PATH: "/bin:/usr/bin:/sbin:/usr/sbin"
-  changed_when: false
-  failed_when: false
-  register: edpm_tuned_check
+  ansible.builtin.include_tasks: install.yml
 
 - name: Configure tuned
-  include_tasks: tuned_config.yml
-  when:
-    - not ansible_check_mode
-    - edpm_tuned_check.rc == 0
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Start tuned
+  ansible.builtin.include_tasks: run.yml
