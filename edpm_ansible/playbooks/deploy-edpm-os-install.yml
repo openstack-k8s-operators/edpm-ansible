@@ -32,6 +32,12 @@
         name: edpm_kernel
       tags:
         - edpm_kernel
+    - name: Install edpm_tuned
+      import_role:
+        name: edpm_tuned
+        tasks_from: tuned_install.yml
+      tags:
+        - edpm_tuned
     - name: Install edpm_podman
       import_role:
         name: edpm_podman
