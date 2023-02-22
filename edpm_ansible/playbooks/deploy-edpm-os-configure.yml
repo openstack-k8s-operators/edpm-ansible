@@ -28,6 +28,12 @@
         tasks_from: configure.yml
       tags:
         - edpm_podman
+    - name: Configure edpm_tuned
+      import_role:
+        name: edpm_tuned
+        tasks_from: tuned_config.yml
+      tags:
+        - edpm_tuned
     - name: Manage edpm container services
       import_role:
         name: edpm_container_manage
