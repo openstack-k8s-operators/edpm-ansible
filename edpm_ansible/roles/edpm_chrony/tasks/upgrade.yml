@@ -3,5 +3,5 @@
   ansible.builtin.package:
     name: chronyd
     statue: latest
-  when: chrony_manage_package|bool
+  when: epdm_chrony_manage_package|bool
   notify: Restart chronyd
