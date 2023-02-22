@@ -14,6 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Load required vars
+  ansible.builtin.include_tasks: vars.yml
+
 - name: Ensure profile directory exists
   ansible.builtin.file:
     path: "/etc/tuned/{{ edpm_tuned_profile }}"
