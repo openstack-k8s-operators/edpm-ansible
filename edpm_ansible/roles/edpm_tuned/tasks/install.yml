@@ -14,9 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Check tuned package is installed
+  ansible.builtin.command: "rpm -q --whatprovides {{ edpm_tuned_system_packages }}"
+  register: rpm_query_result
+  failed_when: false
 
-- name: Prepare
-  hosts: all
-  roles:
-    - role: test_deps
-    - role: env_data
+- name: Install tuned
+  become: true
+  ansible.builtin.package:
+    name: "{{ edpm_tuned_system_packages }}"
+    state: present
+  when:
+    - rpm_query_result.rc > 0
