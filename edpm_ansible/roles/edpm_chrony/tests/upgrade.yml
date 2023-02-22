@@ -3,6 +3,6 @@
   gather_facts: true
   become: true
   vars:
-    chrony_role_action: all
+    epdm_chrony_role_action: upgrade
   roles:
     - chrony

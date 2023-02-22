@@ -1,0 +1,9 @@
+---
+epdm_chrony_package_name: chrony
+epdm_chrony_service_name: chronyd
+epdm_chrony_config_file_location: /etc/chrony.conf
+epdm_chrony_driftfile_path: /var/lib/chrony/drift
+epdm_chrony_logdir_path: /var/log/chrony
+epdm_chrony_makestep: 1.0 3
+epdm_chrony_rtc_settings:
+    - rtcsync
