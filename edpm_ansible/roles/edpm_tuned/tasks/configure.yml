@@ -67,9 +67,7 @@
 
 - name: Enable tuned profile
   ansible.builtin.command: >-
-    tuned-adm profile {{ edpm_tuned_profile }}
-  environment:
-    PATH: "/bin:/usr/bin:/sbin:/usr/sbin"
+    /usr/sbin/tuned-adm profile {{ edpm_tuned_profile }}
   when:
     - not edpm_tuned_active_profile_file.stat.exists or (
       edpm_tuned_active_profile_file.stat.exists and (
