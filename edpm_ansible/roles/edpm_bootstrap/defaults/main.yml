@@ -31,3 +31,6 @@ edpm_bootstrap_release_version_package: "{{ _edpm_bootstrap_release_version_pack
 #       network.service.
 edpm_bootstrap_legacy_network_packages: "{{ _edpm_bootstrap_legacy_network_packages | default([]) }}"
 edpm_bootstrap_network_service: network
+
+# String for SELinux state. One of: disabled, enforcing, permissive
+edpm_bootstrap_selinux_mode: enforcing
