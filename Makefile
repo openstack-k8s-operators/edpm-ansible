@@ -17,7 +17,6 @@ setup_test_environment: ## Setup the environment
 		make -C $(ENV_DIR) ci_ctx; \
 	fi
 
-
 .PHONY: execute_molecule
 execute_molecule: ## Execute molecule tests
 	podman run --rm -ti --security-opt label=disable \
