@@ -28,6 +28,12 @@
         tasks_from: run.yml
       tags:
         - edpm_sshd
+    - name: Rune edpm_tuned
+      import_role:
+        name: edpm_tuned
+        tasks_from: run.yml
+      tags:
+        - edpm_tuned
     - name: Run edpm_chrony
       import_role:
         name: edpm_chrony

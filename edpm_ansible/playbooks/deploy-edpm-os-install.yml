@@ -35,7 +35,7 @@
     - name: Install edpm_tuned
       import_role:
         name: edpm_tuned
-        tasks_from: tuned_install.yml
+        tasks_from: install.yml
       tags:
         - edpm_tuned
     - name: Install edpm_podman

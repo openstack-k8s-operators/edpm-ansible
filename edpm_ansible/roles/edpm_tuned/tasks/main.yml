@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,36 +17,15 @@
 
 # "{{ role_name }}" will search for and load any operating system variable file
 # found within the "vars/" path. If no OS files are found the task will skip.
-- name: Gather variables for each operating system
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - skip: true
-      files:
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}.yml"
-  tags:
-    - always
+
+- name: Load required vars
+  ansible.builtin.include_tasks: vars.yml
 
 - name: Install packages
-  ansible.builtin.include_tasks: tuned_install.yml
-  when:
-    - (edpm_tuned_system_packages | length) > 0
-
-- name: Check for tuned-adm
-  ansible.builtin.command: >-
-    which tuned-adm
-  environment:
-    PATH: "/bin:/usr/bin:/sbin:/usr/sbin"
-  changed_when: false
-  failed_when: false
-  register: edpm_tuned_check
+  ansible.builtin.include_tasks: install.yml
 
 - name: Configure tuned
-  include_tasks: tuned_config.yml
-  when:
-    - not ansible_check_mode
-    - edpm_tuned_check.rc == 0
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Start tuned
+  ansible.builtin.include_tasks: run.yml

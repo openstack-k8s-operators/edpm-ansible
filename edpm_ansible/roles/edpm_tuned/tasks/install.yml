@@ -14,9 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Load required vars
+  ansible.builtin.include_tasks: vars.yml
 
-- name: Prepare
-  hosts: all
-  roles:
-    - role: test_deps
-    - role: env_data
+- name: Install tuned
+  become: true
+  ansible.builtin.package:
+    name: "{{ edpm_tuned_system_packages }}"
+    state: present
