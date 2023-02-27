@@ -18,7 +18,6 @@ collections:
   - ansible.posix
   - community.general
   - containers.podman
-  - openstack.cloud
   - name: https://opendev.org/openstack/ansible-config_template
     version: master
     type: git
