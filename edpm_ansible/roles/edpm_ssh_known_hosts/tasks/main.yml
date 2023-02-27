@@ -50,7 +50,7 @@
       run_once: true
       ansible.builtin.set_fact:
         ssh_known_hosts_lines: |-
-          {% for host in groups['allovercloud'] | intersect(play_hosts) %}
+          {% for host in groups['all'] | intersect(play_hosts) %}
           {%   set hostdata = hostvars[host] %}
           {%   if 'ssh_host_key_rsa_public' in hostdata['ansible_facts'] %}
           {%     set entries = [] %}
