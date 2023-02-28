@@ -1,4 +1,4 @@
-FROM quay.io/ansible/creator-ee:v0.13.0
+FROM quay.io/ansible/creator-ee:v0.14.1
 ARG EDPM_LOCAL_REPO=""
 ARG EDPM_REPO_URL="https://github.com/openstack-k8s-operators/edpm-ansible.git"
 ARG EDPM_LOCAL_DIR="/var/tmp/edpm-ansible"
