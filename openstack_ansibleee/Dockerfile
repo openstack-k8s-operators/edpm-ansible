@@ -3,7 +3,7 @@ ARG EDPM_LOCAL_REPO=""
 ARG EDPM_REPO_URL="https://github.com/openstack-k8s-operators/edpm-ansible.git"
 ARG EDPM_LOCAL_DIR="/var/tmp/edpm-ansible"
 USER root
-RUN dnf upgrade --refresh -y && dnf clean all
+RUN microdnf upgrade --refresh -y && microdnf clean all
 RUN chmod g=u /etc/passwd /etc/group
 RUN if [ ! -d "${EDPM_LOCAL_DIR}" ] ; then \
         echo "Cloning from ${EDPM_REPO_URL}"; \
