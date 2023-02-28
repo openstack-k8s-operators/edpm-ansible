@@ -64,9 +64,7 @@ class FilterModule(object):
                 to_skip += [c_name]
                 continue
 
-            # Don't delete containers NOT managed by edpm* or paunch*
-            elif not re.findall(r"(?=(" + '|'.join(['edpm', 'paunch']) + r"))",
-                                managed_by):
+            elif not re.findall(r"(?=edpm)", managed_by):
                 to_skip += [c_name]
                 continue
 
