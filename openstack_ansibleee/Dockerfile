@@ -9,7 +9,7 @@ RUN if [ ! -d "${EDPM_LOCAL_DIR}" ] ; then \
         /usr/bin/git clone ${EDPM_REPO_URL} ${EDPM_LOCAL_DIR}; \
     fi
 WORKDIR ${EDPM_LOCAL_DIR}
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip-3 install --no-cache-dir -r requirements.txt
 RUN ansible-galaxy role install --timeout 120 -r requirements.yml \
     --roles-path "/usr/share/ansible/roles" && \
     ansible-galaxy collection install --timeout 120 -r requirements.yml \
