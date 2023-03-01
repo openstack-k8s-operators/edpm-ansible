@@ -28,7 +28,7 @@ COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /bin/edpm_entrypoint
 RUN sed -i '1d' /bin/entrypoint && \
     cat /bin/entrypoint >> /bin/edpm_entrypoint && \
     chmod +x /bin/edpm_entrypoint
-    
+
 WORKDIR /runner
 
 RUN rm -rf roles && ln -snf /usr/share/ansible/roles roles && \
