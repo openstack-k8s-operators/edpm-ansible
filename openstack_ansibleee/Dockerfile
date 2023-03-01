@@ -8,7 +8,8 @@ USER root
 RUN microdnf upgrade --refresh -y && microdnf clean all
 
 RUN useradd -d /home/runner -U ansible && \
-    chown -R ansible: /home/runner /runner
+    chown -R ansible: /home/runner /runner && \
+    chmod 0777 /runner/artifacts
 
 COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
 
@@ -26,7 +27,7 @@ RUN sed -i '1d' /bin/entrypoint && \
     cat /bin/entrypoint >> /bin/edpm_entrypoint && \
     chmod +x /bin/edpm_entrypoint
 
-COPY --chown=ansible:ansible $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
+COPY --chown=ansible:ansible --chmod=0666 $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
 RUN touch /runner/inventory/inventory.yaml \
           /usr/share/ansible/edpm-playbooks/playbook.yaml && \
     chmod 0666 /runner/inventory/inventory.yaml \
