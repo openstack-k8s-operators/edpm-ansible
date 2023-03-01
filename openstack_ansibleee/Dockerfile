@@ -26,8 +26,11 @@ RUN sed -i '1d' /bin/entrypoint && \
     cat /bin/entrypoint >> /bin/edpm_entrypoint && \
     chmod +x /bin/edpm_entrypoint
 
-COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
-RUN chown ansible: /runner/env/settings
+COPY --chown=ansible:ansible $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
+RUN touch /runner/inventory/inventory.yaml \
+          /usr/share/ansible/edpm-playbooks/playbook.yaml && \
+    chmod 0666 /runner/inventory/inventory.yaml \
+          /usr/share/ansible/edpm-playbooks/playbook.yaml
 
 USER ansible
 
