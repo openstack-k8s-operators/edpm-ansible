@@ -14,4 +14,9 @@ if [ -n "$RUNNER_PLAYBOOK" ]; then
     echo "$RUNNER_PLAYBOOK" >> /runner/project/playbook.yaml
 fi
 
+if [ -n "$RUNNER_CMDLINE" ]; then
+    echo "---" > /runner/env/cmdline
+    echo "$RUNNER_CMDLINE" >> /runner/env/cmdline
+fi
+
 # Contents from ansible-runner entrypoint
