@@ -1,0 +1,33 @@
+---
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: 'registry.redhat.io/ansible-automation-platform/ee-minimal-rhel8:2.14.2-3'
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--timeout=120'
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_steps:
+  prepend: |
+    COPY openstack_ansibleee/settings /runner/env/settings
+    COPY openstack_ansibleee/edpm_entrypoint.sh /bin/edpm_entrypoint
+    COPY . /var/tmp/edpm-ansible
+  append:
+    - USER root
+    - RUN chmod g=u /etc/passwd /etc/group
+    - RUN ls -laR /var/tmp/edpm-ansible
+    - RUN cd /var/tmp/edpm-ansible && python3 setup.py install --prefix=/usr
+    - RUN rm -fr /var/tmp/edpm-ansible
+    - RUN chmod -R 777 /usr/share/ansible
+    - RUN chmod 777 /runner/env/settings
+    - RUN sed -i '1d' /bin/entrypoint
+    - RUN cat /bin/entrypoint >> /bin/edpm_entrypoint
+    - RUN chmod +x /bin/edpm_entrypoint
+    - WORKDIR /runner
+    - RUN rm -rf /runner/roles && ln -snf /usr/share/ansible/roles roles
+    - RUN rm -rf /runner/project && ln -snf /usr/share/ansible/edpm-playbooks project
+    - USER 1001
+    - ENTRYPOINT ["edpm_entrypoint"]

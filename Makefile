@@ -1,4 +1,5 @@
 TEST_ENV_REPOSITORY := https://github.com/openstack-k8s-operators/ci-framework.git
+EE_IMG := openstack-ansibleee-runner:latest
 
 ifndef ENV_DIR
 override ENV_DIR := $(shell mktemp -d)
@@ -30,3 +31,8 @@ execute_molecule: ## Execute molecule tests
 
 .PHONY: execute_molecule_tests ## Setup the environment and execute molecule tests
 execute_molecule_tests: setup_test_environment execute_molecule
+
+.PHONY: build_ee
+build_ee: ## Build container image using ansible-builder
+	rm -fr .venv; python3 -m venv .venv;
+	source .venv/bin/activate; pip install ansible-builder; ansible-builder build -c . -t ${EE_IMG} -v3
