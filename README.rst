@@ -30,6 +30,29 @@ Note: the instruction ``execute_molecule`` has the
 tests in all the roles. In case we want to execute the tests just in
 modified roles we should delete it.
 
+Build and push the openstack-ansibleee-runner container image
+-------------------------------------------------------------
+
+In order to test a local change to edpm-ansible, the ansible-runner container
+image can be rebuilt and pushed to a container repository.
+
+To build the image:
+
+.. code:: bash
+
+    $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+    $ make openstack_ansibleee_build
+
+To push the image:
+
+.. code:: bash
+
+    $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+    $ make openstack_ansibleee_push
+
+Depending on the repository, a ``podman login quay.io/<user>`` may be required
+before pushing.
+
 License
 -------
 

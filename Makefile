@@ -1,4 +1,6 @@
 TEST_ENV_REPOSITORY := https://github.com/openstack-k8s-operators/ci-framework.git
+IMAGE_TAG_BASE ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
+IMG ?= $(IMAGE_TAG_BASE):latest
 
 ifndef ENV_DIR
 override ENV_DIR := $(shell mktemp -d)
@@ -30,3 +32,11 @@ execute_molecule: ## Execute molecule tests
 
 .PHONY: execute_molecule_tests ## Setup the environment and execute molecule tests
 execute_molecule_tests: setup_test_environment execute_molecule
+
+.PHONY: openstack_ansibleee_build ## Build the openstack-ansibleee-runner image
+openstack_ansibleee_build:
+	podman build . -f openstack_ansibleee/Dockerfile -t ${IMG}
+
+.PHONY: openstack_ansibleee_push ## Push the openstack-ansibleee-runner image
+openstack_ansibleee_push:
+	podman push ${IMG}
