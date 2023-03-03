@@ -15,7 +15,6 @@ if [ -n "$RUNNER_PLAYBOOK" ]; then
 fi
 
 if [ -n "$RUNNER_CMDLINE" ]; then
-    echo "---" > /runner/env/cmdline
     echo "$RUNNER_CMDLINE" >> /runner/env/cmdline
 fi
 
