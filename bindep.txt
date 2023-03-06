@@ -25,7 +25,7 @@ python3-pyyaml    [platform:rpm !platform:rhel-7 !platform:centos-7]
 python3-dnf       [platform:rpm !platform:rhel-7 !platform:centos-7]
 
 # RH Mechanisms
-python-rhsm-certificates                [platform:redhat]
+python-rhsm-certificates  [platform:rpm !platform:centos-8 !platform:centos-9 !platform:fedora]
 
 # SELinux cent7
 libselinux-python3  [platform:rpm !platform:rhel-8 !platform:centos-8]

@@ -40,3 +40,7 @@ docs/build/*
 
 # Custom inventory variable files
 edpm_ansible/inventory/99-standalone-vars
+
+# EE related files
+_build/
+Containerfile
