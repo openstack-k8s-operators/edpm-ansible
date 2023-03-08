@@ -33,6 +33,6 @@
 
 - name: Install chronyd package
   ansible.builtin.package:
-    name: "{{ epdm_chrony_package_name }}"
+    name: "{{ edpm_chrony_package_name }}"
     state: present
-  when: epdm_chrony_manage_package|bool
+  when: edpm_chrony_manage_package|bool

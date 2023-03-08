@@ -1,63 +1,63 @@
 # Do not manually edit this file.
 # Managed by ansible-role-chrony
-{% for server in epdm_chrony_ntp_servers -%}
+{% for server in edpm_chrony_ntp_servers -%}
 {% if server is mapping %}
 server {{ server.server_host }} {{ server.server_settings }}
 {% else %}
-server {{ server }} {{ epdm_chrony_global_server_settings|default('') }}
+server {{ server }} {{ edpm_chrony_global_server_settings|default('') }}
 {% endif %}
 {% endfor -%}
 
-{% for pool in epdm_chrony_ntp_pools -%}
+{% for pool in edpm_chrony_ntp_pools -%}
 {% if pool is mapping %}
 pool {{ pool.pool_host }} {{ pool.pool_settings }}
 {% else %}
-pool {{ pool }} {{ epdm_chrony_global_pool_settings|default('') }}
+pool {{ pool }} {{ edpm_chrony_global_pool_settings|default('') }}
 {% endif %}
 {% endfor -%}
 
-{% for peer in epdm_chrony_ntp_peers -%}
+{% for peer in edpm_chrony_ntp_peers -%}
 {% if peer is mapping %}
 peer {{ peer.peer_host }} {{ peer.peer_settings }}
 {% else %}
-peer {{ peer }} {{ epdm_chrony_global_peer_settings|default('') }}
+peer {{ peer }} {{ edpm_chrony_global_peer_settings|default('') }}
 {% endif %}
 {% endfor -%}
 
-{% if epdm_chrony_bind_addresses is defined and epdm_chrony_bind_addresses|length > 0 -%}
-{% for bind_addr in epdm_chrony_bind_addresses %}
+{% if edpm_chrony_bind_addresses is defined and edpm_chrony_bind_addresses|length > 0 -%}
+{% for bind_addr in edpm_chrony_bind_addresses %}
 bindcmdaddress {{ bind_addr }}
 {% endfor %}
 {% endif -%}
 
-{% if epdm_chrony_acl_rules is defined and epdm_chrony_acl_rules|length > 0 -%}
-{{ epdm_chrony_acl_rules|join("\n") }}
+{% if edpm_chrony_acl_rules is defined and edpm_chrony_acl_rules|length > 0 -%}
+{{ edpm_chrony_acl_rules|join("\n") }}
 {% endif -%}
 
-{% if epdm_chrony_keyfile_path is defined -%}
-keyfile {{ epdm_chrony_keyfile_path }}
+{% if edpm_chrony_keyfile_path is defined -%}
+keyfile {{ edpm_chrony_keyfile_path }}
 {% endif -%}
 
-{% if epdm_chrony_driftfile_path is defined -%}
-driftfile {{ epdm_chrony_driftfile_path }}
+{% if edpm_chrony_driftfile_path is defined -%}
+driftfile {{ edpm_chrony_driftfile_path }}
 {% endif -%}
 
-{% if epdm_chrony_logdir_path is defined -%}
-logdir {{ epdm_chrony_logdir_path }}
+{% if edpm_chrony_logdir_path is defined -%}
+logdir {{ edpm_chrony_logdir_path }}
 {% endif -%}
 
-{% if epdm_chrony_rtc_settings is defined -%}
-{{ epdm_chrony_rtc_settings|join("\n") }}
+{% if edpm_chrony_rtc_settings is defined -%}
+{{ edpm_chrony_rtc_settings|join("\n") }}
 {% endif -%}
 
-{% if epdm_chrony_log_options is defined -%}
-log {{ epdm_chrony_log_options }}
+{% if edpm_chrony_log_options is defined -%}
+log {{ edpm_chrony_log_options }}
 {% endif -%}
 
-{% if epdm_chrony_makestep is defined -%}
-makestep {{ epdm_chrony_makestep }}
+{% if edpm_chrony_makestep is defined -%}
+makestep {{ edpm_chrony_makestep }}
 {% endif -%}
 
-{% if epdm_chrony_extra_options -%}
-{{ epdm_chrony_extra_options|join("\n") }}
+{% if edpm_chrony_extra_options -%}
+{{ edpm_chrony_extra_options|join("\n") }}
 {% endif -%}

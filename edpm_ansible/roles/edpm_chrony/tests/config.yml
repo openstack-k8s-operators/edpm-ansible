@@ -3,6 +3,6 @@
   gather_facts: true
   become: true
   vars:
-    epdm_chrony_role_action: config
+    edpm_chrony_role_action: config
   roles:
     - chrony
