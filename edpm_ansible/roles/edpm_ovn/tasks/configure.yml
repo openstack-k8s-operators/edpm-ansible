@@ -72,7 +72,7 @@
 
     - name: Run neutron_metadata_agent container
       ansible.builtin.shell: >
-          podman run --detach --name neutron_metadata_config quay.io/tripleomastercentos9/openstack-neutron-metadata-agent-ovn:current-tripleo sleep infinity
+          podman run --detach --name neutron_metadata_config {{ edpm_ovn_metadata_agent_image }} sleep infinity
       register: metadata_container_id
 
     - name: register_metadata_id
