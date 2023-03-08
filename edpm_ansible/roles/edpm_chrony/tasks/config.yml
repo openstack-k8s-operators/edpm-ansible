@@ -21,9 +21,9 @@
 - name: Install chrony configuration file
   ansible.builtin.template:
     src: chrony.conf.j2
-    dest: "{{ epdm_chrony_config_file_location }}"
+    dest: "{{ edpm_chrony_config_file_location }}"
     owner: root
     group: root
     mode: 0644
-  register: epdm_chrony_config
+  register: edpm_chrony_config
   notify: Restart chronyd

@@ -19,24 +19,24 @@
 
 - name: Install chronyd
   ansible.builtin.include_tasks: install.yml
-  when: epdm_chrony_role_action in ['all', 'install']
+  when: edpm_chrony_role_action in ['all', 'install']
 
 - name: Upgrade chronyd
   ansible.builtin.include_tasks: upgrade.yml
-  when: epdm_chrony_role_action in ['upgrade']
+  when: edpm_chrony_role_action in ['upgrade']
 
 - name: Configure chronyd
   ansible.builtin.include_tasks: config.yml
-  when: epdm_chrony_role_action in ['all', 'config']
+  when: edpm_chrony_role_action in ['all', 'config']
 
 - name: Run chronyd
   ansible.builtin.include_tasks: run.yml
-  when: epdm_chrony_role_action in ['all', 'config', 'run']
+  when: edpm_chrony_role_action in ['all', 'config', 'run']
 
 - name: Enable online service
   ansible.builtin.include_tasks: online.yml
-  when: epdm_chrony_role_action in ['all', 'online']
+  when: edpm_chrony_role_action in ['all', 'online']
 
 - name: Sync chronyc
   ansible.builtin.include_tasks: sync.yml
-  when: epdm_chrony_role_action in ['all', 'sync']
+  when: edpm_chrony_role_action in ['all', 'sync']
