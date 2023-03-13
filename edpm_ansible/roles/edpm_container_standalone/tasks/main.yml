@@ -57,6 +57,9 @@
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
     mode: 0644
+  # NOTE(tkajinam): Some containers can contain secrets in their environments.
+  #                 Hide the output to avoid dumping these to output.
+  no_log: true
   loop: "{{ edpm_container_standalone_container_defs | dict2items }}"
 
 - name: Run {{ edpm_container_standalone_service }}  containers
