@@ -19,12 +19,7 @@ import json
 import re
 
 
-# cmp() doesn't exist on python3
-def cmp(a, b):
-    return 0 if a == b else 1
-
-
-class FilterModule(object):
+class FilterModule:
     def filters(self):
         return {
             'needs_delete': self.needs_delete,
@@ -54,9 +49,7 @@ class FilterModule(object):
         for c in container_infos:
             c_name = c['Name']
             installed_containers.append(c_name)
-            labels = c['Config'].get('Labels')
-            if not labels:
-                labels = dict()
+            labels = c['Config'].get('Labels', {})
             managed_by = labels.get('managed_by', 'unknown').lower()
 
             # Check containers have a label
@@ -94,7 +87,7 @@ class FilterModule(object):
             # changed. Since we already cleaned the containers not in config,
             # this check needs to be in that loop.
             # e.g. new EDPM_CONFIG_HASH during a minor update
-            c_datas = list()
+            c_datas = []
             for c in container_infos:
                 if c_name == c['Name']:
                     try:
@@ -110,9 +103,9 @@ class FilterModule(object):
                     try:
                         c_data = dict(c_data)  # Confirms c_data is type safe
                     except ValueError:  # c_data is not data
-                        c_data = dict()
+                        c_data = {}
 
-                if cmp(c_data, config_data) != 0 and check_config:
+                if check_config and c_data != config_data:
                     to_delete += [c_name]
 
         # Cleanup installed containers that aren't in config anymore.
@@ -137,6 +130,9 @@ class FilterModule(object):
         should be added to the excluded_keys list. If excluded_keys is used
         with reverse, we'll just exclude the items which had a key from
         excluded_keys in the reversed list.
+
+        :returns: list of dictionaries
+        :rtype: `list`
         """
         return_list = []
         for i in data:
