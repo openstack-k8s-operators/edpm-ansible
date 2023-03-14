@@ -22,7 +22,7 @@ edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
 edpm_iscsid_hide_sensitive_logs: true
 
-edpm_iscsid_image: "quay.io/tripleomastercentos9/openstack-iscsid:current-tripleo"
+edpm_iscsid_image: "quay.io/tripleozedcentos9/openstack-iscsid:current-tripleo"
 edpm_iscsid_config_dir: /var/lib/config-data/ansible-generated/iscsid
 edpm_iscsid_volumes:
   - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro

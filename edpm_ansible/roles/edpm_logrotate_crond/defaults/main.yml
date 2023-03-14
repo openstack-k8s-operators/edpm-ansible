@@ -27,7 +27,7 @@ edpm_logrotate_crond_cronie_package: cronie
 # Pid namespace for podman container. Only change for testing.
 edpm_logrotate_crond_podman_pid: host
 
-edpm_logrotate_crond_image: "quay.io/tripleomastercentos9/openstack-cron:current-tripleo"
+edpm_logrotate_crond_image: "quay.io/tripleozedcentos9/openstack-cron:current-tripleo"
 edpm_logrotate_crond_config_use_ansible: true
 edpm_logrotate_crond_config_dir: /var/lib/config-data/ansible-generated/crond
 edpm_logrotate_crond_volumes:
