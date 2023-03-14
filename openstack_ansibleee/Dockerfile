@@ -22,16 +22,23 @@ RUN ansible-galaxy role install --timeout 120 -r requirements.yml \
     --collections-path "/usr/share/ansible/collections"
 RUN python3 setup.py install --prefix=/usr
 
-COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /bin/edpm_entrypoint
-RUN sed -i '1d' /bin/entrypoint && \
+RUN cp ${REMOTE_SOURCE_DIR}/openstack_ansibleee/edpm_entrypoint.sh \
+       /bin/edpm_entrypoint && \
+    sed -i '1d' /bin/entrypoint && \
     cat /bin/entrypoint >> /bin/edpm_entrypoint && \
     chmod +x /bin/edpm_entrypoint
 
-COPY --chown=ansible:ansible --chmod=0666 $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
+RUN cp ${REMOTE_SOURCE_DIR}/openstack_ansibleee/settings \
+       /runner/env/settings && \
+    chown ansible:ansible /runner/env/settings && \
+    chmod 0660 /runner/env/settings
+
 RUN touch /runner/inventory/inventory.yaml \
           /usr/share/ansible/edpm-playbooks/playbook.yaml && \
     chmod 0666 /runner/inventory/inventory.yaml \
           /usr/share/ansible/edpm-playbooks/playbook.yaml
+
+RUN rm -fr ${REMOTE_SOURCE_DIR}
 
 USER ansible
 
