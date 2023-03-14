@@ -4,7 +4,7 @@
 config:
   - name: /var/lib/edpm-config/container-startup-config/nova_libvirt/nova_virtqemud.json
     expected_lines:
-      - '    "image": "quay.io/tripleomastercentos9/openstack-nova-libvirt:current-tripleo",'
+      - '    "image": "quay.io/tripleozedcentos9/openstack-nova-libvirt:current-tripleo",'
       - '        "nofile=131072",'
       - '        "nproc=126960"'
       - '    "pids_limit": 65536,'
