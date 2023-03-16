@@ -3,4 +3,4 @@ Role - edpm_tuned
 ========================
 
 .. ansibleautoplugin::
-   :role: edpm_ansible/roles/edpm_tuned
+   :role: roles/edpm_tuned

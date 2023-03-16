@@ -3,4 +3,4 @@ Role - edpm_iscsid
 ===================
 
 .. ansibleautoplugin::
-  :role: edpm_ansible/roles/edpm_iscsid
+  :role: roles/edpm_iscsid

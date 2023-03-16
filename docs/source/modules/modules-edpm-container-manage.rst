@@ -9,6 +9,6 @@ This module provides for the following ansible plugin:
 
 
 .. ansibleautoplugin::
-   :module: edpm_ansible/ansible_plugins/modules/edpm_container_manage.py
+   :module: ansible_plugins/modules/edpm_container_manage.py
    :documentation: true
    :examples: true

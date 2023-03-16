@@ -3,7 +3,7 @@ Role - edpm_container_manage
 ===============================
 
 .. ansibleautoplugin::
-  :role: edpm_ansible/roles/edpm_container_manage
+  :role: roles/edpm_container_manage
 
 Usage
 ~~~~~

@@ -3,4 +3,4 @@ Role - edpm-kernel
 =====================
 
 .. ansibleautoplugin::
-  :role: edpm_ansible/roles/edpm_kernel
+  :role: roles/edpm_kernel

@@ -27,7 +27,7 @@ execute_molecule: ## Execute molecule tests
     	   cfwm:latest bash -c "make molecule_nodeps \
 		   							BUILD_VENV_CTX=no \
 									MOLECULE_CONFIG=.config/molecule/config_local.yml \
-									ROLE_DIR=/opt/edpm-ansible/edpm_ansible/roles/ \
+									ROLE_DIR=/opt/edpm-ansible/roles/ \
 									TEST_ALL_ROLES=yes"
 
 .PHONY: execute_molecule_tests ## Setup the environment and execute molecule tests
