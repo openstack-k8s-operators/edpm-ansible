@@ -10,12 +10,9 @@ tags:
   - RHOSP
   - EDPM
 dependencies:
-  - ansible.posix
-  - community.general
-  - containers.podman
-  - name: https://opendev.org/openstack/ansible-config_template
-    version: master
-    type: git
+  ansible.posix: '*'
+  community.general: '*'
+  containers.podman: '*'
 repository: https://github.com/openstack-k8s-operators/edpm-ansible
 documentation: https://openstack-k8s-operators.github.io/edpm-ansible
 homepage: https://github.com/openstack-k8s-operators/edpm-ansible
