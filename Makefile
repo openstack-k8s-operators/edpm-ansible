@@ -15,7 +15,7 @@ setup_test_environment: ## Setup the environment
 	@if [ ! -d $(ENV_DIR) ]; then \
 		git clone $(TEST_ENV_REPOSITORY) $(ENV_DIR); \
 	fi
-	@if ! podman image exists localhost/cfwm; then \
+	@if ! podman image exists localhost/cifmw-build; then \
 		make -C $(ENV_DIR) ci_ctx; \
 	fi
 
@@ -24,7 +24,7 @@ execute_molecule: ## Execute molecule tests
 	podman run --rm -ti --security-opt label=disable \
     	   -v $(ENV_DIR):/opt/sources \
     	   -v .:/opt/edpm-ansible \
-    	   cfwm:latest bash -c "make molecule_nodeps \
+    	   cifmw-build:latest bash -c "cd /opt/sources/ && make molecule \
 		   							BUILD_VENV_CTX=no \
 									MOLECULE_CONFIG=.config/molecule/config_local.yml \
 									ROLE_DIR=/opt/edpm-ansible/edpm_ansible/roles/ \
