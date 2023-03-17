@@ -3,7 +3,7 @@ IMAGE_TAG_BASE ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
 IMG ?= $(IMAGE_TAG_BASE):latest
 
 ifndef ENV_DIR
-override ENV_DIR := $(shell mktemp -d)
+override ENV_DIR := $(shell mktemp -d)/ci-framework
 endif
 
 .PHONY: help
