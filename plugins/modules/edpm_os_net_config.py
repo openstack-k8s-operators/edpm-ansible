@@ -72,7 +72,6 @@ options:
       - If enabled, use nmstate and network manager for network configuration.
     type: bool
     default: false
-
 """
 
 EXAMPLES = """
@@ -95,7 +94,7 @@ stderr:
   description:
     - The command standard error
   returned: always
-    type: str
+  type: str
 """
 
 DEFAULT_CFG = '/etc/os-net-config/dhcp_all_interfaces.yaml'
