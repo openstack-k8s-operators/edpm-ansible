@@ -16,20 +16,6 @@
 #    under the License.
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
-
-import glob
-import json
-import os
-import yaml
-
-
-ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
-
 DOCUMENTATION = """
 module: container_systemd
 author:
