@@ -9,6 +9,6 @@ This module provides for the following ansible plugin:
 
 
 .. ansibleautoplugin::
-   :module: ansible_plugins/modules/edpm_os_net_config.py
+   :module: plugins/modules/edpm_os_net_config.py
    :documentation: true
    :examples: true
