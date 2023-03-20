@@ -12,6 +12,7 @@ RUN microdnf -y install python3-tenacity
 RUN cd /var/tmp/edpm-ansible && \
     ansible-galaxy collection install --timeout 120 -r requirements.yml --collections-path "/usr/share/ansible/collections" && \
     ansible-galaxy collection install $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
+RUN ln -sfv /usr/share/ansible/collections/ansible_collections/osp/edpm/plugins /usr/share/ansible/plugins
 RUN chmod -R 777 /usr/share/ansible
 COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
 RUN chmod 777 /runner/env/settings
