@@ -70,7 +70,6 @@ edpm_nova_libvirt_migration_ssh_key: >
 edpm_nova_libvirt_migration_ssh_port: "{{ edpm_migration_ssh_port | default('2022'.true) }}"
 edpm_nova_libvirt_tls_password: ""  # sensitive, assert not empty
 edpm_nova_libvirt_qemu_default_tls_verify: true
-edpm_nova_libvirt_virtlogd_wrapper_virtlogd_process_wrapper: /var/lib/container-config-scripts/virtlogd_wrapper
 
 # TODO(bogdando): config it with ansible, by converting logic implemented in tht with these hiera mappings:
 edpm_nova_libvirt_manage_libvirt_services: false
@@ -101,7 +100,6 @@ edpm_nova_libvirt_rbd_rbd_keyring: client.{{ edpm_nova_libvirt_ceph_client_user_
 
 # Redundant mappings, keep it for validation to not complain about missing hiera mappings
 # edpm_nova_libvirt_migration_client_ssh_private_key: "{{ edpm_nova_libvirt_migration_ssh_key.private_key }}"
-# edpm_nova_libvirt_virtlogd_wrapper_virtlogd_image: "{{ edpm_nova_libvirt_container_image }}"
 
 # FIXME(bogdando): monolithic libvirt is not supported, remove these once removed from puppet and tht
 # but keep it for new for the mappings validations to not complain about missing hiera mappings
@@ -110,8 +108,6 @@ edpm_nova_libvirt_rbd_rbd_keyring: client.{{ edpm_nova_libvirt_ceph_client_user_
 # edpm_nova_libvirt_migration_libvirt_modular_libvirt
 
 edpm_nova_libvirt_services:
-  # TODO(bogdando): restore _wrapper handling conditions and add back create_virtlogd_wrapper,
-  # and conditional nova_virtlogd or nova_virtlogd_wrapper containers to start
   - virtlogd
   - virtsecretd
   - virtnodedevd
@@ -140,8 +136,6 @@ edpm_nova_libvirt_virtnwfilterd_log_outputs: "1:file:/var/log/libvirt/virtnwfilt
 
 edpm_nova_libvirt_tls_priority: "NORMAL:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2"
 edpm_nova_libvirt_opt_volumes: []  # role specific
-edpm_nova_libvirt_enable_virtlogd_container_wrapper: false
-edpm_nova_libvirt_virtlogd_wrapper_debug: false
 edpm_nova_libvirt_rbd_disk_cachemodes: "{{
   edpm_rbd_disk_cachemodes |
     default(['network=writeback'], true) }}"

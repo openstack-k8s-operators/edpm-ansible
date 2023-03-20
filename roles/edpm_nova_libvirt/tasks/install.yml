@@ -23,7 +23,6 @@
     recurse: "{{ item.recurse | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   with_items:
-    - {'path': /etc/puppet, 'setype': container_file_t}
     - {'path': /etc/libvirt, 'setype': container_file_t}
     - {'path': /etc/libvirt/secrets, 'setype': container_file_t}
     - {'path': /etc/libvirt/qemu, 'setype': container_file_t}

@@ -31,8 +31,6 @@
       vars:
         edpm_container_standalone_service: nova_libvirt
         edpm_container_standalone_container_defs:
-          # TODO(bogdando): restore _wrapper handling conditions and add back create_virtlogd_wrapper,
-          # and conditional nova_virtlogd or nova_virtlogd_wrapper containers to start
           nova_virtlogd: "{{ lookup('template', 'nova_virtlogd.yaml.j2') | from_yaml }}"
           nova_virtnodedevd: "{{ lookup('template', 'nova_virtnodedevd.yaml.j2') | from_yaml }}"
           nova_virtproxyd: "{{ lookup('template', 'nova_virtproxyd.yaml.j2') | from_yaml }}"
