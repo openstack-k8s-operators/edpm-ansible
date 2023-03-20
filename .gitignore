@@ -40,3 +40,5 @@ docs/build/*
 
 # Custom inventory variable files
 edpm_ansible/inventory/99-standalone-vars
+
+tests/output/**
