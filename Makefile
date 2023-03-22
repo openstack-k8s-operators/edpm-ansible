@@ -22,17 +22,16 @@ setup_test_environment: ## Setup the environment
 .PHONY: execute_molecule
 execute_molecule: setup_test_environment ## Execute molecule tests
 	podman run --rm -ti --security-opt label=disable \
-				 -v $(ENV_DIR):/opt/sources \
+				 -v $(ENV_DIR):/opt/ci_framework \
 				 -v .:/opt/edpm-ansible \
 				 -e ANSIBLE_LOCAL_TMP=/tmp \
 				 -e ANSIBLE_REMOTE_TMP=/tmp \
 				 -e HOME=/tmp \
+				 -e MOLECULE_CONFIG=.config/molecule/config_local.yml \
+				 -e TEST_ALL_ROLES=yes \
 				 --user root \
-				 cifmw:latest bash -c "make -C /opt/sources/ molecule_nodeps \
-									BUILD_VENV_CTX=no \
-									MOLECULE_CONFIG=.config/molecule/config_local.yml \
-									ROLE_DIR=/opt/edpm-ansible/roles/ \
-									TEST_ALL_ROLES=yes"
+				 cifmw:latest bash -c "/opt/ci_framework/scripts/run_molecule \
+									/opt/edpm-ansible/roles/"
 
 .PHONY: execute_molecule_tests ## Setup the environment and execute molecule tests
 execute_molecule_tests: setup_test_environment execute_molecule
