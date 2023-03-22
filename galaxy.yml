@@ -1,0 +1,28 @@
+namespace: osp
+name: edpm
+version: 0.0.1
+readme: README.rst
+authors:
+  - EDPM Team (github.com/openstack-k8s-operators/edpm-ansible)
+description: Ansible collection for edpm project
+license_file: LICENSE
+tags:
+  - RHOSP
+  - EDPM
+dependencies:
+  ansible.posix: '*'
+  community.general: '*'
+  containers.podman: '*'
+repository: https://github.com/openstack-k8s-operators/edpm-ansible
+documentation: https://openstack-k8s-operators.github.io/edpm-ansible
+homepage: https://github.com/openstack-k8s-operators/edpm-ansible
+issues: https://github.com/openstack-k8s-operators/edpm-ansible/issues
+build_ignore:
+  - tests/output
+  - openstack_ansibleee
+  - _skeleton_role_
+  - .gitignore
+  - .vscode
+  - .idea
+  - .github
+  - zuul.d

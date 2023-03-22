@@ -12,7 +12,7 @@ From with the project root, creating a skeleton for the new role.
 
 .. code-block:: console
 
-    $ ansible-galaxy init --role-skeleton=_skeleton_role_ --init-path=edpm_ansible/roles ${NEWROLENAME}
+    $ ansible-galaxy init --role-skeleton=_skeleton_role_ --init-path=roles ${NEWROLENAME}
 
 When the role is ready for CI, add a **job** entry into the
 `zuul.d/molecule.yaml`.
@@ -21,7 +21,7 @@ When the role is ready for CI, add a **job** entry into the
 
     - job:
         files:
-        - ^edpm_ansible/roles/${NEWROLENAME}/.*
+        - ^roles/${NEWROLENAME}/.*
         name: edpm-ansible-centos-stream-molecule-${NEWROLENAME}
         parent: edpm-ansible-centos-stream-base
         vars:
@@ -134,7 +134,7 @@ file from the project root, and then execute the following commands.
 .. code-block:: console
 
     (test-python) $ source ansible-test-env.rc
-    (test-python) $ cd edpm_ansible/roles/${NEWROLENAME}/
+    (test-python) $ cd roles/${NEWROLENAME}/
     (test-python) $ molecule --base-config ../../../.config/molecule/config.yml test --all
 
 To run a test using the `podman` driver, `ansible-test-env-podman.rc` also
@@ -144,7 +144,7 @@ needs to be sourced, and specify the `config_podman.yml` molecule config.
 
     (test-python) $ source ansible-test-env.rc
     (test-python) $ source ansible-test-env-podman.rc
-    (test-python) $ cd edpm_ansible/roles/${NEWROLENAME}/
+    (test-python) $ cd roles/${NEWROLENAME}/
     (test-python) $ molecule --base-config ../../../.config/molecule/config_podman.yml test --all
 
 If a role has more than one scenario, a specific scenario can be
@@ -154,7 +154,7 @@ the `--scenario-name` flag with the name of the desired scenario.
 
 .. code-block:: console
 
-    (test-python) $ cd edpm_ansible/roles/${NEWROLENAME}/
+    (test-python) $ cd roles/${NEWROLENAME}/
     (test-python) $ molecule test --scenario-name ${EXTRA_SCENARIO_NAME}
 
 
@@ -171,7 +171,7 @@ Contributing plugins
 ~~~~~~~~~~~~~~~~~~~~
 
 All plugins contributed to the EDPM-Ansible can be found in the
-`edpm_ansible/ansible_plugins` directory, from the root of this project.
+`ansible_plugins` directory, from the root of this project.
 When contributing a plugin, make sure to also add documentation in the
 `doc/source/modules` folder. All documentation added to this folder will be
 automatically indexed and rendered via `sphinx`.
@@ -183,7 +183,7 @@ sphinx template to auto-render the in-code documentation.
 .. code-block:: rst
 
     .. ansibleautoplugin::
-       :module: edpm_ansible/ansible_plugins/${DIRECTORY}/${PLUGINFILE}
+       :module: ansible_plugins/${DIRECTORY}/${PLUGINFILE}
        :documentation: true
        :examples: true
 
@@ -194,5 +194,5 @@ documentation for either type can be disabled by omitting the option.
 .. code-block:: rst
 
     .. ansibleautoplugin::
-       :module: edpm_ansible/ansible_plugins/${DIRECTORY}/${PLUGINFILE}
+       :module: ansible_plugins/${DIRECTORY}/${PLUGINFILE}
        :documentation: true

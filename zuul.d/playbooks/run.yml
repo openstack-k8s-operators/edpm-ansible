@@ -11,12 +11,12 @@
 
     - name: Set role or plugin path fact
       ansible.builtin.set_fact:
-        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/edpm_ansible/roles/{{ edpm_role_name }}"
+        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/roles/{{ edpm_role_name }}"
       when: edpm_role_name is defined and edpm_role_name
 
     - name: Set role or plugin path fact
       ansible.builtin.set_fact:
-        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/edpm_ansible/ansible_plugins/tests"
+        edpm_ansible_testdir: "{{ edpm_ansible_project_path }}/ansible_plugins/tests"
       when: edpm_role_name is not defined
 
   tasks:

@@ -35,9 +35,9 @@
       ansible.builtin.command: >-
         ansible-galaxy init
         --role-skeleton=_skeleton_role_
-        --init-path=edpm_ansible/roles {{ _role_name }}
+        --init-path=roles {{ _role_name }}
       args:
-        creates: "edpm_ansible/roles/{{ _role_name }}"
+        creates: "roles/{{ _role_name }}"
 
     - name: Read zuul molecule file
       ansible.builtin.slurp:
@@ -83,7 +83,7 @@
                   "name": new_job_name,
                   "parent": "edpm-ansible-centos-stream-base",
                   "files": [
-                    "^edpm_ansible/roles/" ~ _role_name ~ "/(?!meta).*",
+                    "^roles/" ~ _role_name ~ "/(?!meta).*",
                     "^molecule-requirements.txt",
                   ],
                   "vars": {
@@ -109,5 +109,5 @@
     #       {{ '=' * (opening | length) }}
 
     #       .. ansibleautoplugin::
-    #         :role: edpm_ansible/roles/{{ _role_name }}
+    #         :role: roles/{{ _role_name }}
     #     dest: "doc/source/roles/role-{{ _role_name }}.rst"
