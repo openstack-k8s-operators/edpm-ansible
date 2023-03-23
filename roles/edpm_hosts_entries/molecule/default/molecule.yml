@@ -23,8 +23,6 @@ provisioner:
             - 172.17.0.1 centos.internalapi.localdomain centos.internalapi
           edpm_hosts_entries_undercloud_hosts_entries: []
           edpm_hosts_entries_extra_hosts_entries: []
-          edpm_stack_name: overcloud
-          plan: overcloud
         children:
           allovercloud:
             hosts:
