@@ -12,11 +12,7 @@ security_opt:
   - label=filetype:container_share_t
 restart: always
 depends_on:
-{% if edpm_nova_libvirt_enable_virtlogd_container_wrapper %}
-  - edpm_nova_virtlogd_wrapper.service
-{% else %}
   - edpm_nova_virtlogd.service
-{% endif -%}
 volumes:
   {{ edpm_nova_libvirt_volumes +
      ['/var/lib/kolla/config_files/nova_virtproxyd.json:/var/lib/kolla/config_files/config.json:ro'] }}
