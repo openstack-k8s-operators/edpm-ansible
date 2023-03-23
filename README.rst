@@ -20,7 +20,7 @@ For setting up the environment and executing the tests:
 
 .. code:: bash
 
-   $ make execute_molecule_tests
+   $ make execute_molecule
 
 In case the ci-framework project is already cloned we can provide the
 folder with ``ENV_DIR=/path/repository``
