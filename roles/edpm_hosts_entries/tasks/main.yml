@@ -57,8 +57,8 @@
     insertbefore: BOF
     block: "{{ edpm_hosts_entries_block }}"
     marker: "# {mark}"
-    marker_begin: "START_HOST_ENTRIES_FOR_STACK: {{ edpm_stack_name | default(plan) }}"
-    marker_end: "END_HOST_ENTRIES_FOR_STACK: {{ edpm_stack_name | default(plan) }}"
+    marker_begin: START_HOST_ENTRIES_FOR_STACK
+    marker_end: END_HOST_ENTRIES_FOR_STACK
   register: edpm_hosts_entries_new_entries
   tags:
     - edpm_hosts_entries
