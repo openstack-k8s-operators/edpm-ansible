@@ -20,7 +20,7 @@ setup_test_environment: ## Setup the environment
 	fi
 
 .PHONY: execute_molecule
-execute_molecule: setup_test_environment ## Execute molecule tests
+execute_molecule: setup_test_environment ## Setup the environment and execute molecule tests
 	podman run --rm -ti --security-opt label=disable \
 				 -v $(ENV_DIR):/opt/ci_framework \
 				 -v .:/opt/edpm-ansible \
@@ -32,9 +32,6 @@ execute_molecule: setup_test_environment ## Execute molecule tests
 				 --user root \
 				 cifmw:latest bash -c "/opt/ci_framework/scripts/run_molecule \
 									/opt/edpm-ansible/roles/"
-
-.PHONY: execute_molecule_tests ## Setup the environment and execute molecule tests
-execute_molecule_tests: setup_test_environment execute_molecule
 
 .PHONY: openstack_ansibleee_build ## Build the openstack-ansibleee-runner image
 openstack_ansibleee_build:
