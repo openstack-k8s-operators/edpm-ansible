@@ -20,13 +20,11 @@
   name: Deploy EDPM Pre Network
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
-  collections:
-    - osp.edpm
   tasks:
 
     - name: Configure Hosts Entries
-      import_role:
-        name: edpm_hosts_entries
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_hosts_entries
       vars:
         edpm_hosts_entries_undercloud_hosts_entries: "{{ undercloud_hosts_entries }}"
         edpm_hosts_entries_extra_hosts_entries: "{{ extra_hosts_entries }}"

@@ -21,48 +21,46 @@
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   become: true
-  collections:
-    - osp.edpm
   tasks:
     - name: Run edpm_sshd
-      import_role:
-        name: edpm_sshd
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_sshd
         tasks_from: run.yml
       tags:
         - edpm_sshd
     - name: Rune edpm_tuned
-      import_role:
-        name: edpm_tuned
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_tuned
         tasks_from: run.yml
       tags:
         - edpm_tuned
     - name: Run edpm_chrony
-      import_role:
-        name: edpm_chrony
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_chrony
         tasks_from: run.yml
       tags:
         - edpm_chrony
     - name: Run edpm_chrony (online)
-      import_role:
-        name: edpm_chrony
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_chrony
         tasks_from: online.yml
       tags:
         - edpm_chrony
     - name: Run edpm_chrony (sync)
-      import_role:
-        name: edpm_chrony
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_chrony
         tasks_from: sync.yml
       tags:
         - edpm_chrony
     - name: Run edpm_timezone
-      import_role:
-        name: edpm_timezone
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_timezone
         tasks_from: run.yml
       tags:
         - edpm_timezone
     - name: Run edpm_ovn
-      import_role:
-        name: edpm_ovn
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovn
         tasks_from: run.yml
       tags:
         - edpm_ovn

@@ -20,38 +20,36 @@
   strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
-  collections:
-    - osp.edpm
   tasks:
     - name: Apply nftables configuration
       when:
         - deploy_edpm_openstack_run_firewall|default(true)|bool
-      import_role:
-        name: edpm_nftables
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nftables
         tasks_from: run.yml
       tags:
         - edpm_firewall
     - name: Run edpm_logrotate_crond
-      import_role:
-        name: edpm_logrotate_crond
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_logrotate_crond
         tasks_from: run.yml
       tags:
         - edpm_logrotate_crond
     - name: Run edpm_iscsid
-      import_role:
-        name: edpm_iscsid
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_iscsid
         tasks_from: run.yml
       tags:
         - edpm_iscsid
     - name: Run edpm_nova_libvirt
-      import_role:
-        name: edpm_nova_libvirt
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nova_libvirt
         tasks_from: run.yml
       tags:
         - edpm_nova_libvirt
     - name: Run edpm_nova_compute
-      import_role:
-        name: edpm_nova_compute
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nova_compute
         tasks_from: run.yml
       tags:
         - edpm_nova_compute

@@ -20,12 +20,10 @@
   name: Deploy EDPM Network
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
-  collections:
-    - osp.edpm
   tasks:
     - name: Run Network Config
-      import_role:
-        name: edpm_network_config
+      ansible.builtin.import_role:
+        name: osp.epdm.edpm_network_config
       vars:
         edpm_network_config_with_ansible: true
       tags:

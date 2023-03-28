@@ -20,30 +20,28 @@
   strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
-  collections:
-    - osp.edpm
   tasks:
     - name: Install edpm_logrotate_crond
-      import_role:
-        name: edpm_logrotate_crond
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_logrotate_crond
         tasks_from: install.yml
       tags:
         - edpm_logrotate_crond
     - name: Install edpm_iscsid
-      import_role:
-        name: edpm_iscsid
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_iscsid
         tasks_from: install.yml
       tags:
         - edpm_iscsid
     - name: Install edpm_nova-libvirt
-      import_role:
-        name: edpm_nova_libvirt
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nova_libvirt
         tasks_from: install.yml
       tags:
         - edpm_nova_libvirt
     - name: Install edpm_nova_compute
-      import_role:
-        name: edpm_nova_compute
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nova_compute
         tasks_from: install.yml
       tags:
         - edpm_nova_compute

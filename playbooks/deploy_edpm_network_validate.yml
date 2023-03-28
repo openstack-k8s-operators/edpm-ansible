@@ -20,11 +20,9 @@
   name: Server Network Validation
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
-  collections:
-    - osp.edpm
   tasks:
     - name: Basic Network Validation
-      import_role:
-        name: edpm_nodes_validation
+      ansible.builtin.import_role:
+        name: osp.edpm_nodes_validation
       tags:
         - edpm_nodes_validation
