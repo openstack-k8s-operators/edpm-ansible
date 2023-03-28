@@ -21,6 +21,8 @@
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   become: true
+  collections:
+  - osp.edpm
   tasks:
     - name: Run edpm_sshd
       import_role:

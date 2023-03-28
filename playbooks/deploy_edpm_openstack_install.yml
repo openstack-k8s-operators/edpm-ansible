@@ -20,6 +20,8 @@
   strategy: free
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
+  collections:
+  - osp.edpm
   tasks:
     - name: Install edpm_logrotate_crond
       import_role:
