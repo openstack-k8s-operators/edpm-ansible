@@ -21,7 +21,7 @@
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   collections:
-  - osp.edpm
+    - osp.edpm
   tasks:
     - name: Run Network Config
       import_role:

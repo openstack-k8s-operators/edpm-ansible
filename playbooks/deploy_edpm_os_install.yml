@@ -21,7 +21,7 @@
   any_errors_fatal: true
   become: true
   collections:
-  - osp.edpm
+    - osp.edpm
   tasks:
     - name: Install edpm_bootstrap
       import_role:

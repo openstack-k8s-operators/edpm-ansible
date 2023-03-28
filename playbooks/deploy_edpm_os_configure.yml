@@ -22,7 +22,7 @@
   any_errors_fatal: true
   become: true
   collections:
-  - osp.edpm
+    - osp.edpm
   tasks:
     - name: Configure edpm_podman
       import_role:
