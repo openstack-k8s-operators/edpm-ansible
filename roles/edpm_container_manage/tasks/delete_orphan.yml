@@ -29,6 +29,6 @@
   vars:
     edpm_container_cli: "{{ edpm_container_manage_cli }}"
     edpm_containers_to_rm: >-
-      {{ podman_containers.containers | needs_delete(config=all_containers_hash,
+      {{ podman_containers.containers | osp.edpm.needs_delete(config=all_containers_hash,
       config_id=edpm_container_manage_config_id, check_config=False,
       clean_orphans=True) }}
