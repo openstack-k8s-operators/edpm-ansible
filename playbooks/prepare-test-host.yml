@@ -43,17 +43,9 @@
         group: "{{ ansible_user }}"
         mode: "0700"
 
-    - name: Create ssh key pair
-      ansible.builtin.user:
-        name: "{{ ansible_user }}"
-        generate_ssh_key: true
-        ssh_key_bits: 2048
-        ssh_key_file: "{{ ansible_user_dir }}/.ssh/id_rsa"
-
-    - name: Slurp pub key
-      ansible.builtin.slurp:
-        src: "{{ ansible_user_dir ~ '/.ssh/id_rsa.pub' }}"
-      register: pub_key
+    - name: Fail the playbook intensionally
+      ansible.builtin.shell: |
+        exit 1
 
     - name: Ensure can ssh to can connect to localhost
       ansible.posix.authorized_key:
