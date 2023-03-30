@@ -22,43 +22,43 @@
   become: true
   tasks:
     - name: Install edpm_bootstrap
-      import_role:
-        name: edpm_bootstrap
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_bootstrap
         tasks_from: bootstrap.yml
       tags:
         - edpm_bootstrap
     - name: Install edpm_kernel
-      import_role:
-        name: edpm_kernel
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_kernel
       tags:
         - edpm_kernel
     - name: Install edpm_tuned
-      import_role:
-        name: edpm_tuned
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_tuned
         tasks_from: install.yml
       tags:
         - edpm_tuned
     - name: Install edpm_podman
-      import_role:
-        name: edpm_podman
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_podman
         tasks_from: install.yml
       tags:
         - edpm_podman
     - name: Install edpm_sshd
-      import_role:
-        name: edpm_sshd
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_sshd
         tasks_from: install.yml
       tags:
         - edpm_sshd
     - name: Install edpm_chrony
-      import_role:
-        name: edpm_chrony
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_chrony
         tasks_from: install.yml
       tags:
         - edpm_chrony
     - name: Install edpm_ovn
-      import_role:
-        name: edpm_ovn
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovn
         tasks_from: install.yml
       tags:
         - edpm_ovn
