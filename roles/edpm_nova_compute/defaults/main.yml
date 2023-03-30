@@ -48,7 +48,6 @@ edpm_nova_compute_opt_volumes: []  # role specific
 edpm_nova_compute_opt_env_vars: {}  # role specific
 edpm_nova_compute_rbd_disk_cachemodes: "{{ edpm_rbd_disk_cachemodes | default(['network=writeback']) }}"
 edpm_nova_compute_startup_delay: 0
-edpm_nova_compute_enable_instance_ha: false
 edpm_nova_compute_rbd_pool_name: vms  # role specific
 edpm_nova_compute_cinder_enable_nfs_backend: false
 edpm_nova_compute_mkisofs_cmd: mkisofs  # role specific

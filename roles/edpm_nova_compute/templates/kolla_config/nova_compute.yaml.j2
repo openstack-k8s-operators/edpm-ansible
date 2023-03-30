@@ -1,8 +1,6 @@
 command:
 {%- if edpm_nova_compute_startup_delay != 0 -%}
   '/var/lib/nova/delay-nova-compute --delay {{ edpm_nova_compute_startup_delay }} --nova-binary'
-{% elif edpm_nova_compute_enable_instance_ha -%}
-  '/var/lib/nova/instanceha/check-run-nova-compute'
 {% else %}
   '/usr/bin/nova-compute'
 {% endif -%}

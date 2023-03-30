@@ -124,38 +124,16 @@
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
 
-- name: Install Instance HA recovery script
-  when: edpm_nova_compute_enable_instance_ha|bool
-  block:
-    - name: Prepare Instance HA script directory
-      ansible.builtin.file:
-        path: /var/lib/nova/instanceha
-        state: directory
-        mode: 0755
+- name: Install nova-compute delay wrapper script
+  ansible.builtin.copy:
+    content: delay-nova-compute
+    dest: /var/lib/nova/delay-nova-compute
+    mode: 0755
+  when: edpm_nova_compute_startup_delay|int > 0
 
-    - name: Install Instance HA script that runs nova-compute
-      ansible.builtin.copy:
-        content: check-run-nova-compute
-        dest: /var/lib/nova/instanceha/check-run-nova-compute
-        mode: 0755
-
-    - name: If instance HA is enabled on the node activate the evacuation completed check
-      ansible.builtin.file:
-        path: /var/lib/nova/instanceha/enabled
-        state: touch
-        mode: 0644
-      when: inventory_hostname in groups["compute_instanceha"] | default([])
-
-    - name: Install nova-compute delay wrapper script
-      ansible.builtin.copy:
-        content: delay-nova-compute
-        dest: /var/lib/nova/delay-nova-compute
-        mode: 0755
-      when: edpm_nova_compute_startup_delay|int > 0
-
-    - name: Disable irqbalance service on compute
-      when: edpm_nova_compute_disable_irq_balance|bool
-      ansible.builtin.service:
-        name: irqbalance.service
-        state: stopped
-        enabled: false
+- name: Disable irqbalance service on compute
+  when: edpm_nova_compute_disable_irq_balance|bool
+  ansible.builtin.service:
+    name: irqbalance.service
+    state: stopped
+    enabled: false
