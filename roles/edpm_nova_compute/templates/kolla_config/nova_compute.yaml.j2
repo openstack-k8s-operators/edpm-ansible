@@ -24,6 +24,9 @@ permissions:
   - path: /var/log/nova
     owner: nova:nova
     recurse: true
+  - path: /run/nova
+    owner: nova:nova
+    recurse: false
   - path: {{ "/etc/ceph/" ~ edpm_nova_compute_ceph_cluster_name ~ ".client." ~ edpm_nova_compute_ceph_client_user_name ~ ".keyring" }}
     owner: nova:nova
     perm: '0600'

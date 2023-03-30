@@ -25,9 +25,9 @@ parser.add_argument('--delay', dest='delay', action='store',
                     default=120, type=int,
                     help='Number of seconds to wait until nova-compute is started')
 parser.add_argument('--state-file', dest='state_file', action='store',
-                    default="/run/nova-compute-delayed",
+                    default="/run/nova/nova-compute-delayed",
                     help='file exists if we already delayed nova-compute startup'\
-                    '(default: /run/nova-compute-delayed)')
+                    '(default: /run/nova/nova-compute-delayed)')
 
 
 sections = {}

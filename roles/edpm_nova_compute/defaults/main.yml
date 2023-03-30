@@ -136,6 +136,7 @@ edpm_nova_compute_volumes:
   - /dev:/dev
   - /lib/modules:/lib/modules:ro
   - /run:/run
+  - /run/nova:/run/nova:z
   - /var/lib/iscsi:/var/lib/iscsi:z
   - /var/lib/libvirt:/var/lib/libvirt:shared
   - /sys/class/net:/sys/class/net
