@@ -121,6 +121,10 @@ edpm_nova_compute_vgpu_types_device_addresses_mapping: {}  # role specific, DEPR
 edpm_nova_compute_root_stack_name: "{{ edpm_root_stack_name | default('') }}"  # assert not empty
 edpm_nova_compute_auth_cloud_name: "{{ edpm_auth_cloud_name | default('') }}"  # assert not empty
 edpm_nova_compute_libvirt_manage_libvirt_services: false
+edpm_nova_compute_swap_size_megabytes: 4096
+edpm_nova_compute_swap_path: /swap
+edpm_nova_compute_swap_partition: false
+edpm_nova_compute_swap_partition_label: swap1
 
 edpm_nova_compute_common_volumes: "{{ edpm_container_standalone_common_volumes }}"
 
