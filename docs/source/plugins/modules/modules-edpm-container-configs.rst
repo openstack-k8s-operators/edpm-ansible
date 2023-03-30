@@ -9,6 +9,6 @@ This module provides for the following ansible plugin:
 
 
 .. ansibleautoplugin::
-   :module: plugins/modules/edpm_container_configs.py
-   :documentation: true
-   :examples: true
+    :module: plugins/modules/edpm_container_configs.py
+    :documentation: true
+    :examples: true
