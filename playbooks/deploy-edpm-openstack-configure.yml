@@ -38,18 +38,6 @@
         tasks_from: configure.yml
       tags:
         - edpm_iscsid
-    - name: Configure edpm_nova_libvirt
-      import_role:
-        name: edpm_nova_libvirt
-        tasks_from: configure.yml
-      tags:
-        - edpm_nova_libvirt
-    - name: Configure edpm_nova_compute
-      import_role:
-        name: edpm_nova_compute
-        tasks_from: configure.yml
-      tags:
-        - edpm_nova_compute
     - name: Configure nftables
       import_role:
         name: edpm_nftables
