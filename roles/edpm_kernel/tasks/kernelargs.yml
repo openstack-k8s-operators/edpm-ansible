@@ -18,30 +18,6 @@
   ansible.builtin.command: cat /proc/cmdline
   register: cmdline
 
-- name: TSX KernelArgs compute node reboot prevention
-  when:
-    - '"nova_libvirt" in groups'
-  block:
-    - name: Check if node has a nova.conf
-      ansible.builtin.stat:
-        path: "{{ edpm_nova_compute_config_dir }}/etc/nova/nova.conf"
-      register: nova_conf_check
-
-    - name: Enabling defer_reboot when TSX was added or appended
-      when:
-        - nova_conf_check.stat.exists
-        - edpm_kernel_args is regex("^[\s]*tsx=[\S]+[\s]*$")
-      block:
-        - name: Warn operator about workload protection
-          ansible.builtin.debug:
-            msg: |
-              Automated reboot for this node has been defered because it is already provisionned.
-              Please schedule a manual reboot after this deployment is completed.
-
-        - name: Setting workload protection fact
-          ansible.builtin.set_fact:
-            _workload_protection: true
-
 - name: EDPM Hugepages configuration
   vars:
     _converted_hugepages: {}
