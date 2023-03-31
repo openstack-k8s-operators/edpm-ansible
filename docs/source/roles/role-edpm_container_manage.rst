@@ -8,8 +8,7 @@ Role - edpm_container_manage
 Usage
 ~~~~~
 
-Note that right now, only Podman is supported by this role. Docker support is
-in the roadmap though.
+Note that right now, only Podman is supported by this role.
 
 This Ansible role allows to do the following tasks:
 

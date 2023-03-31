@@ -20,7 +20,3 @@ _edpm_podman_packages:
 
 _edpm_buildah_packages:
   - buildah
-
-_edpm_podman_purge_packages:
-  - docker
-  - docker-ce
