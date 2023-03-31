@@ -2,14 +2,10 @@
 
 set -euxo pipefail
 
-TEMP_VENV_ENV="/tmp/sphinx"
+TEMP_VENV_ENV="$(mktemp -d)"
 DOCS_DIR="./docs"
 
-if [ ! -d ${TEMP_VENV_ENV} ]; then
-    python -m venv ${TEMP_VENV_ENV}
-fi
-
-source ${TEMP_VENV_ENV}/bin/activate
+python -m venv ${TEMP_VENV_ENV} && source ${TEMP_VENV_ENV}/bin/activate
 
 pip install -r requirements.txt -r ${DOCS_DIR}/docs-requirements.txt
 ansible-galaxy install -r requirements.yml
