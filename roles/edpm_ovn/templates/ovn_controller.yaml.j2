@@ -9,8 +9,6 @@ depends_on:
 {% if edpm_ovn_cpu_set|default(false) %}
 cpuset_cpus: "{{ edpm_ovn_cpu_set }}"
 {% endif -%}
-healthcheck:
-  test: '/openstack/healthcheck {{ edpm_ovn_sb_server_port }}'
 volumes:
   {% set edpm_ovn_controller_volumes = [] %}
   {%- set edpm_ovn_controller_volumes =
