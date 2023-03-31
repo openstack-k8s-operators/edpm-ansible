@@ -10,7 +10,9 @@ TEST_VERBOSITY := '-vvv'
 
 .PHONY: help
 help: ## Display this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk \
+		'BEGIN {FS = ":.*?## "; print "Usage"}; \
+		{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: setup_test_environment
 setup_test_environment: ## Setup the test environment
