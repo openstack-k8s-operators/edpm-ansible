@@ -4,6 +4,7 @@
 .venv
 *.egg*
 egg
+.coverage
 .testrepository
 __pycache__
 build
