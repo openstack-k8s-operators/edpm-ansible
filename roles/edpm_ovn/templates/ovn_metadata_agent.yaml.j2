@@ -6,8 +6,6 @@ user: root
 restart: always
 depends_on:
   - openvswitch.service
-healthcheck:
-  test: '/openstack/healthcheck {{ edpm_ovn_sb_server_port }}'
 volumes:
   {% set edpm_ovn_metadata_volumes = [] %}
   {%- set edpm_ovn_metadata_volumes =

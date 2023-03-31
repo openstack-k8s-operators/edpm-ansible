@@ -4,8 +4,6 @@ pid: {{ edpm_logrotate_crond_podman_pid }}
 privileged: true
 user: root
 restart: always
-healthcheck:
-  test: '/usr/share/openstack-edpm-common/healthcheck/cron'
 volumes:
   {{ edpm_container_standalone_common_volumes | default([]) + edpm_logrotate_crond_volumes }}
 environment:
