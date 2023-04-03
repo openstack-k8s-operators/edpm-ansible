@@ -9,6 +9,6 @@ This module provides for the following ansible plugin:
 
 
 .. ansibleautoplugin::
-   :module: plugins/modules/container_config_hash.py
-   :documentation: true
-   :examples: true
+    :module: plugins/modules/container_config_hash.py
+    :documentation: true
+    :examples: true

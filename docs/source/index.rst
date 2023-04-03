@@ -15,7 +15,7 @@ Contents:
    contributing_roles
    usage
    roles
-   modules
+   plugins
 
 Indices and tables
 ==================

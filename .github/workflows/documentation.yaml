@@ -34,13 +34,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install dependencies
-        run: |
-          pip install tox
-          pip install -r docs/requirements.txt
       - name: Build documentation
         run: |
-          tox -e docs
+          docs/build-docs.sh
       - name: Upload artifacts
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v1
