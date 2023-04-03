@@ -1,11 +1,9 @@
 [Unit]
 Description=EDPM Container Shutdown
 Documentation=https://github.com/openstack-k8s-operators/docs
-# Note: docker.service will be removed once CentOS8 / RHEL8 will be the default
-# platform, but for now we keep it for Pacemaker testing.
 # pacemaker.service is needed here, to make sure that all non-Pacemaker managed
 # containers are stopped before Pacemaker.
-After=pacemaker.service docker.service network-online.target iptables.service ip6tables.service
+After=pacemaker.service network-online.target iptables.service ip6tables.service
 Before=shutdown.target
 RefuseManualStop=yes
 
