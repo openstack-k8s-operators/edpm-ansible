@@ -20,5 +20,5 @@
 # All variables within this role should have a prefix of "edpm_ceph_client_files"
 edpm_ceph_client_files_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_ceph_client_files_hide_sensitive_logs: true
-edpm_ceph_client_files_source: ""
-edpm_ceph_client_files_config_home: "{{ edpm_ceph_client_config_home | default('/var/lib/edpm-config/ceph/') }}"
+edpm_ceph_client_files_source: '/etc/ceph'
+edpm_ceph_client_files_config_home: "{{ edpm_ceph_client_config_home | default('/etc/ceph/') }}"
