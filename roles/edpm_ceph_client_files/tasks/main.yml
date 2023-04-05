@@ -14,17 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Fail if edpm_ceph_client_files_source is missing
-  ansible.builtin.fail:
-    msg: >-
-      edpm_ceph_client_files_source must be set to a path that
-      already exists on the Ansible host which contains Ceph
-      configuration and Cephx key files.
-  when:
-    - edpm_ceph_client_files_source is not defined or
-      (edpm_ceph_client_files_source is defined and
-       edpm_ceph_client_files_source | length < 1)
-
 - name: Get list ceph files to copy from localhost edpm_ceph_client_files_source
   delegate_to: localhost
   become: true
