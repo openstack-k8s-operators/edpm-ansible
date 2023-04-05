@@ -1,0 +1,271 @@
+---
+# defaults file for edpm_ovn
+edpm_ovn_neutron_config_dir: "/var/lib/config-data/ansible-generated/neutron"
+edpm_ovn_metadata_agent_config_dir: "/etc/neutron"
+edpm_ovn_metadata_agent_log_dir: "/var/log/neutron"
+edpm_ovn_bridge: br-int
+edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
+edpm_ovn_encap_type: geneve
+edpm_ovn_dbs: []
+edpm_enable_dvr: true
+edpm_enable_hw_offload: false
+edpm_ovn_multi_rhel: false
+edpm_enable_internal_tls: false
+edpm_ovn_sb_server_port: 6642
+edpm_ovn_of_probe_interval: 60
+edpm_ovn_remote_probe_interval: 60000
+edpm_ovn_ofctrl_wait_before_clear: 8000
+edpm_ovn_controller_agent_image: "quay.io/tripleozedcentos9/openstack-ovn-controller:current-tripleo"
+edpm_ovn_metadata_agent_image: "quay.io/tripleozedcentos9/openstack-neutron-metadata-agent-ovn:current-tripleo"
+edpm_ovn_encap_ip: "{{ tenant_ip }}"
+edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% endif %}"
+
+edpm_ovn_controller_common_volumes:
+  - /lib/modules:/lib/modules:ro
+  - /run:/run
+  - /var/lib/openvswitch/ovn:/run/ovn:shared,z
+  - /var/log/containers/openvswitch:/var/log/openvswitch:z
+  - /var/log/containers/openvswitch:/var/log/ovn:z
+  - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
+
+edpm_ovn_metadata_common_volumes:
+  - /lib/modules:/lib/modules:ro
+  - /run/openvswitch:/run/openvswitch:z
+  - "{{ edpm_ovn_neutron_config_dir }}/etc/neutron:/etc/neutron:z"
+  - /run/netns:/run/netns:shared
+  - /var/log/containers/neutron:/var/log/neutron:z
+  - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
+
+edpm_ovn_controller_tls_volumes:
+  - /etc/pki/tls/certs/:/etc/pki/tls/certs/
+  - /etc/pki/tls/private/:/etc/pki/tls/private/
+
+# Set external_id data from provided variables
+edpm_ovn_ovs_external_ids:
+  hostname: "{{ ansible_facts['fqdn'] }}"
+  ovn-bridge: "{{ edpm_ovn_bridge }}"
+  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(', ') }}"
+  ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
+  ovn-encap-type: "{{ edpm_ovn_encap_type }}"
+  ovn-match-northd-version: true
+  ovn-monitor-all: true
+  ovn-openflow-probe-interval: "{{ edpm_ovn_of_probe_interval }}"
+  ovn-remote: "{% set db_addresses = [] %}{% for host in edpm_ovn_dbs %}{{ db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) }}{% endfor %}{{ db_addresses | join(',') }}"
+  ovn-remote-probe-interval: "{{ edpm_ovn_remote_probe_interval }}"
+  ovn-ofctrl-wait-before-clear: "{{ edpm_ovn_ofctrl_wait_before_clear }}"
+  rundir: "/var/run/openvswitch"
+
+# Set openvswitch other_config.
+edpm_ovn_ovs_other_config:
+  vlan-limit: 0
+
+# Neutron conf
+# DEFAULT
+edpm_ovn_metadata_agent_DEFAULT_debug: false
+edpm_ovn_metadata_agent_DEFAULT_log_dir: '/var/log/neutron'
+edpm_ovn_metadata_agent_DEFAULT_rcp_response_timeout: '60'
+edpm_ovn_metadata_agent_DEFAULT_transport_url: '' # tripleo-standalone-vars
+edpm_ovn_metadata_agent_DEFAULT_bind_host: '' # missing vars
+edpm_ovn_metadata_agent_DEFAULT_auth_strategy: 'keystone'
+edpm_ovn_metadata_agent_DEFAULT_core_plugin: 'ml2'
+edpm_ovn_metadata_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}' # also in missing vars
+edpm_ovn_metadata_agent_DEFAULT_dns_domain: '' # missing vars
+edpm_ovn_metadata_agent_DEFAULT_dhcp_agent_notification: 'false'
+edpm_ovn_metadata_agent_DEFAULT_global_physnet_mtu: '1500'
+edpm_ovn_metadata_agent_DEFAULT_vlan_transparent: 'False'
+edpm_ovn_metadata_agent_DEFAULT_service_plugins: 'qos,ovn-router,trunk,segments,port_forwarding,log'
+edpm_ovn_metadata_agent_DEFAULT_l3_ha: 'False'
+edpm_ovn_metadata_agent_DEFAULT_max_l3_agents_per_router: '3'
+edpm_ovn_metadata_agent_DEFAULT_api_workers: '2'
+edpm_ovn_metadata_agent_DEFAULT_rpc_workers: '2'
+edpm_ovn_metadata_agent_DEFAULT_agent_down_time: '600'
+edpm_ovn_metadata_agent_DEFAULT_router_scheduler_driver: 'neutron.scheduler.l3_agent_scheduler.ChanceScheduler'
+edpm_ovn_metadata_agent_DEFAULT_allow_automatic_l3agent_failover: 'True'
+#edpm_ovn_metadata_agent_DEFAULT_: ''
+# oslo_concurrency
+edpm_ovn_metadata_agent_oslo_concurrency_lock_patch: '$state_path/lock'
+# oslo_messaging_notifications
+edpm_ovn_metadata_agent_oslo_messaging_notifications_driver: 'noop'
+edpm_ovn_metadata_agent_oslo_messaging_notifications_transport_url: '' # standalone-roles
+# oslo_messaging_rabbit
+edpm_ovn_metadata_agent_oslo_messaging_rabbit_heartbeat_timeout_threshold: '60'
+# oslo_middleware
+edpm_ovn_metadata_agent_oslo_middleware_enable_proxy_headers_parsing: '60'
+# oslo_policy
+edpm_ovn_metadata_agent_oslo_policy_policy_file: '/etc/neutron/policy.yaml'
+# Database
+edpm_ovn_metadata_agent_database_connection: ''
+edpm_ovn_metadata_agent_database_max_retries: '-1'
+edpm_ovn_metadata_agent_database_db_max_retries: '-1'
+# keystone
+edpm_ovn_metadata_agent_keystone_www_authenticate_uri: ''
+edpm_ovn_metadata_agent_keystone_interface: 'internal'
+edpm_ovn_metadata_agent_keystone_region_name: 'regionOne'
+edpm_ovn_metadata_agent_keystone_memcached_servers: ''
+edpm_ovn_metadata_agent_keystone_memcache_use_advanced_pool: 'True'
+edpm_ovn_metadata_agent_keystone_auth_type: 'password'
+edpm_ovn_metadata_agent_keystone_auth_url: ''
+edpm_ovn_metadata_agent_keystone_username: 'neutron'
+edpm_ovn_metadata_agent_keystone_password: ''
+edpm_ovn_metadata_agent_keystone_user_domain_name: 'Default'
+edpm_ovn_metadata_agent_keystone_project_name: 'service'
+edpm_ovn_metadata_agent_keystone_project_domain_name: 'Default'
+# nova
+edpm_ovn_metadata_agent_nova_auth_type: 'password'
+edpm_ovn_metadata_agent_nova_user_domain_name: 'Default'
+edpm_ovn_metadata_agent_nova_username: 'nova'
+edpm_ovn_metadata_agent_nova_password: ''
+edpm_ovn_metadata_agent_nova_project_domain_name: 'Default'
+edpm_ovn_metadata_agent_nova_project_name: 'service'
+edpm_ovn_metadata_agent_nova_auth_url: ''
+edpm_ovn_metadata_agent_nova_region_name: 'regionOne'
+edpm_ovn_metadata_agent_nova_endpoint_type: 'internal'
+# placement
+edpm_ovn_metadata_agent_placement_auth_type: 'password'
+edpm_ovn_metadata_agent_placement_user_domain_name: 'Default'
+edpm_ovn_metadata_agent_placement_username: 'placement'
+edpm_ovn_metadata_agent_placement_password: ''
+edpm_ovn_metadata_agent_placement_project_domain_name: 'Default'
+edpm_ovn_metadata_agent_placement_project_name: 'service'
+edpm_ovn_metadata_agent_placement_auth_url: ''
+edpm_ovn_metadata_agent_placement_region_name: 'regionOne'
+edpm_ovn_metadata_agent_placement_endpoint_type: 'internal'
+# ovs
+edpm_ovn_metadata_agent_ovs_igmp_snooping_enable: 'False'
+# quotas
+edpm_ovn_metadata_agent_quotas_quota_port: '500'
+edpm_ovn_metadata_agent_quotas_quota_security_group: '10'
+# agent
+edpm_ovn_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+edpm_ovn_metadata_agent_agent_report_interval: '300'
+
+# Rootwrap conf
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_use_syslog: 'False'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_daemon_timeout: '600'
+edpm_ovn_metadata_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
+
+# networking-ovn-metadata-agent.ini
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_debug: 'True'
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ''
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_protocol: 'http'
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ''
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_workers: '2'
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_state_path: '/var/lib/neutron'
+edpm_ovn_metadata_agent_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+edpm_ovn_metadata_agent_metadata_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
+edpm_ovn_metadata_agent_metadata_agent_ovs_ovsdb_connection_timeout: '180'
+edpm_ovn_metadata_agent_metadata_agent_ovn_ovsdb_probe_interval: '60000'
+edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection: ''
+
+edpm_ovn_metadata_agent_neutron_config:
+  DEFAULT:
+    debug: '{{ edpm_ovn_metadata_agent_DEFAULT_debug }}'
+    log_dir: '{{ edpm_ovn_metadata_agent_DEFAULT_log_dir }}'
+    rpc_response_timeout: '{{ edpm_ovn_metadata_agent_DEFAULT_rcp_response_timeout }}'
+    transport_url: '{{ edpm_ovn_metadata_agent_DEFAULT_transport_url }}'
+    bind_host: '{{ edpm_ovn_metadata_agent_DEFAULT_bind_host }}'
+    auth_strategy: '{{ edpm_ovn_metadata_agent_DEFAULT_auth_strategy }}'
+    core_plugin: '{{ edpm_ovn_metadata_agent_DEFAULT_core_plugin }}'
+    host: '{{ edpm_ovn_metadata_agent_DEFAULT_host }}'
+    dns_domain: '{{ edpm_ovn_metadata_agent_DEFAULT_dns_domain }}'
+    dhcp_agent_notification: '{{ edpm_ovn_metadata_agent_DEFAULT_dhcp_agent_notification }}'
+    global_physnet_mtu: '{{ edpm_ovn_metadata_agent_DEFAULT_global_physnet_mtu }}'
+    vlan_tranparent: '{{ edpm_ovn_metadata_agent_DEFAULT_vlan_transparent }}'
+    service_plugins: '{{ edpm_ovn_metadata_agent_DEFAULT_service_plugins }}'
+    l3_ha: '{{ edpm_ovn_metadata_agent_DEFAULT_l3_ha }}'
+    max_l3_agents_per_router: '{{ edpm_ovn_metadata_agent_DEFAULT_max_l3_agents_per_router }}'
+    api_workers: '{{ edpm_ovn_metadata_agent_DEFAULT_api_workers }}'
+    rpc_workers: '{{ edpm_ovn_metadata_agent_DEFAULT_rpc_workers }}'
+    agent_down_time: '{{ edpm_ovn_metadata_agent_DEFAULT_agent_down_time }}'
+    router_scheduler_driver: '{{ edpm_ovn_metadata_agent_DEFAULT_router_scheduler_driver }}'
+    allow_automatic_l3agent_failover: '{{ edpm_ovn_metadata_agent_DEFAULT_allow_automatic_l3agent_failover }}'
+  oslo_concurrency:
+    lock_path: '{{ edpm_ovn_metadata_agent_oslo_concurrency_lock_patch }}'
+  oslo_messaging_notifications:
+    driver: '{{ edpm_ovn_metadata_agent_oslo_messaging_notifications_driver }}'
+    transport_url: '{{ edpm_ovn_metadata_agent_oslo_messaging_notifications_transport_url }}'
+  oslo_messaging_rabbit:
+    heartbeat_timeout_threshold: '{{ edpm_ovn_metadata_agent_oslo_messaging_rabbit_heartbeat_timeout_threshold }}'
+  oslo_middleware:
+    enable_proxy_headers_parsing: '{{ edpm_ovn_metadata_agent_oslo_middleware_enable_proxy_headers_parsing }}'
+  oslo_policy:
+    policy_file: '{{ edpm_ovn_metadata_agent_oslo_policy_policy_file }}'
+  database:
+    connection: '{{ edpm_ovn_metadata_agent_database_connection }}'
+    max_retries: '{{ edpm_ovn_metadata_agent_database_max_retries }}'
+    db_max_retries: '{{ edpm_ovn_metadata_agent_database_db_max_retries }}'
+  keystone_authtoken:
+    www_authenticate_uri: '{{ edpm_ovn_metadata_agent_keystone_www_authenticate_uri }}'
+    interface: '{{ edpm_ovn_metadata_agent_keystone_interface }}'
+    region_name: '{{ edpm_ovn_metadata_agent_keystone_region_name }}'
+    memcached_servers: '{{ edpm_ovn_metadata_agent_keystone_memcached_servers }}'
+    memcache_use_advanced_pool: '{{ edpm_ovn_metadata_agent_keystone_memcache_use_advanced_pool }}'
+    auth_type: '{{ edpm_ovn_metadata_agent_keystone_auth_type }}'
+    auth_url: '{{ edpm_ovn_metadata_agent_keystone_auth_url }}'
+    username: '{{ edpm_ovn_metadata_agent_keystone_username }}'
+    password: '{{ edpm_ovn_metadata_agent_keystone_password }}'
+    user_domain_name: '{{ edpm_ovn_metadata_agent_keystone_user_domain_name }}'
+    project_name: '{{ edpm_ovn_metadata_agent_keystone_project_name }}'
+    project_domain_name: '{{ edpm_ovn_metadata_agent_keystone_project_domain_name }}'
+  agent:
+    root_helper: '{{ edpm_ovn_metadata_agent_agent_root_helper }}'
+    report_interval: '{{ edpm_ovn_metadata_agent_agent_report_interval }}'
+  nova:
+    auth_type: '{{ edpm_ovn_metadata_agent_nova_auth_type }}'
+    user_domain_name: '{{ edpm_ovn_metadata_agent_nova_user_domain_name }}'
+    username: '{{ edpm_ovn_metadata_agent_nova_username }}'
+    password: '{{ edpm_ovn_metadata_agent_nova_password }}'
+    project_domain_name: '{{ edpm_ovn_metadata_agent_nova_project_domain_name }}'
+    project_name: '{{ edpm_ovn_metadata_agent_nova_project_name }}'
+    auth_url: '{{ edpm_ovn_metadata_agent_nova_auth_url }}'
+    region_name: '{{ edpm_ovn_metadata_agent_nova_region_name }}'
+    endpoint_type: '{{ edpm_ovn_metadata_agent_nova_endpoint_type }}'
+  placement:
+    auth_type: '{{ edpm_ovn_metadata_agent_placement_auth_type }}'
+    user_domain_name: '{{ edpm_ovn_metadata_agent_placement_user_domain_name }}'
+    username: '{{ edpm_ovn_metadata_agent_placement_username }}'
+    password: '{{ edpm_ovn_metadata_agent_placement_password }}'
+    project_domain_name: '{{ edpm_ovn_metadata_agent_placement_project_domain_name }}'
+    project_name: '{{ edpm_ovn_metadata_agent_placement_project_name }}'
+    auth_url: '{{ edpm_ovn_metadata_agent_placement_auth_url }}'
+    region_name: '{{ edpm_ovn_metadata_agent_placement_region_name }}'
+    endpoint_type: '{{ edpm_ovn_metadata_agent_placement_endpoint_type }}'
+  ovs:
+    igmp_snooping_enable: '{{ edpm_ovn_metadata_agent_ovs_igmp_snooping_enable }}'
+  quotas:
+    quota_port: '{{ edpm_ovn_metadata_agent_quotas_quota_port }}'
+    quota_security_group: '{{ edpm_ovn_metadata_agent_quotas_quota_security_group }}'
+edpm_ovn_metadata_agent_neutron_config_overrides: {}
+
+edpm_ovn_metadata_agent_rootwrap_config:
+  DEFAULT:
+    filters_path: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_filters_path }}'
+    exec_dirs: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_exec_dirs }}'
+    use_syslog: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_use_syslog }}'
+    syslog_log_facility: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_facility }}'
+    syslog_log_level: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_level }}'
+    daemon_timeout: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_daemon_timeout }}'
+    rlimit_nofile: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_rlimit_nofile }}'
+edpm_ovn_metadata_agent_rootwrap_config_overrides: {}
+
+edpm_ovn_metadata_agent_metadata_agent_config:
+  DEFAULT:
+    debug: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_debug }}'
+    nova_metadata_host: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host }}'
+    nova_metadata_protocol: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_protocol }}'
+    metadata_proxy_shared_secret: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret }}'
+    metadata_workers: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_workers }}'
+    state_path: '{{ edpm_ovn_metadata_agent_metadata_agent_DEFAULT_state_path }}'
+  agent:
+    root_helper: '{{ edpm_ovn_metadata_agent_metadata_agent_agent_root_helper }}'
+  ovs:
+    ovsdb_connection: '{{ edpm_ovn_metadata_agent_metadata_agent_ovs_ovsdb_connection }}'
+    ovsdb_connection_timeout: '{{ edpm_ovn_metadata_agent_metadata_agent_ovs_ovsdb_connection_timeout }}'
+  ovn:
+    ovsdb_probe_interval: '{{ edpm_ovn_metadata_agent_metadata_agent_ovn_ovsdb_probe_interval }}'
+    ovn_sb_connection: '{{ edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection }}'
+edpm_ovn_metadata_agent_metadata_agent_config_overrides: {}

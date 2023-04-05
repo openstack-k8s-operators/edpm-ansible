@@ -54,7 +54,6 @@ jobs:
       with:
         image: openstack-ansibleee-runner
         tags: ${{ env.latesttag }} ${{ github.sha }}
-        context: ./openstack_ansibleee/
         containerfiles: |
           ./openstack_ansibleee/Dockerfile
 

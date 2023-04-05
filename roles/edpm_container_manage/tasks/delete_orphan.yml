@@ -1,0 +1,34 @@
+---
+# Copyright 2019 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Gather podman infos
+  containers.podman.podman_container_info: {}
+  register: podman_containers
+  no_log: "{{ not (edpm_container_manage_debug | bool) }}"
+  when:
+    - edpm_container_manage_cli == 'podman'
+
+- name: "Delete orphan containers managed by Podman for {{ edpm_container_manage_config }}"
+  when:
+    - edpm_container_manage_systemd_teardown | bool
+  ansible.builtin.include_role:
+    name: edpm_container_rm
+  vars:
+    edpm_container_cli: "{{ edpm_container_manage_cli }}"
+    edpm_containers_to_rm: >-
+      {{ podman_containers.containers | osp.edpm.needs_delete(config=all_containers_hash,
+      config_id=edpm_container_manage_config_id, check_config=False,
+      clean_orphans=True) }}

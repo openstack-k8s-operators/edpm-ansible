@@ -1,0 +1,63 @@
+# Do not manually edit this file.
+# Managed by ansible-role-chrony
+{% for server in edpm_chrony_ntp_servers -%}
+{% if server is mapping %}
+server {{ server.server_host }} {{ server.server_settings }}
+{% else %}
+server {{ server }} {{ edpm_chrony_global_server_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% for pool in edpm_chrony_ntp_pools -%}
+{% if pool is mapping %}
+pool {{ pool.pool_host }} {{ pool.pool_settings }}
+{% else %}
+pool {{ pool }} {{ edpm_chrony_global_pool_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% for peer in edpm_chrony_ntp_peers -%}
+{% if peer is mapping %}
+peer {{ peer.peer_host }} {{ peer.peer_settings }}
+{% else %}
+peer {{ peer }} {{ edpm_chrony_global_peer_settings|default('') }}
+{% endif %}
+{% endfor -%}
+
+{% if edpm_chrony_bind_addresses is defined and edpm_chrony_bind_addresses|length > 0 -%}
+{% for bind_addr in edpm_chrony_bind_addresses %}
+bindcmdaddress {{ bind_addr }}
+{% endfor %}
+{% endif -%}
+
+{% if edpm_chrony_acl_rules is defined and edpm_chrony_acl_rules|length > 0 -%}
+{{ edpm_chrony_acl_rules|join("\n") }}
+{% endif -%}
+
+{% if edpm_chrony_keyfile_path is defined -%}
+keyfile {{ edpm_chrony_keyfile_path }}
+{% endif -%}
+
+{% if edpm_chrony_driftfile_path is defined -%}
+driftfile {{ edpm_chrony_driftfile_path }}
+{% endif -%}
+
+{% if edpm_chrony_logdir_path is defined -%}
+logdir {{ edpm_chrony_logdir_path }}
+{% endif -%}
+
+{% if edpm_chrony_rtc_settings is defined -%}
+{{ edpm_chrony_rtc_settings|join("\n") }}
+{% endif -%}
+
+{% if edpm_chrony_log_options is defined -%}
+log {{ edpm_chrony_log_options }}
+{% endif -%}
+
+{% if edpm_chrony_makestep is defined -%}
+makestep {{ edpm_chrony_makestep }}
+{% endif -%}
+
+{% if edpm_chrony_extra_options -%}
+{{ edpm_chrony_extra_options|join("\n") }}
+{% endif -%}

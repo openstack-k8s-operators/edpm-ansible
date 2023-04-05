@@ -1,16 +1,11 @@
 *.py[cod]
 
 # Testing cruft
-.tox
 .venv
 *.egg*
 egg
 .coverage
-cover
-nosetests.xml
 .testrepository
-.stestr
-edpm_ansible.egg-info/
 __pycache__
 build
 
@@ -22,21 +17,18 @@ build
 # Playbook retry files
 *.retry
 
-# roles
-edpm_ansible/roles.galaxy/*
-
 # Sphinx
-doc/build
+docs/build
 
 ansible-errors.json
 pytestdebug.log
-
-# doc
-doc/build/*
 
 # JetBrain
 .idea/
 .cache
 
-# Custom inventory variable files
-edpm_ansible/inventory/99-standalone-vars
+# test output
+tests/output/**
+
+# collection build
+*.tar.gz

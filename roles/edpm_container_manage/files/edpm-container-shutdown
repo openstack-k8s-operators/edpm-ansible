@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+TIMEOUT=${1:-90}
+PARALLEL=${2:-10}
+
+if command -v dnf >/dev/null;then
+    if command -v podman >/dev/null; then
+        containers=$(podman ps --filter label=managed_by=edpm_ansible --format {{.Names}})
+        for c in $containers; do
+            logger -p warning "WARNING ($c) Container $c managed by edpm-ansible is not stopped yet"
+            logger -p warning "WARNING ($c) Check systemd logs: journalctl -u edpm_$c"
+        done
+    fi
+fi

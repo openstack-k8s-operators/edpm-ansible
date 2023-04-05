@@ -1,0 +1,47 @@
+---
+# Copyright 2019 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: "Create containers managed by Podman for {{ edpm_container_manage_config }}"
+  edpm_container_manage:
+    config_id: "{{ edpm_container_manage_config_id }}"
+    config_dir: "{{ edpm_container_manage_config }}"
+    config_patterns: "{{ edpm_container_manage_config_patterns }}"
+    config_overrides: "{{ edpm_container_manage_config_overrides }}"
+    concurrency: "{{ edpm_container_manage_concurrency }}"
+
+- name: Check if /etc/sysconfig/podman_drop_in exists
+  ansible.builtin.stat:
+    path: /etc/sysconfig/podman_drop_in
+  register: podman_drop_in_file
+
+# NOTE(mwhahaha): this fact is used as part of the container_systemd templating
+- name: Set podman_drop_in fact
+  ansible.builtin.set_fact:
+    podman_drop_in: true
+  when:
+    - podman_drop_in_file.stat.exists
+
+- name: "Manage container systemd services and cleanup old systemd healthchecks for {{ edpm_container_manage_config }}"
+  become: true
+  container_systemd:
+    container_config: "{{ container_config }}"
+    debug: "{{ edpm_container_manage_debug | bool }}"
+    systemd_healthchecks: "{{ (not edpm_container_manage_healthcheck_disabled | bool) }}"
+  vars:
+    container_config: "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
+  when:
+    - edpm_container_manage_cli == 'podman'
+    - (container_config|length) > 0
