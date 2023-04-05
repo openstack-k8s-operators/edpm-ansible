@@ -23,7 +23,7 @@
   tasks:
     - name: Run Network Config
       ansible.builtin.import_role:
-        name: osp.epdm.edpm_network_config
+        name: osp.edpm.edpm_network_config
       vars:
         edpm_network_config_with_ansible: true
       tags:
