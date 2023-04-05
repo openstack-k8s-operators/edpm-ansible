@@ -17,23 +17,17 @@
 - name: Create persistent directories
   ansible.builtin.file:
     path: "{{ item.path }}"
-    setype: "{{ item.setype }}"
     state: directory
+    setype: "{{ item.setype | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { 'path': /etc/iscsi, 'setype': container_file_t }
+    - { 'path': /etc/iscsi, 'setype': container_file_t, 'mode': '0755' }
     - { 'path': /etc/target, 'setype': container_file_t }
     - { 'path': /var/lib/iscsi, 'setype': container_file_t }
-
-- name: Create fcontext entry for iscsi
-  community.general.sefcontext:
-    target: "{{ item.path }}(/.*)?"
-    setype: "{{ item.setype }}"
-    state: present
-  loop:
-    - { 'path': /etc/iscsi, 'setype': container_file_t }
-    - { 'path': /etc/target, 'setype': container_file_t }
-    - { 'path': /var/lib/iscsi, 'setype': container_file_t }
-  when: ansible_facts.selinux.status == "enabled"
+    - { 'path': /var/lib/config-data, 'setype': container_file_t, 'selevel': s0, 'mode': '0755' }
+    - { 'path': /var/lib/config-data/ansible-generated/iscsid, 'setype': container_file_t, 'mode': '0755' }
 
 - name: Stat /lib/systemd/system/iscsid.socket
   ansible.builtin.stat:
