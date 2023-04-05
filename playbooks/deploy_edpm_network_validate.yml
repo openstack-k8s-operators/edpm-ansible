@@ -23,6 +23,6 @@
   tasks:
     - name: Basic Network Validation
       ansible.builtin.import_role:
-        name: osp.edpm_nodes_validation
+        name: osp.edpm.edpm_nodes_validation
       tags:
         - edpm_nodes_validation
