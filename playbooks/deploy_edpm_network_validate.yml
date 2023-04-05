@@ -17,14 +17,12 @@
 
 - hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
   strategy: free
-  name: Deploy EDPM Network
+  name: Server Network Validation
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   tasks:
-    - name: Run Network Config
-      import_role:
-        name: edpm_network_config
-      vars:
-        edpm_network_config_with_ansible: true
+    - name: Basic Network Validation
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nodes_validation
       tags:
-        - edpm_network_config
+        - edpm_nodes_validation

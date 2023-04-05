@@ -17,17 +17,14 @@
 
 - hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
   strategy: free
-  name: Deploy EDPM Pre Network
+  name: Deploy EDPM Network
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
   tasks:
-
-    - name: Configure Hosts Entries
-      import_role:
-        name: edpm_hosts_entries
+    - name: Run Network Config
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_network_config
       vars:
-        edpm_hosts_entries_undercloud_hosts_entries: "{{ undercloud_hosts_entries }}"
-        edpm_hosts_entries_extra_hosts_entries: "{{ extra_hosts_entries }}"
-        edpm_hosts_entries_vip_hosts_entries: "{{ vip_hosts_entries }}"
+        edpm_network_config_with_ansible: true
       tags:
-        - edpm_hosts_entries
+        - edpm_network_config

@@ -41,7 +41,7 @@
     debug: "{{ edpm_container_manage_debug | bool }}"
     systemd_healthchecks: "{{ (not edpm_container_manage_healthcheck_disabled | bool) }}"
   vars:
-    container_config: "{{ all_containers_hash | dict_to_list | haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
+    container_config: "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
   when:
     - edpm_container_manage_cli == 'podman'
     - (container_config|length) > 0
