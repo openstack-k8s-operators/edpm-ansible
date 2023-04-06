@@ -30,6 +30,8 @@ edpm_iscsid_volumes:
   - /run:/run
   - /sys:/sys
   - /lib/modules:/lib/modules:ro
-  - "{{ edpm_iscsid_config_dir }}/etc/iscsi:/var/lib/kolla/config_files/src-iscsid:ro"
+  - /etc/iscsi:/etc/iscsi:z
   - /etc/target:/etc/target:z
   - /var/lib/iscsi:/var/lib/iscsi:z
+
+edpm_iscsid_chap_algs: 'SHA3-256,SHA256,SHA1,MD5'

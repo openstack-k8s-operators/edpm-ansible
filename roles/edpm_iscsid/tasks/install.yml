@@ -14,48 +14,43 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Create fcontext entry for iscsi
-  community.general.sefcontext:
-    target: "{{ item.path }}(/.*)?"
-    setype: "{{ item.setype }}"
-    state: present
-  with_items:
-    - {'path': /etc/iscsi, 'setype': container_file_t}
-    - {'path': /etc/target, 'setype': container_file_t}
-    - {'path': /var/lib/iscsi, 'setype': container_file_t}
-  when:
-    - edpm_selinux_mode | default('enforcing') == 'enforcing'
 - name: Create persistent directories
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    setype: "{{ item.setype }}"
-    mode: 0755
-  with_items:
-    - {'path': /etc/iscsi, 'setype': container_file_t}
-    - {'path': /etc/target, 'setype': container_file_t}
-    - {'path': /var/lib/iscsi, 'setype': container_file_t}
+    setype: "{{ item.setype | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - { 'path': /etc/iscsi, 'setype': container_file_t, 'mode': '0755' }
+    - { 'path': /etc/target, 'setype': container_file_t }
+    - { 'path': /var/lib/iscsi, 'setype': container_file_t }
+    - { 'path': /var/lib/config-data, 'setype': container_file_t, 'selevel': s0, 'mode': '0755' }
+    - { 'path': /var/lib/config-data/ansible-generated/iscsid, 'setype': container_file_t, 'mode': '0755' }
+
 - name: Stat /lib/systemd/system/iscsid.socket
   ansible.builtin.stat:
     path: /lib/systemd/system/iscsid.socket
   register: stat_iscsid_socket
+
 - name: Stop and disable iscsid.socket service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: iscsid.socket
     state: stopped
     enabled: false
   when: stat_iscsid_socket.stat.exists
+
 - name: Check if iscsi.service is enabled
   ansible.builtin.command: systemctl is-enabled --quiet iscsi.service
   failed_when: false
   register: iscsi_service_enabled_result
+
 - name: Stop iscsi.service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: iscsi.service
     state: stopped
     enabled: false
   when:
-    - not ansible_check_mode
     - iscsi_service_enabled_result is changed
     - iscsi_service_enabled_result.rc == 0
