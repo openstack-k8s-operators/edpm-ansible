@@ -5,8 +5,29 @@ edpm_ovn_metadata_agent_config_dir: "/etc/neutron"
 edpm_ovn_metadata_agent_log_dir: "/var/log/neutron"
 edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
+
+edpm_ovn_chassis_mac_first_octets: ["0e", "1e", "2e", "3e"]
+# Automatically generate the first two octets for the MAC address pefixes.
+# Pick random from first octets and then a nested iteration over a range
+# of seeds.
+# The inner loop breaks as soon as the bridge_mapping is in seen_bridges.
 edpm_ovn_chassis_mac_mapping_prefixes:
-  datacentre: "0e:01"
+  "{%- set mac_prefixes = {} -%}
+   {%- set seen_prefixes = [] -%}
+   {%- set seen_bridges = [] -%}
+   {%- for bridge_mapping in edpm_ovn_bridge_mappings -%}
+     {%- for n in range(0,255) if bridge_mapping not in seen_bridges -%}
+       {%- set _seed = (bridge_mapping + n|string) -%}
+       {%- set prefix = edpm_ovn_chassis_mac_first_octets | random + ':' + '%02x' % 255 | random(seed=_seed) -%}
+       {%- if not prefix in seen_prefixes -%}
+         {%- set seen_prefixes = seen_prefixes.append(prefix) -%}
+         {%- set seen_bridges = seen_bridges.append(bridge_mapping) -%}
+         {%- set mac_prefixes = mac_prefixes.update({(bridge_mapping | split(':') | first): prefix}) -%}
+       {%- endif -%}
+     {%- endfor -%}
+   {%- endfor -%}
+  {{ mac_prefixes }}"
+
 edpm_ovn_chassis_mac_mapping_seed: "{{ ansible_machine_id }}"
 edpm_ovn_encap_type: geneve
 edpm_ovn_dbs: []
