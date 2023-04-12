@@ -3,17 +3,21 @@ dependency:
   name: galaxy
 driver:
   name: podman
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: Dockerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 provisioner:
   name: ansible
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-platforms:
-  - name: instance
-    image: quay.io/centos/centos:stream9
-    dockerfile: Dockerfile.j2
-    command: /sbin/init
-    privileged: true
+verifier:
+  name: ansible
 scenario:
   test_sequence:
     - dependency
