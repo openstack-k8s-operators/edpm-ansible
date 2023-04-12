@@ -2,42 +2,28 @@
 
 - name: Prepare container
   hosts: instance
+  roles:
+    - role: test_deps
+      test_deps_extra_packages:
+        - podman
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      test_deps_edpm_packages:
+          - openvswitch
+    - role: env_data
   tasks:
+    - name: Mock ovs-vswitchd service
+      community.general.ini_file:
+        path: /etc/systemd/system/ovs-vswitchd.service
+        section: Service
+        option: "{{ item.option }}"
+        value: "{{ item.value | default(omit) }}"
+        state: "{{ item.state | default(omit) }}"
+      loop:
+        - { option: 'Type', value: 'exec' }
+        - { option: 'ExecStartPre', state: 'absent' }
+        - { option: 'ExecStart', value: '/bin/true' }
 
-  - name: Install required packages
-    ansible.builtin.dnf:
-      name:
-        - python-setuptools
-        - python-requests
-        - python3-pip
-        - git-core
-      state: latest
-
-  - name: Install repo-setup
-    ansible.builtin.pip:
-      name: git+https://github.com/openstack-k8s-operators/repo-setup
-
-  - name: Enable required repos
-    ansible.builtin.command: /usr/local/bin/repo-setup current-podified-dev
-
-  - name: Install openvswitch package
-    ansible.builtin.dnf:
-      name: openvswitch
-      state: latest
-      update_cache: true
-
-  - name: Mock ovs-vswitchd service
-    community.general.ini_file:
-      path: /etc/systemd/system/ovs-vswitchd.service
-      section: Service
-      option: "{{ item.option }}"
-      value: "{{ item.value | default(omit) }}"
-      state: "{{ item.state | default(omit) }}"
-    loop:
-      - { option: 'Type', value: 'exec' }
-      - { option: 'ExecStartPre', state: 'absent' }
-      - { option: 'ExecStart', value: '/bin/true' }
-
-  - name: Force systemd to reread configs
-    ansible.builtin.systemd:
-      daemon_reload: true
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true

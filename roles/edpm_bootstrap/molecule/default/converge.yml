@@ -5,4 +5,4 @@
     # replace these tasks with whatever you find suitable to test
     - name: "Include edpm_bootstrap"
       ansible.builtin.include_role:
-        name: "edpm_bootstrap"
+        name: "osp.edpm.edpm_bootstrap"
