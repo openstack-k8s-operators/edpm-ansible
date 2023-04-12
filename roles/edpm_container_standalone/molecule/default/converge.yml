@@ -17,5 +17,18 @@
 
 - name: Converge
   hosts: all
+  vars:
+    edpm_container_standalone_service: test
+    edpm_container_standalone_container_defs:
+      test:
+        image: quay.io/centos/centos:stream9
+        net: host
+        privileged: true
+        restart: always
+        environment:
+            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+    edpm_container_standalone_kolla_config_files:
+      test:
+        command: 'sleep 3600'
   roles:
-    - role: "edpm_container_standalone"
+    - role: "osp.edpm.edpm_container_standalone"

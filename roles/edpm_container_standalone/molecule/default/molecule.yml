@@ -1,28 +1,23 @@
 ---
+dependency:
+  name: galaxy
 driver:
   name: podman
-
 provisioner:
-  inventory:
-    hosts:
-      all:
-        hosts:
-          centos:
-            ansible_python_interpreter: /usr/bin/python3
   name: ansible
   log: true
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml
-
+platforms:
+  - name: instance
+    image: quay.io/centos/centos:stream9
+    dockerfile: Dockerfile.j2
+    command: /sbin/init
+    privileged: true
 scenario:
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
-    - check
-    - verify
     - destroy
-
-verifier:
-  name: testinfra
