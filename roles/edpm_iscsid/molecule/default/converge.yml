@@ -17,5 +17,16 @@
 
 - name: Converge
   hosts: all
-  roles:
-    - role: "edpm_iscsid"
+  tasks:
+    - name: Install iscsid
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: install.yml
+    - name: Configure iscsid
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: configure.yml
+    - name: Run iscsid
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: run.yml
