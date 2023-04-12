@@ -28,68 +28,36 @@
       file:
         path: '/tmp/container-configs'
         state: directory
-    - name: Create a configuration file for a fedora container
+    - name: Create a configuration file for a centos container
       # ipc mode added as WA for podman 4.1.x
       copy:
         content: |
           {
-            "image": "fedora:latest",
+            "image": "quay.io/centos/centos:stream9",
             "net": "host",
             "ipc": "shareable",
             "command": "sleep 3600",
             "restart": "always",
-            "check_interval": "500s",
-            "healthcheck": { "test": "echo test" }
+            "check_interval": "500s"
           }
-        dest: '/tmp/container-configs/fedora.json'
-    - name: Create a secondary configuration file for a fedora container
+        dest: '/tmp/container-configs/centos.json'
+    - name: Create a secondary configuration file for a centos container
       copy:
         content: |
           {
-            "image": "fedora:latest",
+            "image": "quay.io/centos/centos:stream9",
             "net": "host",
             "ipc": "shareable",
             "command": "sleep 5"
           }
-        dest: '/tmp/container-configs/fedora_bis.json'
-    - name: Create a third configuration file for a fedora container
+        dest: '/tmp/container-configs/centos_bis.json'
+    - name: Create a third configuration file for a centos container
       copy:
         content: |
           {
-            "image": "fedora:latest",
+            "image": "quay.io/centos/centos:stream9",
             "net": "host",
             "ipc": "shareable",
             "command": "sleep 5"
           }
-        dest: '/tmp/container-configs/fedora_three.json'
-    - name: Create old healthcheck service for fedora container
-      copy:
-        content: |
-          [Unit]
-          Description=edpm_fedora healthcheck
-          Requisite=edpm_fedora.service
-          [Service]
-          Type=oneshot
-          ExecStart=/usr/bin/podman exec --user root fedora sleep 3600 }}
-          [Install]
-          WantedBy=multi-user.target
-        dest: '/etc/systemd/system/edpm_fedora_healthcheck.service'
-        mode: '0644'
-        owner: root
-        group: root
-    - name: Create old healthcheck timer for fedora container
-      copy:
-        content: |
-          [Unit]
-          Description=edpm_fedora container healthcheck
-          PartOf=edpm_fedora.service
-          [Timer]
-          OnActiveSec=120
-          OnUnitActiveSec=60
-          RandomizedDelaySec=5
-          [Install]
-          WantedBy=timers.target
-        dest: '/etc/systemd/system/edpm_fedora_healthcheck.timer'
-        mode: '0644'
-        owner: root
-        group: root
+        dest: '/tmp/container-configs/centos_three.json'
