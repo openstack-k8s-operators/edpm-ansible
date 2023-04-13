@@ -18,4 +18,4 @@
 - name: Converge
   hosts: all
   roles:
-    - role: "edpm_nodes_validation"
+    - role: "osp.edpm.edpm_nodes_validation"
