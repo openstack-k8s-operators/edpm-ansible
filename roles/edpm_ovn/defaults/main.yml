@@ -5,6 +5,9 @@ edpm_ovn_metadata_agent_config_dir: "/etc/neutron"
 edpm_ovn_metadata_agent_log_dir: "/var/log/neutron"
 edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
+edpm_ovn_chassis_mac_mapping_prefixes:
+  datacentre: "0e:01"
+edpm_ovn_chassis_mac_mapping_seed: "{{ ansible_machine_id }}"
 edpm_ovn_encap_type: geneve
 edpm_ovn_dbs: []
 edpm_enable_dvr: true
@@ -45,6 +48,12 @@ edpm_ovn_ovs_external_ids:
   hostname: "{{ ansible_facts['fqdn'] }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
   ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(', ') }}"
+  ovn-chassis-mac-mappings:
+    "{%- set chassis_mac_mappings = [] -%}
+     {%- for physnet, mac_prefix in edpm_ovn_chassis_mac_mapping_prefixes.items() -%}
+       {{ chassis_mac_mappings.append([physnet, mac_prefix | community.general.random_mac(seed=edpm_ovn_chassis_mac_mapping_seed)] | join(':')) }}
+     {%- endfor -%}
+     {{ chassis_mac_mappings | join(',') }}"
   ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
   ovn-match-northd-version: true
