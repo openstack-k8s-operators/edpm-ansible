@@ -25,7 +25,7 @@
   tasks:
     - name: Cleanup nftables
       ansible.builtin.import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
         tasks_from: cleanup.yml
     - name: Create snippet directory
       become: true
@@ -34,7 +34,7 @@
         state: directory
     - name: Inject snippet for action
       become: true
-      edpm_nftables_snippet:
+      osp.edpm.edpm_nftables_snippet:
         dest: /opt/edpm-firewall/ruleset.yml
         content: |
           - rule_name: '000 related established'

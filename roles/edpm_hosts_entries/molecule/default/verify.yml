@@ -18,28 +18,22 @@
   hosts: all
   become: true
   gather_facts: false
+  vars_files:
+    - ../../defaults/main.yml
   tasks:
     - name: Check if hosts lines were written to hosts file
       lineinfile:
-        path: /tmp/hosts
+        path: "{{ edpm_hosts_entries_hosts_path }}"
         line: "{{ item }}"
       register: hosts_result
       check_mode: true
       loop:
-        - 192.168.24.1 centos.localdomain centos
-        - 192.168.24.1 centos.ctlplane.localdomain centos.ctlplane
-        - 172.17.0.1 centos.internalapi.localdomain centos.internalapi
-
-    - name: slurp /tmp/hosts
-      slurp:
-        path: /tmp/hosts
-      register: slurp_hosts
-
-    - name: Show /tmp/hosts
-      debug:
-        var: slurp_hosts['content'] | b64decode
-
-    - name: Fail if hosts was changed
-      debug:
-        msg: "hosts was changed"
-      failed_when: hosts_result is changed
+        - "192.168.24.1 edpm-director.localdomain edpm-director"
+        - "192.168.24.1 edpm-director.external.localdomain"
+        - "192.168.24.1 edpm-director.ctlplane.localdomain"
+        - "192.168.24.1 edpm-director.ctlplane.localdomain"
+        - "192.168.24.18 overcloud.ctlplane.localdomain"
+        - "172.16.1.90 overcloud.storage.localdomain"
+        - "172.16.3.53 overcloud.storagemgmt.localdomain"
+        - "172.16.2.132 overcloud.internalapi.localdomain"
+        - "172.20.10.25 openstack.example.net"

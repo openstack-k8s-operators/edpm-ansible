@@ -29,7 +29,7 @@
   post_tasks:
     - name: Pull container image
       containers.podman.podman_image:
-        name: fedora
+        name: centos:stream9
 
     - name: Create test containers
       containers.podman.podman_container:
@@ -37,7 +37,7 @@
         interactive: true
         tty: true
         detach: true
-        image: fedora
+        image: centos:stream9
         command: bash
       with_items:
         - podman-container1

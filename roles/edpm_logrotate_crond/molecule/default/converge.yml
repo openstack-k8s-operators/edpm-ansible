@@ -23,10 +23,10 @@
 
     - name: install edpm_logrotate_crond
       include_role:
-        name: "edpm_logrotate_crond"
+        name: "osp.edpm.edpm_logrotate_crond"
         tasks_from: install.yml
 
     - name: configure edpm_logrotate_crond
       include_role:
-        name: "edpm_logrotate_crond"
+        name: "osp.edpm.edpm_logrotate_crond"
         tasks_from: configure.yml

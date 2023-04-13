@@ -23,7 +23,8 @@
   tasks:
     - name: Run role
       ansible.builtin.import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
+        tasks_from: configure.yml
     - name: "Ensure we drop connections on TCP/1211"
       lineinfile:
         path: /etc/nftables/edpm-rules.nft
@@ -32,7 +33,7 @@
 
     - name: Clean everything nftables related
       import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
         tasks_from: cleanup.yml
 
     - name: Fail if file was changed

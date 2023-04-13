@@ -20,7 +20,7 @@
   become: true
   tasks:
     - include_role:
-        name: "edpm_ovn"
+        name: "osp.edpm.edpm_ovn"
       vars:
         tenant_ip: "{{ ansible_host }}"
         edpm_ovn_dbs:

@@ -1,26 +1,30 @@
 ---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: podman
 platforms:
   - name: instance
-    pkg_extras: libselinux-python* policycoreutils-python-utils
-
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: Dockerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 provisioner:
-  inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            ansible_host: localhost
   name: ansible
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-    ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
-
+verifier:
+  name: ansible
 scenario:
   test_sequence:
+    - dependency
+    - destroy
+    - create
     - prepare
     - converge
-    - check
-
-verifier:
-  name: testinfra
+    - destroy

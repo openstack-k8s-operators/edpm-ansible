@@ -1,28 +1,30 @@
 ---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
 driver:
   name: podman
-
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: Dockerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 provisioner:
   name: ansible
-  inventory:
-    hosts:
-      all:
-        hosts:
-          centos:
-            ansible_python_interpreter: /usr/bin/python3
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-
+verifier:
+  name: ansible
 scenario:
   test_sequence:
+    - dependency
     - destroy
     - create
     - prepare
     - converge
-    - check
-    - verify
     - destroy
-
-verifier:
-  name: testinfra

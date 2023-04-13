@@ -16,7 +16,7 @@
 
 
 - name: Prepare
-  hosts: centos
+  hosts: all
   gather_facts: true
   tasks:
     - include_role:
@@ -27,6 +27,7 @@
         test_deps_edpm_packages:
           - openvswitch
           - libibverbs
+          - podman
     - include_role:
         name: env_data
 

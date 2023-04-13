@@ -18,5 +18,5 @@
 - name: Converge
   hosts: all
   roles:
-    - name: edpm_sshd
+    - name: osp.edpm.edpm_sshd
       edpm_sshd_gssapi_authentication: "yes"

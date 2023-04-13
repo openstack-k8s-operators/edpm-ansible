@@ -17,5 +17,17 @@
 
 - name: Converge
   hosts: all
+  vars:
+    edpm_hosts_entries_undercloud_hosts_entries:
+      - "192.168.24.1 edpm-director.localdomain edpm-director"
+      - "192.168.24.1 edpm-director.external.localdomain"
+      - "192.168.24.1 edpm-director.ctlplane.localdomain"
+    edpm_hosts_entries_extra_hosts_entries:
+      - "192.168.24.1 edpm-director.ctlplane.localdomain"
+      - "192.168.24.18 overcloud.ctlplane.localdomain"
+      - "172.16.1.90 overcloud.storage.localdomain"
+      - "172.16.3.53 overcloud.storagemgmt.localdomain"
+      - "172.16.2.132 overcloud.internalapi.localdomain"
+      - "172.20.10.25 openstack.example.net"
   roles:
-    - role: "edpm_hosts_entries"
+    - role: "osp.edpm.edpm_hosts_entries"
