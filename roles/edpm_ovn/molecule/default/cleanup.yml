@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Cleanup
-  hosts: centos
+  hosts: all
   gather_facts: false
   any_errors_fatal: true
   become: true
