@@ -27,7 +27,7 @@
       vars:
         edpm_nftables_src: /opt/edpm-firewall
       import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
         tasks_from: cleanup.yml
     - name: Create snippet directory
       become: true
@@ -36,7 +36,7 @@
         state: directory
     - name: Push snippet for destination
       become: true
-      edpm_nftables_snippet:
+      osp.edpm.edpm_nftables_snippet:
         dest: /opt/edpm-firewall/destination.yml
         content: |
           - rule_name: '000 related established'

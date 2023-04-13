@@ -19,10 +19,8 @@
   hosts: all
   vars:
     edpm_nftables_src: /opt/edpm-firewall
-  roles:
-    - role: "edpm_nftables"
   tasks:
     - name: Cleanup nftables
       import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
         tasks_from: cleanup.yml
