@@ -19,4 +19,4 @@
   become: true
   hosts: all
   roles:
-    - role: "edpm_tuned"
+    - role: "osp.edpm.edpm_tuned"

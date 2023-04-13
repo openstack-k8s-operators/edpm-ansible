@@ -19,4 +19,7 @@
   hosts: all
   roles:
     - role: test_deps
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
     - role: env_data
+

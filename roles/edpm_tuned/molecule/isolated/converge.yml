@@ -23,4 +23,4 @@
     edpm_tuned_profile: "cpu-partitioning"
     edpm_tuned_isolated_cores: "1"
   roles:
-    - role: "tuned"
+    - role: "osp.edpm.edpm_tuned"
