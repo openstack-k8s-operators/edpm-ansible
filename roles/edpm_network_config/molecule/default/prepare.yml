@@ -20,16 +20,18 @@
   roles:
     - role: test_deps
       test_deps_setup_edpm: true
+      test_deps_extra_packages:
+        - iproute
     - role: env_data
 
   tasks:
     - name: Ensure legacy scripts installed
       become: true
-      package:
+      ansible.builtin.package:
         name: network-scripts
         state: present
       when:
         - ansible_facts['distribution_major_version'] is version('8', '==')
     - name: Create a dummy network interface
       become: true
-      command: "ip link add dummy0 type dummy"
+      ansible.builtin.command: "ip link add dummy0 type dummy"
