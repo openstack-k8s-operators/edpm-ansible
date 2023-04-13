@@ -18,6 +18,6 @@
 - name: Converge
   hosts: all
   roles:
-    - name: edpm_sshd
+    - name: osp.edpm.edpm_sshd
       edpm_sshd_motd_enabled: true
       edpm_sshd_banner_enabled: true

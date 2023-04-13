@@ -3,7 +3,7 @@
   hosts: all
   tasks:
     - name: Ensure we activated GSSAPI
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         line: "GSSAPIAuthentication yes"
         state: present
