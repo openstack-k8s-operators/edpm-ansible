@@ -12,8 +12,6 @@ FROM quay.io/ansible/creator-ee:v0.14.1 as runner
 
 COPY --from=builder /usr/share/ansible /usr/share/ansible
 
-RUN microdnf -y install python3-tenacity && microdnf clean all
-
 COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
 RUN chmod 775 /runner/env/settings
 COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /bin/edpm_entrypoint
