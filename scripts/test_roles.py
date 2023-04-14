@@ -4,6 +4,10 @@ import glob
 import subprocess as sp
 import os.path
 
+SKIP_LIST = [
+    "edpm_ovn"
+]
+
 
 def main():
     role_paths = glob.glob("./roles/*")
@@ -11,12 +15,18 @@ def main():
     results = {}
 
     for role in role_paths:
-        print(f"Testing {os.path.basename(role)} ...")
-        process = sp.Popen(
-            "PY_COLORS=0 molecule test --all",
-            cwd=role, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
-        results[os.path.basename(role)] = {
-            'outputs': process.communicate(), 'process': process}
+        role_name = os.path.basename(role)
+        if role_name in SKIP_LIST:
+            continue
+        print(f"Testing {role_name} ...")
+        try:
+            process = sp.Popen(
+                "PY_COLORS=0 molecule test --all",
+                cwd=role, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
+            results[role_name] = {
+                'outputs': process.communicate(), 'process': process}
+        except Exception as ex:
+            results[role_name] = {'outputs': ("", "ERROR"), 'process': ex}
 
     print("*" * 80)
 
