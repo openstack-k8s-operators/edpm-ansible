@@ -21,7 +21,7 @@ __metaclass__ = type
 import copy
 import os
 
-import tenacity
+import time
 import yaml
 
 from ansible.errors import AnsibleActionFail
@@ -265,13 +265,8 @@ class ActionModule(ActionBase):
         if results.get('changed', False):
             self.changed = True
 
-    @tenacity.retry(
-        reraise=True,
-        stop=tenacity.stop_after_attempt(5),
-        wait=tenacity.wait_fixed(5)
-    )
     def _manage_service(self, name, state, task_vars):
-        """Manage a systemd service with retries and delay.
+        """Manage a systemd service.
 
         :param name: String for service name to manage.
         :param state: String for service state.
@@ -301,6 +296,28 @@ class ActionModule(ActionBase):
             pass
         raise AnsibleActionFail('Service {} has not started yet'.format(name))
 
+    def _manage_service_with_retries(self, name, state, task_vars,
+                                     tries=5, delay=5):
+        """Manage a systemd service with retries and delay.
+
+        :param name: String for service name to manage.
+        :param state: String for service state.
+        :param task_vars: Dictionary of Ansible task variables.
+        :param tries: Number of retries
+        :param delay: Delays between retries
+        """
+        while True:
+            try:
+                self._manage_service(name=name, state=state,
+                                     task_vars=task_vars)
+            except Exception:
+                tries -= 1
+                if tries <= 0:
+                    raise
+                time.sleep(delay)
+            else:
+                break
+
     def _restart_services(self, service_names, task_vars):
         """Restart systemd services.
 
@@ -311,8 +328,8 @@ class ActionModule(ActionBase):
             if self.debug:
                 DISPLAY.display('Restarting systemd service for '
                                 '{}'.format(name))
-            self._manage_service(name=name, state='restarted',
-                                 task_vars=task_vars)
+            self._manage_service_with_retries(
+                name=name, state='restarted', task_vars=task_vars)
 
     def _ensure_started(self, service_names, task_vars):
         """Ensure systemd services are started.
@@ -324,8 +341,8 @@ class ActionModule(ActionBase):
             if self.debug:
                 DISPLAY.display('Ensure that systemd service for '
                                 '{} is started'.format(name))
-            self._manage_service(name=name, state='started',
-                                 task_vars=task_vars)
+            self._manage_service_with_retries(
+                name=name, state='started', task_vars=task_vars)
 
     def run(self, tmp=None, task_vars=None):
         self.changed = False
