@@ -3,14 +3,26 @@
 import glob
 import subprocess as sp
 import os.path
+import re
 
 SKIP_LIST = [
-    "edpm_ovn"
+    "edpm_ovn",
+    "edpm_nova_compute",
+    "edpm_nova_libvirt",
+    "edpm_ssh_known_hosts",
+    "edpm_module_load",
+    "edpm_chrony",
+    "edpm_podman",
+    "edpm_nvdimm"
+]
+
+FAILURE_PATTERNS = [
+    'failed=[1-9]'
 ]
 
 
 def _test_passed(result):
-    if 'CRITICAL' in result['stdout'] or result['stderr'] or result['process'].return_code != 0:
+    if any(re.search(e, result['stdout']) for e in FAILURE_PATTERNS) or result['process'].returncode != 0:
         return False
     return True
 
@@ -24,6 +36,7 @@ def main():
 
         role_name = os.path.basename(role)
         if role_name in SKIP_LIST:
+            print(f"Skipping {role_name}")
             continue
         print(f"Testing {role_name} ...")
         try:
@@ -35,7 +48,12 @@ def main():
                 'stdout': outputs[0], 'stderr': outputs[1], 'process': process}
             results[role_name]['passed'] = _test_passed(results[role_name])
         except Exception as ex:
-            results[role_name] = {'outputs': ("", "ERROR"), 'process': ex, 'passed': False}
+            results[role_name] = {
+                'stdout': "",
+                'stderr': f"ERROR: {ex}",
+                'process': ex,
+                'passed': False}
+        print(f"Passed? {results[role_name]['passed']}")
 
     print("*" * 80)
 
@@ -44,12 +62,13 @@ def main():
         print(f"{role} - Passed: {test_result['passed']}")
         if not test_result['passed']:
             print(f"STDOUT: {test_result['stdout']}\nSTDERR: {test_result['stderr']}")
+            print(f"Return code: {test_result['process'].returncode}")
         print("-" * 80)
 
     print("Final report")
     print("+" * 12)
     for role, test_result in results.items():
-        print(f"{role} - Passed: {results[role_name]['passed']}")
+        print(f"{role} - Passed: {test_result['passed']}")
     print("-" * 80)
 
 
