@@ -64,9 +64,21 @@
         tasks_from: configure.yml
       tags:
         - edpm_timezone
+    - name: Configure edpm_frr
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_frr
+        tasks_from: configure.yml
+      tags:
+       - edpm_frr
     - name: Configure edpm_ovn
       ansible.builtin.import_role:
         name: osp.edpm.edpm_ovn
         tasks_from: configure.yml
       tags:
         - edpm_ovn
+    - name: Configure edpm_ovn_bgp_agent
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovn_bgp_agent
+        tasks_from: configure.yml
+      tags:
+        - edpm_ovn_bgp_agent

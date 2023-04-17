@@ -56,9 +56,21 @@
         tasks_from: install.yml
       tags:
         - edpm_chrony
+    - name: Install frr
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_frr
+        tasks_from: install.yml
+      tags:
+        - edpm_frr
     - name: Install edpm_ovn
       ansible.builtin.import_role:
         name: osp.edpm.edpm_ovn
         tasks_from: install.yml
       tags:
         - edpm_ovn
+    - name: Install ovn_bgp_agent
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovn_bgp_agent
+        tasks_from: install.yml
+      tags:
+        - edpm_ovn_bgp_agent

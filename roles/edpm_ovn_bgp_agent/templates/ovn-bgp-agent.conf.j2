@@ -1,0 +1,38 @@
+[DEFAULT]
+debug={{ edpm_ovn_bgp_agent_debug }}
+reconcile_interval={{ edpm_ovn_bgp_agent_reconcile_interval }}
+expose_tenant_networks={{ edpm_ovn_bgp_agent_expose_tenant_networks }}
+expose_ipv6_gua_tenant_networks={{ edpm_ovn_bgp_agent_expose_ipv6_gua_tenant_networks }}
+driver={{ edpm_ovn_bgp_agent_driver }}
+bgp_AS={{ edpm_ovn_bgp_agent_bgp_as }}
+bgp_nic={{ edpm_ovn_bgp_agent_bgp_nic }}
+bgp_vrf={{ edpm_ovn_bgp_agent_bgp_vrf }}
+bgp_vrf_table_id={{ edpm_ovn_bgp_agent_bgp_vrf_table_id }}
+ovsdb_connection={{ edpm_ovn_bgp_agent_ovsdb_connection }}
+{% if edpm_ovn_bgp_agent_internal_tls_enable %}
+ovn_sb_private_key={{ edpm_ovn_bgp_agent_private_key }}
+ovn_sb_certificate={{ edpm_ovn_bgp_agent_certificate }}
+ovn_sb_ca_cert={{ edpm_ovn_bgp_agent_ca_cert }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_address_scopes %}
+address_scopes={{ edpm_ovn_bgp_agent_address_scopes }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_clear_vrf_routes_on_startup %}
+clear_vrf_routes_on_startup={{ edpm_ovn_bgp_agent_clear_vrf_routes_on_startup }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_bgp_router_id %}
+bgp_router_id={{ edpm_ovn_bgp_agent_bgp_router_id }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_evpn_local_ip %}
+evpn_local_ip={{ edpm_ovn_bgp_agent_evpn_local_ip }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_evpn_nic %}
+evpn_nic={{ edpm_ovn_bgp_agent_evpn_nic }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_evpn_udp_dstport %}
+evpn_udp_dstport={{ edpm_ovn_bgp_agent_evpn_udp_dstport }}
+{% endif %}
+
+[agent]
+root_helper={{ edpm_ovn_bgp_agent_root_helper }}
+root_helper_daemon={{ edpm_ovn_bgp_agent_root_helper_daemon }}

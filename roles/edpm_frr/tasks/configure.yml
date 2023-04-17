@@ -1,0 +1,56 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Identify the real interfaces via os-net-config
+  ansible.builtin.shell: os-net-config -i
+  register: os_net_config_result
+
+- name: Os-net-config from json
+  ansible.builtin.set_fact:
+    iface_map: "{{ os_net_config_result.stdout }}"
+
+- name: FRR uplink interfaces
+  block:
+    - name: Construct FRR uplink interfaces from os-net-config mappings
+      ansible.builtin.set_fact:
+        edpm_frr_bgp_uplinks_mapped: "{{ edpm_frr_bgp_uplinks | map('extract', iface_map) | list }}"
+  rescue:
+    - name: Failed to construct FRR uplink interfaces
+      ansible.builtin.fail:
+        msg: |
+          Failed to map at least one interface from {{ edpm_frr_bgp_uplinks }} to {{ iface_map }}.
+          Please check value of Ansible variable edpm_frr_bgp_uplinks.
+  when: edpm_frr_bgp_uplinks
+
+- name: Configure FRR
+  become: true
+  ansible.builtin.template:
+    src: frr.conf.j2
+    dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
+    mode: '640'
+    selevel: s0
+    setype: container_file_t
+  register: _frr_config_result
+
+- name: Configure FRR daemons
+  become: true
+  ansible.builtin.template:
+    src: daemons.j2
+    dest: "{{ edpm_frr_config_basedir }}/etc/frr/daemons"
+    mode: '640'
+    selevel: s0
+    setype: container_file_t
+  register: _frr_daemons_result
