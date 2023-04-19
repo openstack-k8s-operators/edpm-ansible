@@ -1,7 +1,12 @@
-FROM registry.access.redhat.com/ubi9/ubi-init:latest
+
+{% if item.registry is defined %}
+FROM {{ item.registry.url }}/{{ item.image }}
+{% else %}
+FROM {{ item.image }}
+{% endif %}
 
 RUN dnf upgrade -y && \
-    dnf -y install sudo python3-libselinux selinux-policy && \
+    dnf -y install sudo python3-libselinux selinux-policy {{ item.pkg_extras | default('') }} && \
     dnf clean all -y
 
 CMD [ '/sbin/init' ]
