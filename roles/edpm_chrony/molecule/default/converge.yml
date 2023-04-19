@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include edpm_chrony"
+      include_role:
+        name: "osp.edpm.edpm_chrony"
