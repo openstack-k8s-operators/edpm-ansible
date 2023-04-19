@@ -7,7 +7,7 @@ DOCS_DIR="./docs"
 
 python -m venv ${TEMP_VENV_ENV} && source ${TEMP_VENV_ENV}/bin/activate
 
-pip install -r requirements.txt -r ${DOCS_DIR}/docs-requirements.txt
+pip install -r ${DOCS_DIR}/docs-requirements.txt
 ansible-galaxy install -r requirements.yml
 
 doc8 --config ${DOCS_DIR}/doc8.ini ${DOCS_DIR}/source
