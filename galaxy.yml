@@ -31,3 +31,4 @@ build_ignore:
   - "zuul.d"
   - "ansible-requirements.txt"
   - "molecule-requirements.txt"
+  - "molecule"
