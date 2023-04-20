@@ -38,8 +38,6 @@
         virtualenv: "{{ ansible_user_dir }}/test-python"
         virtualenv_command: "{{ ensure_pip_virtualenv_command }}"
         virtualenv_site_packages: true
-        extra_args: >-
-          --constraint "{{ edpm_ansible_project_path }}/ansible-requirements.txt"
 
     - name: Display test-python virtualenv package versions
       ansible.builtin.shell: |-
