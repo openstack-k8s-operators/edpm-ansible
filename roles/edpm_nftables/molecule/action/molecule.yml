@@ -11,7 +11,7 @@ platforms:
     registry:
       url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
     command: /sbin/init
-    dockerfile: Dockerfile.j2
+    dockerfile: ../../../../molecule/common/Containerfile.j2
     privileged: true
     ulimits: &ulimit
       - host

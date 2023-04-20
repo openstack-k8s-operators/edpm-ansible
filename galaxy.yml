@@ -30,3 +30,4 @@ build_ignore:
   - ".venv"
   - "zuul.d"
   - "molecule-requirements.txt"
+  - "molecule"
