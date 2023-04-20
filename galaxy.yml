@@ -18,10 +18,9 @@ documentation: https://openstack-k8s-operators.github.io/edpm-ansible
 homepage: https://github.com/openstack-k8s-operators/edpm-ansible
 issues: https://github.com/openstack-k8s-operators/edpm-ansible/issues
 build_ignore:
-  - "tests/output"
   - "openstack_ansibleee"
   - "contribute"
-  - "docs/build"
+  - "docs"
   - "*.tar.gz"
   - ".gitignore"
   - ".vscode"
@@ -31,3 +30,11 @@ build_ignore:
   - "zuul.d"
   - "molecule-requirements.txt"
   - "molecule"
+  - "scripts"
+  - ".pre-commit-config.yaml"
+  - ".ansible-lint"
+  - ".yamllint"
+  - "Makefile"
+  - "**/molecule"
+  - "tests"
+  - "edpm_ansible.egg-info"
