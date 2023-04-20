@@ -29,5 +29,4 @@ build_ignore:
   - ".github"
   - ".venv"
   - "zuul.d"
-  - "ansible-requirements.txt"
   - "molecule-requirements.txt"
