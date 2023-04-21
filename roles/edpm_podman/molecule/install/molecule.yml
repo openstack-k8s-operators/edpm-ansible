@@ -1,28 +1,32 @@
----
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: podman
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    privileged: true
+    volume_mounts:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    capabilities:
+      - SYS_ADMIN
+      - ALL
 provisioner:
   name: ansible
-  config_options:
-    defaults:
-      fact_caching: jsonfile
-      fact_caching_connection: /tmp/molecule/facts
-  inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            ansible_host: localhost
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-    ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
-    ANSIBLE_LIBRARY: "${ANSIBLE_LIBRARY:-/usr/share/ansible/plugins/modules}"
-    ANSIBLE_FILTER_PLUGINS: "${ANSIBLE_FILTER_PLUGINS:-/usr/share/ansible/plugins/filter}"
-
-scenario:
-  test_sequence:
-    - prepare
-    - converge
-    - check
 
 verifier:
-  name: testinfra
+  name: ansible
+scenario:
+  test_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+    - destroy

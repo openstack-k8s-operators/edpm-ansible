@@ -15,18 +15,12 @@
 # under the License.
 
 
-- name: Converge
-  hosts: all
-  vars:
-    edpm_podman_hide_sensitive_logs: false
-    edpm_podman_buildah_login: true
-    edpm_container_registry_logins:
-      localhost:5000:
-        testuser: testpassword
-  tasks:
-    - include_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: login.yml
-    - include_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: buildah_login.yml
+_tripleo_podman_packages:
+  - podman
+
+_tripleo_buildah_packages:
+  - buildah
+
+_tripleo_podman_purge_packages:
+  - docker
+  - docker-ce

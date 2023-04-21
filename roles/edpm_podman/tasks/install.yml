@@ -27,25 +27,24 @@
         state: present
 
     - name: Ensure we get the ansible interfaces facts
+      become: true
       when:
-        - ansible_facts['interfaces'] is undefined
+        - ansible_facts['ansible_interfaces'] is undefined
       ansible.builtin.setup:
         gather_subset:
-          - '!all'
-          - '!min'
-          - 'network'
-        filter: 'ansible_interfaces'
-
+          - all
+    - debug:
+        msg: "{{ ansible_facts }}"
     - name: Delete legacy cni0 interface (podman < 1.6)
       ansible.builtin.command: ip link delete cni0
       when:
-        - '"cni0" in ansible_facts["interfaces"]'
+        - '"cni0" in ansible_facts["ansible_interfaces"]'
 
     # don't update the network config if the network is already running
     # meaning cni-podman0 is running somewhere
     - name: Update default network configuration if possible
       when:
-        - '"cni-podman0" not in ansible_facts["interfaces"]'
+        - '"cni-podman0" not in ansible_facts["ansible_interfaces"]'
         - edpm_container_default_network_backend == 'cni'
       block:
         - name: Make sure /etc/cni/net.d folder exists

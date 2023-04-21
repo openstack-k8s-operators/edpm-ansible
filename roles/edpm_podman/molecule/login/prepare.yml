@@ -16,8 +16,7 @@
 
 
 - name: Prepare
-  hosts: all
-  gather_facts: true
+  hosts: instance
   vars:
     edpm_container_registry_insecure_registries:
       - localhost:5000
@@ -39,6 +38,8 @@
       test_deps_extra_packages:
         - runc
         - containernetworking-plugins
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
     - role: env_data
 
   tasks:
@@ -86,6 +87,6 @@
 
     - name: Run install
       include_role:
-        name: edpm_podman
+        name: osp.edpm.edpm_podman
         tasks_from: install.yml
         vars_from: "redhat.yml"

@@ -17,5 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: true
+  gather_subset: interfaces
   roles:
-    - role: "edpm_podman"
+    - role: "osp.edpm.edpm_podman"

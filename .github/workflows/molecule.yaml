@@ -27,6 +27,7 @@ jobs:
         - edpm_network_config
         - edpm_nftables
         - edpm_nodes_validation
+        - edpm_podman
         - edpm_sshd
         - edpm_timezone
         - edpm_tuned
@@ -37,7 +38,6 @@ jobs:
         # - edpm_ovn_bgp_agent
         # - edpm_ceph_client_files
         # - edpm_chrony
-        # - edpm_podman
         # - edpm_nova_compute
         # - edpm_nova_libvirt
         # - edpm_nvdimm

@@ -14,19 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+_tripleo_podman_packages:
+  - podman
 
-- name: Converge
-  hosts: all
-  vars:
-    edpm_podman_hide_sensitive_logs: false
-    edpm_podman_buildah_login: true
-    edpm_container_registry_logins:
-      localhost:5000:
-        testuser: testpassword
-  tasks:
-    - include_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: login.yml
-    - include_role:
-        name: osp.edpm.edpm_podman
-        tasks_from: buildah_login.yml
+_tripleo_buildah_packages:
+  - buildah
+
+tripleo_container_default_runtime: crun
+tripleo_container_default_network_backend: "netavark"
