@@ -28,6 +28,18 @@ Note: the instruction ``execute_molecule`` has the
 tests in all the roles. In case we want to execute the tests just in
 modified roles we should delete it.
 
+Tests can be executed locally, either on per role basis with:
+
+.. code:: bash
+
+   $ molecule test --all
+
+invoked in ``roles/<rolename>`` directory. Or by testing all roles sequentially:
+
+.. code:: bash
+
+   $ make execute_molecule_local
+
 Build and push the openstack-ansibleee-runner container image
 -------------------------------------------------------------
 
