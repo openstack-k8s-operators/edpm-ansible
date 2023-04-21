@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include edpm_bootstrap"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_bootstrap"
+    - name: "Include edpm_ovn_bgp_agent"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_ovn_bgp_agent"

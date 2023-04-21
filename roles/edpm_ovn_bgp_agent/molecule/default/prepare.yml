@@ -1,0 +1,30 @@
+---
+
+- name: Prepare container
+  hosts: instance
+  roles:
+    - role: test_deps
+      test_deps_extra_packages:
+        - podman
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      test_deps_edpm_packages:
+          - openvswitch
+          - frr
+    - role: env_data
+  tasks:
+    - name: Mock ovs-vswitchd service
+      community.general.ini_file:
+        path: /etc/systemd/system/ovs-vswitchd.service
+        section: Service
+        option: "{{ item.option }}"
+        value: "{{ item.value | default(omit) }}"
+        state: "{{ item.state | default(omit) }}"
+      loop:
+        - { option: 'Type', value: 'exec' }
+        - { option: 'ExecStartPre', state: 'absent' }
+        - { option: 'ExecStart', value: '/bin/true' }
+
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true
