@@ -21,7 +21,7 @@
 
 edpm_ovn_bgp_agent_enable: true
 edpm_ovn_bgp_agent_debug: true
-edpm_ovn_bgp_agent_reconcile_interval: 120
+edpm_ovn_bgp_agent_reconcile_interval: 300
 edpm_ovn_bgp_agent_expose_tenant_networks: false
 edpm_ovn_bgp_agent_expose_ipv6_gua_tenant_networks: false
 edpm_ovn_bgp_agent_driver: ovn_bgp_driver
