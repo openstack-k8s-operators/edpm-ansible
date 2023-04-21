@@ -1,0 +1,22 @@
+name: Build and install collection
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+jobs:
+  verify-collection:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install ansible
+      run: pip install ansible
+    - name: Build ansible collection
+      run: ansible-galaxy collection build .
+    - name: Install collection
+      run: ansible-galaxy collection install --force osp-edpm-*.tar.gz
