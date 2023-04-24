@@ -18,9 +18,23 @@
 # All variables intended for modification should be placed in this file.
 
 # List of packages that are requred to bootstrap EDPM.
-edpm_bootstrap_packages_bootstrap: "{{ _edpm_bootstrap_packages_bootstrap | default([]) }}"
+edpm_bootstrap_packages_bootstrap:
+  - driverctl
+  - lvm2
+  - crudini
+  - jq
+  - nftables
+  - openvswitch
+  - openstack-selinux
+  - os-net-config
+  - python3-libselinux
+  - python3-pyyaml
+  - rsync
+  - tmpwatch
+  - sysstat
 
-edpm_bootstrap_release_version_package: "{{ _edpm_bootstrap_release_version_package | default([]) }}"
+edpm_bootstrap_release_version_package:
+  - rhosp-release
 
 # List of packages that are required for legacy networking to function.
 # NOTE: We are using 'network' service provided by 'network-scripts' (initscripts)
@@ -29,8 +43,9 @@ edpm_bootstrap_release_version_package: "{{ _edpm_bootstrap_release_version_pack
 #       at boot, as it'll take care of restarting the network interfaces managed by
 #       OVS. Note that OVS unit service is already configure to start before
 #       network.service.
-edpm_bootstrap_legacy_network_packages: "{{ _edpm_bootstrap_legacy_network_packages | default([]) }}"
-edpm_bootstrap_network_service: network
+edpm_bootstrap_legacy_network_packages:
+  - openstack-network-scripts
+edpm_bootstrap_network_service: NetworkManager
 
 # String for SELinux state. One of: disabled, enforcing, permissive
 edpm_bootstrap_selinux_mode: enforcing
