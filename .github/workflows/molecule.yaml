@@ -28,6 +28,7 @@ jobs:
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_nova_compute
+        - edpm_nova_libvirt
         - edpm_nvdimm
         - edpm_sshd
         - edpm_ssh_known_hosts
@@ -40,7 +41,6 @@ jobs:
         # - edpm_ceph_client_files
         # - edpm_chrony
         # - edpm_podman
-        # - edpm_nova_libvirt
         # - edpm_ovn
         # - edpm_module_load
         # - edpm_kernel
@@ -58,6 +58,8 @@ jobs:
       run: pip install ansible
     - name: Install molecule deps
       run: pip install -r molecule-requirements.txt
+    - name: Install selinux
+      run: ansible-playbook .github/playbooks/install-selinux.yml -vvvv --connection=local -i localhost
     - name: Run molecule test
       run: ansible-playbook .github/playbooks/molecule-run.yml -vvvv --connection=local -i localhost
       env:

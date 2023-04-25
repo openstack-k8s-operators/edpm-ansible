@@ -15,9 +15,12 @@
 # under the License.
 
 
-- name: Prepare
+- name: Prepare VM
   hosts: all
   roles:
     - role: test_deps
+      test_deps_extra_packages:
+        - podman
+        - iproute
       test_deps_setup_edpm: true
     - role: env_data

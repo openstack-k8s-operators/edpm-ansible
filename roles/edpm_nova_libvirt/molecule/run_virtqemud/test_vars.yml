@@ -4,10 +4,10 @@
 config:
   - name: /var/lib/edpm-config/container-startup-config/nova_libvirt/nova_virtqemud.json
     expected_lines:
-      - '    "image": "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified",'
-      - '        "nofile=131072",'
-      - '        "nproc=126960"'
-      - '    "pids_limit": 65536,'
+      - '  "image": "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified",'
+      - '    "nofile=131072",'
+      - '    "nproc=126960"'
+      - '  "pids_limit": 65536,'
   - name: /var/lib/kolla/config_files/nova_virtqemud.json
     expected_lines:
       - '    "command": "/usr/sbin/virtqemud --config /etc/libvirt/virtqemud.conf",'

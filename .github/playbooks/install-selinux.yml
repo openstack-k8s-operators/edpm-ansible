@@ -1,0 +1,29 @@
+---
+- name: Install selinux
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Update repos
+    become: true
+    ansible.builtin.shell:
+      cmd: sudo apt update
+  - name: Stop Apparmor
+    become: true
+    ansible.builtin.systemd:
+      service: apparmor
+      state: stopped
+  - name: Remove Apparmor
+    become: true
+    ansible.builtin.package:
+      name: apparmor
+      state: absent
+  - name: Install selinux
+    become: true
+    ansible.builtin.package:
+      name:
+        - selinux-basics
+        - selinux-policy-default
+  - name: Start selinux
+    become: true
+    ansible.builtin.shell:
+      cmd: selinux-activate

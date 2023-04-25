@@ -1,11 +1,16 @@
 ---
 driver:
-  # it starts podman containers to create configs, cannot use podman driver
-  name: delegated
-  options:
-    ansible_connection_options:
-      ansible_connection: local
-      ansible_host: localhost
+  name: podman
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 
 provisioner:
   playbooks:
