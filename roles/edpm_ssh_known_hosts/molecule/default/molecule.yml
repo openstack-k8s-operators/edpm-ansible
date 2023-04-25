@@ -1,19 +1,26 @@
 ---
 driver:
   name: podman
-
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    privileged: true
 provisioner:
   name: ansible
   inventory:
     hosts:
       all:
         hosts:
-          centos:
+          instance:
             ansible_python_interpreter: /usr/bin/python3
         children:
           allovercloud:
             hosts:
-              centos:
+              instance:
                 ctlplane_ip: 10.0.0.1
                 ctlplane_hostname: centos.ctlplane.localdomain
                 internal_api_ip: 10.0.1.1
@@ -34,6 +41,7 @@ scenario:
     - check
     - verify
     - destroy
+
 
 verifier:
   name: testinfra
