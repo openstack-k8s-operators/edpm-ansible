@@ -25,7 +25,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_ssh_host_keys(host):
     expected = [
-        '[10.0.0.1]*,[centos.ctlplane.localdomain]*,[10.0.1.1]*,[centos.internalapi.localdomain]*,[centos.localdomain]*,[centos]* ssh-rsa AAAATEST',
+        '[10.0.0.1]*,[centos.ctlplane.localdomain]*,[10.0.1.1]*,[centos.internalapi.localdomain]*,[centos.localdomain]*,[instance]* ssh-rsa AAAATEST',
     ]
 
     for line in expected:
