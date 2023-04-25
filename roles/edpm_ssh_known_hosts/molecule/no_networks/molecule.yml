@@ -1,19 +1,28 @@
 ---
 driver:
   name: podman
-
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 provisioner:
   name: ansible
   inventory:
     hosts:
       all:
         hosts:
-          centos:
+          instance:
             ansible_python_interpreter: /usr/bin/python3
         children:
           allovercloud:
             hosts:
-              centos:
+              instance:
   log: true
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml
