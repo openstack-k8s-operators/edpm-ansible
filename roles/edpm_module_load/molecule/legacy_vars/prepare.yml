@@ -16,9 +16,25 @@
 
 
 - name: Prepare
-  hosts: all
+  hosts: instance
   roles:
     - role: test_deps
       test_deps_extra_packages:
         - kmod
     - role: env_data
+  tasks:
+    - name: Mock systemd-modules-load service
+      community.general.ini_file:
+        path: /usr/lib/systemd/system/systemd-modules-load.service
+        section: Service
+        option: "{{ item.option }}"
+        value: "{{ item.value | default(omit) }}"
+        state: "{{ item.state | default(omit) }}"
+      loop:
+        - { option: 'Type', value: 'oneshot' }
+        - { option: 'ExecStartPre', state: 'absent' }
+        - { option: 'ExecStart', value: '/bin/true' }
+
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true

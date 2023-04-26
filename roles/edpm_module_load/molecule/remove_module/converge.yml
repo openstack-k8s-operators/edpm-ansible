@@ -16,12 +16,18 @@
 
 
 - name: Converge
-  hosts: all
-  roles:
-    - role: "edpm_module_load"
-      edpm_modules:
+  hosts: instance
+  tasks:
+    - name: Use edpm_module_load to add module
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_module_load
+      vars:
+        modules:
         - name: dummy
-    - role: "edpm_module_load"
-      edpm_modules:
+    - name: Use edpm_module_load to remove module
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_module_load
+      vars:
+        modules:
         - name: dummy
           state: absent

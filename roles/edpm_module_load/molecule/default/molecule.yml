@@ -5,22 +5,30 @@ provisioner:
     defaults:
       fact_caching: jsonfile
       fact_caching_connection: /tmp/molecule/facts
-  inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            ansible_host: localhost
   log: true
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml
     ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
-
+driver:
+  name: podman
+platforms:
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    privileged: true
+    ulimits: &ulimit
+      - host
 scenario:
   test_sequence:
+    - destroy
+    - create
     - prepare
     - converge
     - check
+    - destroy
 
 verifier:
-  name: testinfra
+  name: ansible
