@@ -9,7 +9,6 @@ provisioner:
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml
     ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
-
 driver:
   name: podman
 platforms:
@@ -33,4 +32,4 @@ scenario:
     - destroy
 
 verifier:
-  name: testinfra
+  name: ansible
