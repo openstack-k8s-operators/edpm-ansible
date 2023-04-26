@@ -23,8 +23,10 @@ edpm_podman_buildah_login: false
 edpm_container_registry_insecure_registries: []
 edpm_container_registry_login: false
 edpm_container_registry_logins: {}
-edpm_podman_packages: "{{ _edpm_podman_packages | default([]) }}"
-edpm_buildah_packages: "{{ _edpm_buildah_packages | default([]) }}"
+edpm_podman_packages:
+  - podman
+edpm_buildah_packages:
+  - buildah
 edpm_podman_purge_packages: []
 edpm_podman_enable_socket: false
 edpm_podman_unqualified_search_registries:
@@ -78,8 +80,8 @@ edpm_podman_default_network_config:
 edpm_podman_registries: []
 edpm_container_default_pids_limit: 4096
 edpm_container_events_logger_mechanism: journald
-edpm_container_default_runtime: runc
-edpm_container_default_network_backend: "cni"
+edpm_container_default_runtime: crun
+edpm_container_default_network_backend: netavark
 
 # tell the edpm_container_manage to inject
 # additional ordering dependencies for the systemd
