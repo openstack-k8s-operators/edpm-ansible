@@ -38,3 +38,9 @@
     - name: Force systemd to reread configs
       ansible.builtin.systemd:
         daemon_reload: true
+    - name: Disable kernel lock
+      ansible.builtin.command:
+        cmd: |
+          echo 1 > /proc/sys/kernel/sysrq
+          echo x > /proc/sysrq-trigger
+      become: true

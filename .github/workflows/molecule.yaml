@@ -24,6 +24,7 @@ jobs:
         - edpm_container_standalone
         - edpm_hosts_entries
         - edpm_logrotate_crond
+        - edpm_module_load
         - edpm_network_config
         - edpm_nftables
         - edpm_nodes_validation
@@ -54,6 +55,11 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: '3.9'
+    - name: apt-linux-headers
+      run: |
+        sudo apt-get update
+        sudo apt-get install build-essential linux-headers-$(uname -r) docker
+        sudo systemctl start docker
     - name: Install ansible
       run: pip install ansible
     - name: Install molecule deps

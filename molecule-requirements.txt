@@ -10,6 +10,7 @@ pytest-xdist
 mock
 molecule>=3.3.4
 molecule-plugins[podman]
+molecule-plugins[docker]
 ruamel.yaml
 netaddr
 jinja2

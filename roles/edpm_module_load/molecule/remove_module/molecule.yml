@@ -10,7 +10,7 @@ provisioner:
     ANSIBLE_STDOUT_CALLBACK: yaml
     ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
 driver:
-  name: podman
+  name: docker
 platforms:
   - name: instance
     image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
@@ -18,9 +18,22 @@ platforms:
       url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
     command: /sbin/init
     dockerfile: ../../../../molecule/common/Containerfile.j2
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /lib/modules:/lib/modules:rw
+      - /proc:/proc:rw
+      - /etc/modules-load.d:/etc/modules-load:rw
+      - /var/log:/var/log:rw
+      - /etc/localtime:/etc/localtime:rw
+      - /run:/run:rw
+      - /:/host:rw
     privileged: true
-    ulimits: &ulimit
-      - host
+    ipc: host
+    pid: host
+    user: root
 scenario:
   name: remove_module
   test_sequence:
