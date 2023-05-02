@@ -16,9 +16,7 @@ configurations needed for setting up the environment to execute the
 
 For setting up the environment and executing the tests:
 
-.. code:: bash
-
-   $ make execute_molecule
+      $ make execute_molecule
 
 In case the ci-framework project is already cloned we can provide the
 folder with ``ENV_DIR=/path/repository``
@@ -30,15 +28,11 @@ modified roles we should delete it.
 
 Tests can be executed locally, either on per role basis with:
 
-.. code:: bash
-
-   $ molecule test --all
+      $ molecule test --all
 
 invoked in ``roles/<rolename>`` directory. Or by testing all roles sequentially:
 
-.. code:: bash
-
-   $ make execute_molecule_local
+      $ make execute_molecule_local
 
 Build and push the openstack-ansibleee-runner container image
 -------------------------------------------------------------
@@ -48,17 +42,13 @@ image can be rebuilt and pushed to a container repository.
 
 To build the image:
 
-.. code:: bash
-
-    $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
-    $ make openstack_ansibleee_build
+      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ make openstack_ansibleee_build
 
 To push the image:
 
-.. code:: bash
-
-    $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
-    $ make openstack_ansibleee_push
+      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ make openstack_ansibleee_push
 
 Depending on the repository, a ``podman login quay.io/<user>`` may be required
 before pushing.
@@ -71,8 +61,6 @@ Copyright 2023.
 Licensed under the Apache License, Version 2.0 (the “License”); you may
 not use this file except in compliance with the License. You may obtain
 a copy of the License at
-
-::
 
    http://www.apache.org/licenses/LICENSE-2.0
 
