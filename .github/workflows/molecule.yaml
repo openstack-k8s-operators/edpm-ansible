@@ -28,12 +28,12 @@ jobs:
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_sshd
+        - edpm_ssh_known_hosts
         - edpm_timezone
         - edpm_tuned
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
         # - edpm_iscsid
-        # - edpm_ssh_known_hosts
         # - edpm_ovn_bgp_agent
         # - edpm_ceph_client_files
         # - edpm_chrony
