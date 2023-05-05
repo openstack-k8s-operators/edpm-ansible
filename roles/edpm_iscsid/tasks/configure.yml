@@ -50,6 +50,7 @@
 
 - name: Create /etc/iscsi/iscsid.conf if necessary
   when: result.stat.exists == False
+  become: true
   block:
 
   - name: Fetch iscsid.conf from the iscsid container
@@ -69,10 +70,12 @@
     line: "node.session.auth.chap_algs = {{ edpm_iscsid_chap_algs }}"
     regexp: "^node.session.auth.chap_algs"
     insertafter: "^#node.session.auth.chap.algs"
+  become: true
   register: modify_stat
 
 - name: Record the iscsid container restart is required
   when : modify_stat.changed
+  become: true
   ansible.builtin.file:
    path: /etc/iscsi/.iscsid_restart_required
    state: touch

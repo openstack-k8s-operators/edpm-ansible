@@ -63,6 +63,7 @@
     mode: 0644
     regexp: '^isolated_cores=.*'
     line: 'isolated_cores={{ edpm_tuned_isolated_cores }}'
+  become: true
   when:
     - edpm_tuned_isolated_cores is defined
     - (edpm_tuned_isolated_cores | length) > 0
@@ -71,6 +72,7 @@
 - name: Enable tuned profile
   ansible.builtin.command: >-
     /usr/sbin/tuned-adm profile {{ edpm_tuned_profile }}
+  become: true
   when:
     - not edpm_tuned_active_profile_file.stat.exists or (
       edpm_tuned_active_profile_file.stat.exists and (
