@@ -27,6 +27,7 @@
 
 - name: Ensure the system has a unique IQN
   when: initiator_reset_state.stat.exists == False
+  become: true
   block:
 
   - name: Generate a unique IQN
