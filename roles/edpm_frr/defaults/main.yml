@@ -69,7 +69,7 @@ edpm_frr_conf_custom_router_bgp: ''
 edpm_frr_conf_custom_ipv4: ''
 edpm_frr_conf_custom_ipv6: ''
 
-edpm_frr_image: "quay.io/tripleomastercentos9/openstack-frr:current-tripleo"
+edpm_frr_image: "quay.io/podified-antelope-centos9/openstack-frr:current-podified"
 
 edpm_frr_volumes:
   - /etc/hosts:/etc/hosts:ro
