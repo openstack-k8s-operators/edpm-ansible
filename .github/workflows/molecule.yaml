@@ -27,6 +27,7 @@ jobs:
         - edpm_network_config
         - edpm_nftables
         - edpm_nodes_validation
+        - edpm_nvdimm
         - edpm_sshd
         - edpm_ssh_known_hosts
         - edpm_timezone
@@ -40,7 +41,6 @@ jobs:
         # - edpm_podman
         # - edpm_nova_compute
         # - edpm_nova_libvirt
-        # - edpm_nvdimm
         # - edpm_ovn
         # - edpm_module_load
         # - edpm_kernel
