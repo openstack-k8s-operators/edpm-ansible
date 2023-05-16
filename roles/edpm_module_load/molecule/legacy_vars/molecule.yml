@@ -1,22 +1,31 @@
 ---
+dependency:
+  name: galaxy
 provisioner:
   name: ansible
-  config_options:
-    defaults:
-      fact_caching: jsonfile
-      fact_caching_connection: /tmp/molecule/facts
-  inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            ansible_host: localhost
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-    ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
 
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  - name: instance
+    box: generic/centos8
+    memory: 4096
+    cpus: 2
+    # Dictionary of `config` options.
+    config_options:
+      ssh.keep_alive: yes
+      ssh.remote_user: "'vagrant'"
+    interfaces:
+      # `network_name` is the required identifier, other keys map to arguments.
+      - network_name: private_network
+        ip: 192.168.50.20
+        guest: 80
+        host: 8080
 scenario:
+  name: legacy_vars
   test_sequence:
     - prepare
     - converge

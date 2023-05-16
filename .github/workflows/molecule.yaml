@@ -46,6 +46,11 @@ jobs:
         # - edpm_kernel
         # - edpm_frr
         # - edpm_growvols
+        driver:
+        - podman
+        include:
+        - tested_role: edpm_module_load
+          driver: vagrant
 
     runs-on: ubuntu-22.04
     steps:
@@ -58,6 +63,9 @@ jobs:
       run: pip install ansible
     - name: Install molecule deps
       run: pip install -r molecule-requirements.txt
+    - name: Install vagrant
+      if: matrix.driver == 'vagrant'
+      run: sudo apt update && sudo apt install vagrant virtualbox
     - name: Run molecule test
       run: ansible-playbook .github/playbooks/molecule-run.yml -vvvv --connection=local -i localhost
       env:
