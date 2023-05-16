@@ -40,7 +40,7 @@ jobs:
         # - edpm_ceph_client_files
         # - edpm_chrony
         # - edpm_podman
-        # - edpm_nova_libvirt
+        # - edpm_nova_libvirt # Will not be tested PR#94
         # - edpm_ovn
         # - edpm_module_load
         # - edpm_kernel
