@@ -1,0 +1,43 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# This playbook creates the nova user and adds it to the Nova Host Manager IPA
+# role. This needs to be executed by a user that has permissions to add services
+# and to add them to roles.
+#
+
+- name: set nova service user facts
+  set_fact:
+    nova_service: "nova/{{ undercloud_fqdn }}"
+
+- name: add nova service
+  ipaservice:
+    name: "{{ nova_service }}"
+    state: present
+    force: true
+
+- name: add Nova Host Manager role
+  iparole:
+    name: Nova Host Manager
+    description: Nova Host Manager
+    privilege:
+      - Nova Host Management
+
+- name: add service to the Nova Host Manager role
+  iparole:
+    name: Nova Host Manager
+    service: "{{ nova_service }}"
+    action: member

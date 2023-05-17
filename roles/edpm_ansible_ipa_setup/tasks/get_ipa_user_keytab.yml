@@ -1,0 +1,44 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# This role is supposed to be run on the undercloud.  In this role,
+# we retrieve a keytab for the previously created nova user/service.
+# The undercloud is assumed to be enrolled as an ipa client
+#
+
+- name: set keytab permissions facts
+  set_fact:
+    nova_service: "nova/{{ undercloud_fqdn }}"
+    nova_keytab: "/etc/novajoin/krb5.keytab"
+    nova_keytab_group: "root"
+
+- name: add directory for keytab
+  file:
+    path: "/etc/novajoin"
+    state: directory
+    mode: '0755'
+
+- name: get a keytab for the novajoin service
+  shell: |
+    ipa-getkeytab \
+      -p "{{ nova_service }}" \
+      -k "{{ nova_keytab }}"
+
+- name: chgrp and chmod the keytab
+  file:
+    path: "{{ nova_keytab }}"
+    group: "{{ nova_keytab_group }}"
+    mode: "g+r"

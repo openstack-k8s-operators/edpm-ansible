@@ -1,0 +1,68 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# This role adds a host and its required sub-hosts and services to
+# FreeIPA as defined in the ServerMetadata.
+#
+# The following variables are required:
+# - edpm_ipa_enroll_base_server (True if base server must be enrolled)
+# - edpm_ipa_base_server_fqdn   (FQDN of base host eg. controller-0.example.com)
+# - edpm_ipa_base_server_otp    (OTP for enrollment, only required if enroll_server is True)
+# - edpm_ipa_delegate_server    (Server for OTP delegation, only required if enroll_server is True)
+# - edpm_ipa_server_metadata    (server metadata, which includes required services)
+
+- name: set main facts
+  set_fact:
+    base_server_fqdn: "{{ edpm_ipa_base_server_fqdn }}"
+    base_server_short_name: "{{ edpm_ipa_base_server_fqdn.split('.')[0] }}"
+    base_server_domain: "{{ edpm_ipa_base_server_fqdn.split('.', 1)[1] }}"
+    enroll_base_server: "{{ edpm_ipa_enroll_base_server }}"
+
+- name: get the default.conf file
+  slurp:
+    src: /etc/ipa/default.conf
+  register: ipa_default_conf
+
+- name: set the principal
+  set_fact:
+    principal: "nova/{{ ipa_default_conf['content']| b64decode | regex_findall('host = (.+)')|first }}"
+
+- name: add main host to IPA with OTP
+  when: enroll_base_server|bool
+  become: true
+  block:
+    - name: add new host with one-time password
+      ipahost:
+        name: "{{ base_server_fqdn }}"
+        random: true
+        force: true
+        state: present
+      register: ipa_host
+      failed_when: ipa_host.failed and "Password cannot be set on enrolled host" not in ipa_host.msg
+
+    - name: set otp as a host fact
+      set_fact:
+        ipa_host_otp: "{{ ipa_host.host.randompassword }}"
+      no_log: true
+      delegate_facts: true
+      delegate_to: "{{ edpm_ipa_delegate_server }}"
+      when: "'host' in ipa_host"
+
+- name: add required services
+  include: services.yml
+  loop: "{{ edpm_ipa_server_metadata | from_json | parse_service_metadata(base_server_fqdn) }}"
+  loop_control:
+    loop_var: required_service

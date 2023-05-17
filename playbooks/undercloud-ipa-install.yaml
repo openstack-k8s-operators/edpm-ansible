@@ -1,0 +1,119 @@
+---
+#   Copyright 2019 Red Hat, Inc.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+
+- name: Playbook to register the undercloud host with an IPA server
+  connection: "{{ (edpm_ipa_undercloud_host is defined) | ternary('ssh', 'local') }}"
+  hosts: "{{ edpm_ipa_undercloud_host | default('localhost') }}"
+  tasks:
+    - name: Ensure definitions
+      fail:
+        msg: >-
+          {{ item }} is undefined
+      when: not item.ansible_var and not item.env_var
+      with_items:
+        - name: ipa_domain
+          ansible_var: "{{ edpm_ipa_domain | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_DOMAIN') }}"
+        - name: ipa_realm
+          ansible_var: "{{ edpm_ipa_realm | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_REALM') }}"
+        - name: ipa_server_user
+          ansible_var: "{{ edpm_ipa_admin_user | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_ADMIN_USER') }}"
+        - name: ipa_server_password
+          ansible_var: "{{ edpm_ipa_admin_password | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_ADMIN_PASSWORD') }}"
+        - name: ipa_server_hostname
+          ansible_var: "{{ edpm_ipa_server_hostname | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_SERVER_HOSTNAME') }}"
+        - name: undercloud_fqdn
+          ansible_var: "{{ edpm_undercloud_fqdn | default('') }}"
+          env_var: "{{ lookup('env', 'UNDERCLOUD_FQDN') }}"
+        - name: ansible_user
+          ansible_var: "{{ edpm_ansible_user | default('') }}"
+          env_var: "{{ lookup('env', 'USER') }}"
+        - name: cloud_domain
+          ansible_var: "{{ edpm_cloud_domain | default('') }}"
+          env_var: "{{ lookup('env', 'CLOUD_DOMAIN') }}"
+
+    - name: Set facts needed for configuration
+      set_fact:
+        ipa_domain: "{{ edpm_ipa_domain | default(lookup('env', 'IPA_DOMAIN')) }}"
+        ipa_realm: "{{ edpm_ipa_realm | default(lookup('env', 'IPA_REALM')) }}"
+        ipa_server_user: "{{ edpm_ipa_admin_user | default(lookup('env', 'IPA_ADMIN_USER')) }}"
+        ipa_server_password: "{{ edpm_ipa_admin_password | default(lookup('env', 'IPA_ADMIN_PASSWORD')) }}"
+        ipa_server_hostname: "{{ edpm_ipa_server_hostname | default(lookup('env', 'IPA_SERVER_HOSTNAME')) }}"
+        undercloud_fqdn: "{{ edpm_undercloud_fqdn | default(lookup('env', 'UNDERCLOUD_FQDN')) }}"
+        undercloud_ansible_user: "{{ edpm_ansible_user | default(lookup('env', 'USER')) }}"
+        cloud_domain: "{{ edpm_cloud_domain | default(lookup('env', 'CLOUD_DOMAIN')) }}"
+        ipa_client_install_packages: "{{ edpm_ipa_client_install_packages | default(true) | bool }}"
+
+    - name: Add host to ipaclients group
+      add_host:
+        name: "{{ undercloud_fqdn }}"
+        group: ipaclients
+        state: present
+        ipaclient_domain: "{{ cloud_domain }}"
+        ipaclient_install_packages: "{{ ipa_client_install_packages }}"
+        ipaclient_realm: "{{ ipa_realm }}"
+        ipaclient_force: true
+        ipaadmin_principal: "{{ ipa_server_user }}"
+        ipaadmin_password: "{{ ipa_server_password }}"
+        ansible_user: "{{ undercloud_ansible_user }}"
+        ansible_ssh_extra_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      no_log: true
+
+    - name: Add host to ipaservers group
+      add_host:
+        group: ipaservers
+        name: "{{ ipa_server_hostname }}"
+
+- hosts: ipaclients
+  become: true
+  tasks:
+    - name: Include ipaclient role
+      include_role:
+        name: ipaclient
+
+- hosts: "{{ edpm_ipa_undercloud_host | default('localhost') }}"
+  become: true
+  tasks:
+    - name: Include create admin roles
+      include_role:
+        name: "{{ item }}"
+      with_first_found:
+        - "/usr/share/ansible/roles/edpm_create_admin"
+        - "/usr/share/ansible/roles/edpm-create-admin"
+
+- hosts: "{{ edpm_ipa_undercloud_host | default('localhost') }}"
+  become: true
+  environment:
+    IPA_USER: "{{ ipa_server_user }}"
+    IPA_HOST: "{{ ipa_server_hostname }}"
+    IPA_PASS: "{{ ipa_server_password }}"
+  vars:
+    undercloud_fqdn: "{{ ansible_fqdn }}"
+  tasks:
+    - name: kinit to get admin credentials
+      command: kinit "{{ ipa_server_user }}@{{ ipa_realm }}"
+      args:
+        stdin: "{{ ipa_server_password }}"
+      register: kinit
+      changed_when: kinit.rc == 0
+      no_log: true
+
+    - name: setup the undercloud and get keytab
+      include_role:
+        name: edpm_ipa_setup

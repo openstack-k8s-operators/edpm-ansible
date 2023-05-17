@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2020 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,13 +13,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+#
+# This role removes a set of hosts and its required sub-hosts and services
+# in FreeIPA
+#
+# The following variables are required:
+# - edpm_ipa_hosts_to_delete  (list of FQDNs of hosts to delete)
+# - edpm_ipa_keytab           (file path to keytab to authenticate to FreeIPA)
 
-collections:
-  - ansible.posix
-  - community.general
-  - containers.podman
-  - name: https://opendev.org/openstack/ansible-config_template
-    version: master
-    type: git
-  - ansible.netcommon
-  - openstack.cloud
+- name: delete hosts, subhosts and services from freeIPA
+  cleanup_ipa_services:
+    keytab: "{{ edpm_ipa_keytab }}"
+    hosts: "{{ edpm_ipa_hosts_to_delete }}"
+  become: true

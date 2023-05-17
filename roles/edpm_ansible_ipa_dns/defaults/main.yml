@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2020 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,12 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-collections:
-  - ansible.posix
-  - community.general
-  - containers.podman
-  - name: https://opendev.org/openstack/ansible-config_template
-    version: master
-    type: git
-  - ansible.netcommon
-  - openstack.cloud
+
+# All variables intended for modification should place placed in this file.
+
+# All variables within this role should have a prefix of "edpm_ipa"
+
+edpm_ipa_ptr_zone_split_ipv4: 1
+edpm_ipa_ptr_zone_split_ipv6: 1

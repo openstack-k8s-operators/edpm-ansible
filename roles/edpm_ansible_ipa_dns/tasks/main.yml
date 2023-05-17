@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2020 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,13 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+#
+# This role adds a host entries to FreeIPA, as defined in the host_entry variable.
+#
+# The following variables are required:
+# - host_entry   (host entries string, in a format similar to /etc/hosts)
 
-collections:
-  - ansible.posix
-  - community.general
-  - containers.podman
-  - name: https://opendev.org/openstack/ansible-config_template
-    version: master
-    type: git
-  - ansible.netcommon
-  - openstack.cloud
+
+- name: add dns records
+  include_tasks:
+    file: dns.yaml
+  loop: "{{ hosts_entry }}"

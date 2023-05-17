@@ -1,0 +1,52 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# This playbook adds a role with the correct privileges needed by edpm-ipa
+# and TLS-e to add hosts and services to the IPA server.  The operations in
+# this playbook likely need admin privileges and should be executed on an
+# IPA client.  This playbook only needs to be run once per IPA server as
+# multiple edpm deployments can utilize the same role.
+
+- name: Playbook to setup an IPA role with correct privileges for TLS-e
+  connection: "{{ (edpm_ipa_host is defined) | ternary('ssh', 'local') }}"
+  hosts: "{{ edpm_ipa_host | default('localhost') }}"
+  tasks:
+    - name: ensure definitions
+      fail:
+        msg: >-
+          {{ item }} is undefined
+      when: not item.ansible_var and not item.env_var
+      with_items:
+        - name: ipa_principal
+          ansible_var: "{{ ipa_principal | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_PRINCIPAL') }}"
+        - name: ipa_password
+          ansible_var: "{{ ipa_password | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_PASSWORD') }}"
+
+    - name: set IPA server facts
+      set_fact:
+        ipa_principal: "{{ edpm_ipa_principal | default(lookup('env', 'IPA_PRINCIPAL')) }}"
+        ipa_password: "{{ edpm_ipa_password | default(lookup('env', 'IPA_PASSWORD')) }}"
+
+    - name: set perms, privs, roles
+      include_role:
+        name: edpm_ipa_setup
+        tasks_from: setup
+        apply:
+          environment:
+            IPA_USER: "{ ipa_principal }"
+            IPA_PASS: "{ ipa_password }"

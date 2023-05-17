@@ -15,6 +15,7 @@ Contents:
    contributing_roles
    usage
    roles
+   edpm_ipa_roles
    plugins
 
 Indices and tables

@@ -1,0 +1,68 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# This playbook creates the nova user and adds it to the Nova Host Manager IPA
+# role. This needs to be executed by a user that has permissions to add services
+# and to add them to roles. This needs to be run once per openstack deployment.
+
+- name: Playbook to setup a principal for use with edpm-ipa
+  connection: "{{ (edpm_ipa_host is defined) | ternary('ssh', 'local') }}"
+  hosts: "{{ edpm_ipa_host | default('localhost') }}"
+  tasks:
+    - name: ensure definitions
+      fail:
+        msg: >-
+          {{ item }} is undefined
+      when: not item.ansible_var and not item.env_var
+      with_items:
+        - name: ipa_principal
+          ansible_var: "{{ ipa_principal | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_PRINCIPAL') }}"
+        - name: ipa_password
+          ansible_var: "{{ ipa_password | default('') }}"
+          env_var: "{{ lookup('env', 'IPA_PASSWORD') }}"
+        - name: undercloud_fqdn
+          ansible_var: "{{ edpm_undercloud_fqdn | default('') }}"
+          env_var: "{{ lookup('env', 'UNDERCLOUD_FQDN') }}"
+
+    - name: set IPA server facts
+      set_fact:
+        ipa_principal: "{{ edpm_ipa_principal | default(lookup('env', 'IPA_PRINCIPAL')) }}"
+        ipa_password: "{{ edpm_ipa_password | default(lookup('env', 'IPA_PASSWORD')) }}"
+        undercloud_fqdn: "{{ edpm_undercloud_fqdn | default(lookup('env', 'UNDERCLOUD_FQDN')) }}"
+
+    - name: set nova service user facts
+      set_fact:
+        nova_service: "nova/{{ undercloud_fqdn }}"
+
+    - name: add nova service
+      ipa_service:
+        name: "{{ nova_service }}"
+        ipa_user: "{{ ipa_principal }}"
+        ipa_pass: "{{ ipa_password }}"
+        state: present
+        force: true
+
+    - name: add nova host manager role
+      ipa_role:
+        name: Nova Host Manager
+        ipa_user: "{{ ipa_principal }}"
+        ipa_pass: "{{ ipa_password }}"
+        description: Nova Host Manager
+        privilege:
+          - Nova Host Management
+        service:
+          - "{{ nova_service }}"
