@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    edpm_ipa_keytab: /etc/krb5.keytab
+    edpm_ipa_hosts_to_delete:
+      - instance
+  tasks:
+    # replace these tasks with whatever you find suitable to test
+    - name: "Include edpm_ipa_cleanup"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_ipa_cleanup"
