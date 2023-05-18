@@ -24,6 +24,9 @@
         - { option: 'ExecStartPre', state: 'absent' }
         - { option: 'ExecStart', value: '/bin/true' }
 
+    - name: Mock swapon command
+      ansible.builtin.command: ln -sf /bin/echo /sbin/swapon
+
     - name: Force systemd to reread configs
       ansible.builtin.systemd:
         daemon_reload: true

@@ -50,6 +50,12 @@ edpm_bootstrap_network_service: NetworkManager
 # String for SELinux state. One of: disabled, enforcing, permissive
 edpm_bootstrap_selinux_mode: enforcing
 
+# Swap management
+edpm_bootstrap_swap_size_megabytes: 4096
+edpm_bootstrap_swap_path: /swap
+edpm_bootstrap_swap_partition_enabled: false
+edpm_bootstrap_swap_partition_label: swap1
+
 # Shell command that is executed before any packages are installed by the role.
 # Can be used to register systems using any arbitrary registration command(s).
 edpm_bootstrap_command: ""
