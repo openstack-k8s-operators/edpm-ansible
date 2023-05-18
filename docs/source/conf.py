@@ -17,6 +17,8 @@ import sys
 
 from ansible.plugins import loader # noqa F401
 
+from unittest.mock import MagicMock
+
 # Add the project
 sys.path.insert(0, os.path.abspath('../..'))
 # Add the extensions
@@ -31,6 +33,14 @@ extensions = [
     'sphinx.ext.intersphinx',
     'ansible-autodoc'
 ]
+
+# Mocking imports that are unresolvable for ansible-autodoc
+module_mock_imports = [
+    'ansible_collections.containers.podman.plugins.module_utils.podman.podman_container_lib'
+]
+
+for module in module_mock_imports:
+    sys.modules[module] = MagicMock()
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
