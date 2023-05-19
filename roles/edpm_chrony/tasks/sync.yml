@@ -16,6 +16,7 @@
 
 
 - name: Force NTP sync
+  become: true
   ansible.builtin.command: chronyc makestep
 
 - name: Ensure system is NTP time synced
