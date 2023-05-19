@@ -96,8 +96,6 @@ edpm_nova_compute_ram_allocation_ratio: 1.0  # role specific
 edpm_nova_compute_disk_allocation_ratio: 0.0  # role specific
 edpm_nova_compute_enable_vtpm: false  # role specific
 edpm_nova_compute_max_disk_devices_to_attach: -1  # role specific
-edpm_nova_compute_pmem_mappings: ""  # role specific
-edpm_nova_compute_pmem_namespaces: ""  # role specific
 edpm_nova_compute_mdev_types: {}  # role specific
 edpm_nova_compute_image_cache_ttl: 86400  # role specific
 edpm_nova_compute_disable_irq_balance: false  # role specific
@@ -310,7 +308,6 @@ edpm_nova_compute_config:
     live_migration_uri: '{{ edpm_nova_compute_libvirt_live_migration_uri }}'
     mem_stats_period_seconds: '{{ edpm_nova_compute_mem_stats_period_seconds }}'
     num_pcie_ports: '{{ edpm_nova_compute_num_pcie_ports }}'
-    pmem_namespaces: '{{ edpm_nova_compute_pmem_mappings }}'
     rx_queue_size: '{{ edpm_nova_compute_rx_queue_size }}'
     swtpm_enabled: '{{ edpm_nova_compute_enable_vtpm }}'
     tx_queue_size: '{{ edpm_nova_compute_tx_queue_size }}'

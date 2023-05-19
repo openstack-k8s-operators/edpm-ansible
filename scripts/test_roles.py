@@ -13,7 +13,6 @@ SKIP_LIST = [
     "edpm_module_load",
     "edpm_chrony",
     "edpm_podman",
-    "edpm_nvdimm"
 ]
 
 FAILURE_PATTERNS = [
