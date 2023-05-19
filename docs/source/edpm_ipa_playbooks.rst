@@ -1,10 +1,10 @@
-TLS-e IPA Server Configuration Roles
-====================================
+TLS-e IPA Server Configuration playbooks
+========================================
 
-Included Roles
-~~~~~~~~~~~~~~
+Included playbooks
+~~~~~~~~~~~~~~~~~~
 
-This directory includes 3 playbooks (`ipa-server-*.yaml`) to be used for the TripleO TLS-e configuration of a FreeIPA server.
+This collection includes 3 playbooks (`ipa-server-*.yaml`) to be used for the TLS-e configuration of a FreeIPA server.
 The playbooks need to be run in the order that follows, however certain playbooks only need to be run once per IPA server:
 
 1. `ipa-sever-create-role.yaml`
