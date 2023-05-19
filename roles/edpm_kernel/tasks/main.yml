@@ -76,7 +76,7 @@
         state: "{{ setting.opt.state | default('present') }}"
         sysctl_file: "/etc/sysctl.d/99-edpm.conf"
         reload: false
-      loop: "{{ edpm_kernel_sysctl_extra_settings | dict2items(key_name='key', value_name='opt') }}"
+      loop: "{{ edpm_kernel_sysctl_settings | combine(edpm_kernel_sysctl_extra_settings) | dict2items(key_name='key', value_name='opt') }}"
       loop_control:
         label: "{{ setting.key }}"
         loop_var: setting
