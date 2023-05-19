@@ -16,6 +16,7 @@
 
 
 - name: Restart time services
+  become: true
   ansible.builtin.systemd:
     name: "{{ time_svc }}"
     state: restarted
