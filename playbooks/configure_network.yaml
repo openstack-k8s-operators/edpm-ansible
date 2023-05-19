@@ -30,6 +30,12 @@
         tasks_from: kernelargs.yml
       tags:
         - edpm_kernel
+    - name: Configure KSM for kernel
+      import_role:
+        name: osp.edpm.edpm_kernel
+        tasks_from: ksm.yml
+      tags:
+        - edpm_kernel
     - name: import edpm_network_config
       import_role:
         name: osp.edpm.edpm_network_config

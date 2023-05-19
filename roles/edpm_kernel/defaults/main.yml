@@ -35,3 +35,6 @@ edpm_kernel_hugepages_remove: false
 
 # This should be synced with edpm_nova_compute role
 edpm_nova_compute_config_dir: /var/lib/config-data/ansible-generated/nova_libvirt
+
+# KSM control
+edpm_kernel_enable_ksm: false

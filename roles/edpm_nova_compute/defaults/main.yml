@@ -83,7 +83,6 @@ edpm_nova_compute_file_backed_memory: 0  # role specific
 edpm_nova_compute_volume_use_multipath: false  # role specific
 edpm_nova_compute_hw_machine_type: "x86_64=q35"  # role specific
 edpm_nova_compute_additional_cell: false
-edpm_nova_compute_enable_ksm: false  # role specific
 edpm_nova_compute_cinder_password: "{{ edpm_cinder_password | default('') }}"  # sensitive, assert not empty
 edpm_nova_compute_keystone_region: regionOne
 edpm_nova_compute_num_pcie_ports: 16  # role specific

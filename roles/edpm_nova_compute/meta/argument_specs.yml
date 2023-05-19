@@ -419,10 +419,6 @@ argument_specs:
         default: '{{ edpm_enable_internal_tls | default (false) }}'
         description: ''
         type: str
-      edpm_nova_compute_enable_ksm:
-        default: false
-        description: ''
-        type: bool
       edpm_nova_compute_enable_rbd_backend:
         default: false
         description: ''
