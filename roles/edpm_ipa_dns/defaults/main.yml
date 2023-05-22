@@ -21,3 +21,5 @@
 
 edpm_ipa_ptr_zone_split_ipv4: 1
 edpm_ipa_ptr_zone_split_ipv6: 1
+
+hosts_entry: []
