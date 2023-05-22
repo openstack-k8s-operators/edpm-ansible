@@ -14,11 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Manage PMEM namespaces for vPMEM
-  ansible.builtin.include_role:
-    name: edpm_nvdimm
-  when: edpm_nova_compute_pmem_namespaces  # not a bool
-
 - name: Manage OS version 9 specific sysctls
   when:
     - ansible_facts['os_family'] == 'RedHat'
