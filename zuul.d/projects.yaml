@@ -1,0 +1,6 @@
+---
+- project:
+    name: openstack-k8s-operators/edpm-ansible
+    github-check:
+      jobs:
+        - edpm-ansible-molecule-edpm-podman

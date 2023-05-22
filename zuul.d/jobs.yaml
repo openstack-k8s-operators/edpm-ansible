@@ -1,0 +1,16 @@
+---
+- job:
+    name: edpm-ansible-molecule-base
+    abstract: true
+    parent: cifmw-molecule-base
+    required-projects:
+      - openstack-k8s-operators/install_yamls
+      - github.com/openstack-k8s-operators/ci-framework
+    vars:
+      roles_dir: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}/roles/{{ TEST_RUN }}"
+
+- job:
+    name: edpm-ansible-molecule-edpm-podman
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_podman
