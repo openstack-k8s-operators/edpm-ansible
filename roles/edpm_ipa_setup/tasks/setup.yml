@@ -50,7 +50,7 @@
       - 'Retrieve Certificates from the CA'
 
 - name: add nova host management permissions
-  ipapermission:
+  freeipa.ansible_freeipa.ipapermission:
     name: "{{ item.name }}"
     right: "{{ item.right }}"
     object_type: "{{ item.type }}"
@@ -58,12 +58,12 @@
   loop: "{{ novajoin_perms|flatten(levels=1) }}"
 
 - name: add Nova Host privilege
-  ipaprivilege:
+  freeipa.ansible_freeipa.ipaprivilege:
     name: Nova Host Management
     description: Nova Host Management
 
 - name: add permissions to the Nova Host privilege
-  ipaprivilege:
+  freeipa.ansible_freeipa.ipaprivilege:
     name: Nova Host Management
     action: member
     permission: "{{ item }}"
@@ -74,7 +74,7 @@
   loop: "{{ novajoin_privilege_perms }}"
 
 - name: add Nova Host Manager role
-  iparole:
+  freeipa.ansible_freeipa.iparole:
     name: Nova Host Manager
     description: Nova Host Manager
     privilege:

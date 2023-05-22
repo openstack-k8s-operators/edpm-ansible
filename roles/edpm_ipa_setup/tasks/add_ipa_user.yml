@@ -24,20 +24,20 @@
     nova_service: "nova/{{ undercloud_fqdn }}"
 
 - name: add nova service
-  ipaservice:
+  freeipa.ansible_freeipa.ipaservice:
     name: "{{ nova_service }}"
     state: present
     force: true
 
 - name: add Nova Host Manager role
-  iparole:
+  freeipa.ansible_freeipa.iparole:
     name: Nova Host Manager
     description: Nova Host Manager
     privilege:
       - Nova Host Management
 
 - name: add service to the Nova Host Manager role
-  iparole:
+  freeipa.ansible_freeipa.iparole:
     name: Nova Host Manager
     service: "{{ nova_service }}"
     action: member
