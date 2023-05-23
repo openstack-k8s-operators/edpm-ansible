@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_nova_libvirt/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_nova_libvirt role.
+    options: {}

@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/test_deps/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the test_deps role.
+    options: {}

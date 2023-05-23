@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_container_rm/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_container_rm role.
+    options: {}

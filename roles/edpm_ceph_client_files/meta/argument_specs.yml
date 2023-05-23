@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_ceph_client_files/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_ceph_client_files role.
+    options: {}
