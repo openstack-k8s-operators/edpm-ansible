@@ -68,7 +68,7 @@ edpm_ovn_controller_tls_volumes:
 edpm_ovn_ovs_external_ids:
   hostname: "{{ ansible_facts['fqdn'] }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
-  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(', ') }}"
+  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(',') }}"
   ovn-chassis-mac-mappings:
     "{%- set chassis_mac_mappings = [] -%}
      {%- for physnet, mac_prefix in edpm_ovn_chassis_mac_mapping_prefixes.items() -%}
