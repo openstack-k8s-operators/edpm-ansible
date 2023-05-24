@@ -3,4 +3,31 @@ argument_specs:
   # ./roles/test_deps/tasks/main.yml entry point
   main:
     short_description: The main entry point for the test_deps role.
-    options: {}
+    options:
+      test_deps_extra_packages:
+        type: list
+        default: []
+
+      test_deps_setup_edpm:
+        type: bool
+        default: false
+
+      test_deps_repo_version:
+        type: str
+        default: "{{ ansible_facts['distribution'] | lower }}{{ ansible_facts['distribution_major_version'] }}-master"
+
+      test_deps_mirrors_file_path:
+        type: str
+        default: /etc/ci/mirror_info.sh
+
+      test_deps_setup_stream:
+        type: bool
+        default: true
+
+      test_deps_setup_ceph:
+        type: bool
+        default: false
+
+      test_deps_edpm_packages:
+        type: list
+        required: false
