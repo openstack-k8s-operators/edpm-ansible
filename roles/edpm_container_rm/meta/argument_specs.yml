@@ -3,4 +3,13 @@ argument_specs:
   # ./roles/edpm_container_rm/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_container_rm role.
-    options: {}
+    options:
+      edpm_container_cli:
+        type: str
+        description: Set the container command line entry-point
+        default: "{{ container_cli | default('podman') }}"
+
+      edpm_containers_to_rm:
+        type: list
+        default: "{{ containers_to_rm | default([]) }}"
+        description: "List of containers to delete"
