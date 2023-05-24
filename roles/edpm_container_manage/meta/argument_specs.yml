@@ -3,4 +3,43 @@ argument_specs:
   # ./roles/edpm_container_manage/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_container_manage role.
-    options: {}
+    options:
+      edpm_container_manage_hide_sensitive_logs:
+        type: bool
+        default: "{{ hide_sensitive_logs | default(true) }}"
+      edpm_container_manage_debug:
+        type: bool
+        default: "{{ ((ansible_verbosity | int) >= 2) | bool }}"
+      edpm_container_manage_clean_orphans:
+        type: bool
+        default: true
+      edpm_container_manage_update_config_hash:
+        type: bool
+        default: true
+      edpm_container_manage_cli:
+        type: str
+        default: podman
+      edpm_container_manage_concurrency:
+        type: int
+        default: 1
+      edpm_container_manage_config:
+        type: str
+        default: "/var/lib/edpm-config/"
+      edpm_container_manage_config_id:
+        type: str
+        default: edpm
+      edpm_container_manage_config_overrides:
+        type: dict
+        default: {}
+      edpm_container_manage_config_patterns:
+        type: str
+        default: '*.json'
+      edpm_container_manage_healthcheck_disabled:
+        type: bool
+        default: false
+      edpm_container_manage_log_path:
+        type: str
+        default: '/var/log/containers/stdouts'
+      edpm_container_manage_systemd_teardown:
+        type: bool
+        default: true
