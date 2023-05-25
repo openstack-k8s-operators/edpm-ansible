@@ -20,6 +20,11 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_module_load
+- job:
+    name: edpm-ansible-molecule-edpm-kernel
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_kernel
 
 # EDPM jobs
 - job:
