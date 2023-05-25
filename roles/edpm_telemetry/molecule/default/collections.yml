@@ -1,0 +1,5 @@
+---
+collections:
+  - community.general
+  - osp.edpm.edpm_container_manage
+  - containers.podman.podman_container

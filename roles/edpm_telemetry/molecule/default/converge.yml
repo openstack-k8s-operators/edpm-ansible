@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    # replace these tasks with whatever you find suitable to test
+    - name: "Include edpm_telemetry"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_telemetry"
