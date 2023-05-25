@@ -2,7 +2,9 @@
 - name: Converge
   hosts: all
   tasks:
-    # replace these tasks with whatever you find suitable to test
-    - name: "Include edpm_telemetry"
-      ansible.builtin.include_role:
+    - include_role:
         name: "osp.edpm.edpm_telemetry"
+      vars:
+        telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+        ansible_user: root
+        ansible_user_dir: /root
