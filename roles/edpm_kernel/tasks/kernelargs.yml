@@ -194,13 +194,6 @@
       ansible.builtin.set_fact:
         reboot_required: true
 
-# Apply DPDK workarounds before reboot
-- name: Apply DPDK workarounds
-  ansible.builtin.include_role:
-    name: edpm_ovs_dpdk
-    tasks_from: workarounds.yml
-  when: reboot_required is defined and reboot_required
-
 # Kernel modules loading
 - name: Load type1 IOMMU driver for VFIO on boot
   ansible.builtin.import_role:
