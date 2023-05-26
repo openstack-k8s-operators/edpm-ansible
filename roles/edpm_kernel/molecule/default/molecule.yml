@@ -1,5 +1,20 @@
 ---
-# inherits .config/molecule/config.yml
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: podman
+platforms:
+- command: /sbin/init
+  dockerfile: ../../../../molecule/common/Containerfile.j2
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  name: instance
+  privileged: true
+  registry:
+    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+  ulimits:
+  - host
 provisioner:
   inventory:
     hosts:
@@ -8,17 +23,17 @@ provisioner:
           instance:
             ansible_connection: local
             ansible_host: localhost
+  log: true
+  name: ansible
   playbooks:
-    prepare: "${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/prepare.yml"
-    cleanup: "${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/cleanup.yml"
-
+    cleanup: ${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/cleanup.yml
+    prepare: ${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/prepare.yml
 scenario:
   name: default
   test_sequence:
-    - prepare
-    - converge
-    - check
-    - cleanup
-
+  - prepare
+  - converge
+  - check
+  - cleanup
 verifier:
   name: testinfra

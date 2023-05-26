@@ -18,5 +18,5 @@
 - name: Prepare
   hosts: all
   roles:
-    - role: test_deps
+    - role: ../../../../molecule/common/test_deps
     - role: env_data

@@ -13,14 +13,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+- name: Prepare test_deps
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - nftables
 
 - name: Prepare
   hosts: all
   roles:
-    - role: test_deps
-      test_deps_extra_packages:
-        - nftables
     - role: env_data
   tasks:
     - name: Cleanup nftables
