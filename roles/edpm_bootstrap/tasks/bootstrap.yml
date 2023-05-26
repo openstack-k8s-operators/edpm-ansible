@@ -160,3 +160,9 @@
       ansible.builtin.service:
         name: NetworkManager
         state: reloaded
+
+- name: Set GID hugetlbfs user to match kolla pre-set
+  become: true
+  group:
+    name: hugetlbfs
+    gid: 42477
