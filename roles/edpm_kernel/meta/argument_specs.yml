@@ -3,4 +3,16 @@ argument_specs:
   # ./roles/edpm_kernel/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_kernel role.
-    options: {}
+    options:
+      edpm_kernel_extra_modules:
+          type: dict
+          default: {}
+          description: Additional kernel modules to load
+      edpm_kernel_extra_packages:
+        type: dict
+        default: {}
+        description: Additional packages to install before handling kernel modules.
+      edpm_kernel_sysctl_extra_settings:
+        type: dict
+        default: {}
+        description: Additional sysctl settings.
