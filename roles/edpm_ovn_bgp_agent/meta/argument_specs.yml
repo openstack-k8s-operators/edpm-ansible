@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_ovn_bgp_agent/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_ovn_bgp_agent role.
+    options: {}

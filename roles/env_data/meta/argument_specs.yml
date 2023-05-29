@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/env_data/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the env_data role.
+    options: {}

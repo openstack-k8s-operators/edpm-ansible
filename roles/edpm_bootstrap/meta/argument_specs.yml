@@ -1,0 +1,50 @@
+---
+argument_specs:
+  # ./roles/edpm_bootstrap/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_bootstrap role.
+    options:
+      edpm_bootstrap_packages_bootstrap:
+        type: list
+        default:
+          - driverctl
+          - lvm2
+          - crudini
+          - jq
+          - nftables
+          - openvswitch
+          - openstack-selinux
+          - os-net-config
+          - python3-libselinux
+          - python3-pyyaml
+          - rsync
+          - tmpwatch
+          - sysstat
+        description: "List of packages that are requred to bootstrap EDPM."
+
+      edpm_bootstrap_release_version_package:
+        type: list
+        default:
+          - rhosp-release
+
+      edpm_bootstrap_legacy_network_packages:
+        type: list
+        default:
+          - openstack-network-scripts
+        description: |
+          List of packages that are required for legacy networking to function.
+          NOTE: We are using 'network' service provided by 'network-scripts' (initscripts)
+                which deprecated in recent releases but os-net-config doesn't support yet
+                NetworkManager. Until it happens, we need to ensure that network is started
+                at boot, as it'll take care of restarting the network interfaces managed by
+                OVS. Note that OVS unit service is already configure to start before
+                network.service.
+
+      edpm_bootstrap_network_service:
+        type: str
+        default: NetworkManager
+
+      edpm_bootstrap_selinux_mode:
+        type: str
+        default: enforcing
+        description: "String for SELinux state. One of: disabled, enforcing, permissive"

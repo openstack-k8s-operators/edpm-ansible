@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_nodes_validation/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_nodes_validation role.
+    options: {}

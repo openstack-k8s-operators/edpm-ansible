@@ -1,0 +1,15 @@
+---
+argument_specs:
+  # ./roles/edpm_sshd/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_sshd role.
+    options:
+      edpm_sshd_banner_enabled:
+        type: bool
+        default: false
+      edpm_sshd_motd_enabled:
+        type: bool
+        default: false
+      edpm_sshd_gssapi_authentication:
+        type: str
+        required: true

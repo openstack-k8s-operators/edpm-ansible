@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_logrotate_crond/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_logrotate_crond role.
+    options: {}

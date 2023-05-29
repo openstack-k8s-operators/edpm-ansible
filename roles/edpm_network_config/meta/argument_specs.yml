@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_network_config/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_network_config role.
+    options: {}
