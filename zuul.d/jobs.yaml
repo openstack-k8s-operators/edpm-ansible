@@ -15,6 +15,11 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_podman
+- job:
+    name: edpm-ansible-molecule-edpm-module_load
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_module_load
 
 # EDPM jobs
 - job:

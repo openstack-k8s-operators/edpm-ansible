@@ -4,4 +4,5 @@
     github-check:
       jobs:
         - edpm-ansible-molecule-edpm-podman
+        - edpm-ansible-molecule-edpm-module_load
         - edpm-ansible-crc-podified-edpm-deployment
