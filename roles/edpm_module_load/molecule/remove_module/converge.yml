@@ -19,9 +19,9 @@
   hosts: all
   roles:
     - role: "edpm_module_load"
-      edpm_modules:
+      modules:
         - name: dummy
     - role: "edpm_module_load"
-      edpm_modules:
+      modules:
         - name: dummy
           state: absent
