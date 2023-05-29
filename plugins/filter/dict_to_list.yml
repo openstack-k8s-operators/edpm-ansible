@@ -1,0 +1,14 @@
+DOCUMENTATION:
+  name: dict_to_list
+  author: "EDPM team"
+  version_added: 2.9
+  description: |
+    This filter will take a dictionary which itself containers
+    multiple dictionaries; and will convert that to a list
+    of dictionaries.
+EXAMPLES: |
+  "{{ all_containers_hash | osp.edpm.dict_to_list }}"
+RETURN:
+  _value:
+    description:
+    type: list
