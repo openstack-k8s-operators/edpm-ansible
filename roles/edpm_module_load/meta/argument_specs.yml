@@ -3,4 +3,19 @@ argument_specs:
   # ./roles/edpm_module_load/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_module_load role.
-    options: {}
+    options:
+      modules:
+        type: list
+        default: []
+        description: |
+          List of dictionaries describing modules, their desired state and parameters.
+          Params is assumed to be `null` and
+          state is assumed to be "present"; state can be either "present" or "absent".
+          Example:
+
+           modules:
+             - name: foo
+               params: 'bar baz'
+             - name: starwars
+             - name: starwars
+               state: absent
