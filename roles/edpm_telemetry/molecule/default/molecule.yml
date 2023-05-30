@@ -1,11 +1,10 @@
 ---
-driver:
-  # it starts podman containers to create configs, cannot use podman driver
-  name: delegated
+dependency:
+  name: galaxy
   options:
-    ansible_connection_options:
-      ansible_connection: local
-      ansible_host: localhost
+    role-file: collections.yml
+driver:
+  name: podman
 platforms:
   - name: instance
     image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
@@ -21,7 +20,6 @@ provisioner:
   config_options:
     defaults:
       remote_tmp: /tmp
-      remote_src: true
   log: true
 verifier:
   name: ansible

@@ -17,6 +17,13 @@
 
 - name: Prepare
   hosts: all
+  vars:
+    required_packages:
+      - podman
+  roles:
+    - role: test_deps
+      test_deps_extra_packages: "{{ required_packages }}"
+    - role: env_data
   tasks:
     - name: Create config-data merged directory
       file:
@@ -92,16 +99,7 @@
             },
             "volumes": [
                 "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
-                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z",
-                "/run/libvirt:/run/libvirt:z",
-                "/etc/hosts:/etc/hosts:z",
-                "/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:z",
-                "/etc/localtime:/etc/localtime:z",
-                "/etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:z",
-                "/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:z",
-                "/dev/log:/dev/log:z",
-                "/etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:z",
-                "/etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:z"
+                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z"
             ]
           }
 

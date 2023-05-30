@@ -50,6 +50,7 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode | default('640') }}"
+    remote_src: "{{ telemetry_test | default('false') }}"
   with_items:
     - { 'src': "/var/lib/config-data/merged/ceilometer.conf", "dest": "/var/lib/openstack/config/ceilometer/ceilometer.conf" }
     - { 'src': "/var/lib/config-data/merged/polling.yaml", "dest": "/var/lib/openstack/config/ceilometer/polling.yaml" }

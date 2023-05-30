@@ -30,6 +30,7 @@ jobs:
         - edpm_sshd
         - edpm_timezone
         - edpm_tuned
+        - edpm_telemetry
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
         # - edpm_iscsid
