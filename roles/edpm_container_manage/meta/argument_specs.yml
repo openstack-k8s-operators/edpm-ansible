@@ -5,10 +5,10 @@ argument_specs:
     short_description: The main entry point for the edpm_container_manage role.
     options:
       edpm_container_manage_hide_sensitive_logs:
-        type: bool
+        type: str
         default: "{{ hide_sensitive_logs | default(true) }}"
       edpm_container_manage_debug:
-        type: bool
+        type: str
         default: "{{ ((ansible_verbosity | int) >= 2) | bool }}"
       edpm_container_manage_clean_orphans:
         type: bool

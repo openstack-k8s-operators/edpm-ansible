@@ -2,5 +2,5 @@
 Role - edpm-growvols
 =====================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_growvols
+.. include::
+  ../collections/osp/edpm/edpm_growvols_role.rst

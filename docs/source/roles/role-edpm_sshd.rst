@@ -2,5 +2,5 @@
 Role - edpm-sshd
 ===================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_sshd
+.. include::
+  ../collections/osp/edpm/edpm_sshd_role.rst

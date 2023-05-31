@@ -2,6 +2,7 @@ DOCUMENTATION:
   name: dict_to_list
   author: "EDPM team"
   version_added: 2.9
+  short_description: Turn nested dictionary into list of dictionaries
   description: |
     This filter will take a dictionary which itself containers
     multiple dictionaries; and will convert that to a list

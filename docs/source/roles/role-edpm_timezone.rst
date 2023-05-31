@@ -2,5 +2,5 @@
 Role - edpm-timezone
 =======================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_timezone
+.. include::
+  ../collections/osp/edpm/edpm_timezone_role.rst

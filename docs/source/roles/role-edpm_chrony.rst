@@ -2,5 +2,5 @@
 Role - edpm_chrony
 ========================
 
-.. ansibleautoplugin::
-   :role: roles/edpm_chrony
+.. include::
+   ../collections/osp/edpm/edpm_chrony_role.rst

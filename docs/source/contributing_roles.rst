@@ -16,9 +16,11 @@ From with the project root, creating a skeleton for the new role.
 
 Finally add a role documentation file at
 `docs/source/roles/role-${NEWROLENAME}.rst`. This file will need to contain
-a title, a literal include of the defaults yaml and a literal include of
-the molecule playbook, or playbooks, used to test the role, which is noted
-as an "example" playbook.
+a title and an include directive of the automatically generated documentation
+stub at the `../collections/osp/edpm/edpm_<NEWROLENAME>_role.rst` path.
+
+Optionally you can write further information about role operation.
+Including section of examples and molecule tests.
 
 Local testing of new roles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,24 +38,3 @@ All plugins contributed to the edpm-ansible can be found in the
 When contributing a plugin, make sure to also add documentation in the
 `docs/source/plugins` folder. All documentation added to this folder will be
 automatically indexed and rendered via `sphinx`.
-
-If a contributed plugin is following the Ansible practice of placing
-documentation within the plugin itself, the following snippet can be used in a
-sphinx template to auto-render the in-code documentation.
-
-.. code-block:: rst
-
-    .. ansibleautoplugin::
-        :module: plugins/${DIRECTORY}/${PLUGINFILE}
-        :documentation: true
-        :examples: true
-
-The snippet can take two options, `documentation` and `examples`. If a given
-plugin does not have either of these in-code documentation objects,
-documentation for either type can be disabled by omitting the option.
-
-.. code-block:: rst
-
-    .. ansibleautoplugin::
-        :module: plugins/${DIRECTORY}/${PLUGINFILE}
-        :documentation: true
