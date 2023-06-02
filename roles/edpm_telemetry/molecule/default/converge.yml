@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - include_role:
+        name: "osp.edpm.edpm_telemetry"
+      vars:
+        telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+        telemetry_test: true
+        ansible_user: root
+        ansible_user_dir: /root
