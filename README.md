@@ -43,12 +43,12 @@ image can be rebuilt and pushed to a container repository.
 
 To build the image:
 
-      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ export IMAGE_TAG_BASE=quay.io/<user>/openstack-ansibleee-runner
       $ make openstack_ansibleee_build
 
 To push the image:
 
-      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ export IMAGE_TAG_BASE=quay.io/<user>/openstack-ansibleee-runner
       $ make openstack_ansibleee_push
 
 Depending on the repository, a ``podman login quay.io/<user>`` may be required
