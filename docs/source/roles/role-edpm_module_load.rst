@@ -2,5 +2,5 @@
 Role - edpm-module-load
 ==========================
 
-.. ansibleautoplugin::
-   :role: roles/edpm_module_load
+.. include::
+   ../collections/osp/edpm/edpm_module_load_role.rst

@@ -6,3 +6,6 @@ doc8>=0.8.1 # Apache-2.0
 bashate>=0.6.0 # Apache-2.0
 jsonschema  # MIT
 ruamel.yaml
+antsibull-docs >= 2.0.0, < 3.0.0
+ansible-pygments >= 0.1.1
+sphinx-ansible-theme >= 0.9.0

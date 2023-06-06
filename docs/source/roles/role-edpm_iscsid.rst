@@ -2,5 +2,5 @@
 Role - edpm_iscsid
 ===================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_iscsid
+.. include::
+  ../collections/osp/edpm/edpm_iscsid_role.rst

@@ -2,5 +2,5 @@
 Role - edpm-kernel
 =====================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_kernel
+.. include::
+  ../collections/osp/edpm/edpm_kernel_role.rst

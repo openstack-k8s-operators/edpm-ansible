@@ -2,9 +2,6 @@
 Role - edpm_container_manage
 ===============================
 
-.. ansibleautoplugin::
-  :role: roles/edpm_container_manage
-
 Usage
 ~~~~~
 
@@ -72,35 +69,6 @@ This Ansible role allows to do the following tasks:
             edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
             edpm_container_manage_config_id: "edpm_step1"
 
-Roles variables
-~~~~~~~~~~~~~~~
-
-+------------------------------------------------+-----------------------------+----------------------------+
-| Name                                           | Default Value               | Description                |
-+================================================+=============================+============================+
-| edpm_container_manage_cli                      | podman                      | Container CLI              |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_concurrency              | 1                           | Number of containers       |
-|                                                |                             | managed at same time       |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_config                   | /var/lib/edpm-config/       | Container config path      |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_config_id                | edpm                        | Config ID                  |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_config_patterns          | `*.json`                    | Bash REGEX to find configs |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_debug                    | false                       | Debug toggle               |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_healthcheck_disable      | false                       | Allow to disable           |
-|                                                |                             | Healthchecks               |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_log_path                 | /var/log/containers/stdouts | Containers stdouts path    |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_config_overrides         | {}                          | Allows to override any     |
-|                                                |                             | container configuration    |
-+------------------------------------------------+-----------------------------+----------------------------+
-| edpm_container_manage_clean_orphans            | true                        | Option to clean orphans    |
-+------------------------------------------------+-----------------------------+----------------------------+
 
 Healthchecks
 ~~~~~~~~~~~~
@@ -206,5 +174,9 @@ have to exist and are the ones that define the container configuration. Note
 that it doesn't write down the overrides in the JSON file so if an update /
 upgrade is executed, the container will be re-configured with the configuration
 that is in the JSON file.
+
+
+.. include::
+   ../collections/osp/edpm/edpm_container_manage_role.rst
 
 .. _podman_container: https://github.com/containers/ansible-podman-collections

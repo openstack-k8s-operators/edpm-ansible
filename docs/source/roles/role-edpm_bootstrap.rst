@@ -2,5 +2,5 @@
 Role - edpm_bootstrap
 ========================
 
-.. ansibleautoplugin::
-   :role: roles/edpm_bootstrap
+.. include::
+   ../collections/osp/edpm/edpm_bootstrap_role.rst
