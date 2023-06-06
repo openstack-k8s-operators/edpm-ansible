@@ -2,38 +2,20 @@
 driver:
   name: podman
 
-log: true
-
 platforms:
-  - name: centos
-    hostname: centos
-    image: centos/centos:stream9
+  - name: instance
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
     registry:
-      url: quay.io
-    dockerfile: Dockerfile.j2
-    pkg_extras: python*setuptools
-    volumes:
-      - /etc/ci/mirror_info.sh:/etc/ci/mirror_info.sh:ro
-      - /etc/pki/rpm-gpg:/etc/pki/rpm-gpg
-      - /etc/dnf/vars:/etc/dnf/vars
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
     privileged: true
-    environment: &env
-      http_proxy: "{{ lookup('env', 'http_proxy') }}"
-      https_proxy: "{{ lookup('env', 'https_proxy') }}"
     ulimits: &ulimit
       - host
 
 provisioner:
-  inventory:
-    hosts:
-      all:
-        hosts:
-          centos:
-            ansible_python_interpreter: /usr/bin/python3
   name: ansible
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
 
 scenario:
   test_sequence:
