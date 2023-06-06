@@ -1,0 +1,9 @@
+#command: "/usr/share/ovn/scripts/ovn-ctl start_northd --ovnnb-db=unix:/var/run/ovn/ovnnb_db.sock --ovnsb-db=unix:/var/run/ovn/ovnsb_db.sock"
+command: "/usr/bin/ovn-northd --ovnnb-db=unix:/var/run/ovn/ovnnb_db.sock --ovnsb-db=unix:/var/run/ovn/ovnsb_db.sock"
+permissions:
+  - path: /var/log/openvswitch
+    owner: root:root
+    recurse: true
+  - path: /var/log/ovn
+    owner: root:root
+    recurse: true

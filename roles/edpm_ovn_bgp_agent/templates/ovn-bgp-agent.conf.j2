@@ -9,13 +9,8 @@ bgp_nic={{ edpm_ovn_bgp_agent_bgp_nic }}
 bgp_vrf={{ edpm_ovn_bgp_agent_bgp_vrf }}
 bgp_vrf_table_id={{ edpm_ovn_bgp_agent_bgp_vrf_table_id }}
 ovsdb_connection={{ edpm_ovn_bgp_agent_ovsdb_connection }}
-{% if edpm_ovn_bgp_agent_internal_tls_enable %}
-ovn_sb_private_key={{ edpm_ovn_bgp_agent_private_key }}
-ovn_sb_certificate={{ edpm_ovn_bgp_agent_certificate }}
-ovn_sb_ca_cert={{ edpm_ovn_bgp_agent_ca_cert }}
-ovn_nb_private_key={{ edpm_ovn_bgp_agent_private_key }}
-ovn_nb_certificate={{ edpm_ovn_bgp_agent_certificate }}
-ovn_nb_ca_cert={{ edpm_ovn_bgp_agent_ca_cert }}
+{% if edpm_ovn_bgp_agent_exposing_method %}
+exposing_method={{ edpm_ovn_bgp_agent_exposing_method }}
 {% endif %}
 {% if edpm_ovn_bgp_agent_address_scopes %}
 address_scopes={{ edpm_ovn_bgp_agent_address_scopes }}
@@ -36,6 +31,33 @@ evpn_nic={{ edpm_ovn_bgp_agent_evpn_nic }}
 evpn_udp_dstport={{ edpm_ovn_bgp_agent_evpn_udp_dstport }}
 {% endif %}
 
+[ovn]
+{% if edpm_ovn_bgp_agent_internal_tls_enable %}
+ovn_sb_private_key={{ edpm_ovn_bgp_agent_private_key }}
+ovn_sb_certificate={{ edpm_ovn_bgp_agent_certificate }}
+ovn_sb_ca_cert={{ edpm_ovn_bgp_agent_ca_cert }}
+ovn_nb_private_key={{ edpm_ovn_bgp_agent_private_key }}
+ovn_nb_certificate={{ edpm_ovn_bgp_agent_certificate }}
+ovn_nb_ca_cert={{ edpm_ovn_bgp_agent_ca_cert }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_ovn_sb_connection %}
+ovn_sb_connection{{ edpm_ovn_bgp_agent_ovn_sb_connection }}
+{% endif %}
+{% if edpm_ovn_bgp_agent_ovn_nb_connection %}
+ovn_nb_connection={{ edpm_ovn_bgp_agent_ovn_nb_connection }}
+{% endif %}
+
 [agent]
 root_helper={{ edpm_ovn_bgp_agent_root_helper }}
 root_helper_daemon={{ edpm_ovn_bgp_agent_root_helper_daemon }}
+
+{% if edpm_ovn_bgp_agent_local_ovn_routing %}
+[local_ovn_cluster]
+ovn_nb_connection={{ edpm_ovn_bgp_agent_local_ovn_nb_connection }}
+ovn_sb_connection={{ edpm_ovn_bgp_agent_local_ovn_sb_connection }}
+external_nics={{ ovn_bgp_agent_external_nics }}
+peer_ips={{ ovn_bgp_agent_peer_ips }}
+{% if edpm_ovn_bgp_agent_provider_networks_pool_prefixes %}
+provider_networks_pool_prefixes={{ edpm_ovn_bgp_agent_provider_networks_pool_prefixes }}
+{% endif %}
+{% endif %}

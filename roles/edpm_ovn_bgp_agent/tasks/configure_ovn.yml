@@ -18,3 +18,11 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_ovn
     tasks_from: "bootstrap.yml"
+
+- name: Configure OVS external_ids
+  ansible.builtin.shell: >
+    ovs-vsctl set open . {% for key, value in edpm_ovn_bgp_agent_local_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
+  register: ovn_ovs_external_ids
+  changed_when: ovn_ovs_external_ids.rc == 0
+  failed_when: ovn_ovs_external_ids.rc != 0
+  when: edpm_ovn_bgp_agent_local_ovn_ovs_external_ids | length > 0
