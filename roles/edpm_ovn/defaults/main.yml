@@ -31,7 +31,7 @@ edpm_ovn_chassis_mac_mapping_prefixes:
 edpm_ovn_chassis_mac_mapping_seed: "{{ ansible_machine_id }}"
 edpm_ovn_encap_type: geneve
 edpm_ovn_dbs: []
-edpm_enable_dvr: true
+edpm_enable_chassis_gw: false
 edpm_enable_hw_offload: false
 edpm_ovn_multi_rhel: false
 edpm_enable_internal_tls: false
