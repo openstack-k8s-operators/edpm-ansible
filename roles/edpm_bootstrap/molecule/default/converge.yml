@@ -6,3 +6,5 @@
     - name: "Include edpm_bootstrap"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_bootstrap"
+      vars:
+        edpm_bootstrap_release_version_package: []

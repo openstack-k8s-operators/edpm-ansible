@@ -1,0 +1,17 @@
+---
+- hosts: all
+  tasks:
+    - name: "Create {{ ansible_user_dir }}/.ansible/roles"
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.ansible/roles"
+        state: directory
+        recurse: yes
+
+    - name: Create symlink for ci-framework test_deps role
+      ansible.builtin.file:
+        src: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/ci-framework'].src_dir }}/ci_framework/roles/{{ item }}"
+        dest: "{{ ansible_user_dir }}/.ansible/roles/{{ item }}"
+        state: link
+      with_items:
+        - test_deps
+        - repo_setup

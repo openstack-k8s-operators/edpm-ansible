@@ -7,6 +7,8 @@
     required-projects:
       - openstack-k8s-operators/install_yamls
       - github.com/openstack-k8s-operators/ci-framework
+    pre-run:
+      - ci/playbooks/mol_role_symlink.yaml
     vars:
       roles_dir: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}/roles/{{ TEST_RUN }}"
 
@@ -25,6 +27,81 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_kernel
+- job:
+    name: edpm-ansible-molecule-edpm-bootstrap
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_bootstrap
+- job:
+    name: edpm-ansible-molecule-edpm-container-rm
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_container_rm
+- job:
+    name: edpm-ansible-molecule-edpm-container-standalone
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_container_standalone
+- job:
+    name: edpm-ansible-molecule-edpm-hosts-entries
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_hosts_entries
+- job:
+    name: edpm-ansible-molecule-edpm-logrotate-crond
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_logrotate_crond
+- job:
+    name: edpm-ansible-molecule-edpm-network-config
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_network_config
+- job:
+    name: edpm-ansible-molecule-edpm-nftables
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_nftables
+- job:
+    name: edpm-ansible-molecule-edpm-nodes-validation
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_nodes_validation
+- job:
+    name: edpm-ansible-molecule-edpm-nova-compute
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_nova_compute
+- job:
+    name: edpm-ansible-molecule-edpm-sshd
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_sshd
+- job:
+    name: edpm-ansible-molecule-edpm-ssh-known-hosts
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_ssh_known_hosts
+- job:
+    name: edpm-ansible-molecule-edpm-timezone
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_timezone
+- job:
+    name: edpm-ansible-molecule-edpm-tuned
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_tuned
+- job:
+    name: edpm-ansible-molecule-edpm-telmetry
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_telemetry
+- job:
+    name: edpm-ansible-molecule-edpm-data
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: env_data
 
 # EDPM jobs
 - job:

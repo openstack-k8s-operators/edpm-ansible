@@ -7,3 +7,19 @@
         - edpm-ansible-molecule-edpm-module_load
         - edpm-ansible-molecule-edpm-kernel
         - edpm-ansible-crc-podified-edpm-deployment
+        - edpm-ansible-molecule-edpm-data
+        - edpm-ansible-molecule-edpm-bootstrap
+        - edpm-ansible-molecule-edpm-telmetry
+        - edpm-ansible-molecule-edpm-tuned
+        - edpm-ansible-molecule-edpm-timezone
+        - edpm-ansible-molecule-edpm-ssh-known-hosts
+        - edpm-ansible-molecule-edpm-sshd
+        - edpm-ansible-molecule-edpm-nova-compute
+        - edpm-ansible-molecule-edpm-nodes-validation
+        - edpm-ansible-molecule-edpm-nftables
+        - edpm-ansible-molecule-edpm-network-config
+        - edpm-ansible-molecule-edpm-logrotate-crond
+        - edpm-ansible-molecule-edpm-hosts-entries
+        - edpm-ansible-molecule-edpm-container-standalone
+        - edpm-ansible-molecule-edpm-container-rm
+        - edpm-ansible-molecule-edpm-bootstrap
