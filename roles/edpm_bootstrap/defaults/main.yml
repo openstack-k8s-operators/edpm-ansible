@@ -49,3 +49,7 @@ edpm_bootstrap_network_service: NetworkManager
 
 # String for SELinux state. One of: disabled, enforcing, permissive
 edpm_bootstrap_selinux_mode: enforcing
+
+# Shell command that is executed before any packages are installed by the role.
+# Can be used to register systems using any arbitrary registration command(s).
+edpm_bootstrap_command: ""

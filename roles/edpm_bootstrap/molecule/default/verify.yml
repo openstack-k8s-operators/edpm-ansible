@@ -1,0 +1,11 @@
+---
+
+- name: Verify
+  hosts: all
+  tasks:
+
+    - name: Verify bootstrap command created expected file
+      stat:
+        path: /tmp/edpm_bootstrap_command
+      register: bootstrap_stat
+      failed_when: not bootstrap_stat.stat.exists

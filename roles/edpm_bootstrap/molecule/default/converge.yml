@@ -6,3 +6,7 @@
     - name: "Include edpm_bootstrap"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_bootstrap"
+      vars:
+        edpm_bootstrap_command: |
+          touch /tmp/edpm_bootstrap_command
+          ls -l /tmp
