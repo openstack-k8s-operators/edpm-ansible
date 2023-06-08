@@ -23,6 +23,7 @@ edpm_bootstrap_packages_bootstrap:
   - lvm2
   - crudini
   - jq
+  - NetworkManager-ovs
   - nftables
   - openvswitch
   - openstack-selinux
