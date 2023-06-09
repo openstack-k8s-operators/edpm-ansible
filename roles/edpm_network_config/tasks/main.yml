@@ -27,12 +27,16 @@
           {%- endif -%}
           _system_role.network"
       delegate_to: localhost
+    - name: Install required package
+      ansible.builtin.dnf:
+        name: NetworkManager-ovs
+        state: latest
     - name: Configure network with nmstate
       ansible.builtin.include_role:
         name: "{{ systemrolename }}"
-  when: edpm_network_config_role == 'nmstate'
+  when: edpm_network_config_tool == 'nmstate'
 
 - name: Load edpm_network_config tasks
   ansible.builtin.include_tasks:
     file: network_config.yml
-  when: edpm_network_config_role == 'os-net-config'
+  when: edpm_network_config_tool == 'os-net-config'

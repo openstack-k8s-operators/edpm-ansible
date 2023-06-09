@@ -27,7 +27,6 @@ edpm_bootstrap_packages_bootstrap:
   - nftables
   - openvswitch
   - openstack-selinux
-  - os-net-config
   - python3-libselinux
   - python3-pyyaml
   - rsync

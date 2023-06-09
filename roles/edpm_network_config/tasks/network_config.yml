@@ -38,6 +38,11 @@
     name: edpm_bootstrap
     tasks_from: packages.yml
 
+- name: Install os-net-config package
+  ansible.builtin.dnf:
+    name: os-net-config
+    state: latest
+
 - name: Ensure /var/lib/edpm-config directory exists
   become: true
   ansible.builtin.file:

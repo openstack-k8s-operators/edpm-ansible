@@ -18,7 +18,15 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_network_config"
-edpm_network_config_role: os-net-config
+
+# This variable let the use choose which tool will be used to configure networking on hosts
+# Accepted values are:
+# * os-net-config (default) -> the os-net-config will be used
+# * nmstate -> the network role from linux-system-roles/rhel-system-roles will be used to
+#   configure networking on hosts. In particular, the nmstate tool should cover all the
+#   supported scenario. Refer to nmstate.io for configuration snippets.
+edpm_network_config_tool: os-net-config
+
 edpm_network_config_update: false
 edpm_network_config_async_poll: 3
 edpm_network_config_async_timeout: 300
