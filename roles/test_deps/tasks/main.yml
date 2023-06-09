@@ -72,7 +72,7 @@
   block:
     - name: Fetch latest repo version
       ansible.builtin.uri:
-        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current/delorean.repo
+        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-tripleo/delorean.repo
         return_content: true
       register: edpm_packages
 
