@@ -50,7 +50,7 @@
     state: directory
     setype: container_file_t
     selevel: s0
-    mode: 0750
+    mode: '0750'
 
 - name: Check for previous run of NetworkConfig
   become: true
