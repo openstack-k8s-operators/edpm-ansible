@@ -72,6 +72,22 @@
   tags:
     - always
 
+- name: Bootstrap command
+  become: true
+  when: edpm_bootstrap_command != ""
+  block:
+    - name: Bootstrap command
+      shell: "{{ edpm_bootstrap_command }}"
+      register: bootstrap_cmd
+      failed_when: false
+
+    - name: Bootstrap command output
+      debug:
+        msg:
+          stdout: "{{ bootstrap_cmd.stdout_lines }}"
+          stderr: "{{ bootstrap_cmd.stderr_lines }}"
+      failed_when: bootstrap_cmd.rc != 0
+
 # Currently only supported on RHEL as edpm does not have a version package
 - name: Release version package
   when:
