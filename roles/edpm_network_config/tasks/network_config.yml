@@ -85,14 +85,14 @@
     - (edpm_network_config_update) or
       (os_net_config_returncode_stat.stat.exists and
       ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
-       (not os_net_config_returncode_stat.stat.exists)
+      (not os_net_config_returncode_stat.stat.exists)
   block:
     - name: Create /etc/os-net-config directory
       become: true
       ansible.builtin.file:
         path: /etc/os-net-config
         state: directory
-        recurse: true
+        mode: '0755'
 
     - name: Create os-net-config mappings from lookup data
       edpm_os_net_config_mappings:
@@ -105,7 +105,7 @@
       ansible.builtin.copy:
         content: "{{ os_net_config_mappings_result.mapping | to_nice_yaml }}"
         dest: /etc/os-net-config/mapping.yaml
-        mode: 0644
+        mode: '0644'
       when: os_net_config_mappings_result.changed|bool
 
     - name: Manage NetworkConfig with edpm_os_net_config module
@@ -126,7 +126,7 @@
       when:
         - network_config_result.rc is defined
 
-    # LP Bug: https://bugs.launchpad.net/edpm/+bug/1958332
+    # LP Bug: https://bugs.launchpad.net/tripleo/+bug/1958332
     - name: Disable cloud-init network config
       ansible.builtin.copy:
         content: |
