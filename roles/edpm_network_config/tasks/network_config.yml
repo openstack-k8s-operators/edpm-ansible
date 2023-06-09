@@ -122,7 +122,7 @@
       ansible.builtin.copy:
         content: "{{ network_config_result.rc }}"
         dest: /var/lib/edpm-config/os-net-config.returncode
-        mode: 0644
+        mode: '0644'
       when:
         - network_config_result.rc is defined
 
@@ -133,7 +133,7 @@
           network:
             config: disabled
         dest: /etc/cloud/cloud.cfg.d/99-edpm-disable-network-config.cfg
-        mode: 0644
+        mode: '0644'
       when:
         - network_config_result.rc is defined
         - network_config_result.rc == 0
