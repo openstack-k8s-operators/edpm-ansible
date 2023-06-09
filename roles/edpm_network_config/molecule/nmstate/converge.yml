@@ -19,11 +19,12 @@
   hosts: all
   vars:
     edpm_network_config_tool: nmstate
-    interfaces:
-    - name: dummy1
-      type: unknown
-      state: down
-      ipv4:
-        enabled: false
+    network_state:
+      interfaces:
+      - name: dummy1
+        type: unknown
+        state: down
+        ipv4:
+          enabled: false
   roles:
     - role: "osp.edpm.edpm_network_config"
