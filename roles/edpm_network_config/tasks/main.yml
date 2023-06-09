@@ -14,9 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Load network system role
+- name: Configure network with network role from system roles [nmstate]
   block:
-    - name: Retrieve role name
+    - name: Retrieve role name [nmstate]
       ansible.builtin.set_fact:
         systemrolename:
           "{{ ansible_facts['distribution'] | lower }}.
@@ -27,16 +27,16 @@
           {%- endif -%}
           _system_role.network"
       delegate_to: localhost
-    - name: Install required package
+    - name: Install required package [nmstate]
       ansible.builtin.dnf:
         name: NetworkManager-ovs
         state: latest
-    - name: Configure network with nmstate
+    - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ systemrolename }}"
   when: edpm_network_config_tool == 'nmstate'
 
-- name: Load edpm_network_config tasks
+- name: Load edpm_network_config tasks [os-net-config]
   ansible.builtin.include_tasks:
     file: network_config.yml
   when: edpm_network_config_tool == 'os-net-config'
