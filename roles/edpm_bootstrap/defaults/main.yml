@@ -25,6 +25,7 @@ edpm_bootstrap_packages_bootstrap:
   - jq
   - nftables
   - openvswitch
+  - NetworkManager
   - openstack-selinux
   - python3-libselinux
   - python3-pyyaml
