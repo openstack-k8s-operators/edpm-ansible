@@ -19,10 +19,11 @@
   hosts: all
   vars:
     edpm_network_config_tool: nmstate
+    network_provider: nm
     network_state:
       interfaces:
-      - name: dummy1
-        type: unknown
+      - name: dummy0
+        type: dummy
         state: down
         ipv4:
           enabled: false
