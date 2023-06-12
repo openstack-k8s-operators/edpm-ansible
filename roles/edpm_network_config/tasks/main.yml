@@ -19,7 +19,11 @@
     - name: Retrieve role name [nmstate]
       ansible.builtin.set_fact:
         systemrolename:
-          "{{ ansible_facts['distribution'] | lower }}.
+          "{%- if ansible_facts['distribution'] == 'RedHat' -%}
+            redhat
+          {%- else -%}
+            fedora
+          {%- endif -%}.
           {%- if ansible_facts['distribution'] == 'RedHat' -%}
             rhel
           {%- else -%}
