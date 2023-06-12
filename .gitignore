@@ -13,7 +13,6 @@ build
 *~
 .*.swp
 .*sw?
-.vscode
 
 # Playbook retry files
 *.retry
