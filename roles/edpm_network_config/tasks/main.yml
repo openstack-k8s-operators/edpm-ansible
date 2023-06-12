@@ -20,14 +20,9 @@
       ansible.builtin.set_fact:
         systemrolename:
           "{%- if ansible_facts['distribution'] == 'RedHat' -%}
-            redhat
+            redhat.rhel
           {%- else -%}
-            fedora
-          {%- endif -%}.
-          {%- if ansible_facts['distribution'] == 'RedHat' -%}
-            rhel
-          {%- else -%}
-            linux
+            fedora.linux
           {%- endif -%}
           _system_roles.network"
       delegate_to: localhost
@@ -35,6 +30,10 @@
       ansible.builtin.dnf:
         name: NetworkManager-ovs
         state: latest
+    - name: Restart NetworkManager after plugin installation [nmstate]
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: restarted
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ systemrolename }}"
