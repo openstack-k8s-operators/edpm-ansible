@@ -19,7 +19,7 @@
 
 - name: Ensure /var/log/journal exists
   become: true
-  file:
+  ansible.builtin.file:
     path: /var/log/journal
     state: directory
     mode: 0750
@@ -28,7 +28,7 @@
     setype: var_log_t
 
 - name: Check cloud-init status
-  shell: systemctl is-active cloud-init.service || systemctl is-enabled cloud-init.service
+  ansible.builtin.shell: systemctl is-active cloud-init.service || systemctl is-enabled cloud-init.service
   failed_when: false
   become: true
   register: cloud_init_enabled
@@ -37,7 +37,7 @@
     var: cloud_init_enabled
 
 - name: Check if cloud-init is disabled via kernel args
-  shell: cat /proc/cmdline | grep -q cloud-init=disabled
+  ansible.builtin.shell: cat /proc/cmdline | grep -q cloud-init=disabled
   failed_when: false
   check_mode: false
   register: cloud_init_vendor_disabled
@@ -77,12 +77,12 @@
   when: edpm_bootstrap_command != ""
   block:
     - name: Bootstrap command
-      shell: "{{ edpm_bootstrap_command }}"
+      ansible.builtin.shell: "{{ edpm_bootstrap_command }}"
       register: bootstrap_cmd
       failed_when: false
 
     - name: Bootstrap command output
-      debug:
+      ansible.builtin.debug:
         msg:
           stdout: "{{ bootstrap_cmd.stdout_lines }}"
           stderr: "{{ bootstrap_cmd.stderr_lines }}"
@@ -111,7 +111,7 @@
 
 - name: Set selinux state
   become: true
-  selinux:
+  ansible.posix.selinux:
     policy: targeted
     state: "{{ edpm_bootstrap_selinux_mode }}"
 
@@ -179,6 +179,6 @@
 
 - name: Set GID hugetlbfs user to match kolla pre-set
   become: true
-  group:
+  ansible.builtin.group:
     name: hugetlbfs
     gid: 42477
