@@ -7,3 +7,4 @@
         - edpm-ansible-molecule-edpm-module_load
         - edpm-ansible-molecule-edpm-kernel
         - edpm-ansible-crc-podified-edpm-deployment
+        - edpm-ansible-crc-podified-edpm-baremetal
