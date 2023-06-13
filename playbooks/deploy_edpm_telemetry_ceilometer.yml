@@ -15,7 +15,7 @@
 # under the License.
 
 
-- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
+- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('all') }}"
   strategy: free
   name: Deploy EDPM Ceilometer Agent Compute
   gather_facts: "{{ gather_facts | default(false) }}"
