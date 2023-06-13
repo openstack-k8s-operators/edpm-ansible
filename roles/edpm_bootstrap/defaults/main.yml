@@ -47,6 +47,11 @@ edpm_bootstrap_legacy_network_packages:
   - openstack-network-scripts
 edpm_bootstrap_network_service: NetworkManager
 
+# Control resolv.conf management by NetworkManager
+# false = disable NetworkManager resolv.conf update (default)
+# true = enable NetworkManager resolv.conf update
+edpm_bootstrap_network_resolvconf_update: false
+
 # String for SELinux state. One of: disabled, enforcing, permissive
 edpm_bootstrap_selinux_mode: enforcing
 
