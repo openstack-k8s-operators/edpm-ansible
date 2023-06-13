@@ -150,7 +150,7 @@
 
 - name: Stop NetworkManager from updating resolv.conf
   become: true
-  when: edpm_bootstrap_network_service == 'NetworkManager'
+  when: (edpm_bootstrap_network_service == 'NetworkManager') and (edpm_bootstrap_network_resolvconf_update == false)
   block:
     - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
