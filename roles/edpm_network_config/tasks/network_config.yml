@@ -39,6 +39,7 @@
     tasks_from: packages.yml
 
 - name: Install os-net-config package
+  become: true
   ansible.builtin.dnf:
     name: os-net-config
     state: latest
