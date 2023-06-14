@@ -26,14 +26,16 @@
           {%- endif -%}
           _system_roles.network"
       delegate_to: localhost
-    - name: Install required package [nmstate]
+    - name: Install OVS NetworkManager plugin [nmstate]
       ansible.builtin.dnf:
         name: NetworkManager-ovs
         state: latest
+      register: nm_ovs_status
     - name: Restart NetworkManager after plugin installation [nmstate]
       ansible.builtin.systemd:
         name: NetworkManager
         state: restarted
+      when: nm_ovs_status.changed
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ systemrolename }}"
