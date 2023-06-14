@@ -35,7 +35,7 @@
         mode: 0644
         content: |
           make_edpm_deploy_env:
-            ANSIBLEEE_IMAGE_URL_DEFAULT: "{{ ansibleee_runner_img }}"
-          make_edpm_compute_baremetal:
+            DATAPLANE_RUNNER_IMG: "{{ ansibleee_runner_img }}"
+          make_edpm_compute_baremetal_params:
             ANSIBLEEE_IMAGE_URL_DEFAULT: "{{ ansibleee_runner_img }}"
         dest: "{{ ansible_user_dir }}/ci-framework/edpm-ansible.yml"
