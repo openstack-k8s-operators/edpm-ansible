@@ -177,6 +177,9 @@
         name: NetworkManager
         state: reloaded
 
+- name: Configure swap
+  ansible.builtin.import_tasks: swap.yml
+
 - name: Set GID hugetlbfs user to match kolla pre-set
   become: true
   ansible.builtin.group:
