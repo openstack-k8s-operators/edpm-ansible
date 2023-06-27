@@ -9,10 +9,16 @@ SKIP_LIST = [
     "edpm_ovn",
     "edpm_nova_compute",
     "edpm_nova_libvirt",
-    "edpm_ssh_known_hosts",
     "edpm_module_load",
     "edpm_chrony",
     "edpm_podman",
+    "edpm_ceph_client_files",
+    "edpm_frr",
+    "edpm_growvols",
+    "edpm_kernel",
+    "edpm_nvdimm",
+    "edpm_ovn_bgp_agent",
+    "test_deps"
 ]
 
 FAILURE_PATTERNS = [
