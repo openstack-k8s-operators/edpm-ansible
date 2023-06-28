@@ -64,7 +64,7 @@ options:
   safe_defaults:
     description:
       - If enabled, safe defaults (DHCP for all interfaces) will be applied in
-        case of failuring while applying the provided net config.
+        case of failing while applying the provided net config.
     type: bool
     default: false
   use_nmstate:
