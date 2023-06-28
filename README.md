@@ -2,8 +2,7 @@ EDPM Ansible
 ============
 [![CodeQL](https://github.com/openstack-k8s-operators/edpm-ansible/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/edpm-ansible/actions/workflows/codeql.yml)
 
-EDPM Ansible project repository. Contains Ansible playbooks, roles, and
-plugins for use with EDPM.
+EDPM Ansible project repository. Contains Ansible roles and plugins for use with EDPM.
 
 Test ansible roles with molecule
 --------------------------------
