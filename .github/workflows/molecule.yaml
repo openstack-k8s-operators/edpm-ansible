@@ -19,6 +19,7 @@ jobs:
       matrix:
         tested_role:
         - edpm_bootstrap
+        - edpm_ceph_client_files
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
@@ -38,7 +39,6 @@ jobs:
         # molecule tests deemed functional and stable
         # - edpm_iscsid
         # - edpm_ovn_bgp_agent
-        # - edpm_ceph_client_files
         # - edpm_chrony
         # - edpm_podman
         # - edpm_nova_libvirt # Will not be tested PR#94
