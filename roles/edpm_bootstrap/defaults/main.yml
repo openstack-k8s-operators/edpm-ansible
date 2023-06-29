@@ -56,7 +56,7 @@ edpm_bootstrap_network_resolvconf_update: false
 edpm_bootstrap_selinux_mode: enforcing
 
 # Swap management
-edpm_bootstrap_swap_size_megabytes: 4096
+edpm_bootstrap_swap_size_megabytes: 1024
 edpm_bootstrap_swap_path: /swap
 edpm_bootstrap_swap_partition_enabled: false
 edpm_bootstrap_swap_partition_label: swap1
