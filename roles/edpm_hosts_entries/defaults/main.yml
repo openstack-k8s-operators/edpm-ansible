@@ -18,7 +18,6 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_hosts_entries"
-edpm_hosts_entries_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_hosts_entries_hosts_path: /etc/hosts
 edpm_hosts_entries_undercloud_hosts_entries: ""
 edpm_hosts_entries_extra_hosts_entries: ""

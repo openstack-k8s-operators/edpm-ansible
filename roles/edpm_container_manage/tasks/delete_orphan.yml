@@ -17,7 +17,6 @@
 - name: Gather podman infos
   containers.podman.podman_container_info: {}
   register: podman_containers
-  no_log: "{{ not (edpm_container_manage_debug | bool) }}"
   when:
     - edpm_container_manage_cli == 'podman'
 

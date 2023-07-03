@@ -18,7 +18,6 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_nodes_validation"
-edpm_nodes_validation_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 edpm_nodes_validation_hide_sensitive_logs: true
 edpm_nodes_validation_ping_test_ips: []
 edpm_nodes_validation_edpm_role_name: true

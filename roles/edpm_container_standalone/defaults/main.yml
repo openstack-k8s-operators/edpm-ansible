@@ -18,8 +18,6 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_container_standalone"
-edpm_container_standalone_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
-
 edpm_container_standalone_hide_sensitive_logs: true
 
 # Service name. Use for creating directories, container labels, etc

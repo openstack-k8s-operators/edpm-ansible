@@ -20,7 +20,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: '*.json'
   tasks:
     - include_role:
@@ -86,7 +85,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: '*.json'
   tasks:
     - name: Gather facts about centos container before new run
@@ -119,7 +117,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: '*.json'
   tasks:
     - name: Stop systemd service for edpm_centos in a manual stop
@@ -151,7 +148,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'centos.json'
     edpm_container_manage_clean_orphans: false
     edpm_container_manage_config_overrides:
@@ -197,7 +193,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'centos.json'
     edpm_container_manage_clean_orphans: false
   tasks:
@@ -234,7 +229,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'centos_*.json'
   tasks:
     - name: Remove centos container config
@@ -267,7 +261,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'centos_*.json'
   tasks:
     - name: Modify the centos_bis container config
@@ -309,7 +302,6 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'centos_*.json'
     edpm_container_manage_config_overrides:
       centos_bis:

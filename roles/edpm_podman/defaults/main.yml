@@ -17,7 +17,6 @@
 
 # All variables intended for modification should be placed in this file.
 edpm_podman_hide_sensitive_logs: "{{ hide_sensitive_logs | default(true) }}"
-edpm_podman_debug: "{{ ((ansible_verbosity | int) >= 2) | bool }}"
 
 edpm_podman_buildah_login: false
 edpm_container_registry_insecure_registries: []

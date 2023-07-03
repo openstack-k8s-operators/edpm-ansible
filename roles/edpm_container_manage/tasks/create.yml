@@ -38,7 +38,6 @@
   become: true
   container_systemd:
     container_config: "{{ container_config }}"
-    debug: "{{ edpm_container_manage_debug | bool }}"
     systemd_healthchecks: "{{ (not edpm_container_manage_healthcheck_disabled | bool) }}"
   vars:
     container_config: "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"

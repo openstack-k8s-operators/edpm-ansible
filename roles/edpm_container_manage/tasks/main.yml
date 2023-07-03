@@ -42,14 +42,12 @@
   become: true
 
 - name: Generate containers configs data
-  no_log: "{{ not edpm_container_manage_debug }}"
   block:
     - name: "Find all matching configs configs for in {{ edpm_container_manage_config }}"
       container_config_data:
         config_path: "{{ edpm_container_manage_config }}"
         config_pattern: "{{ edpm_container_manage_config_patterns }}"
         config_overrides: "{{ edpm_container_manage_config_overrides }}"
-        debug: "{{ edpm_container_manage_debug }}"
       register: container_config_data
     - name: Finalise hashes for all containers
       ansible.builtin.set_fact:
