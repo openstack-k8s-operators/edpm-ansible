@@ -42,33 +42,33 @@
             state: absent
           when: ice_pkg_xz.stat.exists
 
-      - name: Select and deploy Ddp package
-        become: true
-        block:
-          - name: check package file name ice.pkg
-            ansible.builtin.set_fact:
-              package_filename: "ice.pkg"
-            when: ice_pkg.stat.exists
+    - name: Select and deploy Ddp package
+      become: true
+      block:
+        - name: check package file name ice.pkg
+          ansible.builtin.set_fact:
+            package_filename: "ice.pkg"
+          when: ice_pkg.stat.exists
 
-          - name: check package file name ice.pkg.xz
-            ansible.builtin.set_fact:
-              package_filename: "ice.pkg.xz"
-            when: ice_pkg_xz.stat.exists
+        - name: check package file name ice.pkg.xz
+          ansible.builtin.set_fact:
+            package_filename: "ice.pkg.xz"
+          when: ice_pkg_xz.stat.exists
 
-          - name: Confiure ddp/ice.pkg
-            vars:
-              ddp_package_file: "{{ ddp_package_files.stdout.split('\n')[0] }}"
-            ansible.builtin.file:
-              src: '{{ ddp_package_file }}'
-              dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
-              state: link
-            when: (edpm_ddp_package|string) != ''
+        - name: Confiure ddp/ice.pkg
+          vars:
+            ddp_package_file: "{{ ddp_package_files.stdout.split('\n')[0] }}"
+          ansible.builtin.file:
+            src: '{{ ddp_package_file }}'
+            dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
+            state: link
+          when: (edpm_ddp_package|string) != ''
 
-          - name: Load the new ice package
-            ansible.builtin.shell: |-
-              dracut -f
-              rmmod ice
-              modprobe ice
-        when: ddp_package_files is defined
+        - name: Load the new ice package
+          ansible.builtin.shell: |-
+            dracut -f
+            rmmod ice
+            modprobe ice
+      when: ddp_package_files is defined
 
-    when: ddp_package|string != ""
+  when: edpm_ddp_package|string != ""
