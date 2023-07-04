@@ -1,0 +1,133 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Prepare
+  hosts: all
+  vars:
+    required_packages:
+      - podman
+  roles:
+    - role: test_deps
+      test_deps_extra_packages: "{{ required_packages }}"
+    - role: env_data
+  tasks:
+    - name: Create config-data merged directory
+      file:
+        path: /var/lib/config-data/merged
+        state: directory
+
+    - name: Create ceilometer.conf
+      copy:
+        dest: "/var/lib/config-data/merged/ceilometer.conf"
+        content: |
+          [DEFAULT]
+          tenant_name_discovery=False
+          debug=True
+          log_dir=/var/log/ceilometer
+          rpc_response_timeout=60
+          polling_namespaces=compute
+
+          [service_credentials]
+          auth_type=password
+          auth_url=http://keystone-internal.openstack.svc:5000
+          project_name=service
+          project_domain_name=Default
+          username=ceilometer
+          user_domain_name=Default
+
+          [compute]
+          instance_discovery_method=libvirt_metadata
+
+          [coordination]
+          backend_url=
+
+          [publisher]
+          telemetry_secret=eQ5qb0yysfJ8lx82Vl061vSyY
+
+    - name: Create polling.yaml
+      copy:
+        dest: "/var/lib/config-data/merged/polling.yaml"
+        content: |
+          ---
+          sources:
+              - name: some_pollsters
+                interval: 300
+                meters:
+                  - cpu
+                  - disk.*
+                  - ip.*
+                  - image.*
+                  - memory
+                  - memory.*
+                  - network.*
+                  - perf.*
+                  - port
+                  - port.*
+                  - switch
+                  - switch.*
+                  - storage.*
+                  - volume.*
+
+    - name: Create ceilometer_agent_compute.json
+      copy:
+        dest: "/var/lib/config-data/merged/ceilometer_agent_compute.json"
+        content: |
+          {
+            "image": "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified",
+            "user": "root",
+            "restart": "always",
+            "command": "kolla_start",
+            "net": "host",
+            "environment": {
+                "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS",
+                "KOLLA_CONFIG_FILE":"/var/lib/openstack/config/ceilometer-agent-compute.json",
+                "OS_ENDPOINT_TYPE":"internal"
+            },
+            "volumes": [
+                "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
+                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z"
+            ]
+          }
+
+    - name: Create ceilometer-agent-compute.json
+      copy:
+        dest: "/var/lib/config-data/merged/ceilometer-agent-compute.json"
+        content: |
+          {
+            "command": "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /var/log/containers/ceilometer/compute.log",
+            "config_files": [
+              {
+                "source": "/var/lib/openstack/config/ceilometer.conf",
+                "dest": "/etc/ceilometer/ceilometer.conf",
+                "owner": "ceilometer",
+                "perm": "0600"
+              },
+              {
+                "source": "/var/lib/openstack/config/polling.yaml",
+                "dest": "/etc/ceilometer/polling.yaml",
+                "owner": "ceilometer",
+                "perm": "0600"
+              }
+            ],
+            "permissions": [
+              {
+                  "path": "/var/log/containers/ceilometer",
+                  "owner": "ceilometer:ceilometer",
+                  "recurse": true
+              }
+            ]
+          }

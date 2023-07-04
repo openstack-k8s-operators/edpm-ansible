@@ -18,6 +18,7 @@ collections:
   - ansible.posix
   - community.general
   - containers.podman
+  - fedora.linux_system_roles
   - name: https://opendev.org/openstack/ansible-config_template
     version: master
     type: git

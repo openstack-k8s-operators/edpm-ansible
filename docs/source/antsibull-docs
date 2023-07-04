@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import re
+import sys
+from antsibull_docs.cli.antsibull_docs import main
+from antsibull_docs.schemas.docs.role import RoleEntrypointSchema, RoleOptionsSchema
+
+# Overriding default documentation argspec parsing.
+# Ansible doesn't require the `description` key, even if the antsibull-docs does
+# https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#sample-specification
+
+RoleEntrypointSchema.__fields__['description'].required = False
+RoleEntrypointSchema.__fields__['description'].default = []
+RoleOptionsSchema.__fields__['description'].required = False
+RoleOptionsSchema.__fields__['description'].default = []
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())

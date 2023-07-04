@@ -17,8 +17,6 @@ import sys
 
 from ansible.plugins import loader # noqa F401
 
-from unittest.mock import MagicMock
-
 # Add the project
 sys.path.insert(0, os.path.abspath('../..'))
 # Add the extensions
@@ -31,16 +29,8 @@ sys.path.insert(0, os.path.join(os.path.abspath('.'), '_exts'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'ansible-autodoc'
+    'sphinx_antsibull_ext'
 ]
-
-# Mocking imports that are unresolvable for ansible-autodoc
-module_mock_imports = [
-    'ansible_collections.containers.podman.plugins.module_utils.podman.podman_container_lib'
-]
-
-for module in module_mock_imports:
-    sys.modules[module] = MagicMock()
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -84,3 +74,14 @@ latex_documents = [
      u'%s Documentation' % project,
      u'Red Hat', 'manual'),
 ]
+
+
+# See https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping for the syntax
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/2/', (None, '../python2.inv')),
+    'python3': ('https://docs.python.org/3/', (None, '../python3.inv')),
+    'jinja2': ('http://jinja.palletsprojects.com/', (None, '../jinja2.inv')),
+    'ansible_devel': ('https://docs.ansible.com/ansible/devel/', (None, '../ansible_devel.inv')),
+    # If you want references to resolve to a released Ansible version (say, `5`), uncomment and replace X by this version:
+    # 'ansibleX': ('https://docs.ansible.com/ansible/X/', (None, '../ansibleX.inv')),
+}

@@ -22,10 +22,20 @@
 # This prevents accidental lock-outs.
 - name: Reload custom nftables ruleset files
   become: true
-  ansible.builtin.shell: >-
-    cat /etc/nftables/edpm-flushes.nft
-    /etc/nftables/edpm-rules.nft
-    /etc/nftables/edpm-update-jumps.nft | nft -f -
-  when:
-    - nft_ruleset is defined
-    - nft_ruleset is changed
+  block:
+    - name: Check if rules are changed
+      ansible.builtin.stat:
+        path: /etc/nftables/edpm-rules.nft.changed
+      register: nft_ruleset_changed
+    - name: Reload ruleset
+      ansible.builtin.shell: >-
+        cat /etc/nftables/edpm-flushes.nft
+        /etc/nftables/edpm-rules.nft
+        /etc/nftables/edpm-update-jumps.nft | nft -f -
+      when: nft_ruleset_changed.stat.exists
+  always:
+    - name: Delete nft_ruleset_changed file
+      ansible.builtin.file:
+        path: /etc/nftables/edpm-rules.nft.changed
+        state: absent
+      ignore_errors: true

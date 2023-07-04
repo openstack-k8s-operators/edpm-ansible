@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Set DVR setting when enabled
-  when: edpm_enable_dvr|default(true)
+- name: Configure GW ports on chassis setting when enabled
+  when: edpm_enable_chassis_gw|default(false)
   block:
     - name: Set enable-chassis-as-gw
       ansible.builtin.set_fact:

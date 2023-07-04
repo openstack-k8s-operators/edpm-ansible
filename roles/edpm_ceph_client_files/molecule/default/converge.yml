@@ -17,7 +17,9 @@
 
 - name: Converge
   hosts: all
-  roles:
-    - role: "edpm_ceph_client_files"
-  vars:
-    edpm_ceph_client_files_source: "/home/stack/ceph_files/"
+  tasks:
+    - name: "Include edpm_ceph_client_files"
+      ansible.builtin.include_role:
+        name: "edpm_ceph_client_files"
+      vars:
+        edpm_ceph_client_files_source: "/home/stack/ceph_files/"

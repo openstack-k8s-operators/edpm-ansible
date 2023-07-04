@@ -5,4 +5,11 @@
       jobs:
         - edpm-ansible-molecule-edpm-podman
         - edpm-ansible-molecule-edpm-module_load
-        - edpm-ansible-crc-podified-edpm-deployment
+        - edpm-ansible-molecule-edpm-kernel
+        - edpm-ansible-content-provider
+        - edpm-ansible-crc-podified-edpm-deployment:
+            dependencies:
+              - edpm-ansible-content-provider
+        - edpm-ansible-crc-podified-edpm-baremetal:
+            dependencies:
+              - edpm-ansible-content-provider

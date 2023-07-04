@@ -2,5 +2,5 @@
 Role - edpm-container-rm
 ===========================
 
-.. ansibleautoplugin::
-   :role: roles/edpm_container_rm
+.. include::
+   ../collections/osp/edpm/edpm_container_rm_role.rst

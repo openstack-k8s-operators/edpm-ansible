@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,14 +15,4 @@
 # under the License.
 
 
-- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
-  strategy: free
-  name: Server Network Validation
-  gather_facts: "{{ gather_facts | default(false) }}"
-  any_errors_fatal: true
-  tasks:
-    - name: Basic Network Validation
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_nodes_validation
-      tags:
-        - edpm_nodes_validation
+# All variables intended for modification should be placed in this file.

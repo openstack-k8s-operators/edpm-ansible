@@ -2,5 +2,5 @@
 Role - test_deps
 ================
 
-.. ansibleautoplugin::
-   :role: roles/test_deps
+.. include::
+   ../collections/osp/edpm/test_deps_role.rst

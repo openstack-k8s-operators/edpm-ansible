@@ -28,7 +28,7 @@
       ansible.builtin.copy:
         content: "{{ edpm_network_config_override | to_yaml }}"
         dest: "{{ nic_config_file }}"
-        mode: 0644
+        mode: '0644'
         backup: true
       when:
         - edpm_network_config_override.keys()|length > 0
@@ -37,7 +37,7 @@
       ansible.builtin.template:
         src: "{{ edpm_network_config_template }}"
         dest: "{{ nic_config_file }}"
-        mode: 0644
+        mode: '0644'
         backup: true
       when:
         - edpm_network_config_override.keys()|length == 0

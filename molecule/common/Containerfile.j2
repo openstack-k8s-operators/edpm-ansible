@@ -5,8 +5,10 @@ FROM {{ item.registry.url }}/{{ item.image }}
 FROM {{ item.image }}
 {% endif %}
 
-RUN dnf upgrade -y && \
+RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-wallaby/current/delorean.repo && \
+    dnf upgrade -y && \
     dnf -y install sudo python3-libselinux selinux-policy {{ item.pkg_extras | default('') }} && \
+    dnf install -y python*tripleo-repos && \
     dnf clean all -y
 
 CMD [ '/sbin/init' ]

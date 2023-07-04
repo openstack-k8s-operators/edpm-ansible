@@ -32,3 +32,6 @@ tests/output/**
 
 # collection build
 *.tar.gz
+
+# Dynamic antsibull-docs source
+docs/source/collections/**

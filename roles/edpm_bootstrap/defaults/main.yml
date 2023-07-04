@@ -25,8 +25,8 @@ edpm_bootstrap_packages_bootstrap:
   - jq
   - nftables
   - openvswitch
+  - NetworkManager
   - openstack-selinux
-  - os-net-config
   - python3-libselinux
   - python3-pyyaml
   - rsync
@@ -47,5 +47,20 @@ edpm_bootstrap_legacy_network_packages:
   - openstack-network-scripts
 edpm_bootstrap_network_service: NetworkManager
 
+# Control resolv.conf management by NetworkManager
+# false = disable NetworkManager resolv.conf update (default)
+# true = enable NetworkManager resolv.conf update
+edpm_bootstrap_network_resolvconf_update: false
+
 # String for SELinux state. One of: disabled, enforcing, permissive
 edpm_bootstrap_selinux_mode: enforcing
+
+# Swap management
+edpm_bootstrap_swap_size_megabytes: 1024
+edpm_bootstrap_swap_path: /swap
+edpm_bootstrap_swap_partition_enabled: false
+edpm_bootstrap_swap_partition_label: swap1
+
+# Shell command that is executed before any packages are installed by the role.
+# Can be used to register systems using any arbitrary registration command(s).
+edpm_bootstrap_command: ""

@@ -2,8 +2,7 @@ EDPM Ansible
 ============
 [![CodeQL](https://github.com/openstack-k8s-operators/edpm-ansible/actions/workflows/codeql.yml/badge.svg)](https://github.com/openstack-k8s-operators/edpm-ansible/actions/workflows/codeql.yml)
 
-EDPM Ansible project repository. Contains Ansible playbooks, roles, and
-plugins for use with EDPM.
+EDPM Ansible project repository. Contains Ansible roles and plugins for use with EDPM.
 
 Test ansible roles with molecule
 --------------------------------
@@ -43,12 +42,12 @@ image can be rebuilt and pushed to a container repository.
 
 To build the image:
 
-      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ export IMAGE_TAG_BASE=quay.io/<user>/openstack-ansibleee-runner
       $ make openstack_ansibleee_build
 
 To push the image:
 
-      $ export IMG_BASE_TAG=quay.io/<user>/openstack-ansibleee-runner
+      $ export IMAGE_TAG_BASE=quay.io/<user>/openstack-ansibleee-runner
       $ make openstack_ansibleee_push
 
 Depending on the repository, a ``podman login quay.io/<user>`` may be required

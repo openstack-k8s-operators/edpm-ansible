@@ -20,16 +20,36 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_module_load
+- job:
+    name: edpm-ansible-molecule-edpm-kernel
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_kernel
 
 # EDPM jobs
+- job:
+    name: edpm-ansible-content-provider
+    parent: content-provider-base
+    vars:
+      cifmw_operator_build_org: openstack-k8s-operators
+      cifmw_operator_build_operators:
+        - name: "openstack-operator"
+          src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
+          image_base: edpm
 - job:
     name: edpm-ansible-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
     pre-run:
       - ci/playbooks/build_runner_image.yaml
-    vars:
+    vars: &edpm_vars
       registry_login_enabled: true
       push_registry: quay.rdoproject.org
       quay_login_secret_name: quay_nextgen_zuulgithubci
       cifmw_extras:
         - '@{{ ansible_user_dir }}/ci-framework/edpm-ansible.yml'
+- job:
+    name: edpm-ansible-crc-podified-edpm-baremetal
+    parent: cifmw-crc-podified-edpm-baremetal
+    pre-run:
+      - ci/playbooks/build_runner_image.yaml
+    vars: *edpm_vars

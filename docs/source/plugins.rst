@@ -6,6 +6,5 @@ Contents:
 .. toctree::
    :glob:
 
-   plugins/modules/*
-   plugins/action/*
-   plugins/filter/*
+   collections/index_module
+   collections/index_filter

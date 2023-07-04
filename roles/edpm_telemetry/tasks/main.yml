@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,16 +15,8 @@
 # under the License.
 
 
-- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
-  strategy: free
-  name: Deploy EDPM Network
-  gather_facts: "{{ gather_facts | default(false) }}"
-  any_errors_fatal: true
-  tasks:
-    - name: Run Network Config
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_network_config
-      vars:
-        edpm_network_config_with_ansible: true
-      tags:
-        - edpm_network_config
+- name: Import deploy_ceilometer telemetry tasks
+  ansible.builtin.import_tasks: deploy_ceilometer.yml
+
+- name: Import deploy_infra telemetry tasks
+  ansible.builtin.import_tasks: deploy_infra.yml

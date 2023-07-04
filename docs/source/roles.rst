@@ -1,5 +1,5 @@
-Documented roles in EDPM-Ansible
-===================================
+Roles in EDPM-Ansible
+=====================
 
 Contents:
 

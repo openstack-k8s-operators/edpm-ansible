@@ -23,7 +23,7 @@
         state: directory
         owner: root
         group: root
-        mode: 0750
+        mode: '0750'
 
     - name: Push default ruleset snipet
       ansible.builtin.copy:
@@ -37,6 +37,9 @@
       ansible.builtin.copy:
         dest: /etc/nftables/iptables.nft
         src: iptables.nft
+        owner: root
+        group: root
+        mode: '0600'
 
     - name: Load empty ruleset
       ansible.builtin.command: nft -f /etc/nftables/iptables.nft
@@ -70,6 +73,9 @@
       ansible.builtin.template:
         dest: /etc/nftables/edpm-jumps.nft
         src: jump-chain.j2
+        owner: root
+        group: root
+        mode: '0600'
 
     # Create a special "update chain jumps" file, adding just the MISSING
     # jumps in the main, default chains. This will avoid useless duplication
@@ -85,6 +91,9 @@
       ansible.builtin.template:
         dest: /etc/nftables/edpm-update-jumps.nft
         src: jump-chain.j2
+        owner: root
+        group: root
+        mode: '0600'
 
     # Note: we do NOT include this one for boot, since chains are
     # already empty!
@@ -96,6 +105,9 @@
       ansible.builtin.template:
         dest: /etc/nftables/edpm-flushes.nft
         src: flush-chain.j2
+        owner: root
+        group: root
+        mode: '0600'
 
     - name: Generate nft edpm chains
       register: nft_chains
@@ -105,6 +117,9 @@
       ansible.builtin.template:
         dest: /etc/nftables/edpm-chains.nft
         src: chains.j2
+        owner: root
+        group: root
+        mode: '0600'
 
     - name: Generate nft ruleset in static file
       register: nft_ruleset
@@ -114,11 +129,27 @@
       ansible.builtin.template:
         dest: /etc/nftables/edpm-rules.nft
         src: ruleset.j2
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Create a sentinel file when nft rules are changed
+      ansible.builtin.file:
+        path: /etc/nftables/edpm-rules.nft.changed
+        state: touch
+        owner: root
+        group: root
+        mode: '0600'
+      when:
+        - nft_ruleset is defined
+        - nft_ruleset is changed
+
 
 # We cannot use the "validate" parameter from the "template" module, since
 # we don't load the chains before. So let's validate now, with all the things.
 # Remember, the "iptables" compat layout is already loaded at this point.
 - name: Validate all of the generated content before loading
+  become: true
   when:
     - not ansible_check_mode|bool
   ansible.builtin.shell: >-

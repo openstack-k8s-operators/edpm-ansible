@@ -1,5 +1,5 @@
 ---
-# Copyright 2020 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,136 +14,34 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Gather SELinux fact if needed
-  when:
-    - ansible_facts.selinux is undefined
-  ansible.builtin.setup:
-    gather_subset:
-      - "!all"
-      - "!min"
-      - "selinux"
-
-- name: Create fcontext entry for edpmconfig
-  become: true
-  when:
-    - ansible_facts.selinux.status == "enabled"
-  sefcontext:
-    target: "/var/lib/edpm-config(/.*)?"
-    setype: container_file_t
-    selevel: s0
-    state: present
-
-- name: Ensure requirements are satisfied
-  ansible.builtin.include_role:
-    name: edpm_bootstrap
-    tasks_from: packages.yml
-
-- name: Ensure /var/lib/edpm-config directory exists
-  become: true
-  ansible.builtin.file:
-    path: /var/lib/edpm-config
-    state: directory
-    setype: container_file_t
-    selevel: s0
-    mode: 0750
-
-- name: Check for previous run of NetworkConfig
-  become: true
-  ansible.builtin.stat:
-    path: /var/lib/edpm-config/os-net-config.returncode
-  register: os_net_config_returncode_stat
-
-- name: Check result of previous run of NetworkConfig
-  become: true
-  ansible.builtin.slurp:
-    path: /var/lib/edpm-config/os-net-config.returncode
-  when: os_net_config_returncode_stat.stat.exists
-  register: os_net_config_returncode_slurp
-
-- name: Ensure we get cloud-init
-  ansible.builtin.stat:
-    path: /etc/cloud/cloud.cfg.d
-  register: cloud_init_exists
-
-- name: NetworkConfig
-  become: true
-  # The conditions here are when we want to apply the
-  # NetworkConfig. They are:
-  # - If edpm_network_config_update is True
-  # - Or the previous run of NetworkConfig failed.
-  # - Or it has never run
-  # This will match the prior behavior of when a Heat
-  # SoftwareDeployment was used.
-  # It also ensures the script does exist as a sine qua non
-  # condition
-  when:
-    - (edpm_network_config_update) or
-      (os_net_config_returncode_stat.stat.exists and
-      ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
-       (not os_net_config_returncode_stat.stat.exists)
+- name: Configure network with network role from system roles [nmstate]
   block:
-    - name: Create /etc/os-net-config directory
-      become: true
-      ansible.builtin.file:
-        path: /etc/os-net-config
-        state: directory
-        recurse: true
-
-    - name: Create os-net-config mappings from lookup data
-      edpm_os_net_config_mappings:
-        net_config_data_lookup:
-          "{{ edpm_network_config_os_net_config_mappings }}"
-      when: not ansible_check_mode|bool
-      register: os_net_config_mappings_result
-
-    - name: Write os-net-config mappings file /etc/os-net-config/mapping.yaml
-      ansible.builtin.copy:
-        content: "{{ os_net_config_mappings_result.mapping | to_nice_yaml }}"
-        dest: /etc/os-net-config/mapping.yaml
-        mode: 0644
-      when: os_net_config_mappings_result.changed|bool
-
-    - name: Manage NetworkConfig with edpm_os_net_config module
-      block:
-        - name: Remove /var/lib/edpm-config/scripts directory
-          ansible.builtin.file:
-            path: /var/lib/edpm-config/scripts
-            state: absent
-
-        - name: Run NetworkConfig with edpm_os_net_config
-          ansible.builtin.include_tasks: os_net_config.yml
-
-    - name: Write rc of NetworkConfig script
-      ansible.builtin.copy:
-        content: "{{ network_config_result.rc }}"
-        dest: /var/lib/edpm-config/os-net-config.returncode
-        mode: 0644
-      when:
-        - network_config_result.rc is defined
-
-    # LP Bug: https://bugs.launchpad.net/edpm/+bug/1958332
-    - name: Disable cloud-init network config
-      ansible.builtin.copy:
-        content: |
-          network:
-            config: disabled
-        dest: /etc/cloud/cloud.cfg.d/99-edpm-disable-network-config.cfg
-        mode: 0644
-      when:
-        - network_config_result.rc is defined
-        - network_config_result.rc == 0
-        - cloud_init_exists.stat.exists
-        - cloud_init_exists.stat.isdir
-
-    # os-net-config currently relies on the legacy network
-    # so we need to ensure it's enabled on boot. This should
-    # be removed when we switch to NetworkManager or replaced
-    # with something that ensures NetworkManager is enabled.
-    - name: Ensure network service is enabled
+    - name: Retrieve role name [nmstate]
+      ansible.builtin.set_fact:
+        systemrolename:
+          "{%- if ansible_facts['distribution'] == 'RedHat' -%}
+            redhat.rhel
+          {%- else -%}
+            fedora.linux
+          {%- endif -%}
+          _system_roles.network"
+      delegate_to: localhost
+    - name: Install OVS NetworkManager plugin [nmstate]
+      ansible.builtin.dnf:
+        name: NetworkManager-ovs
+        state: latest
+      register: nm_ovs_status
+    - name: Restart NetworkManager after plugin installation [nmstate]
       ansible.builtin.systemd:
-        name: network
-        enabled: true
-      when:
-        - edpm_network_config_manage_service
-        - not edpm_network_config_nmstate|bool
-        - not ansible_check_mode|bool
+        name: NetworkManager
+        state: restarted
+      when: nm_ovs_status.changed
+    - name: Load system-roles.network tasks [nmstate]
+      ansible.builtin.include_role:
+        name: "{{ systemrolename }}"
+  when: edpm_network_config_tool == 'nmstate'
+
+- name: Load edpm_network_config tasks [os-net-config]
+  ansible.builtin.include_tasks:
+    file: network_config.yml
+  when: edpm_network_config_tool == 'os-net-config'
