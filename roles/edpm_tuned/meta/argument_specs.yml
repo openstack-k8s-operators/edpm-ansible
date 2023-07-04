@@ -3,4 +3,29 @@ argument_specs:
   # ./roles/edpm_tuned/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_tuned role.
-    options: {}
+    options:
+      edpm_tuned_profile:
+        type: str
+        default: "throughput-performance"
+        description: >
+          Name of the custom tuned profile. This string will
+          be used for relevant /etc/ subdir and files.
+      edpm_tuned_custom_profile:
+        type: str
+        default: >
+          Contents of a custom tuned.conf file.
+      edpm_tuned_isolated_cores:
+        type: str
+        default: ""
+        description: >
+          String consisting of comma separated core indices
+          in a format accepted by /etc/tuned/realtime-variables.conf
+          for example: 2,4-7 .
+          Please note that the value may be rendered in a different .conf
+          file, depending on your local setup.
+      edpm_tuned_system_packages:
+        type: list
+        description: >
+          Packages installed on the local system. Allows user to define this list
+          otherwise it will inherit from the OS specific variable file(s).
+        default: []

@@ -18,9 +18,9 @@
 - name: Converge
   become: true
   hosts: all
-  vars:
-    edpm_tuned_system_packages: "tuned-profiles-cpu-partitioning"
-    edpm_tuned_profile: "cpu-partitioning"
-    edpm_tuned_isolated_cores: "1"
   roles:
     - role: "osp.edpm.edpm_tuned"
+      edpm_tuned_system_packages:
+      - "tuned-profiles-cpu-partitioning"
+      edpm_tuned_profile: "cpu-partitioning"
+      edpm_tuned_isolated_cores: "1"
