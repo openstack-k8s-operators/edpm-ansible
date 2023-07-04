@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_ddp_package/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_ddp_option role.
+    options: {}
