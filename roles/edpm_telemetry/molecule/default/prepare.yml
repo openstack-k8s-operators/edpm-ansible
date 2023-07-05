@@ -31,8 +31,11 @@
         state: directory
 
     - name: Create ceilometer.conf
-      copy:
+      ansible.builtin.copy:
         dest: "/var/lib/config-data/merged/ceilometer.conf"
+        mode: 0644
+        owner: root
+        group: root
         content: |
           [DEFAULT]
           tenant_name_discovery=False
@@ -59,8 +62,11 @@
           telemetry_secret=eQ5qb0yysfJ8lx82Vl061vSyY
 
     - name: Create polling.yaml
-      copy:
+      ansible.builtin.copy:
         dest: "/var/lib/config-data/merged/polling.yaml"
+        mode: 0644
+        owner: root
+        group: root
         content: |
           ---
           sources:
@@ -81,10 +87,14 @@
                   - switch.*
                   - storage.*
                   - volume.*
+                  - hardware.*
 
     - name: Create ceilometer_agent_compute.json
-      copy:
+      ansible.builtin.copy:
         dest: "/var/lib/config-data/merged/ceilometer_agent_compute.json"
+        mode: 0644
+        owner: root
+        group: root
         content: |
           {
             "image": "quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified",
@@ -104,11 +114,70 @@
           }
 
     - name: Create ceilometer-agent-compute.json
-      copy:
+      ansible.builtin.copy:
         dest: "/var/lib/config-data/merged/ceilometer-agent-compute.json"
+        mode: 0644
+        owner: root
+        group: root
         content: |
           {
             "command": "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /var/log/containers/ceilometer/compute.log",
+            "config_files": [
+              {
+                "source": "/var/lib/openstack/config/ceilometer.conf",
+                "dest": "/etc/ceilometer/ceilometer.conf",
+                "owner": "ceilometer",
+                "perm": "0600"
+              },
+              {
+                "source": "/var/lib/openstack/config/polling.yaml",
+                "dest": "/etc/ceilometer/polling.yaml",
+                "owner": "ceilometer",
+                "perm": "0600"
+              }
+            ],
+            "permissions": [
+              {
+                  "path": "/var/log/containers/ceilometer",
+                  "owner": "ceilometer:ceilometer",
+                  "recurse": true
+              }
+            ]
+          }
+
+    - name: Create ceilometer_agent_ipmi.json
+      ansible.builtin.copy:
+        dest: "/var/lib/config-data/merged/ceilometer_agent_ipmi.json"
+        mode: 0644
+        owner: root
+        group: root
+        content: |
+          {
+            "image": "quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified",
+            "user": "root",
+            "restart": "always",
+            "command": "kolla_start",
+            "net": "host",
+            "environment": {
+                "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS",
+                "KOLLA_CONFIG_FILE":"/var/lib/openstack/config/ceilometer-agent-ipmi.json",
+                "OS_ENDPOINT_TYPE":"internal"
+            },
+            "volumes": [
+                "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
+                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z"
+            ]
+          }
+
+    - name: Create ceilometer-agent-ipmi.json
+      ansible.builtin.copy:
+        dest: "/var/lib/config-data/merged/ceilometer-agent-ipmi.json"
+        mode: 0644
+        owner: root
+        group: root
+        content: |
+          {
+            "command": "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /var/log/containers/ceilometer/ipmi.log",
             "config_files": [
               {
                 "source": "/var/lib/openstack/config/ceilometer.conf",

@@ -56,10 +56,12 @@
     - { 'src': "/var/lib/config-data/merged/polling.yaml", "dest": "/var/lib/openstack/config/ceilometer/polling.yaml" }
     - { 'src': "/var/lib/config-data/merged/ceilometer_agent_compute.json", "dest": "/var/lib/openstack/config/containers/ceilometer_agent_compute.json" }
     - { 'src': "/var/lib/config-data/merged/ceilometer-agent-compute.json", "dest": "/var/lib/openstack/config/ceilometer/ceilometer-agent-compute.json" }
+    - { 'src': "/var/lib/config-data/merged/ceilometer_agent_ipmi.json", "dest": "/var/lib/openstack/config/containers/ceilometer_agent_ipmi.json" }
+    - { 'src': "/var/lib/config-data/merged/ceilometer-agent-ipmi.json", "dest": "/var/lib/openstack/config/ceilometer/ceilometer-agent-ipmi.json" }
   tags:
     - edpm_telemetry
 
-- name: deploy ceilometer container
+- name: deploy ceilometer compute container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
@@ -71,10 +73,30 @@
   tags:
     - edpm_telemetry
 
-- name: restart ceilometer
+- name: deploy ceilometer ipmi container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_debug: true
+    edpm_container_manage_config_patterns: 'ceilometer_agent_ipmi.json'
+    edpm_container_manage_clean_orphans: false
+  tags:
+    - edpm_telemetry
+
+- name: restart ceilometer compute
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: edpm_ceilometer_agent_compute.service
+  tags:
+    - edpm_telemetry
+
+- name: restart ceilometer ipmi
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_ceilometer_agent_ipmi.service
   tags:
     - edpm_telemetry
