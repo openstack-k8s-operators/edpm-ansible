@@ -53,6 +53,15 @@ To push the image:
 Depending on the repository, a ``podman login quay.io/<user>`` may be required
 before pushing.
 
+Run ansibleee pods with a local copy of edpm-ansible
+----------------------------------------------------
+
+Local changes to edpm-ansible can also be tested by adding a volume mount to
+the ansibleee pods. This will be faster than building a new
+openstack-ansibleee-runner container image. See the [edpm-ansible
+documentation](https://openstack-k8s-operators.github.io/edpm-ansible/) for
+more information.
+
 License
 -------
 
