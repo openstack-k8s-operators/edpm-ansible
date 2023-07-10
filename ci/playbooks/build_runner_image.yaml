@@ -34,5 +34,8 @@
       ansible.builtin.copy:
         mode: 0644
         content: |
-          cifmw_edpm_prepare_ansible_runner_image: "{{ ansibleee_runner_img }}"
+          cifmw_edpm_prepare_update_os_containers: true
+          cifmw_set_openstack_containers_operator_name: openstack-ansibleee
+          cifmw_set_openstack_containers_overrides:
+            ANSIBLEEE_IMAGE_URL_DEFAULT: "{{ ansibleee_runner_img }}"
         dest: "{{ ansible_user_dir }}/ci-framework/edpm-ansible.yml"
