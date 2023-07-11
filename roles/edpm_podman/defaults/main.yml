@@ -23,11 +23,8 @@ edpm_podman_buildah_login: false
 edpm_container_registry_insecure_registries: []
 edpm_container_registry_login: false
 edpm_container_registry_logins: {}
-edpm_podman_packages:
-  - podman
-edpm_buildah_packages:
-  - buildah
-edpm_podman_purge_packages: []
+edpm_podman_package: podman
+edpm_buildah_package: buildah
 edpm_podman_enable_socket: false
 edpm_podman_unqualified_search_registries:
   - registry.redhat.io
@@ -35,7 +32,6 @@ edpm_podman_unqualified_search_registries:
   - registry.fedoraproject.org
   - registry.centos.org
   - quay.io
-edpm_podman_insecure_registries: "{{ edpm_container_registry_insecure_registries }}"
 # this is the default network configuration except the range has been moved
 # from 10.88.0.0/16 to 10.255.255.0/24 to try and prevent a conflict in an
 # existing cloud

@@ -23,7 +23,7 @@
   block:
     - name: Ensure podman and deps are installed
       ansible.builtin.package:
-        name: "{{ edpm_podman_packages }}"
+        name: "{{ edpm_podman_package }}"
         state: present
 
     - name: Ensure we get the ansible interfaces facts

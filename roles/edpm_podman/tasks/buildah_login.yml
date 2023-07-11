@@ -29,7 +29,7 @@
 - name: Ensure buildah is installed
   become: true
   ansible.builtin.package:
-    name: "{{ edpm_buildah_packages }}"
+    name: "{{ edpm_buildah_package }}"
     state: present
 
 - name: Perform container registry login(s) with buildah
