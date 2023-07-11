@@ -3,4 +3,124 @@ argument_specs:
   # ./roles/edpm_podman/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_podman role.
-    options: {}
+    options:
+      edpm_podman_hide_sensitive_logs:
+        type: bool
+        default: true
+        description: >
+          Defaults to true unless the "hide_sensitive_logs" variable is set.
+          If it is it takes a precedence.
+      edpm_podman_buildah_login:
+        type: bool
+        default: false
+      edpm_container_registry_insecure_registries:
+        type: list
+        default: []
+      edpm_container_registry_login:
+        type: bool
+        default: false
+      edpm_container_registry_logins:
+        type: dict
+        default: {}
+      edpm_podman_packages:
+        type: list
+        default:
+          - podman
+        description: Name of podman package to be installed
+      edpm_buildah_packages:
+        type: list
+        default:
+          - buildah
+        description: Name of buildah package to be installed.
+      edpm_podman_purge_packages:
+        type: list
+        default: []
+      edpm_podman_enable_socket:
+        type: bool
+        default: false
+      edpm_podman_unqualified_search_registries:
+        type: list
+        default:
+          - registry.redhat.io
+          - registry.access.redhat.com
+          - registry.fedoraproject.org
+          - registry.centos.org
+          - quay.io
+        description: List of package registries
+      edpm_podman_default_network_config:
+          type: dict
+          description: >
+            This is the default network configuration except the range has been moved
+            from 10.88.0.0/16 to 10.255.255.0/24 to try and prevent a conflict in an
+            existing cloud
+          default:
+            cniVersion: 0.4.0
+            name: podman
+            plugins:
+              - type: bridge
+                bridge: cni-podman0
+                isGateway: true
+                ipMasq: true
+                hairpinMode: true
+                ipam:
+                  type: host-local
+                  routes:
+                    - dst: 0.0.0.0/0
+                  ranges:
+                    - - subnet: 10.255.255.0/24
+                        gateway: 10.255.255.1
+              - type: portmap
+                capabilities:
+                  portMappings: true
+              - type: firewall
+              - type: tuning
+
+      edpm_podman_registries:
+        type: list
+        default: []
+        description: |
+          edpm_podman_registries requires a list of dictionaries
+          Example:
+            # edpm_podman_registries:
+            #   - prefix: quay.io
+            #     insecure: false
+            #     location: quay.io
+            #     mirrors:
+            #       - location: 192.168.0.1:8787
+            #         insecure: true
+            #   - prefix: registry.redhat.io
+            #     insecure: false
+            #     location: registry.redhat.io
+            #     mirrors:
+            #       - location: 192.168.0.2:8787
+            #         insecure: false
+            #   - prefix: registry.fedoraproject.org
+            #     blocked: true
+      edpm_container_default_pids_limit:
+        type: int
+        default: 4096
+      edpm_container_events_logger_mechanism:
+        type: str
+        default: journald
+      edpm_container_default_runtime:
+        type: str
+        default: crun
+      edpm_container_default_network_backend:
+        type: str
+        default: netavark
+      edpm_podman_systemd_drop_in_dependencies:
+        type: bool
+        default: true
+        description: >
+          Tell the edpm_container_manage to inject
+          additional ordering dependencies for the systemd
+          scopes associated to podman containers.
+      edpm_podman_service_unit_name:
+        type: str
+        default: "edpm_podman.service"
+      edpm_podman_service_unit_description:
+        type: str
+        default: "Podman API service for EDPM purposes"
+      edpm_podman_socket_path:
+        type: path
+        default: /var/lib/edpm-podman/podman.sock
