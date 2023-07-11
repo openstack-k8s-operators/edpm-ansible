@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,8 +15,16 @@
 # under the License.
 
 
-- name: Converge
+- name: Verify
   hosts: all
-  roles:
-    - role: "osp.edpm.edpm_timezone"
-      edpm_timezone: "GMT"
+  tasks:
+    - name: Get current timezone
+      community.general.timezone:
+        name: Asia/Tokyo
+      check_mode: true
+      register: timezone_info
+
+    - name: Do we have a the right timezone?
+      ansible.builtin.fail:
+        msg: "The timezone wasn't set up properly."
+      when: timezone_info.diff.before.name != "GMT"
