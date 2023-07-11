@@ -66,7 +66,7 @@ edpm_ovn_controller_tls_volumes:
 
 # Set external_id data from provided variables
 edpm_ovn_ovs_external_ids:
-  hostname: "{{ ansible_facts['fqdn'] }}"
+  hostname: "{{ ansible_hostname }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
   ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(',') }}"
   ovn-chassis-mac-mappings:
