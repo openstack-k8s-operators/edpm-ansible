@@ -1,12 +1,11 @@
-============
-Contributing
-============
+Contributing Roles
+------------------
 
 Adding roles into this project is easy and starts with a compatible skeleton.
 
 
-Create a new role manually
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a new role
+~~~~~~~~~~~~~~~~~
 
 From with the project root, creating a skeleton for the new role.
 
