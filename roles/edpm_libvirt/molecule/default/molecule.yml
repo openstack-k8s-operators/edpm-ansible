@@ -1,0 +1,25 @@
+---
+dependency:
+  name: galaxy
+verifier:
+  name: ansible
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: no
+  cachier: machine
+  parallel: true
+  default_box: 'generic/rocky9'
+platforms:
+  - name: compute-1
+    memory: 4000
+    cpus: 4
+    provider_options:
+      cpu_mode: 'host-passthrough'
+      nested: true
+      machine_type: 'q35'
+    groups:
+      - compute
+provisioner:
+  name: ansible

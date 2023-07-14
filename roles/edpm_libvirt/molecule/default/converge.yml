@@ -1,0 +1,20 @@
+- name: Setup DUT
+  hosts: "compute-1"
+  tasks:
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+    - name: set timezone
+      import_role:
+        name: "edpm_timezone"
+    - name: install podman
+      import_role:
+        name: "edpm_podman"
+
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_libvirt"

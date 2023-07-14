@@ -7,6 +7,7 @@ import re
 
 SKIP_LIST = [
     "edpm_ovn",
+    "edpm_libvirt",
     "edpm_nova_compute",
     "edpm_nova_libvirt",
     "edpm_module_load",

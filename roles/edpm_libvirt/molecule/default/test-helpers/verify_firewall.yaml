@@ -1,0 +1,30 @@
+- name: verify vnc nftables firewall rules
+  block:
+    - name: Check if nftables rule exists in /etc/nftables/edpm-rules.nft
+      become: true
+      ansible.builtin.shell: grep -q "005 Allow vnc access on all networks." /etc/nftables/edpm-rules.nft
+      register: rule_exists
+    - name: Assert nftables rule exists in /etc/nftables/edpm-rules.nft
+      ansible.builtin.assert:
+        that:
+          - rule_exists.rc == 0
+        fail_msg: "vnc rule does not exist in /etc/nftables/edpm-rules.nft"
+    - name: vnc rule port range and protocol
+      become: true
+      ansible.builtin.shell: grep -q "EDPM_INPUT tcp dport { 5900-6923 }" /etc/nftables/edpm-rules.nft
+      register: rule_content_exists
+    - name: Assert vnc rule port range and protocol
+      ansible.builtin.assert:
+        that:
+          - rule_content_exists.rc == 0
+        fail_msg: "vnc rule port range and protocol incorrect in /etc/nftables/edpm-rules.nft"
+    - name: vnc rule source file exists
+      become: true
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/firewall/vnc.yaml"
+      register: rule_source_exists
+    - name: Assert vnc rule source file exists
+      ansible.builtin.assert:
+        that:
+          - rule_source_exists.stat.exists
+        fail_msg: "vnc rule source file does not exist"

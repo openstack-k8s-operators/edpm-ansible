@@ -1,0 +1,12 @@
+- name: verify dir exists
+  become: true
+  block:
+      - name: Check if directory exists {{ item }}
+        ansible.builtin.stat:
+          path: "{{ item }}"
+        register: dir_exists
+      - name: Assert directory exists {{ item }}
+        ansible.builtin.assert:
+          that:
+            - dir_exists.stat.exists
+          fail_msg: "Directory {{ item }} does not exist"
