@@ -20,3 +20,19 @@
   roles:
     - role: test_deps
     - role: env_data
+
+- name: Setup DUT
+  hosts: all
+  tasks:
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+    - name: set timezone
+      import_role:
+        name: "edpm_timezone"
+    - name: install podman
+      import_role:
+        name: "edpm_podman"

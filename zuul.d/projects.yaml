@@ -6,6 +6,7 @@
         - edpm-ansible-molecule-edpm-podman
         - edpm-ansible-molecule-edpm-module_load
         - edpm-ansible-molecule-edpm-kernel
+        - edpm-ansible-molecule-edpm_libvirt
         - edpm-ansible-content-provider
         - edpm-ansible-crc-podified-edpm-deployment:
             dependencies:

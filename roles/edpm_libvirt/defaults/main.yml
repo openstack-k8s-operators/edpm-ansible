@@ -18,8 +18,6 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_libvirt"
-edpm_libvirt_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
-edpm_libvirt_hide_sensitive_logs: true
 edpm_libvirt_image: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
 edpm_libvirt_containers:
   - "libvirt_virtlogd"

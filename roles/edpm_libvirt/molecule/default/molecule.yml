@@ -1,25 +1,22 @@
 ---
 dependency:
   name: galaxy
-verifier:
-  name: ansible
 driver:
-  name: vagrant
-  provider:
-    name: libvirt
-  provision: no
-  cachier: machine
-  parallel: true
-  default_box: 'generic/rocky9'
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
   - name: compute-1
-    memory: 4000
-    cpus: 4
-    provider_options:
-      cpu_mode: 'host-passthrough'
-      nested: true
-      machine_type: 'q35'
     groups:
       - compute
 provisioner:
   name: ansible
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+     - prepare
+     - converge
+     - verify

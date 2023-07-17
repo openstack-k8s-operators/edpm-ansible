@@ -13,7 +13,7 @@
         "/var/log/containers/qemu:/var/log/libvirt/qemu",
         "/var/log/containers/libvirt:/var/log/containers/libvirt",
         "/var/lib/libvirt:/var/lib/libvirt",
-        "/var/lib/nova:/var/lib/nova",
-        "/run/libvirt:/run/libvirt"
+        "/var/lib/nova:/var/lib/nova:shared,z",
+        "/run/libvirt:/run/libvirt:shared,z"
     ]
   }

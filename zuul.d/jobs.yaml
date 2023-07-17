@@ -10,6 +10,7 @@
     vars:
       roles_dir: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}/roles/{{ TEST_RUN }}"
 
+# non-containerized role jobs
 - job:
     name: edpm-ansible-molecule-edpm-podman
     parent: edpm-ansible-molecule-base
@@ -25,6 +26,11 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_kernel
+- job:
+    name: edpm-ansible-molecule-edpm_libvirt
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_libvirt
 
 # EDPM jobs
 - job:

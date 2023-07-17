@@ -1,35 +1,43 @@
 ---
 - name: ensure /var/run/libvirt is present upon reboot
-  tags: install
+  tags:
+    - install
+    - libvirt
   become: true
   ansible.builtin.copy:
         dest: /etc/tmpfiles.d/run-libvirt.conf
         content: |
           d /run/libvirt 0755 root root - -
 - name: create tempfiles
-  tags: install
+  tags:
+    - install
+    - libvirt
   become: true
   command: systemd-tmpfiles --create
 - name: create persistent directories
-  tags: install
+  tags:
+    - install
+    - libvirt
   become: true
   file:
     path: "{{ item.path }}"
     setype: "{{ item.setype | default('container_file_t') }}"
     state: directory
-    owner: "{{ item.owner | default(ansible_user) }}"
-    group: "{{ item.group | default(ansible_user) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   with_items:
-  - { "path": /var/lib/libvirt}
-  - { "path": /var/log/containers/libvirt, "mode": "0750" }
-  - { "path": /var/log/containers/qemu, "mode": "0750" }
-  - { "path": /var/log/containers/stdouts, "mode": "0750" }
-  # we could proably just assume tha this has been precreated by the dataplane operator.
-  - { "path": /etc/ceph, "mode": "0750", "owner": "root", "group": "root"}
+  - { "path": "/var/lib/libvirt", "mode": "0750" }
+  - { "path": "/var/log/containers/libvirt", "mode": "0750" }
+  - { "path": "/var/log/containers/qemu", "mode": "0750" }
+  # dont set owner/group or mode on these, as they are managed
+  # by other roles, just ensure they exist.
+  - { "path": "/var/log/containers/stdouts" }
+  - { "path": "/etc/ceph" }
 - name: render libvirt container
-  become: true
-  tags: install
+  tags:
+    - install
+    - libvirt
   ansible.builtin.template:
     src: "{{ item }}/{{ item }}.json.j2"
     dest: "/var/lib/openstack/config/containers/{{ item }}.json"
@@ -39,18 +47,21 @@
   notify:
   - restart libvirt
 - name: deploy libvirt containers
-  tags: install
+  tags:
+    - install
+    - libvirt
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: "/var/lib/openstack/config/containers"
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: "libvirt*.json"
     edpm_container_manage_clean_orphans: false
   register: edpm_container_manage_result
 - name: notify on container changes
-  tags: install
+  tags:
+    - install
+    - libvirt
   ansible.builtin.debug:
     msg: "container changes: {{ edpm_container_manage_result.changed }}"
   when: edpm_container_manage_result.changed

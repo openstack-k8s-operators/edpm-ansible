@@ -1,7 +1,10 @@
 ---
 - name: update ceph libvirt secret
-  tags: post-install
+  tags:
+    - install
+    - post-libvirt
   become: true
+  changed_when: true
   shell: |
     CLUSTERS=( $(ls /etc/ceph/*.conf | xargs -I {} basename  -s .conf {} ) )
     declare -A CLUSTER_USER_MAP=()
@@ -25,14 +28,18 @@
     podman exec libvirt_virtqemud bash -c "virsh secret-set-value ${CLUSTER_FSID_MAP[${cluster}]} --base64 ${keyring}"
     done
 - name: Copy qemu vnc firewall config
-  tags: post-install
+  tags:
+    - install
+    - post-libvirt
   become: true
   ansible.builtin.template:
     src: "firewall.yaml"
     dest: "/var/lib/edpm-config/firewall/vnc.yaml"
     mode: "640"
 - name: Configure firewall for the vnc
-  tags: post-install
+  tags:
+    - install
+    - post-libvirt
   ansible.builtin.include_role:
       name: osp.edpm.edpm_nftables
       tasks_from: "configure.yml"

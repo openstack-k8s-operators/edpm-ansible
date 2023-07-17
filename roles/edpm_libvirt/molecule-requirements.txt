@@ -1,8 +1,0 @@
-ansible-core<2.12.0
-ansible<5
-molecule!=3.6.1,!=3.6.0
-molecule-plugins[vagrant]
-python-vagrant
-netaddr
-jmespath
-pytest-testinfra

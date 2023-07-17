@@ -1,6 +1,8 @@
 ---
 - name: create libvirt config dir
-  tags: configure
+  tags:
+    - configure
+    - libvirt
   become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -9,27 +11,30 @@
     owner: "{{ item.owner | default(ansible_user) }}"
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
-    recurse: true
   with_items:
-  - { "path": /var/lib/openstack/config/libvirt}
-  - { "path": /var/lib/openstack/config/containers}
-  - { 'path': /var/lib/nova}
-  - { "path": /etc/tmpfiles.d/, "owner": "root", "group": "root"}
+  - { "path": "/var/lib/openstack/config/libvirt"}
+  - { "path": "/var/lib/openstack/config/containers"}
+  - { 'path': "/var/lib/nova"}
+  - { "path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
   - { "path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
 
 - name: create container config dirs
   become: true
-  tags: configure
+  tags:
+    - configure
+    - libvirt
   ansible.builtin.file:
     path: "/var/lib/openstack/config/libvirt/{{ item }}"
     state: directory
-    setype: "container_file_t"
+    setype: "{{ item.setype | default('container_file_t') }}"
+    owner: "{{ item.owner | default(ansible_user) }}"
+    group: "{{ item.group | default(ansible_user) }}"
     mode: 0755
-    recurse: true
   loop: "{{ edpm_libvirt_containers }}"
 - name: render libvirt container config.json
-  tags: configure
-  become: true
+  tags:
+    - configure
+    - libvirt
   ansible.builtin.template:
     src: "{{ item }}/config.json.j2"
     dest: "/var/lib/openstack/config/libvirt/{{ item }}/config.json"
@@ -39,8 +44,9 @@
   notify:
   - restart libvirt
 - name: render libvirt config files
-  tags: configure
-  become: true
+  tags:
+    - configure
+    - libvirt
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "/var/lib/openstack/config/libvirt/{{ item.dest }}"
