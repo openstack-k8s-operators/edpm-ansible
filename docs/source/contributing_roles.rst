@@ -50,12 +50,44 @@ When they are in conflict with the actual implementation, for example when the d
 value of a variable in `roles/<NEWROLENAME>/defaults/main.yml` doesn't match
 the definition in metadata, the conflict must be resolved.
 
+Conditionals
+++++++++++++
+
+Conditions for execution of tasks must not use Jinja templating, as that is already implicit
+in the construct and can impact readability.
+
+.. code-block:: yaml
+
+    - name: Look! No Jinja!
+      debug:
+        msg: Just read the title!
+      when: not needs_jinja
+
+Multiple conditions can be used at the same time, using boolean operators.
+However, the resulting increase in complexity must be considered.
+Even though you know the purpose behind every single condition, and meaning of every variable,
+your colleagues may not. Nor will you in a couple of weeks.
+
+.. code-block:: yaml
+
+    - name: This task is super important
+      debug:
+        msg: If this message doesn't reach the operator, we are in serious trouble.
+      when:
+        - stars_align
+        - openstack_stuck | bool or penguins == "marching"
+        - not coder_knows_what_is_going_on
+
 Tasks
 +++++
 
 All tasks of the role must accurately report whether or not they have performed
 changes on the target machine. This is especially important when tasks invoke
 modules which do not properly implement change reporting, for example `ansible.buildin.cmd`.
+
+In these cases, `changed_when`_ and `failed_when`_ constructs must be used.
+Just like other `conditionals`_, the conditionals used to define change and failure should
+emphasize readability and simplicity.
 
 .. note::
     If possible, roles should avoid modules wrapping scripts,
@@ -64,15 +96,14 @@ modules which do not properly implement change reporting, for example `ansible.b
     In most cases there already is a built-in module, or a collection module,
     providing the same functionality.
 
-Tasks must have descriptive name, ideally without use of templating.
+Tasks must have a descriptive name, ideally without use of templating.
 
 Error handling
 ++++++++++++++
 
-Roles must accurately report all failures, a concise, yet descriptive, message that can point
+Roles must accurately report all failures, with a concise, yet descriptive, message that can point
 administrator in the right direction. Error messages should not include complex data structures,
 like dictionaries or lists, in order to strain on human parser.
-
 
 Privilege escalation
 ++++++++++++++++++++
@@ -126,7 +157,7 @@ and must be a valid, readable rst document.
 This file must contain a title and an include directive of the automatically generated documentation
 stub at the `../collections/osp/edpm/edpm_<NEWROLENAME>_role.rst` path.
 
-.. code-block::
+.. code-block:: rst
 
     .. include::
         ../collections/osp/edpm/edpm_<NEWROLENAME>_role.rst
@@ -207,3 +238,6 @@ automatically indexed and rendered via `sphinx`.
 .. _`Ansible documentation`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html
 .. _`argument specification`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-argument-validation
 .. _`Privilege escalation`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html
+.. _`conditionals`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_conditionals.html
+.. _`changed_when`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_error_handling.html#defining-changed
+.. _`failed_when`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_error_handling.html#defining-failure
