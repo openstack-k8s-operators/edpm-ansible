@@ -18,9 +18,9 @@ insecure = {{ mirror.insecure | default(False) | bool | ternary('true', 'false')
 {% endif %}
 {% endfor %}
 
-{% if edpm_podman_insecure_registries is defined %}
+{% if edpm_container_registry_insecure_registries is defined %}
 # insecure registry list
-{% for reg in edpm_podman_insecure_registries %}
+{% for reg in edpm_container_registry_insecure_registries %}
 [[registry]]
 prefix = "{{ reg }}"
 insecure = true
