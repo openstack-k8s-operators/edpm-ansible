@@ -12,17 +12,17 @@
 
 # non-containerized role jobs
 - job:
-    name: edpm-ansible-molecule-edpm-podman
+    name: edpm-ansible-molecule-edpm_podman
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_podman
 - job:
-    name: edpm-ansible-molecule-edpm-module_load
+    name: edpm-ansible-molecule-edpm_module_load
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_module_load
 - job:
-    name: edpm-ansible-molecule-edpm-kernel
+    name: edpm-ansible-molecule-edpm_kernel
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_kernel
@@ -31,6 +31,11 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_libvirt
+- job:
+    name: edpm-ansible-molecule-edpm_nova
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_nova
 
 # EDPM jobs
 - job:
