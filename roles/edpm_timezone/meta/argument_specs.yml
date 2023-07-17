@@ -3,4 +3,9 @@ argument_specs:
   # ./roles/edpm_timezone/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_timezone role.
-    options: {}
+    options:
+      edpm_timezone:
+        type: str
+        default: UTC
+        description: >
+          Timezone you want to set for resident clock service
