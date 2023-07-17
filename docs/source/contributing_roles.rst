@@ -1,14 +1,14 @@
 Contributing Roles
 ------------------
 
-Addition of new roles to edpm-ansible collection is easy, thanks
-to specialized development tooling and CI pipeline.
+Addition of new roles to the edpm-ansible collection is easy,
+thanks to specialized development tooling and CI pipeline.
 However, certain requirements must be met by any new role,
 in order to ensure quality of the collection and a smooth operation
 of software consuming it.
 
 These requirements, outlined in the following document, go beyond
-syntactic and functional correctness of the code. ....
+syntactic and functional correctness of the code.
 
 Where there isn't an explicit requirement, or recommendation,
 provided by this document, the primary `Ansible documentation`_ is considered
@@ -78,6 +78,13 @@ It is up to the developer then to ensure that the resolution provides a readable
 
     Since Ansible has several layers of variable precedence, with additional criterion of scope,
     the variable names should be checked for possible name space conflicts.
+
+Default variable values should be constants, and contain as little logic as possible otherwise.
+The variable defaults should therefore avoid Jinja templating or use of filters.
+
+The default variable values must be viable, so the role can run without failure with no adjustement
+from the operator, at least in minimal scenario. Invoking role without any parameters specified,
+should be possible.
 
 Conditionals
 ++++++++++++

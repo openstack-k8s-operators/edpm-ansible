@@ -5,6 +5,10 @@ Plugins and modules contributed to the edpm-ansible are placed in the `plugins` 
 from the root of this repository. Both must be developed with reference to
 best Python development practices, with emphasis on Ansible specifics.
 
+As with roles, the plugins should be specialized and adhere to the venerable:
+
+    'Doing one thing, and doing it well.'
+
 There is a certain level of confusion regarding the nomenclature. This is partly
 caused by the directory structure used by ansible to organize plugins.
 
@@ -53,7 +57,7 @@ as the parent plugin characteristics may change over time.
     Orphaned plugins will be deprecated, and subsequently removed,
     unless there is a valid reason not to.
 
-
+Plugins should use existing ansible `module_utils`_ resources, if possible.
 
 Plugin structure
 ~~~~~~~~~~~~~~~~
@@ -108,3 +112,4 @@ the plugin. Percentual coverage of the code is not a consideration by itself.
 .. _`strict requirements`: https://docs.ansible.com/ansible/6/dev_guide/developing_modules_documenting.html#module-format-and-documentation
 .. _`check mode`: https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#declaring-check-mode-support
 .. _`argument spec`: https://docs.ansible.com/ansible/6/dev_guide/developing_program_flow_modules.html#argument-spec
+.. _`module_utils`: https://docs.ansible.com/ansible/latest/reference_appendices/module_utils.html
