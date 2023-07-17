@@ -50,6 +50,35 @@ When they are in conflict with the actual implementation, for example when the d
 value of a variable in `roles/<NEWROLENAME>/defaults/main.yml` doesn't match
 the definition in metadata, the conflict must be resolved.
 
+Argument spec is essentially an API definition of the role. And as such must not be changed
+without regard to backward compatibility, or dependent software.
+Removal of variable from an argument spec must be preceded by a deprecation period.
+The same goes for a renaming of a variable, with a period of time when both new, and original
+names are accepted as part of the spec.
+
+Variables added to an existing spec must be defined as optional and with appropriate defaults.
+
+Variables
++++++++++
+
+Role variables must be named in a way that both denotes their origin and their purpose.
+Choice of a correct name is especially important when variable is expected to be used
+outside of the role itself, or when it is a part of role arguments.
+
+The standard variable name should take a following form:
+
+.. code-block::
+
+    edpm_<role_name>_<variable_purpose>
+
+This format should virtually guarantee uniqueness. However conflicts may still occur.
+It is up to the developer then to ensure that the resolution provides a readable result.
+
+.. note::
+
+    Since Ansible has several layers of variable precedence, with additional criterion of scope,
+    the variable names should be checked for possible name space conflicts.
+
 Conditionals
 ++++++++++++
 
