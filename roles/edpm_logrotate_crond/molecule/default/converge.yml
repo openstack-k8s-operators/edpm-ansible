@@ -18,7 +18,6 @@
 - name: Converge
   hosts: all
   vars:
-    edpm_container_manage_debug: true
   tasks:
 
     - name: install edpm_logrotate_crond

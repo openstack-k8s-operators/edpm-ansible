@@ -13,9 +13,6 @@ Role Variables
    * - Name
      - Default Value
      - Description
-   * - `edpm_chrony_debug`
-     - `False`
-     - Enable debug option in chrony
    * - `edpm_chrony_role_action`
      - `all`
      - Ansible action when including the role. Should be one of: [all|install|config|upgrade|online]
