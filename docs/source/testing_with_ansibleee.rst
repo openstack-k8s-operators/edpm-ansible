@@ -2,6 +2,14 @@
 Testing with ansibleee
 ======================
 
+edpm-ansible is included in the openstack-ansibleee-runner container image,
+which is a key component used by the dataplane-operator that deploys EDPM nodes.
+The dataplane-operator's CRD includes support for specifying additional
+volume mounts for the ansibleee pods, which provides a mechanism for accessing
+a local copy of edpm-ansible. This makes it possible to develop and test local
+changes to edpm-ansible without having to build and deploy a new
+openstack-ansibleee-runner container image.
+
 Provide NFS access to your edpm-ansible directory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

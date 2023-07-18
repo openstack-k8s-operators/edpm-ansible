@@ -7,16 +7,19 @@ Testing roles with molecule
 Launch `make execute_molecule` to test all collections roles.
 
 Roles can be tested individually using the *molecule-venv* created by running
-`make execute_molecule`. The *molecule-venv* can also be manually created.
+`make execute_molecule`. The *molecule-venv* can also be created manually.
 
 .. code-block:: console
 
     % python3 -m venv molecule-venv
     % source molecule-venv/bin/activate
     (molecule-venv) % pip install --upgrade pip
-    (molecule-venv) % pip install molecule molecule-podman jmespath
+    (molecule-venv) % pip install -r molecule-requirements.txt
 
-Use the *molecule-venv* to test a specific role.
+Afterwards the *molecule-venv* can be used to test a specific role.
+Note however that not all roles can be tested in a container, some may require
+a full-fledged VM. To make sure your role can be tested in a container,
+check the `driver` section in the `molecule.yml` file.
 
 .. code-block:: console
 
@@ -25,17 +28,6 @@ Use the *molecule-venv* to test a specific role.
     (molecule-venv) % molecule test --all
     (molecule-venv) % molecule test --scenario-name <specific scenario>
 
-Testing roles with ansibleee
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Alternatively you can test roles in with `AnsibleEE`_.
 
-edpm-ansible is included in the openstack-ansibleee-runner container image,
-which is key component used by the dataplane-operator that deploys EDPM
-nodes. The dataplane-operator's CRD includes support for specifying additional
-volume mounts for the ansibleee pods, which provides a mechanism for accessing
-a local copy of edpm-ansible. This makes it possible to develop and test local
-changes to edpm-ansible without having to build and deploy a new
-openstack-ansibleee-runner container image.
-
-.. toctree::
-
-   testing_with_ansibleee
+.. _`AnsibleEE`: testing_with_ansibleee
