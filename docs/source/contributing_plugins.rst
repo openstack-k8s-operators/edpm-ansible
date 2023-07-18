@@ -43,7 +43,7 @@ and of the default ansible paths for plugins, and thus is easier to follow.
     ├── test
     └── vars
 
-Therefore, we will use the term **plugin** to denote the general set of auxillary software used by ansible,
+Therefore, we will use the term **plugin** to denote the general set of auxiliary software used by ansible,
 and **module** for those plugins which can be used to perform operations on the target machine.
 
 Before developing plugins first check if the use case isn't already supported by
@@ -74,7 +74,7 @@ Even more `strict requirements`_ are placed on modules. This guide will only foc
 of these requirements that are most relevant to development of cloud.
 
 Each module must have a well defined `argument spec`_, with variable types, default values
-and whether or not are the arguments optional. This provides additional checking mechanism
+and whether or not the arguments are optional. This provides additional checking mechanism
 for module call in ansible playbooks.
 
 .. code-block:: python

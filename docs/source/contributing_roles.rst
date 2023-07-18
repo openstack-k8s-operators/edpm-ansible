@@ -25,7 +25,7 @@ and follow the venerable principle of 'Doing one thing, and doing it well.'
 
 Therefore, roles must not reimplement functionality already present in other roles,
 or functionality that is not part of their intended purpose.
-Prequisite tasks can be performed by roles added as dependencies, or by preceding roles
+Prerequisite tasks can be performed by roles added as dependencies, or by preceding roles
 in the playbook, and declared in the role documentation.
 
 If a newly developed role has a prerequisite that isn't already fulfilled
@@ -39,10 +39,10 @@ Argument specs allow for validity checks on arguments passed to the role in play
 while also providing bulk of the information neccessary for automated doc build.
 This both prevents unnecessary bugs, and simplifies documentation upkeep.
 
-Argument specification must contain definition of argument types, defaults and descritptions.
+Argument specification must contain definition of argument types, defaults and descriptions.
 
 All uses of the role, across playbooks and other roles, must utilize one of the endpoints
-defined in the arugment specification metadata. No other variables than those definined
+defined in the argugment specification metadata. No other variables than those defined
 as part of an endpoint may be used for role invocation.
 
 Properties of endpoints in argument specs are considered the source of truth.
@@ -82,7 +82,7 @@ It is up to the developer then to ensure that the resolution provides a readable
 Default variable values should be constants, and contain as little logic as possible otherwise.
 The variable defaults should therefore avoid Jinja templating or use of filters.
 
-The default variable values must be viable, so the role can run without failure with no adjustement
+The default variable values must be viable, so the role can run without failure with no adjustment
 from the operator, at least in minimal scenario. Invoking role without any parameters specified,
 should be possible.
 
@@ -145,13 +145,13 @@ Privilege escalation
 ++++++++++++++++++++
 
 `Privilege escalation`_, or `become`, must be used only when neccessary.
-Only a tasks that have to be executed under root privileges should receive them.
+Only tasks that have to be executed under root privileges should receive them.
 Even if there are multiple tasks requiring root privileges, separated by others that can operate
 under normal user, the entire role must not operate under them.
 
 The same applies when using `become` to switch to a different, non-root, user.
 
-Special care must be taken when using become with modules executing scripts,
+Special care must be taken when using `become` with modules executing scripts,
 like the `ansible.builtin.cmd`. And when invoking other roles.
 
 Role test development
@@ -190,7 +190,7 @@ The metadata should also include information about system compatibility.
 Primary role documentation file must reside at `docs/source/roles/role-<NEWROLENAME>.rst`
 and must be a valid, readable rst document.
 
-This file must contain a title and an include directive of the automatically generated documentation
+This file must contain a title and an `include` directive of the automatically generated documentation
 stub at the `../collections/osp/edpm/edpm_<NEWROLENAME>_role.rst` path.
 
 .. code-block:: rst
@@ -206,7 +206,7 @@ However, this documentation must be updated manually, together with the role.
 Create a new role
 ~~~~~~~~~~~~~~~~~
 
-From with the project root, creating a skeleton for the new role.
+From within the project root, creating a skeleton for the new role.
 
 .. code-block:: console
 
