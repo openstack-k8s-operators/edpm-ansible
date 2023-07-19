@@ -9,3 +9,4 @@ ruamel.yaml
 antsibull-docs >= 2.0.0, < 3.0.0
 ansible-pygments >= 0.1.1
 sphinx-ansible-theme >= 0.9.0
+pyyaml!=6.0.0,!=5.4.0,!=5.4.1 # https://github.com/yaml/pyyaml/issues/601
