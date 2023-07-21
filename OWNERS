@@ -3,6 +3,7 @@ approvers:
   - edpm-approvers
   - ci-approvers
   - openstack-approvers
+  - compute-approvers
 
 reviewers:
   - edpm-approvers
