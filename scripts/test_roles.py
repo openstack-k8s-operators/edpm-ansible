@@ -13,6 +13,7 @@ SKIP_LIST = [
     "edpm_chrony",
     "edpm_podman",
     "edpm_ceph_client_files",
+    "edpm_ddp_package",
     "edpm_frr",
     "edpm_growvols",
     "edpm_kernel",
