@@ -36,6 +36,17 @@
         - name: "openstack-operator"
           src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
           image_base: edpm
+    irrelevant-files: &molecule_irrelevant_files
+      - LICENSE
+      - OWNERS*
+      - README.md
+      - molecule/*
+      - .github/workflows
+      - scripts/*
+      - docs/*
+      - contribute/*
+      - tests
+      - roles/*/molecule/*
 - job:
     name: edpm-ansible-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
@@ -47,9 +58,11 @@
       quay_login_secret_name: quay_nextgen_zuulgithubci
       cifmw_extras:
         - '@{{ ansible_user_dir }}/ci-framework/edpm-ansible.yml'
+    irrelevant-files: *molecule_irrelevant_files
 - job:
     name: edpm-ansible-crc-podified-edpm-baremetal
     parent: cifmw-crc-podified-edpm-baremetal
     pre-run:
       - ci/playbooks/build_runner_image.yaml
     vars: *edpm_vars
+    irrelevant-files: *molecule_irrelevant_files
