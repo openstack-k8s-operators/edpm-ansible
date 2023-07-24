@@ -11,5 +11,59 @@ argument_specs:
         type: bool
         default: false
       edpm_sshd_gssapi_authentication:
+        type: bool
+        description: Enable gssapi authentication?
+        default: false
+      edpm_sshd_package_state:
         type: str
-        required: true
+        default: present
+        description: Package state for ssh
+      edpm_sshd_message_of_the_day:
+        type: str
+        default: ''
+      edpm_sshd_banner_text:
+        type: str
+        default: ''
+      edpm_sshd_password_authentication:
+        type: bool
+        default: False
+        description: Enable password authentication?
+      edpm_sshd_server_options:
+        type: dict
+        description: >
+          Dictionary of settings for sshd server. Including location of key files,
+          location of authorized key files, forwarding, accepted environment settings,
+          usage of DNS, PAM and GSSAPI.
+        default:
+          HostKey:
+            - '/etc/ssh/ssh_host_rsa_key'
+            - '/etc/ssh/ssh_host_ecdsa_key'
+            - '/etc/ssh/ssh_host_ed25519_key'
+          SyslogFacility: 'AUTHPRIV'
+          AuthorizedKeysFile: '.ssh/authorized_keys'
+          ChallengeResponseAuthentication: 'no'
+          GSSAPIAuthentication: 'no'
+          GSSAPICleanupCredentials: 'no'
+          UsePAM: 'yes'
+          UseDNS: 'no'
+          X11Forwarding: 'yes'
+          AcceptEnv:
+            - 'LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES'
+            - 'LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT'
+            - 'LC_IDENTIFICATION LC_ALL LANGUAGE'
+            - 'XMODIFIERS'
+          Subsystem: 'sftp /usr/libexec/openssh/sftp-server'
+      edpm_sshd_configure_firewall:
+        type: bool
+        default: false
+        description: Should the firewall be configured.
+      edpm_sshd_allowed_ranges:
+        type: list
+        default: []
+        description: List of address ranges to allow ssh connection from.
+      edpm_sshd_firewall_port:
+        type: int
+        default: 22
+        description: >
+          Since we can override the port using the edpm_sshd_server_options,
+          we'd rather ensure we can set the appropriate value here as well.
