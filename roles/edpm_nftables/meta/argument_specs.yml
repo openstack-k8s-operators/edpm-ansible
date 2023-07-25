@@ -3,4 +3,12 @@ argument_specs:
   # ./roles/edpm_nftables/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_nftables role.
-    options: {}
+    options:
+      edpm_nftables_src:
+        description: Location of the snippets directory.
+        type: path
+        default: /var/lib/edpm-config/firewall
+      edpm_nftables_default_chains_prefix:
+        description: Default NFT chain prefix
+        type: str
+        default: EDPM
