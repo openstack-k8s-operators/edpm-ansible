@@ -3,4 +3,127 @@ argument_specs:
   # ./roles/edpm_ovn_bgp_agent/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_ovn_bgp_agent role.
-    options: {}
+    options:
+      edpm_ovn_bgp_agent_enable:
+        type: bool
+        default: true
+        description: Enable the bgp agent or not?
+      edpm_ovn_bgp_agent_debug:
+        type: bool
+        default: true
+        description: Start the agent in a debug mode?
+      edpm_ovn_bgp_agent_reconcile_interval:
+        description: Reconciliation interval in seconds
+        type: int
+        default: 300
+      edpm_ovn_bgp_agent_expose_tenant_networks:
+        description: Exposing tenant networks.
+        type: bool
+        default: false
+      edpm_ovn_bgp_agent_expose_ipv6_gua_tenant_networks:
+        description: Exposing tenant networks with IPv6 addresses.
+        type: bool
+        default: false
+      edpm_ovn_bgp_agent_driver:
+        type: str
+        default: ovn_bgp_driver
+      edpm_ovn_bgp_agent_private_key:
+        description: Location of private TLS key. Keep it safe.
+        type: path
+        default: /etc/pki/tls/private/ovn_bgp_agent.key
+      edpm_ovn_bgp_agent_certificate:
+        description: Location of TLS certificate used by BGP agent.
+        type: path
+        default: /etc/pki/tls/certs/ovn_bgp_agent.crt
+      edpm_ovn_bgp_agent_ca_cert:
+        description: Location of IPA certificate.
+        type: path
+        default: /etc/ipa/ca.crt
+      edpm_ovn_bgp_agent_internal_tls_enable:
+        description: Enable internal TLS.
+        type: bool
+        default: false
+      edpm_ovn_bgp_agent_config_basedir:
+        description: Location of BGP agent configuration base directory.
+        type: path
+        default: "/var/lib/config-data/ansible-generated/ovn-bgp-agent"
+      edpm_ovn_bgp_agent_bgp_as:
+        description: BGP Autonomous System number
+        type: int
+        default: 64999
+      edpm_ovn_bgp_agent_clear_vrf_routes_on_startup:
+        type: bool
+        default: false
+      edpm_ovn_bgp_agent_bgp_nic:
+        type: str
+        default: bgp-nic
+      edpm_ovn_bgp_agent_bgp_vrf:
+        type: str
+        default: bgp-vrf
+      edpm_ovn_bgp_agent_bgp_vrf_table_id:
+        description: ID of Virtual Routing and Forwarding table.
+        type: int
+        default: 10
+      edpm_ovn_bgp_agent_root_helper:
+        description: Root helper for BGP agent.
+        type: str
+        default: "sudo ovn-bgp-agent-rootwrap /etc/ovn-bgp-agent/rootwrap.conf"
+      edpm_ovn_bgp_agent_root_helper_daemon:
+        description: Root helper for BGP agent as a daemon.
+        type: str
+        default: "sudo ovn-bgp-agent-rootwrap-daemon /etc/ovn-bgp-agent/rootwrap.conf"
+      edpm_ovn_bgp_agent_ovsdb_connection:
+        description: Connection to the OVS database, including port and protocol.
+        type: str
+        default: "tcp:127.0.0.1:6640"
+      edpm_ovn_bgp_agent_ovs_manager:
+        type: str
+        default: "ptcp:6640:127.0.0.1"
+      edpm_ovn_bgp_agent_image:
+        type: str
+        default: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+      edpm_ovn_bgp_agent_address_scopes:
+        description: Optional parameter
+        type: str
+        default: ''
+      edpm_ovn_bgp_agent_bgp_router_id:
+        description: Optional parameter
+        type: str
+        default: ''
+      edpm_ovn_bgp_agent_evpn_local_ip:
+        description: Optional parameter
+        type: str
+        default: ''
+      edpm_ovn_bgp_agent_evpn_nic:
+        description: Optional parameter
+        type: str
+        default: ''
+      edpm_ovn_bgp_agent_evpn_udp_dstport:
+        default: ''
+        type: str
+        description: Originally set to '4789'
+
+      edpm_ovn_bgp_agent_common_volumes:
+        type: list
+        description: List of mounted volumes with optional permissions.
+        default:
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /dev/log:/dev/log
+          - /etc/iproute2:/etc/iproute2
+          - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+          - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - /var/lib/config-data/ansible-generated/ovn-bgp-agent:/var/lib/kolla/config_files/src:ro
+          - /run/frr:/run/frr:shared,z
+          - /run/openvswitch:/run/openvswitch:shared,z
+
+      edpm_ovn_bgp_agent_tls_volumes:
+        type: list
+        description: list of mounted TLS certificat volumes
+        default:
+          - /etc/pki/tls/certs/ovn_bgp_agent.crt:/etc/pki/tls/certs/ovn_bgp_agent.crt
+          - /etc/pki/tls/private/ovn_bgp_agent.key:/etc/pki/tls/private/ovn_bgp_agent.key
