@@ -2,5 +2,5 @@
 argument_specs:
   # ./roles/edpm_ssh_known_hosts/tasks/main.yml entry point
   main:
-    short_description: The main entry point for the edpm_ssh_known_hosts role.
+    short_description: The edpm_ssh_known_hosts role doesn't expose any parameters.
     options: {}
