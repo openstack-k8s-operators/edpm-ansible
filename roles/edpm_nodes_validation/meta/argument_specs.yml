@@ -3,4 +3,28 @@ argument_specs:
   # ./roles/edpm_nodes_validation/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_nodes_validation role.
-    options: {}
+    options:
+      edpm_nodes_validation_hide_sensitive_logs:
+        description: Hide potentially sensitive log messages.
+        type: bool
+        default: true
+      edpm_nodes_validation_ping_test_ips:
+        description: List of controller IP addresses to ping.
+        type: list
+        default: []
+      edpm_nodes_validation_validate_controllers_icmp:
+        description: Attempt to reach controllers with ping.
+        type: bool
+        default: true
+      edpm_nodes_validation_validate_fqdn:
+        description: Verify if hostname matches FQDN from /etc/hosts
+        type: bool
+        default: false
+      edpm_nodes_validation_validate_gateway_icmp:
+        description: Attempt to reach gateway with ping.
+        type: bool
+        default: true
+      edpm_nodes_validation_ping_test_gateway_ips:
+        description: List of gateway IP addresses to verify using ping.
+        type: list
+        default: []

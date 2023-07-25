@@ -20,7 +20,6 @@
 # All variables within this role should have a prefix of "edpm_nodes_validation"
 edpm_nodes_validation_hide_sensitive_logs: true
 edpm_nodes_validation_ping_test_ips: []
-edpm_nodes_validation_edpm_role_name: true
 edpm_nodes_validation_validate_controllers_icmp: true
 edpm_nodes_validation_validate_fqdn: false
 edpm_nodes_validation_validate_gateway_icmp: true
