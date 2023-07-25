@@ -19,6 +19,6 @@
 
 # All variables within this role should have a prefix of "edpm_hosts_entries"
 edpm_hosts_entries_hosts_path: /etc/hosts
-edpm_hosts_entries_undercloud_hosts_entries: ""
-edpm_hosts_entries_extra_hosts_entries: ""
-edpm_hosts_entries_overcloud_hosts_entries: "{{ hosts_entry }}"
+edpm_hosts_entries_undercloud_hosts_entries: []
+edpm_hosts_entries_extra_hosts_entries: []
+edpm_hosts_entries_overcloud_hosts_entries: "{{ hosts_entry | default([]) }}"

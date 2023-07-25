@@ -2,5 +2,26 @@
 argument_specs:
   # ./roles/edpm_hosts_entries/tasks/main.yml entry point
   main:
-    short_description: The main entry point for the edpm_hosts_entries role.
-    options: {}
+    short_description: The main entry point for the edpm_hosts_entries role creating a new hosts file.
+    options:
+      edpm_hosts_entries_hosts_path:
+        type: path
+        default: /etc/hosts
+        description: Path to the hosts file
+      edpm_hosts_entries_undercloud_hosts_entries:
+        type: list
+        default: []
+        description: |
+          List of undercloud hosts to be inserted into the new hosts file.
+      edpm_hosts_entries_extra_hosts_entries:
+        type: list
+        default: []
+        description: |
+          List of additional hosts to be inserted into the new hosts file.
+      edpm_hosts_entries_overcloud_hosts_entries:
+        type: list
+        default: []
+        description: |
+          List of overcloud hosts to be inserted into the new hosts file
+          Default is set to empty list, unless the `hosts_entry` variable is set
+          in the invoking scope
