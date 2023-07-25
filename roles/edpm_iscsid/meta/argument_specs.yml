@@ -3,4 +3,34 @@ argument_specs:
   # ./roles/edpm_iscsid/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_iscsid role.
-    options: {}
+    options:
+      edpm_iscsid_debug:
+        type: bool
+        default: false
+        description: |
+          Produce additional text messages describing role operation.
+          Set to false by default using following template:
+          {{ (ansible_verbosity | int) >= 2 | bool }}
+      edpm_iscsid_image:
+        type: str
+        default: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
+        description: URL of the iscsid container image.
+      edpm_iscsid_config_dir:
+        type: path
+        default: /var/lib/config-data/ansible-generated/iscsid
+      edpm_iscsid_volumes:
+        type: list
+        default:
+        - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
+        - /dev:/dev
+        - /run:/run
+        - /sys:/sys
+        - /lib/modules:/lib/modules:ro
+        - /etc/iscsi:/etc/iscsi:z
+        - /etc/target:/etc/target:z
+        - /var/lib/iscsi:/var/lib/iscsi:z
+        description: List of iscsid volume mounts with permissions.
+      edpm_iscsid_chap_algs:
+        type: str
+        default: 'SHA3-256,SHA256,SHA1,MD5'
+        description: List of allowed CHAP algorithms.

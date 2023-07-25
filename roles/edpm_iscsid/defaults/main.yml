@@ -20,8 +20,6 @@
 # All variables within this role should have a prefix of "edpm_iscsid"
 edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
-edpm_iscsid_hide_sensitive_logs: true
-
 edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
 edpm_iscsid_config_dir: /var/lib/config-data/ansible-generated/iscsid
 edpm_iscsid_volumes:
