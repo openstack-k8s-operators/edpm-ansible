@@ -16,3 +16,31 @@ argument_specs:
         type: dict
         default: {}
         description: Additional sysctl settings.
+      edpm_nova_compute_config_dir:
+        type: path
+        default: /var/lib/config-data/ansible-generated/nova_libvirt
+        description: This should be synced with edpm_nova_compute role
+      edpm_kernel_args:
+        type: str
+        default: ""
+        description: Grub kernel args.
+      edpm_kernel_reboot_timeout:
+        type: int
+        default: 3600
+        description: Reboot timeout in seconds
+      edpm_kernel_post_reboot_delay:
+        type: int
+        default: 60
+        description: Reboot delay in seconds
+      edpm_kernel_defer_reboot:
+        type: bool
+        default: false
+        description: Do not reboot, even if it is required for changes to take effect.
+      edpm_kernel_hugepages_remove:
+        type: bool
+        default: false
+        description: Remove hugepages setting from kernel args.
+      edpm_kernel_hugepages:
+        type: dict
+        default: {}
+        description: Hugepages configuration dictionary.
