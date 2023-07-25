@@ -32,4 +32,4 @@ edpm_iscsid_volumes:
   - /etc/target:/etc/target:z
   - /var/lib/iscsi:/var/lib/iscsi:z
 
-edpm_iscsid_chap_algs: 'SHA3-256,SHA256,SHA1,MD5'
+edpm_iscsid_chap_algs: 'SHA3-256,SHA256,SHA1'

@@ -32,5 +32,5 @@ argument_specs:
         description: List of iscsid volume mounts with permissions.
       edpm_iscsid_chap_algs:
         type: str
-        default: 'SHA3-256,SHA256,SHA1,MD5'
+        default: 'SHA3-256,SHA256,SHA1'
         description: List of allowed CHAP algorithms.
