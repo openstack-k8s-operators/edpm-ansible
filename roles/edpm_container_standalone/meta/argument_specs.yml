@@ -3,4 +3,71 @@ argument_specs:
   # ./roles/edpm_container_standalone/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_container_standalone role.
-    options: {}
+    options:
+      edpm_container_standalone_common_volumes:
+        default:
+        - /etc/hosts:/etc/hosts:ro
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+        - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+        - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+        - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+        - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+        - /dev/log:/dev/log
+        description: List of volumes in a mount point format.
+        type: list
+      edpm_container_standalone_container_defs:
+        default: {}
+        description: Parsed container definitions.
+        type: dict
+      edpm_container_standalone_container_startup_config_dir:
+        default: /var/lib/edpm-config/container-startup-config
+        description: Path to configuration directory.
+        type: path
+      edpm_container_standalone_internal_tls_volumes:
+        default:
+        - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
+        - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
+        description: List of TLS volumes in a mount point format.
+        type: list
+      edpm_container_standalone_kolla_config_dir:
+        default: /var/lib/kolla/config_files
+        description: Path to Kolla configuration directory.
+        type: path
+      edpm_container_standalone_kolla_config_files:
+        default: {}
+        description: Parsed configuration file contents.
+        type: dict
+      edpm_container_standalone_service:
+        default: ''
+        description: Name of container standalone service
+        type: str
+      edpm_container_standalone_volumes:
+        default: '{{ edpm_enable_internal_tls | ternary( edpm_container_standalone_common_volumes
+          + edpm_container_standalone_internal_tls_volumes + [edpm_internal_tls_ca_file
+          ~ '':'' ~ edpm_internal_tls_ca_file ~ '':ro''], edpm_container_standalone_common_volumes)
+          }}'
+        description: |
+          List of volumes formed by concatenation of several other volume list variables.
+          Presence of TLS related mount points is conditioned on `edpm_enable_internal_tls`
+        type: list
+      edpm_debug:
+        default: false
+        description: Sets `__OS_DEBUG` environment variable for the `edpm_nova_compute` role.
+        type: bool
+      edpm_deploy_identifier:
+        default: ''
+        description: Sets `EDPM_DEPLOY_IDENTIFIER` environment variable.
+        type: str
+      edpm_enable_internal_tls:
+        default: false
+        description: Enable internal TLS
+        type: bool
+      edpm_internal_tls_ca_file:
+        default: /etc/ipa/ca.crt
+        description: Path to TLS certificate.
+        type: path
+      edpm_iscsid_config_volume:
+        default: /var/lib/config-data/ansible-generated/iscsid
+        description: Path to iscsid config directory.
+        type: path
