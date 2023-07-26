@@ -17,7 +17,11 @@
 
 # "iscsid" will search for and load any operating system variable file
 
-# found within the "vars/" path. If no OS files are found the task will skip.
+- name: DNM check hello
+  ansible.builtin.debug:
+    msg: "hello world"
+
+# found within the "vars/" file path. If no OS files are found the task will skip.
 - name: Gather variables for each operating system
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
