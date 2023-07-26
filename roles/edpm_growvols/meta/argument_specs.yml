@@ -3,4 +3,16 @@ argument_specs:
   # ./roles/edpm_growvols/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_growvols role.
-    options: {}
+    options:
+      growvols_args:
+        type: str
+        default: >
+          /=8GB
+          /tmp=1GB
+          /var/log=10GB
+          /var/log/audit=2GB
+          /home=1GB
+          /var=100%
+        description: |
+          Arguments for the `growvols` utility.
+          Full documentation: https://docs.openstack.org/diskimage-builder/latest/elements/growvols/README.html
