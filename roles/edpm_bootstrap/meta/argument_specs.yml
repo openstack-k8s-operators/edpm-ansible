@@ -48,3 +48,34 @@ argument_specs:
         type: str
         default: enforcing
         description: "String for SELinux state. One of: disabled, enforcing, permissive"
+
+      edpm_bootstrap_network_resolvconf_update:
+        type: bool
+        default: false
+        description: |
+          Control resolv.conf management by NetworkManager
+          false = disable NetworkManager resolv.conf update (default)
+          true = enable NetworkManager resolv.conf update
+
+      edpm_bootstrap_swap_size_megabytes:
+        type: int
+        default: 1024
+
+      edpm_bootstrap_swap_path:
+        type: path
+        default: /swap
+
+      edpm_bootstrap_swap_partition_enabled:
+        type: bool
+        default: false
+
+      edpm_bootstrap_swap_partition_label:
+        type: str
+        default: swap1
+
+      edpm_bootstrap_command:
+        type: str
+        default: ""
+        description: |
+          Shell command that is executed before any packages are installed by the role.
+          Can be used to register systems using any arbitrary registration command(s).
