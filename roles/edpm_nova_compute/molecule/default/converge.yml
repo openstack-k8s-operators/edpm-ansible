@@ -17,5 +17,29 @@
 
 - name: Converge
   hosts: all
+  vars:
+    edpm_container_standalone_service: test
+    edpm_container_standalone_container_defs:
+      test:
+        image: quay.io/centos/centos:stream9
+        net: host
+        privileged: true
+        restart: always
+        environment:
+            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+    edpm_container_standalone_kolla_config_files:
+      test:
+        command: 'sleep 3600'
+  pre_tasks:
+    - ansible.builtin.set_fact:
+        internal_api:
+          nova_api_network: mock_network
+          nova_libvirt_network: mock_network
+        internal_api_ip: 10.0.0.1
+        fqdn_internal_api: mock_api
   roles:
+    - role: "osp.edpm.edpm_container_standalone"
     - role: "edpm_nova_compute"
+      service_net_map:
+          nova_api_network: internal_api
+          nova_libvirt_network: internal_api
