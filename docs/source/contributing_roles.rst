@@ -212,6 +212,13 @@ From within the project root, creating a skeleton for the new role.
 
     $ ansible-galaxy init --role-skeleton=contribute/_skeleton_role_ --init-path=roles ${NEWROLENAME}
 
+While the role skeleton contains the most common reasonable defaults, it may not be completely
+suited for your use case. All unused, undesirable, or unnecessary remnants of the role skeleton,
+must be removed before the role is published.
+
+Before submitting a role for review, don't forget to run pre-commit hooks,
+as well as molecule tests, if possible.
+
 Testing roles with molecule
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -269,7 +276,6 @@ All plugins contributed to the edpm-ansible can be found in the
 When contributing a plugin, make sure to also add documentation in the
 `docs/source/plugins` folder. All documentation added to this folder will be
 automatically indexed and rendered via `sphinx`.
-
 
 .. _`Ansible documentation`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html
 .. _`argument specification`: https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#role-argument-validation
