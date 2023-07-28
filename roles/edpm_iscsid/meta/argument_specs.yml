@@ -15,9 +15,6 @@ argument_specs:
         type: str
         default: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
         description: URL of the iscsid container image.
-      edpm_iscsid_config_dir:
-        type: path
-        default: /var/lib/config-data/ansible-generated/iscsid
       edpm_iscsid_volumes:
         type: list
         default:
