@@ -3,4 +3,77 @@ argument_specs:
   # ./roles/edpm_chrony/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_chrony role.
-    options: {}
+    options:
+      edpm_chrony_acl_rules:
+        default:
+        - deny all
+        description: List of specific allow/deny commands for the configuration file.
+        type: list
+      edpm_chrony_bind_addresses:
+        default:
+        - 127.0.0.1
+        - ::1
+        description: List of addresses, both IPv4 and IPv6
+        type: list
+      edpm_chrony_extra_options:
+        default: []
+        description: |
+          A list of extra option strings that is added to the end of the configuration file.
+          This list is joined with new lines.
+        type: list
+      edpm_chrony_global_pool_settings:
+        default: iburst minpoll 6 maxpoll 10
+        description: Global chrony pool settings.
+        type: str
+      edpm_chrony_global_server_settings:
+        default: iburst minpoll 6 maxpoll 10
+        description: Global chrony server settings.
+        type: str
+      edpm_chrony_manage_package:
+        default: true
+        description: Should role manage the package?
+        type: bool
+      edpm_chrony_manage_service:
+        default: true
+        description: Should role manage the service?
+        type: bool
+      edpm_chrony_ntp_peers:
+        default: []
+        description: |
+          List of NTP peers. This can be a list of hashes for advanced configuration.
+          If using the hash format, a `peer_name` and `peer_settings` key should be populated with
+          the appropriate data. If this is a list of hostnames, the `edpm_chrony_global_peer_settings`
+          will be appended to the configuration.
+        type: list
+      edpm_chrony_ntp_pools:
+        default: []
+        description: |
+          List of NTP pools. This can be a list of hashes for advanced configuration.
+          If using the hash format, a `pool_name` and `pool_settings` key should be populated with
+          the appropriate data. If this is a list of hostnames, the `edpm_chrony_global_pool_settings`
+          will be appended to the configuration.
+        type: list
+      edpm_chrony_ntp_servers:
+        default:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
+        - 2.pool.ntp.org
+        - 3.pool.ntp.org
+        description: |
+          List of NTP servers. This can be a list of hashes for advanced configuration.
+          If using the hash format, a `server_name` and `server_settings` key should be populated with
+          the appropriate data. If this is a list of hostnames, the `edpm_chrony_global_server_settings`
+          will be appended to the configuration.
+        type: list
+      edpm_chrony_role_action:
+        default: all
+        description: Ansible action when including the role.
+        type: str
+      edpm_chrony_service_name:
+        default: chronyd
+        description: Name of the chrony service as managed by systemd.
+        type: str
+      edpm_chrony_service_state:
+        default: started
+        description: Required chrony service state.
+        type: str
