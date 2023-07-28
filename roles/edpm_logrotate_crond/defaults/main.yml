@@ -19,8 +19,6 @@
 
 # All variables within this role should have a prefix of "edpm_logrotate_crond"
 
-edpm_logrotate_crond_hide_sensitive_logs: true
-
 edpm_logrotate_crond_cronie_package: cronie
 
 # Pid namespace for podman container. Only change for testing.

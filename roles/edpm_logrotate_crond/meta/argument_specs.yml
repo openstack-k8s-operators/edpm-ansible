@@ -3,4 +3,80 @@ argument_specs:
   # ./roles/edpm_logrotate_crond/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_logrotate_crond role.
-    options: {}
+    options:
+      edpm_logrotate_crond_cronie_package:
+        description: Name of the package installed by the role
+        type: str
+        default: cronie
+      edpm_logrotate_crond_podman_pid:
+        description: Pid namespace for podman container. Only change for testing.
+        default: host
+        type: str
+      edpm_logrotate_crond_image:
+        description: URL of the cron image.
+        type: str
+        default: "quay.io/podified-antelope-centos9/openstack-cron:current-podified"
+      edpm_logrotate_crond_config_use_ansible:
+        description: Should the logrotate crond be configured by the role?
+        type: bool
+        default: true
+      edpm_logrotate_crond_config_dir:
+        description: Path to the crond config directory.
+        type: path
+        default: /var/lib/config-data/ansible-generated/crond
+      edpm_logrotate_crond_volumes:
+        description: >
+          List of crond volumes in a mount point form. The `ansible-generated` volume location
+          is based on value of the `edpm_logrotate_crond_config_dir` variable.
+        type: list
+        default:
+          - /var/lib/kolla/config_files/logrotate_crond.json:/var/lib/kolla/config_files/config.json:ro
+          - /var/lib/config-data/ansible-generated/crond:/var/lib/kolla/config_files/src:ro
+          - /var/log/containers:/var/log/containers:z
+      edpm_logrotate_crond_purge_after_days:
+        type: int
+        default: 14
+        description: >
+          Enforces life time (days) of rotated and compressed files.
+          Overrides the rotation and rotate settings.
+      edpm_logrotate_crond_rotation:
+        type: str
+        default: daily
+        description: Configures the logrotate rotation interval.
+      edpm_logrotate_crond_rotate:
+        description: Configures the logrotate rotate parameter.
+        type: int
+        default: 14
+      edpm_logrotate_crond_minsize:
+        description: Configures the logrotate minsize parameter.
+        type: int
+        default: 1
+      edpm_logrotate_crond_maxsize:
+        type: str
+        default: 10M
+        description: Configures the logrotate maxsize parameter.
+      edpm_logrotate_crond_notifempty:
+        description: Configures the logrotate notifempty parameter.
+        type: bool
+        default: true
+      edpm_logrotate_crond_copytruncate:
+        description: Configures the logrotate copytruncate parameter.
+        type: bool
+        default: true
+      edpm_logrotate_crond_delaycompress:
+        description: Configures the logrotate delaycompress parameter.
+        type: bool
+        default: true
+      edpm_logrotate_crond_compress:
+        description: Configures the logrotate compress parameter.
+        type: bool
+        default: true
+      edpm_logrotate_crond_dateext:
+        default: null
+        description: Configures the dateext parameter.
+      edpm_logrotate_crond_dateformat:
+        default: null
+        description:  Configures the dateformat parameter used with dateext parameter.
+      edpm_logrotate_crond_dateyesterday:
+        default: null
+        description: Configures the dateyesterday parameter used with dateext parameter.
