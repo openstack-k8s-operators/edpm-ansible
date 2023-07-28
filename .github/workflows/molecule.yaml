@@ -23,7 +23,6 @@ jobs:
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
-        - edpm_hosts_entries
         - edpm_logrotate_crond
         - edpm_network_config
         - edpm_nftables
