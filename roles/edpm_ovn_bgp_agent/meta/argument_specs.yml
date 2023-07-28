@@ -54,14 +54,17 @@ argument_specs:
       edpm_ovn_bgp_agent_clear_vrf_routes_on_startup:
         type: bool
         default: false
+        description: Clear VRF routes on startup.
       edpm_ovn_bgp_agent_bgp_nic:
         type: str
         default: bgp-nic
+        description: The name of the interface used within the VRF to expose the IPs and/or Networks.
       edpm_ovn_bgp_agent_bgp_vrf:
         type: str
         default: bgp-vrf
+        description: The name of the VRF to be used to expose the IPs and/or Networks through BGP.
       edpm_ovn_bgp_agent_bgp_vrf_table_id:
-        description: ID of Virtual Routing and Forwarding table.
+        description: The Routing Table ID that the VRF should use. If it does not exist, this table will be created.
         type: int
         default: 10
       edpm_ovn_bgp_agent_root_helper:
@@ -79,29 +82,39 @@ argument_specs:
       edpm_ovn_bgp_agent_ovs_manager:
         type: str
         default: "ptcp:6640:127.0.0.1"
+        description:  OVSDB connection method.
       edpm_ovn_bgp_agent_image:
         type: str
         default: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
+        description: OVN BGP agent image.
       edpm_ovn_bgp_agent_address_scopes:
-        description: Optional parameter
+        description: |
+          Allows to filter on the address scope.
+          Only networks with the same address scope on the provider and internal interface are announced.
         type: str
         default: ''
       edpm_ovn_bgp_agent_bgp_router_id:
-        description: Optional parameter
+        description: |
+          Router ID to be used by the Agent when running in BGP mode and configuring the VRF route leaking.
         type: str
         default: ''
       edpm_ovn_bgp_agent_evpn_local_ip:
-        description: Optional parameter
+        description: |
+          IP address of local EVPN VXLAN (tunnel) endpoint. This option can be used instead of the edpm_ovn_bgp_agent_evpn_nic.
+          If none specified, it will take the one from the loopback device.
         type: str
         default: ''
       edpm_ovn_bgp_agent_evpn_nic:
-        description: Optional parameter
+        description: |
+          NIC with the IP address to use for the local EVPN VXLAN (tunnel) endpoint.
+          This option can be used instead of the edpm_ovn_bgp_agent_evpn_local_ip.
+          If none specified, it will take the one from the loopback device.
         type: str
         default: ''
       edpm_ovn_bgp_agent_evpn_udp_dstport:
         default: ''
         type: str
-        description: Originally set to '4789'
+        description: The UDP port used for EVPN VXLAN communication. Originally set to '4789'
 
       edpm_ovn_bgp_agent_common_volumes:
         type: list
@@ -123,7 +136,7 @@ argument_specs:
 
       edpm_ovn_bgp_agent_tls_volumes:
         type: list
-        description: list of mounted TLS certificat volumes
+        description: list of mounted TLS certificate volumes
         default:
           - /etc/pki/tls/certs/ovn_bgp_agent.crt:/etc/pki/tls/certs/ovn_bgp_agent.crt
           - /etc/pki/tls/private/ovn_bgp_agent.key:/etc/pki/tls/private/ovn_bgp_agent.key
