@@ -32,7 +32,7 @@ argument_specs:
         type: int
       edpm_frr_bgp:
         default: true
-        description: ''
+        description: Enable bgpd daemon.
         type: bool
       edpm_frr_bgp_asn:
         default: 64999
