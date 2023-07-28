@@ -60,18 +60,22 @@ argument_specs:
       edpm_bootstrap_swap_size_megabytes:
         type: int
         default: 1024
+        description: Swap file size (in Megabytes).
 
       edpm_bootstrap_swap_path:
         type: path
         default: /swap
+        description: Swap file location.
 
       edpm_bootstrap_swap_partition_enabled:
         type: bool
         default: false
+        description: Enable swap partition instead of swap file.
 
       edpm_bootstrap_swap_partition_label:
         type: str
         default: swap1
+        description: Partition label used to search swap partition on disk.
 
       edpm_bootstrap_command:
         type: str
