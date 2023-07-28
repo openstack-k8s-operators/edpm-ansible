@@ -17,7 +17,6 @@ SKIP_LIST = [
     "edpm_frr",
     "edpm_growvols",
     "edpm_kernel",
-    "edpm_nvdimm",
     "edpm_ovn_bgp_agent",
     "test_deps"
 ]
