@@ -38,15 +38,15 @@
           image_base: edpm
     irrelevant-files: &molecule_irrelevant_files
       - LICENSE
-      - OWNERS*
+      - OWNERS.*
       - README.md
-      - molecule/*
+      - molecule/.*
       - .github/workflows
-      - scripts/*
-      - docs/*
-      - contribute/*
+      - scripts/.*
+      - docs/.*
+      - contribute/.*
       - tests
-      - roles/*/molecule/*
+      - roles/.*/molecule/.*
 - job:
     name: edpm-ansible-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
