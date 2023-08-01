@@ -3,7 +3,6 @@ argument_specs:
   # ./roles/edpm_libvirt/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_libvirt role.
-    description: Multiple lines description
     options:
       edpm_libvirt_image:
         type: str
