@@ -20,6 +20,7 @@ jobs:
         tested_role:
         - edpm_bootstrap
         - edpm_ceph_client_files
+        - edpm_chrony
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
@@ -29,6 +30,7 @@ jobs:
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_nova_compute
+        - edpm_ovn
         - edpm_sshd
         - edpm_ssh_known_hosts
         - edpm_timezone
@@ -38,15 +40,13 @@ jobs:
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
         # - edpm_iscsid
+        # - edpm_growvols
         # - edpm_ovn_bgp_agent
-        # - edpm_chrony
         # - edpm_podman
         # - edpm_nova_libvirt # Will not be tested PR#94
-        # - edpm_ovn
         # - edpm_module_load
         # - edpm_kernel
         # - edpm_frr
-        # - edpm_growvols
 
     runs-on: ubuntu-22.04
     steps:
