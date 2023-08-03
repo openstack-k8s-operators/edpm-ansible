@@ -1,0 +1,71 @@
+---
+- name: Deploy EDPM Operating System Configure
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: Configure edpm_podman
+      import_role:
+        name: osp.edpm.edpm_podman
+        tasks_from: configure.yml
+      tags:
+        - edpm_podman
+    - name: Manage edpm container services
+      import_role:
+        name: osp.edpm.edpm_container_manage
+        tasks_from: shutdown.yml
+      tags:
+        - edpm_container_manage
+    - name: Prepare nftables
+      import_role:
+        name: osp.edpm.edpm_nftables
+        tasks_from: service-bootstrap.yml
+      tags:
+        - edpm_firewall
+    - name: Configure edpm_sshd
+      import_role:
+        name: osp.edpm.edpm_sshd
+        tasks_from: configure.yml
+      tags:
+        - edpm_sshd
+    - name: Configure edpm_chrony
+      import_role:
+        name: osp.edpm.edpm_chrony
+        tasks_from: config.yml
+      tags:
+        - edpm_chrony
+    - name: Configure edpm_timezone
+      import_role:
+        name: osp.edpm.edpm_timezone
+        tasks_from: configure.yml
+      tags:
+        - edpm_timezone
+    - name: Configure edpm_ovn
+      import_role:
+        name: osp.edpm.edpm_ovn
+        tasks_from: configure.yml
+      tags:
+        - edpm_ovn
+    - name: Configure edpm_ssh_known_hosts
+      import_role:
+        name: osp.edpm.edpm_ssh_known_hosts
+      tags:
+        - edpm_ssh_known_hosts
+    - name: Configure edpm_logrotate_crond
+      import_role:
+        name: osp.edpm.edpm_logrotate_crond
+        tasks_from: configure.yml
+      tags:
+        - edpm_logrotate_crond
+    - name: Configure edpm_iscsid
+      import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: configure.yml
+      tags:
+        - edpm_iscsid
+    - name: Configure nftables
+      import_role:
+        name:      osp.edpm.edpm_nftables
+        tasks_from: configure.yml
+      tags:
+        - edpm_firewall
