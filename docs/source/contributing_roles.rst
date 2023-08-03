@@ -35,7 +35,17 @@ Roles can be tested individually using the *molecule-venv* created by running
     % python3 -m venv molecule-venv
     % source molecule-venv/bin/activate
     (molecule-venv) % pip install --upgrade pip
-    (molecule-venv) % pip install molecule molecule-podman jmespath
+    (molecule-venv) % pip install -r ../../molecule-requirements.txt
+
+The `edpm_timezone` role molecule directory is a working example to
+borrow from when configuring the molecule directory for a new role.
+Copying the default `molecule.yml` file from `edpm_timezone` should
+be sufficient for the `molecule test` command to work.
+
+.. code-block:: console
+
+    $ cd roles/${NEWROLENAME}/molecule/default
+    $ cp ../../../edpm_timezone/molecule/default/molecule.yml molecule.yml
 
 Use the *molecule-venv* to test a specific role.
 
