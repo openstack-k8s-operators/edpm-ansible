@@ -100,7 +100,7 @@
       failed_when: false
     - name: Deploy release version package
       become: true
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: "{{ edpm_bootstrap_release_version_package }}"
         state: present
       when:
@@ -137,7 +137,7 @@
       failed_when: false
 
     - name: Deploy network-scripts required for deprecated network service
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: "{{ edpm_bootstrap_legacy_network_packages }}"
         state: present
       when:

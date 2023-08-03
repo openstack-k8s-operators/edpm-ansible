@@ -43,7 +43,7 @@
 
 - name: Deploy required packages to bootstrap EDPM
   become: true
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name: "{{ edpm_bootstrap_packages_bootstrap }}"
     state: present
   # When a node is deployed with overcloud-minimal, OVS isn't required so let's
