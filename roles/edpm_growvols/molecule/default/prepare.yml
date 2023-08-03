@@ -1,5 +1,5 @@
 ---
-# Copyright 2020 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,10 +13,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
+- name: Prepare test_deps
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
 - name: Prepare
   hosts: all
   roles:
-    - role: test_deps
     - role: env_data

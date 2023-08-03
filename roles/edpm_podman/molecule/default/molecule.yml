@@ -1,10 +1,28 @@
 ---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+platforms:
+- command: /sbin/init
+  dockerfile: ../../../../molecule/common/Containerfile.j2
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  name: instance
+  privileged: true
+  registry:
+    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+  ulimits:
+  - host
 provisioner:
-  name: ansible
   config_options:
     defaults:
       fact_caching: jsonfile
       fact_caching_connection: /tmp/molecule/facts
+  env:
+    ANSIBLE_FILTER_PLUGINS: ${ANSIBLE_FILTER_PLUGINS:-/usr/share/ansible/plugins/filter}
+    ANSIBLE_LIBRARY: ${ANSIBLE_LIBRARY:-/usr/share/ansible/plugins/modules}
+    ANSIBLE_ROLES_PATH: ${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles
+    ANSIBLE_STDOUT_CALLBACK: yaml
   inventory:
     hosts:
       all:
@@ -12,17 +30,11 @@ provisioner:
           instance:
             ansible_host: localhost
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-    ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
-    ANSIBLE_LIBRARY: "${ANSIBLE_LIBRARY:-/usr/share/ansible/plugins/modules}"
-    ANSIBLE_FILTER_PLUGINS: "${ANSIBLE_FILTER_PLUGINS:-/usr/share/ansible/plugins/filter}"
-
+  name: ansible
 scenario:
   test_sequence:
-    - prepare
-    - converge
-    - check
-
+  - prepare
+  - converge
+  - check
 verifier:
   name: testinfra

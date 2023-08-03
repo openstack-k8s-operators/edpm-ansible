@@ -1,0 +1,7 @@
+---
+- name: Prepare test_deps
+  hosts: {{ prepare_params.hosts }}
+  become: {{ prepare_params.become }}
+  gather_facts: {{ prepare_params.gather_facts }}
+  roles:
+    - role: ../../../../molecule/common/test_deps

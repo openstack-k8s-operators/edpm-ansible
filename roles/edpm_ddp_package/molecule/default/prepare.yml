@@ -1,4 +1,3 @@
----
 # Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
@@ -15,10 +14,10 @@
 # under the License.
 
 
-- name: Prepare
+- name: Prepare test_deps
   hosts: all
   roles:
-    - role: test_deps
+    - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
     - role: env_data

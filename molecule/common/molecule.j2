@@ -1,0 +1,75 @@
+dependency:
+  name: {{ dependency.name | default('galaxy', true) }}
+  options:
+    role-file: {{ (dependency.options.role_file if dependency.options is defined) | default('collections.yml', true) }}
+{% if driver.name is defined %}
+driver:
+  name: {{ driver.name | default('podman', true) }}
+{% endif %}
+platforms:
+  {% for platform in platforms | default([{}], true) %}
+  - name: {{ platform.name | default('instance', true) }}
+    image: {{ platform.image | default('${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}', true) }}
+    registry:
+      url: {{ (platform.registry.url if platform.registry is defined) | default('${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}', true) }}
+    command: {{ platform.command | default('/sbin/init', true) }}
+    dockerfile: {{ platform.dockerfile | default('../../../../molecule/common/Containerfile.j2', true) }}
+    privileged: {{ platform.privileged | default(true, true) }}
+    ulimits: &ulimit
+      - host
+  {% endfor %}
+provisioner:
+  name: {{ provisioner.name | default('ansible', true) }}
+  log: {{ provisioner.log | default(true, true) }}
+  {% if provisioner.options is defined %}
+  options:
+    {% for key, value in provisioner.options.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  {% endif %}
+  {% if provisioner.inventory is defined %}
+  inventory:
+    {% if provisioner.inventory.hosts is defined %}
+    hosts:
+      {% if provisioner.inventory.hosts.all is defined %}
+      all:
+        {% if provisioner.inventory.hosts.all.hosts is defined %}
+        hosts:
+          {% for host, details in provisioner.inventory.hosts.all.hosts.items() %}
+          {{ host }}:
+            {% for key, value in details.items() %}
+            {{ key }}: {{ value }}
+            {% endfor %}
+          {% endfor %}
+        {% endif %}
+        {% if provisioner.inventory.hosts.all.children is defined %}
+        children:
+          {% for child, grandchilds in provisioner.inventory.hosts.all.children.items() %}
+          {{ child }}:
+            {% if grandchilds.hosts is defined %}
+            hosts:
+              {% for grandchild, grandchildDetails in grandchilds.hosts.items() %}
+              {{ grandchild }}:
+                {% for key, value in grandchildDetails.items() %}
+                {{ key }}: {{ value }}
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+  {% if provisioner.env is defined %}
+  env:
+    {% for key, value in provisioner.env.items() %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  {% endif %}
+verifier:
+  name: {{ verifier.name | default('ansible', true) }}
+scenario:
+  test_sequence:
+    {% for sequence in scenario.test_sequence | default(['dependency', 'destroy', 'create', 'prepare', 'converge', 'destroy'], true) %}
+    - {{ sequence }}
+    {% endfor %}

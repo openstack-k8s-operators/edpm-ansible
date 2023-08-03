@@ -6,27 +6,26 @@ dependency:
 driver:
   name: podman
 platforms:
-  - name: instance
-    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-    registry:
-      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
-    command: /sbin/init
-    dockerfile: ../../../../molecule/common/Containerfile.j2
-    privileged: true
-    ulimits: &ulimit
-      - host
+- command: /sbin/init
+  dockerfile: ../../../../molecule/common/Containerfile.j2
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  name: instance
+  privileged: true
+  registry:
+    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+  ulimits:
+  - host
 provisioner:
-  name: ansible
   log: true
+  name: ansible
 scenario:
   test_sequence:
-    - destroy
-    - create
-    - prepare
-    - converge
-    - check
-    - verify
-    - destroy
-
+  - destroy
+  - create
+  - prepare
+  - converge
+  - check
+  - verify
+  - destroy
 verifier:
   name: testinfra

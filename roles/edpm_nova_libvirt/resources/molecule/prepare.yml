@@ -18,6 +18,6 @@
 - name: Prepare
   hosts: all
   roles:
-    - role: test_deps
+    - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
     - role: env_data

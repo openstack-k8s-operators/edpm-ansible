@@ -13,15 +13,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+- name: Prepare test_deps
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - runc
+        - containernetworking-plugins
 
 - name: Prepare
   hosts: all
   become: true
   gather_facts: true
   roles:
-    - role: test_deps
-      test_deps_extra_packages:
-        - runc
-        - containernetworking-plugins
     - role: env_data
