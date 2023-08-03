@@ -1,0 +1,12 @@
+---
+  - name: "Deploy EDPM FRR Configure"
+    hosts: all
+    strategy: linear
+    become: true
+    tasks:
+      - name: Configure edpm_frr
+        import_role:
+          name: osp.edpm.edpm_frr
+          tasks_from: configure.yml
+        tags:
+          - "edpm_frr"
