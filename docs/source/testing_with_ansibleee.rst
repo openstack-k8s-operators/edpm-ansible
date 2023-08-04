@@ -1,3 +1,5 @@
+.. _testing with ansibleee:
+
 ======================
 Testing with ansibleee
 ======================

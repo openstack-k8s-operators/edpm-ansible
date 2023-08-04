@@ -108,8 +108,13 @@ Unit tests should cover use case that is present in one of the roles utilizing
 the plugin. Percentual coverage of the code is not a consideration by itself.
 
 
+.. note::
+
+    Further reading: `RH plugin best practices`_
+
 .. _`requirements`: https://docs.ansible.com/ansible/6/dev_guide/developing_plugins.html#writing-plugins-in-python
 .. _`strict requirements`: https://docs.ansible.com/ansible/6/dev_guide/developing_modules_documenting.html#module-format-and-documentation
 .. _`check mode`: https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#declaring-check-mode-support
 .. _`argument spec`: https://docs.ansible.com/ansible/6/dev_guide/developing_program_flow_modules.html#argument-spec
 .. _`module_utils`: https://docs.ansible.com/ansible/latest/reference_appendices/module_utils.html
+.. _`RH plugin best practices`: https://redhat-cop.github.io/automation-good-practices/#_plugins_good_practices

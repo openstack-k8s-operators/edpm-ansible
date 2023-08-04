@@ -28,7 +28,12 @@ check the `driver` section in the `molecule.yml` file.
     (molecule-venv) % molecule test --all
     (molecule-venv) % molecule test --scenario-name <specific scenario>
 
-Alternatively you can test roles in with `AnsibleEE`_.
+The `edpm_timezone` role molecule directory is a working example to
+borrow from when configuring the molecule directory for a new role.
+Copying the default `molecule.yml` file from `edpm_timezone` should
+be sufficient for the `molecule test` command to work.
+
+Alternatively you can test roles in with :ref:`AnsibleEE<testing with ansibleee>`.
 
 Writing molecule tests
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -70,5 +75,4 @@ and any configuration specified in `molecule.yml`, to destroy the test instances
 However they can be customized further based on the specific needs of the role.
 
 
-.. _`AnsibleEE`: testing_with_ansibleee
 .. _`configuration`: https://ansible.readthedocs.io/projects/molecule/configuration/

@@ -19,6 +19,7 @@ check to avoid needless issues with style, such as indentation.
 .. note::
 
    Pre-commit hooks should be installed in your local repo with: `pre-commit install`
+   Alternatively, you can run all hooks on all files with: `pre-commit run -a`
 
 .. toctree::
 
