@@ -1,0 +1,27 @@
+---
+argument_specs:
+  # ./roles/edpm_nova/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_nova role.
+    options:
+      edpm_nova_config_src:
+        type: str
+        default: /var/lib/openstack/config
+        description: |
+          The path to the directory containing the nova config files
+          in the ansibleEE container. This is the directory
+          where all configmaps containing nova config files are mounted.
+      edpm_nova_config_dest:
+        type: str
+        default: /var/lib/openstack/config/nova
+        description: |
+          The path to the directory where the nova config files
+          will be rendered on the compute node.
+      edpm_nova_compute_image:
+        type: str
+        default:  "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+        description: |
+          The container image to use for the nova compute container.
+          This image is used to create the nova compute container
+          on the compute node and generaly will be set via the container
+          bundle by the dataplane operator.

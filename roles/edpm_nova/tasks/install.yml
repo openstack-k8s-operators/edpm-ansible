@@ -1,0 +1,25 @@
+
+- name: render nova container
+  become: true
+  tags:
+    - install
+    - nova
+  ansible.builtin.template:
+    src: "nova_compute.json.j2"
+    dest: "/var/lib/openstack/config/containers/nova_compute.json"
+    setype: "container_file_t"
+    mode: 0644
+  notify:
+  - restart nova
+- name: deploy nova container
+  tags:
+    - install
+    - nova
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_debug: true
+    edpm_container_manage_config_patterns: 'nova_compute.json'
+    edpm_container_manage_clean_orphans: false

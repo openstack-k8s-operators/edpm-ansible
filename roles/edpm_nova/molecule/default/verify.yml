@@ -1,0 +1,34 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: compute-1
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      with_items:
+        # common directories
+        - "/etc/tmpfiles.d/"
+        - "/var/lib/openstack"
+        - "/var/lib/openstack/config/containers"
+        - "/var/log/containers"
+        - "/var/log/containers/stdouts"
+        # extrenal deps
+        - "/etc/ceph"
+         # nova directories
+        - "/var/lib/nova"
+        - "/var/lib/openstack/config/nova"
+        - "/var/lib/_nova_secontext"
+        - "/var/lib/nova/instances"
+        - "/var/log/containers/nova"
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
+      with_items:
+        - "edpm_nova_compute"
+    - name: ensure podman container exists and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+      with_items:
+        - "nova_compute"

@@ -1,0 +1,19 @@
+---
+argument_specs:
+  # ./roles/edpm_libvirt/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_libvirt role.
+    options:
+      edpm_libvirt_image:
+        type: str
+        description: The image to use for the libvirt_virt* containers.
+        default: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
+      edpm_libvirt_containers:
+        type: list
+        description: The list of containers to run.
+        default:
+          - "libvirt_virtlogd"
+          - "libvirt_virtnodedevd"
+          - "libvirt_virtproxyd"
+          - "libvirt_virtqemud"
+          - "libvirt_virtsecretd"

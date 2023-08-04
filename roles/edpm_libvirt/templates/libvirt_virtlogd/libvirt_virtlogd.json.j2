@@ -1,0 +1,19 @@
+{
+    "image": "{{ edpm_libvirt_image }}",
+    "restart": "always",
+    "command": "kolla_start",
+    "net": "host",
+    "privileged": "true",
+    "environment": {
+        "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS"
+    },
+    "volumes": [
+        "/var/lib/openstack/config/libvirt/libvirt_virtlogd:/var/lib/kolla/config_files:ro",
+        "/etc/localtime:/etc/localtime:ro",
+        "/var/log/containers/qemu:/var/log/libvirt/qemu",
+        "/var/log/containers/libvirt:/var/log/containers/libvirt",
+        "/var/lib/libvirt:/var/lib/libvirt",
+        "/var/lib/nova:/var/lib/nova:shared,z",
+        "/run/libvirt:/run/libvirt:shared,z"
+    ]
+  }

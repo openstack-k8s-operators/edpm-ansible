@@ -7,12 +7,16 @@ DOCS_DIR="./docs"
 
 python -m venv ${TEMP_VENV_ENV} && source ${TEMP_VENV_ENV}/bin/activate
 
-pip install -r ${DOCS_DIR}/docs-requirements.txt
+pip install -c ${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/master} -r ${DOCS_DIR}/docs-requirements.txt
 ansible-galaxy install -r requirements.yml
 ansible-galaxy collection install . --force
 
 # Remove any leftovers from previous builds
 rm -rf ${DOCS_DIR}/source/collections/*
+
+# antsibull requires that the directory is only writeable by
+# its owner. so ensure its 755
+chmod 755 ${DOCS_DIR}/source
 
 # Use modified antsibull-docs script
 ${DOCS_DIR}/source/antsibull-docs \

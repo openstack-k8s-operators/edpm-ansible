@@ -1,0 +1,7 @@
+---
+# Generated via edpm_libvirt
+- rule_name: 005 Allow vnc access on all networks.
+  rule:
+    proto: tcp
+    dport:
+     - "5900-6923"

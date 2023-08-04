@@ -1,0 +1,45 @@
+---
+- name: update ceph libvirt secret
+  tags:
+    - install
+    - post-libvirt
+  become: true
+  changed_when: true
+  shell: |
+    CLUSTERS=( $(ls /etc/ceph/*.conf | xargs -I {} basename  -s .conf {} ) )
+    declare -A CLUSTER_USER_MAP=()
+    for cluster in ${CLUSTERS[@]}; do CLUSTER_USER_MAP[${cluster}]=$(ls /etc/ceph/${cluster}.client.*.keyring | grep -v admin | awk -F . '{print $3}'); done
+    declare -A CLUSTER_FSID_MAP=()
+    for cluster in ${CLUSTERS[@]}; do CLUSTER_FSID_MAP[${cluster}]=$(awk -F '=' '/fsid/ {print $2}' /etc/ceph/${cluster}.conf| xargs); done
+    for cluster in ${CLUSTERS[@]}; do
+    cat <<EOF | tee secret.xml>/dev/null
+    <secret ephemeral='no' private='no'>
+    <uuid>${CLUSTER_FSID_MAP[${cluster}]}</uuid>
+    <usage type='ceph'>
+        <name>${cluster}.client.${CLUSTER_USER_MAP[$cluster]} secret</name>
+    </usage>
+    </secret>
+    EOF
+    podman cp secret.xml libvirt_virtqemud:/tmp/secret.xml
+    rm -f secret.xml
+    podman exec libvirt_virtqemud bash -c "virsh secret-undefine ${CLUSTER_FSID_MAP[${cluster}]}"
+    podman exec libvirt_virtqemud bash -c "virsh secret-define --file /tmp/secret.xml; rm -f /tmp/secret.xml"
+    keyring=$(awk '$1 == "key" {print $3}' /etc/ceph/${cluster}.client.${CLUSTER_USER_MAP[$cluster]}.keyring)
+    podman exec libvirt_virtqemud bash -c "virsh secret-set-value ${CLUSTER_FSID_MAP[${cluster}]} --base64 ${keyring}"
+    done
+- name: Copy qemu vnc firewall config
+  tags:
+    - install
+    - post-libvirt
+  become: true
+  ansible.builtin.template:
+    src: "firewall.yaml"
+    dest: "/var/lib/edpm-config/firewall/vnc.yaml"
+    mode: "640"
+- name: Configure firewall for the vnc
+  tags:
+    - install
+    - post-libvirt
+  ansible.builtin.include_role:
+      name: osp.edpm.edpm_nftables
+      tasks_from: "configure.yml"

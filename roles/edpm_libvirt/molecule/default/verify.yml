@@ -1,0 +1,42 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: compute-1
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      with_items:
+        # common directories
+        - "/etc/tmpfiles.d/"
+        - "/var/lib/openstack"
+        - "/var/lib/openstack/config/containers"
+        - "/var/log/containers"
+        - "/var/log/containers/stdouts"
+        # extrenal deps
+        - "/etc/ceph"
+        # libvirt directories
+        - "/var/lib/libvirt"
+        - "/var/lib/openstack/config/libvirt"
+        - "/var/log/containers/libvirt"
+    - name: ensure firewall is configured
+      ansible.builtin.include_tasks: "test-helpers/verify_firewall.yaml"
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
+      with_items:
+        - "edpm_libvirt_virtlogd"
+        - "edpm_libvirt_virtnodedevd"
+        - "edpm_libvirt_virtproxyd"
+        - "edpm_libvirt_virtqemud"
+        - "edpm_libvirt_virtsecretd"
+    - name: ensure podman container exists and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+      with_items:
+        - "libvirt_virtlogd"
+        - "libvirt_virtnodedevd"
+        - "libvirt_virtproxyd"
+        - "libvirt_virtqemud"
+        - "libvirt_virtsecretd"

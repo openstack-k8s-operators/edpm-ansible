@@ -1,0 +1,69 @@
+---
+- name: ensure /var/run/libvirt is present upon reboot
+  tags:
+    - install
+    - libvirt
+  become: true
+  ansible.builtin.copy:
+        dest: /etc/tmpfiles.d/run-libvirt.conf
+        content: |
+          d /run/libvirt 0755 root root - -
+- name: create tempfiles
+  tags:
+    - install
+    - libvirt
+  become: true
+  command: systemd-tmpfiles --create
+- name: create persistent directories
+  tags:
+    - install
+    - libvirt
+  become: true
+  file:
+    path: "{{ item.path }}"
+    setype: "{{ item.setype | default('container_file_t') }}"
+    state: directory
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  with_items:
+  - { "path": "/var/lib/libvirt", "mode": "0750" }
+  - { "path": "/var/log/containers/libvirt", "mode": "0750" }
+  - { "path": "/var/log/containers/qemu", "mode": "0750" }
+  # dont set owner/group or mode on these, as they are managed
+  # by other roles, just ensure they exist.
+  - { "path": "/var/log/containers/stdouts" }
+  - { "path": "/etc/ceph" }
+- name: render libvirt container
+  tags:
+    - install
+    - libvirt
+  ansible.builtin.template:
+    src: "{{ item }}/{{ item }}.json.j2"
+    dest: "/var/lib/openstack/config/containers/{{ item }}.json"
+    setype: "container_file_t"
+    mode: 0644
+  loop: "{{ edpm_libvirt_containers }}"
+  notify:
+  - restart libvirt
+- name: deploy libvirt containers
+  tags:
+    - install
+    - libvirt
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "/var/lib/openstack/config/containers"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "libvirt*.json"
+    edpm_container_manage_clean_orphans: false
+  register: edpm_container_manage_result
+- name: notify on container changes
+  tags:
+    - install
+    - libvirt
+  ansible.builtin.debug:
+    msg: "container changes: {{ edpm_container_manage_result.changed }}"
+  when: edpm_container_manage_result.changed
+  changed_when: edpm_container_manage_result.changed
+  notify: restart libvirt
