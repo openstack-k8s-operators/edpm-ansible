@@ -12,6 +12,11 @@
         - edpm-ansible-crc-podified-edpm-deployment:
             dependencies:
               - edpm-ansible-content-provider
+    github-manual:
+      jobs:
+        # Note: the baremetal job is very unstable as such
+        # it is moved to the manual pipeline until that can
+        # be fixed. comment "check-github" to run this job.
         - edpm-ansible-crc-podified-edpm-baremetal:
             dependencies:
               - edpm-ansible-content-provider
