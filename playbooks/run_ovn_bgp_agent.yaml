@@ -1,0 +1,10 @@
+---
+- name: Deploy EDPM OVN BGP Agent Run
+  hosts: all
+  strategy: linear
+  become: True
+  roles:
+    - role: osp.edpm.edpm_ovn_bgp_agent
+      tasks_from: run.yml
+      tags:
+        - edpm_ovn_bgp_agent
