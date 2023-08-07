@@ -1,0 +1,6 @@
+---
+argument_specs:
+  # ./roles/edpm_download_cache/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_download_cache role.
+    options: {}

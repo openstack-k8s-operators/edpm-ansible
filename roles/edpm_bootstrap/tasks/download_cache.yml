@@ -1,0 +1,24 @@
+---
+
+- name: Download needed packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_bootstrap_packages_bootstrap }}"
+    download_only: true
+  become: true
+
+- name: Download legacy network service package
+  when:
+    - (edpm_bootstrap_legacy_network_packages | length) > 0
+  ansible.builtin.dnf:
+    name: "{{ edpm_bootstrap_legacy_network_packages }}"
+    download_only: true
+  become: true
+
+- name: Download release version package
+  when:
+    - (ansible_facts['distribution'] | lower) == 'redhat'
+    - (edpm_bootstrap_release_version_package | list | length) > 0
+  ansible.builtin.dnf:
+    name: "{{ edpm_bootstrap_release_version_package }}"
+    download_only: true
+  become: true
