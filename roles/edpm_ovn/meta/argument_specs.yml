@@ -600,7 +600,7 @@ argument_specs:
         type: int
       edpm_ovn_ovs_external_ids:
         default:
-          hostname: '{{ ansible_hostname }}'
+          hostname: '{{ ansible_nodename }}'
           ovn-bridge: '{{ edpm_ovn_bridge }}'
           ovn-bridge-mappings: '{{ edpm_ovn_bridge_mappings | join('','') }}'
           ovn-chassis-mac-mappings: '{%- set chassis_mac_mappings = [] -%} {%- for physnet,
