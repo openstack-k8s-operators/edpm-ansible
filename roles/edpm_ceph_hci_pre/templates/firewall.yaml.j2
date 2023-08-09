@@ -1,0 +1,13 @@
+---
+# Generated via edpm_ceph_hci_pre
+{% for rule in edpm_ceph_hci_pre_firewall_services -%}
+{% for range in rule.ranges -%}
+{% if rule.name in edpm_ceph_hci_pre_enabled_services -%}
+- rule_name: "{{ rule.num }} allow {{ rule.name }} from {{ range }}"
+  rule:
+    proto: tcp
+    dport: {{ rule.dport }}
+    source: {{ range }}
+{% endif %}
+{% endfor %}
+{% endfor %}
