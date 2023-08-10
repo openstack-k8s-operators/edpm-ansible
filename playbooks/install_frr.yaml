@@ -1,0 +1,12 @@
+---
+- name: Deploy EDPM FRR Install
+  hosts: all
+  strategy: linear
+  become: True
+  tasks:
+    - name: Install edpm_frr
+      import_role:
+        name: osp.edpm.edpm_frr
+        tasks_from: install.yml
+      tags:
+        - edpm_frr
