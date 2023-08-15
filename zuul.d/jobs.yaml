@@ -52,12 +52,14 @@
       - OWNERS.*
       - README.md
       - molecule/.*
+      - molecule-requirements.txt
       - .github/workflows
       - scripts/.*
       - docs/.*
       - contribute/.*
       - tests
       - roles/.*/molecule/.*
+
 - job:
     name: edpm-ansible-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
