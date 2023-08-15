@@ -27,7 +27,9 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   with_items:
-  - { "path": "/var/lib/libvirt", "mode": "0750" }
+  # qemu is not in the libvirt group in the container images so use
+  # mode 755 to make /var/lib/libvirt traversable.
+  - { "path": "/var/lib/libvirt", "mode": "0755" }
   - { "path": "/var/log/containers/libvirt", "mode": "0750" }
   - { "path": "/var/log/containers/qemu", "mode": "0750" }
   # dont set owner/group or mode on these, as they are managed
