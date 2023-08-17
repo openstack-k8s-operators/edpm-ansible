@@ -2,9 +2,7 @@
 - name: Deploy EDPM Nova
   hosts: all
   strategy: linear
-  tasks:
-    - name: nova
-      import_role:
-        name: osp.edpm.edpm_nova
+  roles:
+    - role: osp.edpm.edpm_nova
       tags:
         - edpm_nova

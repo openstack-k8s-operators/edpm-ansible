@@ -2,9 +2,7 @@
 - name: osp.edpm.edpm_ceph_hci_pre
   hosts: all
   strategy: linear
-  tasks:
-    - name: Prepare EDPM to Host Ceph
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_ceph_hci_pre
+  roles:
+    - role: osp.edpm.edpm_ceph_hci_pre
       tags:
         - edpm_ceph_hci_pre
