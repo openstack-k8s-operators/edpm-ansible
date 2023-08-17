@@ -1,0 +1,10 @@
+---
+- name: Deploy EDPM libvirt
+  hosts: all
+  strategy: linear
+  tasks:
+    - name: libvirt
+      import_role:
+        name: osp.edpm.edpm_libvirt
+      tags:
+        - edpm_libvirt
