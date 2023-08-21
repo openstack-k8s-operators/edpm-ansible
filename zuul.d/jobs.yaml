@@ -39,14 +39,8 @@
 
 # EDPM jobs
 - job:
-    name: edpm-ansible-content-provider
-    parent: content-provider-base
-    vars:
-      cifmw_operator_build_org: openstack-k8s-operators
-      cifmw_operator_build_operators:
-        - name: "openstack-operator"
-          src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
-          image_base: edpm
+    name: edpm-ansible-crc-podified-edpm-baremetal
+    parent: cifmw-crc-podified-edpm-baremetal
     irrelevant-files: &molecule_irrelevant_files
       - LICENSE
       - OWNERS.*
@@ -59,13 +53,3 @@
       - contribute/.*
       - tests
       - roles/.*/molecule/.*
-
-- job:
-    name: edpm-ansible-crc-podified-edpm-deployment
-    parent: cifmw-crc-podified-edpm-deployment
-    irrelevant-files: *molecule_irrelevant_files
-
-- job:
-    name: edpm-ansible-crc-podified-edpm-baremetal
-    parent: cifmw-crc-podified-edpm-baremetal
-    irrelevant-files: *molecule_irrelevant_files
