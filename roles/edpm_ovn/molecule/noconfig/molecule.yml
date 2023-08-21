@@ -9,7 +9,7 @@ platforms:
 - command: /sbin/init
   dockerfile: ../../../../molecule/common/Containerfile.j2
   image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-  name: instance
+  name: instance-noconfig
   privileged: true
   registry:
     url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}

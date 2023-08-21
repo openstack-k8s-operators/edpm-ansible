@@ -14,6 +14,28 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Apply ovsdb configuration from configMaps
+  block:
+  - name: Check that config file exists
+    stat:
+      path: "{{ edpm_ovn_config_src }}/ovsdb-config"
+    register: ovsdb_config_exists
+    delegate_to: localhost
+    become: false
+
+  - name: Load ovsdb configuration from file
+    ansible.builtin.include_vars:
+      file: "{{ edpm_ovn_config_src }}/ovsdb-config"
+      name: edpm_ovn_configmap_facts
+    when:
+      ovsdb_config_exists.stat.exists
+    delegate_to: localhost
+    become: false
+
+  - name: Append ovsdb configMap options to external_ids
+    ansible.builtin.set_fact:
+      edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(edpm_ovn_configmap_facts|default({})) }}"
+
 - name: Configure GW ports on chassis setting when enabled
   when: edpm_enable_chassis_gw|default(false)
   block:

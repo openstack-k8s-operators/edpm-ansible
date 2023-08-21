@@ -26,3 +26,4 @@
         edpm_ovn_dbs:
           - "{{ ansible_host }}"
         edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_ovn_encap_type: vxlan
