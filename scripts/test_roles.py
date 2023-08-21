@@ -5,6 +5,8 @@ import subprocess as sp
 import os.path
 import re
 
+# Some of the roles can only be tested in a separate VM (in zuul), not locally,
+# hence skipping them here.
 SKIP_LIST = [
     "edpm_ovn",
     "edpm_libvirt",
