@@ -17,11 +17,24 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: Read generated file
+    - name: Read generated file from defaults
       command: cat /var/lib/edpm-config/firewall/ceph-networks.yaml
       register: ceph_networks
 
-    - name: Assert that generated file is correct
+    - name: Assert that default generated file is correct
+      assert:
+        that:
+          - item.rule.proto == 'tcp'
+          - item.rule_name | regex_search('^[0-9]{3} allow ceph_.*$')
+          - item.rule.dport | list
+          - item.rule.dport[0] | regex_search('^([0-9]{4})$|^([0-9]{4}:[0-9]{4})$')
+      loop: "{{ ceph_networks.stdout | from_yaml }}"
+
+    - name: Read generated file from overrides
+      command: cat /var/lib/edpm-config/firewall/ceph-networks-overrides.yaml
+      register: ceph_networks_overrides
+
+    - name: Assert that overridden generated file is correct
       assert:
         that:
           - item.rule.proto == 'tcp'
@@ -29,4 +42,4 @@
           - item.rule_name | regex_search('^[0-9]{3} allow ceph_.* from 172.18.0.0/24$')
           - item.rule.dport | list
           - item.rule.dport[0] | regex_search('^([0-9]{4})$|^([0-9]{4}:[0-9]{4})$')
-      loop: "{{ ceph_networks.stdout | from_yaml }}"
+      loop: "{{ ceph_networks_overrides.stdout | from_yaml }}"
