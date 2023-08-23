@@ -36,6 +36,11 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_nova
+- job:
+    name: edpm-ansible-molecule-edpm_ovn
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_ovn
 
 # EDPM jobs
 - job:

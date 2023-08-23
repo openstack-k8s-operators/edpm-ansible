@@ -8,6 +8,7 @@
         - edpm-ansible-molecule-edpm_kernel
         - edpm-ansible-molecule-edpm_libvirt
         - edpm-ansible-molecule-edpm_nova
+        - edpm-ansible-molecule-edpm_ovn
         - edpm-ansible-content-provider
         - edpm-ansible-crc-podified-edpm-deployment:
             dependencies:
