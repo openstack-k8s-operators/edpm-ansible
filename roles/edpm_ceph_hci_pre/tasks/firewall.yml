@@ -16,7 +16,7 @@
 
 - name: Ensure firewall directory is present
   ansible.builtin.file:
-    path: '/var/lib/edpm-config/firewall'
+    path: "{{ edpm_ceph_hci_pre_firewall_yaml_file | dirname }}"
     state: directory
     owner: root
     group: root
@@ -24,6 +24,6 @@
 
 - name: Inject firewall configuration for Ceph Server
   ansible.builtin.template:
-    dest: '/var/lib/edpm-config/firewall/ceph-networks.yaml'
+    dest: "{{ edpm_ceph_hci_pre_firewall_yaml_file }}"
     src: 'firewall.yaml.j2'
     mode: '0644'

@@ -22,21 +22,23 @@
 # Firewall configuration
 edpm_ceph_hci_pre_configure_firewall: true
 
-# Only allow default storage network to access Ceph RBD/Mon
-edpm_ceph_hci_pre_storage_ranges:
-  - 172.18.0.0/24
+# Name of file to be created on EDPM nodes with ceph firewall rules
+edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/edpm-config/firewall/ceph-networks.yaml
 
-# What list of IP ranges should connect to RGW front end?
-# If the list is empty, no RGW frontend ports will be opened
-# append 0.0.0.0/0 to allow access from all IPs
+# List of IP ranges which can connect to Ceph RBD/Mon ports
+# If list is empty, the firewall rule will not specify a source address
+edpm_ceph_hci_pre_storage_ranges: []
+
+# List of IP ranges which can connect to RGW front end
+# If list is empty, the firewall rule will not specify a source address
 edpm_ceph_hci_pre_rgw_frontend_ranges: []
 
-# What list of IP ranges should connect to Ceph Grafana front end?
-# If the list is empty, no Grafana frontend ports will be opened
+# List of IP ranges which can connect to Ceph Grafana front end
+# If list is empty, the firewall rule will not specify a source address
 edpm_ceph_hci_pre_grafana_frontend_ranges: []
 
-# What list of IP ranges should connect to RBD Mirror?
-# If the list is empty, no RBD Mirror ports will be opened
+# List of IP ranges which can connect to RBD Mirror
+# If list is empty, the firewall rule will not specify a source address
 edpm_ceph_hci_pre_rbd_mirror_ranges: []
 
 edpm_ceph_hci_pre_firewall_services:

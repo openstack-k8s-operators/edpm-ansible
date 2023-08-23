@@ -15,7 +15,15 @@
 # under the License.
 
 
-- name: Converge
+- name: Converge defaults
   hosts: all
+  roles:
+    - role: "edpm_ceph_hci_pre"
+
+- name: Converge overrides
+  hosts: all
+  vars:
+    edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/edpm-config/firewall/ceph-networks-overrides.yaml
+    edpm_ceph_hci_pre_storage_ranges: [172.18.0.0/24]
   roles:
     - role: "edpm_ceph_hci_pre"
