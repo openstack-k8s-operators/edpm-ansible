@@ -36,3 +36,20 @@
     - name: install podman
       import_role:
         name: "edpm_podman"
+    - name: Create firewall directory
+      become: true
+      ansible.builtin.file:
+        path: '/var/lib/edpm-config/firewall'
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
+    - name: open port 22 (edpm_nftables will active this later)
+      become: true
+      copy:
+        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
+        content: |
+          - rule_name: 003 Allow SSH
+            rule:
+              proto: tcp
+              dport: 22

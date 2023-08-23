@@ -44,3 +44,10 @@
   ansible.builtin.include_role:
       name: osp.edpm.edpm_nftables
       tasks_from: "configure.yml"
+- name: Reload firewall for new vnc rule
+  tags:
+    - install
+    - post-libvirt
+  ansible.builtin.include_role:
+      name: osp.edpm.edpm_nftables
+      tasks_from: "run.yml"
