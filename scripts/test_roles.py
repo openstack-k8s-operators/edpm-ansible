@@ -8,7 +8,6 @@ import re
 # Some of the roles can only be tested in a separate VM (in zuul), not locally,
 # hence skipping them here.
 SKIP_LIST = [
-    "edpm_ovn",
     "edpm_libvirt",
     "edpm_nova",
     "edpm_nova_compute",
