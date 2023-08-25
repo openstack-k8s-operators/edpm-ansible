@@ -22,12 +22,6 @@
         tasks_from: install.yml
       tags:
         - edpm_chrony
-    - name: Install edpm_ovn
-      import_role:
-        name: osp.edpm.edpm_ovn
-        tasks_from: install.yml
-      tags:
-        - edpm_ovn
     - name: Install edpm_logrotate_crond
       import_role:
         name: osp.edpm.edpm_logrotate_crond

@@ -34,12 +34,6 @@
         tasks_from: run.yml
       tags:
         - edpm_timezone
-    - name: Run edpm_ovn
-      import_role:
-        name: osp.edpm.edpm_ovn
-        tasks_from: run.yml
-      tags:
-        - edpm_ovn
     - name: Apply nftables configuration
       import_role:
         name: osp.edpm.edpm_nftables
