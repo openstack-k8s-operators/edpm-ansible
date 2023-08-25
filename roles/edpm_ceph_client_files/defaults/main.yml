@@ -18,5 +18,9 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_ceph_client_files"
+
+# Where files are copied from inside the AEE Pod
 edpm_ceph_client_files_source: '/etc/ceph'
-edpm_ceph_client_files_config_home: "{{ edpm_ceph_client_config_home | default('/etc/ceph/') }}"
+
+# Where files are copied to on the EDPM node
+edpm_ceph_client_files_config_home: "{{ edpm_ceph_client_config_home | default('/var/lib/openstack/config/ceph') }}"

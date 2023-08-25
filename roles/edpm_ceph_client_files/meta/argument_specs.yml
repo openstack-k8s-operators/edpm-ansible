@@ -5,7 +5,7 @@ argument_specs:
     short_description: The main entry point for the edpm_ceph_client_files role.
     options:
       edpm_ceph_client_files_config_home:
-        default: '{{ edpm_ceph_client_config_home | default(''/etc/ceph/'') }}'
+        default: '{{ edpm_ceph_client_config_home | default(''/var/lib/openstack/config/ceph'') }}'
         description: Destination of ceph files on the remote machine.
         type: str
       edpm_ceph_client_files_source:
