@@ -12,6 +12,10 @@ argument_specs:
         default: false
         description: ''
         type: bool
+      edpm_enable_ovs_dpdk:
+        default: false
+        description: ''
+        type: bool
       edpm_enable_internal_tls:
         default: false
         description: ''
