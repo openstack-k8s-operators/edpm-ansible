@@ -14,6 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Install openvswitch if not already
+  become: true
+  ansible.builtin.dnf:
+    name: openvswitch
+    state: present
+
 - name: Ensure the OVS service is running
   ansible.builtin.systemd:
     name: openvswitch
