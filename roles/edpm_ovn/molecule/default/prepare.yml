@@ -38,4 +38,8 @@
       delegate_to: localhost
       run_once: true
 
+    - name: install podman
+      import_role:
+        name: "edpm_podman"
+
   post_tasks: []
