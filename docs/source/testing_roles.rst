@@ -35,6 +35,62 @@ be sufficient for the `molecule test` command to work.
 
 Alternatively you can test roles in with :ref:`AnsibleEE<testing with ansibleee>`.
 
+Creating a VM to run molecule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The
+[edpm_libvirt](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_libvirt)
+molecule senario uses the delegated driver to run against localhost.
+Thus, it's better to run it inside an ephemeral virtual machine as
+it cannot be run insider of a container.
+
+Boot a VM based on `CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2`
+from https://cloud.centos.org/centos/9-stream/x86_64/images.
+
+Use [repo-setup](https://github.com/openstack-k8s-operators/repo-setup)
+to configure the DNF repositories of the VM.
+
+.. code-block:: console
+
+    pushd /tmp
+    curl -sL https://github.com/openstack-k8s-operators/repo-setup/archive/refs/heads/main.tar.gz | tar -xz
+    pushd repo-setup-main
+    python3 -m venv ./venv
+    PBR_VERSION=0.0.0 ./venv/bin/pip install ./
+    sudo ./venv/bin/repo-setup current-podified-dev
+    popd
+    popd
+
+Clone the git repository on the VM.
+
+.. code-block:: console
+
+    cd ~
+    sudo dnf install -y git
+    git clone git@github.com:openstack-k8s-operators/edpm-ansible.git
+
+Prepare molecule.
+
+.. code-block:: console
+
+    pushd ~/edpm-ansible
+    python3 -m venv molecule-venv
+    source molecule-venv/bin/activate
+    pip install --upgrade pip
+    pip install bindep
+    bindep -b | xargs sudo dnf -y --setopt=install_weak_deps=False install
+    pip install -r molecule-requirements.txt
+    popd
+
+Consider taking a snapshot of the VM before running a test like the
+following.
+
+.. code-block:: console
+
+    cd ~/edpm-ansible/roles/edpm_libvirt/
+    molecule test --all
+
+
 Writing molecule tests
 ~~~~~~~~~~~~~~~~~~~~~~
 
