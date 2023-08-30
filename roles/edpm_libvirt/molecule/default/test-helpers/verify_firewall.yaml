@@ -28,3 +28,12 @@
         that:
           - rule_source_exists.stat.exists
         fail_msg: "vnc rule source file does not exist"
+    - name: Run nft list command and grep for VNC rule in EDPM_INPUT chain
+      become: true
+      ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep vnc
+      register: chain_exists
+    - name: Assert that output from greping for VNC contains the correct rule
+      assert:
+        that:
+          - item | regex_search('\s+tcp dport 5900-6923 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+      loop: "{{ chain_exists.stdout_lines }}"
