@@ -69,3 +69,31 @@ argument_specs:
         type: str
         description: "Name of the public network interface"
         default: nic1
+      ctlplane_ip:
+        type: str
+        description: "Control plane ip."
+        required: true
+      ctlplane_gateway_ip:
+        type: str
+        description: "Control plane gateway ip."
+        required: true
+      ctlplane_cidr:
+        type: str
+        description: "Control plane subnet mask."
+        required: true
+      ctlplane_dns_nameservers:
+        type: list
+        description: "List of control plane DNS servers."
+        required: true
+      ctlplane_host_routes:
+        type: list
+        description: "List of control plane routes."
+        required: true
+      ctlplane_mtu:
+        type: int
+        description: "Size of MTU on control plane"
+        required: true
+      dns_search_domains:
+        type: list
+        description: "List of search domains for DNS."
+        required: true
