@@ -14,7 +14,6 @@ network_config:
   domain: {{ dns_search_domains }}
   addresses:
   - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
-  routes: {{ ctlplane_host_routes }}
   members:
   - type: interface
     name: nic2
