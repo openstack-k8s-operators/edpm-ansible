@@ -155,7 +155,7 @@ class ContainerConfigHashManager:
         return r
 
     def _calculate_checksum(self, config_volume, exclusions=[]):
-        """Calculate an md5 hash from a list of files from the given folder
+        """Calculate an sha256 hash from a list of files from the given folder
            and if needed exclude files from that list.
 
         :param config_volume: string
@@ -163,7 +163,7 @@ class ContainerConfigHashManager:
         :returns: string
         """
 
-        total_hash = hashlib.new('md5')
+        total_hash = hashlib.new('sha256')
         for file in glob.glob(config_volume + '/**/*', recursive=True):
             file_relpath = '/' + os.path.relpath(file, config_volume)
             if os.path.isfile(file) and file_relpath not in exclusions:
