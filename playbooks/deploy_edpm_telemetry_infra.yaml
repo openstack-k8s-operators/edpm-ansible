@@ -15,15 +15,15 @@
 # under the License.
 
 
-- hosts: "{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('all') }}"
-  strategy: free
-  name: Deploy EDPM Ceilometer Agent Compute
-  gather_facts: "{{ gather_facts | default(false) }}"
+- hosts: all
+  strategy: linear
+  name: Deploy EDPM Infrastructure Monitoring Tools
+  gather_facts: true
   any_errors_fatal: true
   tasks:
-    - name: Deploy ceilometer
+    - name: Deploy infra telemetry
       ansible.builtin.import_role:
         name: osp.edpm.edpm_telemetry
-        tasks_from: deploy_ceilometer.yml
+        tasks_from: deploy_infra.yml
       tags:
         - edpm_telemetry
