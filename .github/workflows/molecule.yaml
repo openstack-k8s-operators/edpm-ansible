@@ -28,6 +28,7 @@ jobs:
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_nova_compute
+        - edpm_ovn
         - edpm_sshd
         - edpm_ssh_known_hosts
         - edpm_timezone
@@ -41,7 +42,6 @@ jobs:
         # - edpm_chrony
         # - edpm_podman
         # - edpm_nova_libvirt # Will not be tested PR#94
-        # - edpm_ovn
         # - edpm_module_load
         # - edpm_kernel
         # - edpm_frr

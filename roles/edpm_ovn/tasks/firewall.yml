@@ -1,0 +1,57 @@
+---
+# Copyright 2022 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Inject firewall rules for OVN
+  osp.edpm.edpm_nftables_snippet:
+    dest: /var/lib/edpm-config/firewall/ovn.yaml
+    content: |
+      - rule_name: 118 neutron vxlan networks
+        rule:
+          proto: udp
+          dport: 4789
+      - rule_name: 119 neutron geneve networks
+        rule:
+          proto: udp
+          dport: 6081
+          state: ["UNTRACKED"]
+      - rule_name: 120 neutron geneve networks no conntrack
+        rule:
+          proto: udp
+          dport: 6081
+          table: raw
+          chain: OUTPUT
+          jump: NOTRACK
+          action: append
+          state: []
+      - rule_name: 121 neutron geneve networks no conntrack
+        rule:
+          proto: udp
+          dport: 6081
+          table: raw
+          chain: PREROUTING
+          jump: NOTRACK
+          action: append
+          state: []
+
+- name: Configure firewall for the ovn
+  ansible.builtin.include_role:
+      name: osp.edpm.edpm_nftables
+      tasks_from: "configure.yml"
+
+- name: Apply firewall for the ovn
+  ansible.builtin.include_role:
+      name: osp.edpm.edpm_nftables
+      tasks_from: "run.yml"
