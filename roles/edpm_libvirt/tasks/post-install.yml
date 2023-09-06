@@ -1,32 +1,57 @@
 ---
-- name: update ceph libvirt secret
+- name: Gather Ceph configuration files
   tags:
     - install
     - post-libvirt
+    - ceph
   become: true
-  changed_when: true
-  shell: |
-    CLUSTERS=( $(ls /var/lib/openstack/config/ceph/*.conf | xargs -I {} basename  -s .conf {} ) )
-    declare -A CLUSTER_USER_MAP=()
-    for cluster in ${CLUSTERS[@]}; do CLUSTER_USER_MAP[${cluster}]=$(ls /var/lib/openstack/config/ceph/${cluster}.client.*.keyring | grep -v admin | awk -F . '{print $3}'); done
-    declare -A CLUSTER_FSID_MAP=()
-    for cluster in ${CLUSTERS[@]}; do CLUSTER_FSID_MAP[${cluster}]=$(awk -F '=' '/fsid/ {print $2}' /var/lib/openstack/config/ceph/${cluster}.conf| xargs); done
-    for cluster in ${CLUSTERS[@]}; do
-    cat <<EOF | tee secret.xml>/dev/null
-    <secret ephemeral='no' private='no'>
-    <uuid>${CLUSTER_FSID_MAP[${cluster}]}</uuid>
-    <usage type='ceph'>
-        <name>${cluster}.client.${CLUSTER_USER_MAP[$cluster]} secret</name>
-    </usage>
-    </secret>
-    EOF
-    podman cp secret.xml libvirt_virtqemud:/tmp/secret.xml
-    rm -f secret.xml
-    podman exec libvirt_virtqemud bash -c "virsh secret-undefine ${CLUSTER_FSID_MAP[${cluster}]}"
-    podman exec libvirt_virtqemud bash -c "virsh secret-define --file /tmp/secret.xml; rm -f /tmp/secret.xml"
-    keyring=$(awk '$1 == "key" {print $3}' /var/lib/openstack/config/ceph/${cluster}.client.${CLUSTER_USER_MAP[$cluster]}.keyring)
-    podman exec libvirt_virtqemud bash -c "virsh secret-set-value ${CLUSTER_FSID_MAP[${cluster}]} --base64 ${keyring}"
-    done
+  ansible.builtin.find:
+    paths: "{{ edpm_libvirt_ceph_path }}"
+    patterns: "*.conf"
+  register: found_confs
+
+- name: Update Ceph Libvirt secret if Ceph files were found
+  tags:
+    - install
+    - post-libvirt
+    - ceph
+  become: true
+  when:
+    - found_confs.files is defined
+    - found_confs.files | length > 0
+  block:
+    - name: Extract FSIDs from Ceph configuration files
+      ansible.builtin.shell: |
+        echo {{ (item | basename).split('.')[0] }}
+        awk -F '=' '/fsid/ {print $2}' {{ item }} | xargs
+      register: fsids
+      loop: "{{ found_confs.files | map(attribute='path') }}"
+
+    - name: Map Ceph clusters to FSIDs
+      ansible.builtin.set_fact:
+        cluster_fsid_map: "{{ cluster_fsid_map | default({}) |\
+          combine({item.stdout_lines[0] : item.stdout_lines[1] }) }}"
+      loop: "{{ fsids.results }}"
+
+    - name: Gather Ceph keyring files
+      ansible.builtin.find:
+        paths: "{{ edpm_libvirt_ceph_path }}"
+        patterns: "*.keyring"
+      register: found_keys
+
+    - name: Map Ceph clusters to cephx users
+      ansible.builtin.set_fact:
+        cluster_user_map: "{{ cluster_user_map | default({}) |\
+          combine({item.split('.')[0] : item.split('.')[2] }) }}"
+      loop: "{{ found_keys.files | map(attribute='path') | map('basename') }}"
+
+    - name: Use maps to create libvirt secrets
+      ansible.builtin.include_tasks: virsh-secret.yml
+      vars:
+        cluster: "{{ item }}"
+        fsid: "{{ cluster_fsid_map[item] }}"
+        user: "{{ cluster_user_map[item] }}"
+      loop: "{{ cluster_fsid_map.keys() | list }}"
 
 - name: Copy qemu vnc firewall config
   tags:
