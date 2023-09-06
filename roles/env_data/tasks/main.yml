@@ -24,7 +24,7 @@
 
 - name: Output installed packages
   ansible.builtin.debug:
-    msg: "{{ ansible_facts.packages | community.general.json_query('*') | flatten | join('\n') }}"
+    msg: "{{ ansible_facts.packages | flatten }}"
 
 - name: Output installed repositories
   ansible.builtin.debug:
