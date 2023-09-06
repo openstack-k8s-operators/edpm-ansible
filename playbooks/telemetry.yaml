@@ -27,3 +27,9 @@
         tasks_from: deploy_ceilometer.yml
       tags:
         - edpm_telemetry
+    - name: Deploy infra telemetry
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_telemetry
+        tasks_from: deploy_infra.yml
+      tags:
+        - edpm_telemetry
