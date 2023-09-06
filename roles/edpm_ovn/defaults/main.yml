@@ -1,7 +1,7 @@
 ---
 # defaults file for edpm_ovn
 edpm_ovn_config_src: /var/lib/openstack/configs/ovn
-edpm_ovn_neutron_config_dir: "/var/lib/config-data/ansible-generated/neutron"
+edpm_ovn_neutron_config_dir: "/var/lib/config-data/ansible-generated/neutron_ovn_metadata_agent"
 edpm_ovn_metadata_agent_config_dir: "/etc/neutron"
 edpm_ovn_metadata_agent_log_dir: "/var/log/neutron"
 edpm_ovn_bridge: br-int

@@ -171,10 +171,6 @@ argument_specs:
               }}'
         description: ''
         type: dict
-      edpm_ovn_metadata_agent_metadata_agent_config_overrides:
-        default: {}
-        description: ''
-        type: dict
       edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection:
         default: ''
         description: ''
@@ -201,10 +197,6 @@ argument_specs:
             report_interval: '{{ edpm_ovn_metadata_agent_agent_report_interval }}'
           oslo_concurrency:
             lock_path: '{{ edpm_ovn_metadata_agent_oslo_concurrency_lock_patch }}'
-        description: ''
-        type: dict
-      edpm_ovn_metadata_agent_neutron_config_overrides:
-        default: {}
         description: ''
         type: dict
       edpm_ovn_metadata_agent_oslo_concurrency_lock_patch:
@@ -252,10 +244,6 @@ argument_specs:
             syslog_log_level: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_level
               }}'
             use_syslog: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_use_syslog }}'
-        description: ''
-        type: dict
-      edpm_ovn_metadata_agent_rootwrap_config_overrides:
-        default: {}
         description: ''
         type: dict
       edpm_ovn_metadata_common_volumes:
