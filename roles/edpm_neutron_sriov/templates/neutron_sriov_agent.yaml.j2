@@ -1,0 +1,14 @@
+start_order: 1
+image: "{{ edpm_neutron_sriov_image }}"
+net: host
+privileged: true
+user: neutron
+restart: always
+volumes:
+  {% set edpm_neutron_sriov_volumes = [] %}
+  {%- set edpm_neutron_sriov_volumes =
+          edpm_neutron_sriov_volumes +
+          edpm_neutron_sriov_common_volumes %}
+  {{ edpm_neutron_sriov_volumes }}
+environment:
+  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

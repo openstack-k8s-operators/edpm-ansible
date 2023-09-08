@@ -1,0 +1,44 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Create neutron-sriov-agent directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    setype: "container_file_t"
+    state: directory
+    mode: "{{ item.mode | default(omit) }}"
+  with_items:
+    - {'path': "/var/lib/openstack/config/containers", "mode": "0750" }
+    - {'path': "/var/lib/neutron", "mode": "0750" }
+    - {'path': "{{ edpm_neutron_sriov_agent_config_dir }}", 'mode': '0755'}
+    - {'path': "/var/log/containers/stdouts"}
+    - {'path': "/var/log/containers/neutron"}
+  tags:
+    - install
+    - neutron
+
+- name: render neutron-sriov-agent container
+  become: true
+  ansible.builtin.template:
+    src: "neutron_sriov_agent.yaml.j2"
+    dest: "/var/lib/openstack/config/containers/neutron_sriov_agent.yaml"
+    setype: "container_file_t"
+    mode: 0644
+  notify:
+  - restart neutron-sriov-agent
+  tags:
+    - install
+    - neutron
