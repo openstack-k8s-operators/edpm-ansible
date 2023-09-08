@@ -72,17 +72,12 @@ edpm_ceph_hci_pre_firewall_services:
     num: 122
     dport:
       - 8080
-      - 13808
+      - 8082
     ranges: "{{ edpm_ceph_hci_pre_storage_ranges | list }}"
   - name: ceph_rgw_frontend
     num: 100
     dport:
       - 8080
-    ranges: "{{ edpm_ceph_hci_pre_rgw_frontend_ranges | list }}"
-  - name: ceph_ssl_rgw_frontend
-    num: 100
-    dport:
-      - 13808
     ranges: "{{ edpm_ceph_hci_pre_rgw_frontend_ranges | list }}"
   - name: ceph_rbdmirror
     num: 114
@@ -127,3 +122,5 @@ edpm_ceph_hci_pre_enabled_services:
   - ceph_mon
   - ceph_mgr
   - ceph_osd
+  - ceph_rgw
+  - ceph_rgw_frontend
