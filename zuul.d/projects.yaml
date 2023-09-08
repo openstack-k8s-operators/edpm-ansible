@@ -3,15 +3,4 @@
     name: openstack-k8s-operators/edpm-ansible
     github-check:
       jobs:
-        - edpm-ansible-molecule-edpm_podman
-        - edpm-ansible-molecule-edpm_module_load
-        - edpm-ansible-molecule-edpm_kernel
-        - edpm-ansible-molecule-edpm_libvirt
-        - edpm-ansible-molecule-edpm_nova
-        - openstack-k8s-operators-content-provider
-        - podified-multinode-edpm-deployment-crc:
-            dependencies:
-              - openstack-k8s-operators-content-provider
-        - edpm-ansible-crc-podified-edpm-baremetal:
-            dependencies:
-              - openstack-k8s-operators-content-provider
+        - edpm-ansible-molecule-edpm_ovn

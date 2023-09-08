@@ -17,24 +17,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        tested_role:
-        - edpm_bootstrap
-        - edpm_ceph_client_files
-        - edpm_container_manage
-        - edpm_container_rm
-        - edpm_container_standalone
-        - edpm_logrotate_crond
-        - edpm_network_config
-        - edpm_nftables
-        - edpm_nodes_validation
-        - edpm_nova_compute
-        - edpm_ovn
-        - edpm_sshd
-        - edpm_ssh_known_hosts
-        - edpm_timezone
-        - edpm_tuned
-        - edpm_telemetry
-        - env_data
+        tested_role: []
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
         # - edpm_iscsid

@@ -83,6 +83,8 @@
         mode: 0644
 
 - name: Install tripleo-repos package
+  when:
+    - (ansible_facts['os_family'] | lower) == 'redhat'
   become: true
   ansible.builtin.package:
     name: "python*tripleo-repos"

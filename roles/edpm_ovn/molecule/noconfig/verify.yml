@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  become: true
   tasks:
     # we have to use shell to extract the values because openvswitch ansible
     # module doesn't seem to support dashes in key names, see:
@@ -9,7 +10,7 @@
       ansible.builtin.shell: >
         /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-remote
       register: output
-      failed_when: output.stdout != '"tcp:instance-noconfig:6642"'
+      failed_when: output.stdout != '"tcp:{{ ansible_host }}:6642"'
 
     - name: Verify ovn-encap-type
       ansible.builtin.shell: >
