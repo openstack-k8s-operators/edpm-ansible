@@ -25,3 +25,4 @@ edpm_libvirt_containers:
   - "libvirt_virtproxyd"
   - "libvirt_virtqemud"
   - "libvirt_virtsecretd"
+edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph/

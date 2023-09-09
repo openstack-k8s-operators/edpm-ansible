@@ -30,12 +30,15 @@
         path: /etc/localtime
         src: /usr/share/zoneinfo/UTC
         state: link
+
     - name: set timezone
-      import_role:
+      ansible.builtin.import_role:
         name: "edpm_timezone"
+
     - name: install podman
-      import_role:
+      ansible.builtin.import_role:
         name: "edpm_podman"
+
     - name: Create firewall directory
       become: true
       ansible.builtin.file:
@@ -44,12 +47,63 @@
         owner: root
         group: root
         mode: 0750
+
     - name: open port 22 (edpm_nftables will active this later)
       become: true
-      copy:
+      ansible.builtin.copy:
         dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
         content: |
           - rule_name: 003 Allow SSH
             rule:
               proto: tcp
               dport: 22
+
+    # edpm_nova molecule depends on edpm_libvirt so it tests
+    # the case where this directory does not exsit
+    - name: Create Ceph client file directory
+      become: true
+      ansible.builtin.file:
+        path: '/var/lib/openstack/config/ceph/'
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Create random mock Ceph FSID
+      ansible.builtin.command: uuidgen
+      register: fsid
+
+    - name: Create random mock Cephx key
+      ansible.builtin.shell:
+      args:
+        executable: /usr/bin/python
+        cmd: |
+          import os,struct,time,base64
+          key = os.urandom(16)
+          header = struct.pack("<hiih", 1, int(time.time()), 0, len(key))
+          print(base64.b64encode(header + key).decode())
+      register: cephx
+
+    - name: Create a mock Ceph conf file
+      become: true
+      ansible.builtin.copy:
+        dest: /var/lib/openstack/config/ceph/ceph.conf
+        content: |
+          [global]
+          fsid = {{ fsid.stdout }}
+          mon host = 192.168.42.6,192.168.42.7,192.168.42.8
+
+    - name: Create a mock Cephx keyring file
+      become: true
+      ansible.builtin.copy:
+        dest: /var/lib/openstack/config/ceph/ceph.client.openstack.keyring
+        content: |
+          [client.openstack]
+          key = {{ cephx.stdout }}
+          caps mgr = allow rw
+          caps mon = profile r
+          caps osd = allow class-read object_prefix rbd_children, {{
+                                    pools | map('regex_replace', '^(.*)$',
+                                    'allow rwx pool=\1') | join(', ') }}
+      vars:
+        pools: ['vms', 'volumes', 'images']

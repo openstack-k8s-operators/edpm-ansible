@@ -24,6 +24,8 @@
         - "/var/log/containers/libvirt"
     - name: ensure firewall is configured
       ansible.builtin.include_tasks: "test-helpers/verify_firewall.yaml"
+    - name: ensure ceph secret is configured
+      ansible.builtin.include_tasks: "test-helpers/verify_ceph_secret.yaml"
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
       with_items:
