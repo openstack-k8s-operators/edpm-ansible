@@ -84,84 +84,16 @@ argument_specs:
         default: geneve
         description: ''
         type: str
-      edpm_ovn_metadata_agent_DEFAULT_agent_down_time:
-        default: '600'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_allow_automatic_l3agent_failover:
-        default: 'True'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_api_workers:
-        default: '2'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_auth_strategy:
-        default: keystone
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_bind_host:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_core_plugin:
-        default: ml2
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_DEFAULT_debug:
         default: false
         description: ''
         type: bool
-      edpm_ovn_metadata_agent_DEFAULT_dhcp_agent_notification:
-        default: 'false'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_dns_domain:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_global_physnet_mtu:
-        default: '1500'
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_DEFAULT_host:
         default: '{{ ansible_facts["nodename"] }}'
         description: ''
         type: str
-      edpm_ovn_metadata_agent_DEFAULT_l3_ha:
-        default: 'False'
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_DEFAULT_log_dir:
         default: /var/log/neutron
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_max_l3_agents_per_router:
-        default: '3'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_rcp_response_timeout:
-        default: '60'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_router_scheduler_driver:
-        default: neutron.scheduler.l3_agent_scheduler.ChanceScheduler
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_rpc_workers:
-        default: '2'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_service_plugins:
-        default: qos,ovn-router,trunk,segments,port_forwarding,log
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_transport_url:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_DEFAULT_vlan_transparent:
-        default: 'False'
         description: ''
         type: str
       edpm_ovn_metadata_agent_agent_report_interval:
@@ -176,68 +108,8 @@ argument_specs:
         default: /etc/neutron
         description: ''
         type: str
-      edpm_ovn_metadata_agent_database_connection:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_database_db_max_retries:
-        default: '-1'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_database_max_retries:
-        default: '-1'
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_image:
         default: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_auth_type:
-        default: password
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_auth_url:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_interface:
-        default: internal
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_memcache_use_advanced_pool:
-        default: 'True'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_memcached_servers:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_password:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_project_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_project_name:
-        default: service
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_region_name:
-        default: regionOne
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_user_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_username:
-        default: neutron
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_keystone_www_authenticate_uri:
-        default: ''
         description: ''
         type: str
       edpm_ovn_metadata_agent_log_dir:
@@ -299,10 +171,6 @@ argument_specs:
               }}'
         description: ''
         type: dict
-      edpm_ovn_metadata_agent_metadata_agent_config_overrides:
-        default: {}
-        description: ''
-        type: dict
       edpm_ovn_metadata_agent_metadata_agent_ovn_ovn_sb_connection:
         default: ''
         description: ''
@@ -322,207 +190,17 @@ argument_specs:
       edpm_ovn_metadata_agent_neutron_config:
         default:
           DEFAULT:
-            agent_down_time: '{{ edpm_ovn_metadata_agent_DEFAULT_agent_down_time }}'
-            allow_automatic_l3agent_failover: '{{ edpm_ovn_metadata_agent_DEFAULT_allow_automatic_l3agent_failover
-              }}'
-            api_workers: '{{ edpm_ovn_metadata_agent_DEFAULT_api_workers }}'
-            auth_strategy: '{{ edpm_ovn_metadata_agent_DEFAULT_auth_strategy }}'
-            bind_host: '{{ edpm_ovn_metadata_agent_DEFAULT_bind_host }}'
-            core_plugin: '{{ edpm_ovn_metadata_agent_DEFAULT_core_plugin }}'
             debug: '{{ edpm_ovn_metadata_agent_DEFAULT_debug }}'
-            dhcp_agent_notification: '{{ edpm_ovn_metadata_agent_DEFAULT_dhcp_agent_notification
-              }}'
-            dns_domain: '{{ edpm_ovn_metadata_agent_DEFAULT_dns_domain }}'
-            global_physnet_mtu: '{{ edpm_ovn_metadata_agent_DEFAULT_global_physnet_mtu }}'
             host: '{{ edpm_ovn_metadata_agent_DEFAULT_host }}'
-            l3_ha: '{{ edpm_ovn_metadata_agent_DEFAULT_l3_ha }}'
             log_dir: '{{ edpm_ovn_metadata_agent_DEFAULT_log_dir }}'
-            max_l3_agents_per_router: '{{ edpm_ovn_metadata_agent_DEFAULT_max_l3_agents_per_router
-              }}'
-            router_scheduler_driver: '{{ edpm_ovn_metadata_agent_DEFAULT_router_scheduler_driver
-              }}'
-            rpc_response_timeout: '{{ edpm_ovn_metadata_agent_DEFAULT_rcp_response_timeout
-              }}'
-            rpc_workers: '{{ edpm_ovn_metadata_agent_DEFAULT_rpc_workers }}'
-            service_plugins: '{{ edpm_ovn_metadata_agent_DEFAULT_service_plugins }}'
-            transport_url: '{{ edpm_ovn_metadata_agent_DEFAULT_transport_url }}'
-            vlan_tranparent: '{{ edpm_ovn_metadata_agent_DEFAULT_vlan_transparent }}'
           agent:
             report_interval: '{{ edpm_ovn_metadata_agent_agent_report_interval }}'
-            root_helper: '{{ edpm_ovn_metadata_agent_agent_root_helper }}'
-          database:
-            connection: '{{ edpm_ovn_metadata_agent_database_connection }}'
-            db_max_retries: '{{ edpm_ovn_metadata_agent_database_db_max_retries }}'
-            max_retries: '{{ edpm_ovn_metadata_agent_database_max_retries }}'
-          keystone_authtoken:
-            auth_type: '{{ edpm_ovn_metadata_agent_keystone_auth_type }}'
-            auth_url: '{{ edpm_ovn_metadata_agent_keystone_auth_url }}'
-            interface: '{{ edpm_ovn_metadata_agent_keystone_interface }}'
-            memcache_use_advanced_pool: '{{ edpm_ovn_metadata_agent_keystone_memcache_use_advanced_pool
-              }}'
-            memcached_servers: '{{ edpm_ovn_metadata_agent_keystone_memcached_servers }}'
-            password: '{{ edpm_ovn_metadata_agent_keystone_password }}'
-            project_domain_name: '{{ edpm_ovn_metadata_agent_keystone_project_domain_name
-              }}'
-            project_name: '{{ edpm_ovn_metadata_agent_keystone_project_name }}'
-            region_name: '{{ edpm_ovn_metadata_agent_keystone_region_name }}'
-            user_domain_name: '{{ edpm_ovn_metadata_agent_keystone_user_domain_name }}'
-            username: '{{ edpm_ovn_metadata_agent_keystone_username }}'
-            www_authenticate_uri: '{{ edpm_ovn_metadata_agent_keystone_www_authenticate_uri
-              }}'
-          nova:
-            auth_type: '{{ edpm_ovn_metadata_agent_nova_auth_type }}'
-            auth_url: '{{ edpm_ovn_metadata_agent_nova_auth_url }}'
-            endpoint_type: '{{ edpm_ovn_metadata_agent_nova_endpoint_type }}'
-            password: '{{ edpm_ovn_metadata_agent_nova_password }}'
-            project_domain_name: '{{ edpm_ovn_metadata_agent_nova_project_domain_name }}'
-            project_name: '{{ edpm_ovn_metadata_agent_nova_project_name }}'
-            region_name: '{{ edpm_ovn_metadata_agent_nova_region_name }}'
-            user_domain_name: '{{ edpm_ovn_metadata_agent_nova_user_domain_name }}'
-            username: '{{ edpm_ovn_metadata_agent_nova_username }}'
           oslo_concurrency:
             lock_path: '{{ edpm_ovn_metadata_agent_oslo_concurrency_lock_patch }}'
-          oslo_messaging_notifications:
-            driver: '{{ edpm_ovn_metadata_agent_oslo_messaging_notifications_driver }}'
-            transport_url: '{{ edpm_ovn_metadata_agent_oslo_messaging_notifications_transport_url
-              }}'
-          oslo_messaging_rabbit:
-            heartbeat_timeout_threshold: '{{ edpm_ovn_metadata_agent_oslo_messaging_rabbit_heartbeat_timeout_threshold
-              }}'
-          oslo_middleware:
-            enable_proxy_headers_parsing: '{{ edpm_ovn_metadata_agent_oslo_middleware_enable_proxy_headers_parsing
-              }}'
-          oslo_policy:
-            policy_file: '{{ edpm_ovn_metadata_agent_oslo_policy_policy_file }}'
-          ovs:
-            igmp_snooping_enable: '{{ edpm_ovn_metadata_agent_ovs_igmp_snooping_enable }}'
-          placement:
-            auth_type: '{{ edpm_ovn_metadata_agent_placement_auth_type }}'
-            auth_url: '{{ edpm_ovn_metadata_agent_placement_auth_url }}'
-            endpoint_type: '{{ edpm_ovn_metadata_agent_placement_endpoint_type }}'
-            password: '{{ edpm_ovn_metadata_agent_placement_password }}'
-            project_domain_name: '{{ edpm_ovn_metadata_agent_placement_project_domain_name
-              }}'
-            project_name: '{{ edpm_ovn_metadata_agent_placement_project_name }}'
-            region_name: '{{ edpm_ovn_metadata_agent_placement_region_name }}'
-            user_domain_name: '{{ edpm_ovn_metadata_agent_placement_user_domain_name }}'
-            username: '{{ edpm_ovn_metadata_agent_placement_username }}'
-          quotas:
-            quota_port: '{{ edpm_ovn_metadata_agent_quotas_quota_port }}'
-            quota_security_group: '{{ edpm_ovn_metadata_agent_quotas_quota_security_group
-              }}'
         description: ''
         type: dict
-      edpm_ovn_metadata_agent_neutron_config_overrides:
-        default: {}
-        description: ''
-        type: dict
-      edpm_ovn_metadata_agent_nova_auth_type:
-        default: password
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_auth_url:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_endpoint_type:
-        default: internal
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_password:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_project_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_project_name:
-        default: service
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_region_name:
-        default: regionOne
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_user_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_nova_username:
-        default: nova
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_oslo_concurrency_lock_patch:
         default: $state_path/lock
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_oslo_messaging_notifications_driver:
-        default: noop
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_oslo_messaging_notifications_transport_url:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_oslo_messaging_rabbit_heartbeat_timeout_threshold:
-        default: '60'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_oslo_middleware_enable_proxy_headers_parsing:
-        default: '60'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_oslo_policy_policy_file:
-        default: /etc/neutron/policy.yaml
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_ovs_igmp_snooping_enable:
-        default: 'False'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_auth_type:
-        default: password
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_auth_url:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_endpoint_type:
-        default: internal
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_password:
-        default: ''
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_project_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_project_name:
-        default: service
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_region_name:
-        default: regionOne
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_user_domain_name:
-        default: Default
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_placement_username:
-        default: placement
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_quotas_quota_port:
-        default: '500'
-        description: ''
-        type: str
-      edpm_ovn_metadata_agent_quotas_quota_security_group:
-        default: '10'
         description: ''
         type: str
       edpm_ovn_metadata_agent_rootwrap_DEFAULT_daemon_timeout:
@@ -566,10 +244,6 @@ argument_specs:
             syslog_log_level: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_level
               }}'
             use_syslog: '{{ edpm_ovn_metadata_agent_rootwrap_DEFAULT_use_syslog }}'
-        description: ''
-        type: dict
-      edpm_ovn_metadata_agent_rootwrap_config_overrides:
-        default: {}
         description: ''
         type: dict
       edpm_ovn_metadata_common_volumes:
