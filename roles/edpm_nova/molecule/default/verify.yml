@@ -32,3 +32,11 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       with_items:
         - "nova_compute"
+    - name: ensure kolla_set_configs copied the expected files
+      become: true
+      ansible.builtin.shell: |
+        podman logs nova_compute 2>&1 | grep "{{item}}" > /dev/null
+      with_items:
+        - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
+        - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
+        - "Copying /var/lib/kolla/config_files/02-nova-log.conf to /etc/nova/nova.conf.d/02-nova-log.conf"
