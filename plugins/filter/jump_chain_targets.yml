@@ -1,0 +1,16 @@
+DOCUMENTATION:
+  name: jump_chain_targets
+  author: "EDPM team"
+  version_added: 2.9
+  short_description: Retrieve existing jump chain targets
+  description: |
+    Filters valid chain target rules satisfying conditions based on
+    `table`, `family` and `chain` attributes.
+    Used by the osp.edpm.nftables role.
+EXAMPLES: |
+    '{{ edpm_nftables_chains_prefix }}_'~rule.get('chain', 'INPUT')
+     not in ( existing | osp.edpm.jump_chain_targets(rule=rule) )
+RETURN:
+  _value:
+    description: list of jump chain targets
+    type: list

@@ -1,9 +1,9 @@
 {
-  "name": "{{ podman_network_inspect.stdout | from_json | first | json_query('name') }}",
-  "id": "{{ podman_network_inspect.stdout | from_json | first | json_query('id') }}",
-  "driver": "{{ podman_network_inspect.stdout | from_json | first | json_query('driver') }}",
-  "network_interface": "{{ podman_network_inspect.stdout | from_json | first | json_query('network_interface') }}",
-  "created": "{{ podman_network_inspect.stdout | from_json | first | json_query('created') }}",
+  "name": "{{ (podman_network_inspect.stdout | from_json | first)['name'] }}",
+  "id": "{{ (podman_network_inspect.stdout | from_json | first)['id'] }}",
+  "driver": "{{ (podman_network_inspect.stdout | from_json | first)['driver'] }}",
+  "network_interface": "{{ (podman_network_inspect.stdout | from_json | first)['network_interface'] }}",
+  "created": "{{ (podman_network_inspect.stdout | from_json | first)['created'] }}",
   "subnets": [
     {
       "subnet": "10.255.255.0/24",
@@ -15,7 +15,7 @@
     }
   ],
   "ipv6_enabled": true,
-  "internal": {{ podman_network_inspect.stdout | from_json | first | json_query('internal') | to_json }},
-  "dns_enabled": {{ podman_network_inspect.stdout | from_json | first | json_query('dns_enabled') | to_json }},
-  "ipam_options": {{ podman_network_inspect.stdout | from_json | first | json_query('ipam_options') | to_json }}
+  "internal": {{ (podman_network_inspect.stdout | from_json | first)['internal'] | to_json }},
+  "dns_enabled": {{ (podman_network_inspect.stdout | from_json | first)['dns_enabled'] | to_json }},
+  "ipam_options": {{ (podman_network_inspect.stdout | from_json | first)['ipam_options'] | to_json }}
 }

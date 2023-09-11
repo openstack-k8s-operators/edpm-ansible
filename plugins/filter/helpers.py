@@ -25,6 +25,7 @@ class FilterModule:
             'needs_delete': self.needs_delete,
             'haskey': self.haskey,
             'dict_to_list': self.dict_to_list,
+            'jump_chain_targets': self.jump_chain_targets
         }
 
     def needs_delete(self, container_infos, config, config_id,
@@ -172,3 +173,20 @@ class FilterModule:
         for k, v in data.items():
             return_list.append({k: v})
         return return_list
+
+    def jump_chain_targets(self, data: list, rule: dict) -> list:
+        """Filters valid chain target rules satisfying conditions based on
+        `table`, `family` and `chain` attributes.
+        Used by the osp.edpm.nftables role.
+        """
+        def _filter(item):
+            return (
+                item.get('table', 'NOTABLE') == rule.get('table', 'filter')
+                and item.get('family', 'NOFAMILY') == 'inet'
+                and item.get('chain', 'NOCHAIN') == rule.get('chain', 'INPUT'))
+        targets = []
+        for existing_rule in list(filter(_filter, data)):
+            for target in existing_rule.get('expr', []):
+                if 'target' in target.get('jump', {}).keys():
+                    targets.append(target['jump']['target'])
+        return targets
