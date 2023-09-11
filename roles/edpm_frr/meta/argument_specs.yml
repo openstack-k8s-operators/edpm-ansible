@@ -3,4 +3,194 @@ argument_specs:
   # ./roles/edpm_frr/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_frr role.
-    options: {}
+    options:
+      edpm_frr_bfd:
+        default: true
+        description: |
+          Configures the detection multiplier to determine packet loss.
+          The remote transmission interval will be multiplied by this
+          value to determine the connection loss detection timer.
+        type: bool
+      edpm_frr_bfd_detect_multiplier:
+        default: 10
+        description: |
+          Configures the detection multiplier to determine packet loss.
+          The remote transmission interval will be multiplied by this
+          value to determine the connection loss detection timer.
+        type: int
+      edpm_frr_bfd_receive_interval:
+        default: 500
+        description:
+          Configures the minimum interval that this system is capable of
+          receiving control packets. (milliseconds)
+        type: int
+      edpm_frr_bfd_transmit_interval:
+        default: 500
+        description:
+          The minimum transmission interval (less jitter) that this
+          system wants to use to send BFD control packets. (milliseconds)
+        type: int
+      edpm_frr_bgp:
+        default: true
+        description: Enable bgpd daemon.
+        type: bool
+      edpm_frr_bgp_asn:
+        default: 64999
+        description: |
+          Default BGP ASN. Verify that it is correct for your use case.
+        type: int
+      edpm_frr_bgp_expose_only_host:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_ipv4:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_ipv4_allowas_in:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_ipv4_src_network:
+        default: ctlplane
+        description: ''
+        type: str
+      edpm_frr_bgp_ipv6:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_ipv6_allowas_in:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_ipv6_src_network:
+        default: ctlplane
+        description: ''
+        type: str
+      edpm_frr_bgp_l2vpn:
+        default: false
+        description: ''
+        type: bool
+      edpm_frr_bgp_l2vpn_ebgp_multihop:
+        default: 0
+        description: ''
+        type: int
+      edpm_frr_bgp_l2vpn_peers:
+        default:
+        - 192.168.0.1
+        - 192.168.0.2
+        description: List of VPN peer IPv4 addresses.
+        type: list
+      edpm_frr_bgp_l2vpn_peers_scope:
+        default: external
+        description: ''
+        type: str
+      edpm_frr_bgp_l2vpn_uplink_activate:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_bgp_learning_routes:
+        default: false
+        description: ''
+        type: bool
+      edpm_frr_bgp_neighbor_password:
+        default: ''
+        description: |
+          BGP RFCs only cover md5 auth for now, so setting this
+          won't work on a FIPS-enabled environment
+        type: str
+      edpm_frr_bgp_neighbor_ttl_security_hops:
+        default: 1
+        description: |
+          Security feature for limiting potential DOS attacks.
+          The amount is subtracted from packet TTL.
+        type: int
+      edpm_frr_bgp_peers:
+        default: []
+        description: List of IPs or hostnames FRR should peer with
+        type: list
+      edpm_frr_bgp_uplinks:
+        default:
+        - nic1
+        description: ''
+        type: list
+      edpm_frr_bgp_uplinks_scope:
+        default: internal
+        description: ''
+        type: str
+      edpm_frr_conf_custom_globals:
+        default: ''
+        description: ''
+        type: str
+      edpm_frr_conf_custom_ipv4:
+        default: ''
+        description: ''
+        type: str
+      edpm_frr_conf_custom_ipv6:
+        default: ''
+        description: ''
+        type: str
+      edpm_frr_conf_custom_router_bgp:
+        default: ''
+        description: ''
+        type: str
+      edpm_frr_config_basedir:
+        default: /var/lib/config-data/ansible-generated/frr
+        description: Path to FRR configuration directory.
+        type: path
+      edpm_frr_defaults:
+        default: traditional
+        description: ''
+        type: str
+      edpm_frr_hostname:
+        default: '{{ ansible_facts[''hostname''] }}'
+        description: Dynamically retrieved from ansible facts.
+        type: str
+      edpm_frr_image:
+        default: quay.io/podified-antelope-centos9/openstack-frr:current-podified
+        description: URL to openstack-frr container image.
+        type: str
+      edpm_frr_log_level:
+        default: informational
+        description: Log level settings.
+        type: str
+      edpm_frr_log_timestamp_precision:
+        default: 3
+        description: ''
+        type: int
+      edpm_frr_version:
+        default: 7.0
+        description: ''
+        type: float
+      edpm_frr_volumes:
+        default:
+        - /etc/hosts:/etc/hosts:ro
+        - /etc/localtime:/etc/localtime:ro
+        - /dev/log:/dev/log:rw
+        - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+        - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+        - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+        - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+        - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+        - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
+        - /var/lib/config-data/ansible-generated/frr:/var/lib/kolla/config_files/src:ro
+        - /var/log/containers/frr:/var/log/frr:z
+        - /run/frr:/run/frr:shared,z
+        description: List of FRR volumes in a mountpoint form.
+        type: list
+      edpm_frr_watchfrr:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_watchfrr_options:
+        default: ''
+        description: ''
+        type: str
+      edpm_frr_zebra:
+        default: true
+        description: ''
+        type: bool
+      edpm_frr_zebra_nht_resolve_via_default:
+        default: true
+        description: ''
+        type: bool

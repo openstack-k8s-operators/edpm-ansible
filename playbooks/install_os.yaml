@@ -1,0 +1,36 @@
+---
+- name: Deploy EDPM Operating System Install
+  hosts: all
+  strategy: linear
+  become: True
+  tasks:
+    - name: Install edpm_podman
+      import_role:
+        name: osp.edpm.edpm_podman
+        tasks_from: install.yml
+      tags:
+        - edpm_podman
+    - name: Install edpm_sshd
+      import_role:
+        name: osp.edpm.edpm_sshd
+        tasks_from: install.yml
+      tags:
+        - edpm_sshd
+    - name: Install edpm_chrony
+      import_role:
+        name: osp.edpm.edpm_chrony
+        tasks_from: install.yml
+      tags:
+        - edpm_chrony
+    - name: Install edpm_logrotate_crond
+      import_role:
+        name: osp.edpm.edpm_logrotate_crond
+        tasks_from: install.yml
+      tags:
+        - edpm_logrotate_crond
+    - name: Install edpm_iscsid
+      import_role:
+        name: osp.edpm.edpm_iscsid
+        tasks_from: install.yml
+      tags:
+        - edpm_iscsid

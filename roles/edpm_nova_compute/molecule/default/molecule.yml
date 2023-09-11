@@ -15,6 +15,7 @@ platforms:
     url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
   ulimits:
   - host
+  pkg_extras: podman
 provisioner:
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml

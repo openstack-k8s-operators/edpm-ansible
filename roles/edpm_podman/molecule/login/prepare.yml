@@ -54,10 +54,10 @@
         name: registry
         state: absent
 
-    - name: Pull ubuntu image
+    - name: Pull Fedora image
       containers.podman.podman_image:
-        name: ubuntu
-        tag: 16.04
+        name: fedora
+        tag: latest
 
     - name: Create auth directory
       file:
@@ -66,7 +66,7 @@
 
     - name: Create registry
       shell: |-
-        podman tag ubuntu:16.04 localhost:5000/my-ubuntu
+        podman tag fedora:rawhide localhost:5000/my-fedora
         podman run --entrypoint htpasswd registry:2.7.0 -Bbn testuser testpassword > {{ ansible_user_dir }}/auth/htpasswd
       args:
         executable: /bin/bash

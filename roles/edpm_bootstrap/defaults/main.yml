@@ -32,6 +32,7 @@ edpm_bootstrap_packages_bootstrap:
   - rsync
   - tmpwatch
   - sysstat
+  - iproute-tc
 
 edpm_bootstrap_release_version_package:
   - rhosp-release

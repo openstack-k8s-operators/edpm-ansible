@@ -1,0 +1,10 @@
+[DEFAULT]
+debug = {{ edpm_ovn_metadata_agent_DEFAULT_debug }}
+log_dir = {{ edpm_ovn_metadata_agent_DEFAULT_log_dir }}
+host = {{ edpm_ovn_metadata_agent_DEFAULT_host }}
+
+[oslo_concurrency]
+lock_path = {{ edpm_ovn_metadata_agent_oslo_concurrency_lock_patch }}
+
+[agent]
+report_interval = {{ edpm_ovn_metadata_agent_agent_report_interval }}

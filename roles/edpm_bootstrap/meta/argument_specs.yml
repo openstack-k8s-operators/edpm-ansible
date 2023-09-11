@@ -20,6 +20,7 @@ argument_specs:
           - rsync
           - tmpwatch
           - sysstat
+          - iproute-tc
         description: "List of packages that are requred to bootstrap EDPM."
 
       edpm_bootstrap_release_version_package:

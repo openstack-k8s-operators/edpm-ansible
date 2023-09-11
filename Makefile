@@ -1,6 +1,7 @@
 TEST_ENV_REPOSITORY := https://github.com/openstack-k8s-operators/ci-framework.git
 IMAGE_TAG_BASE ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
-IMG ?= $(IMAGE_TAG_BASE):latest
+IMAGE_TAG ?= latest
+IMG ?= $(IMAGE_TAG_BASE):$(IMAGE_TAG)
 
 ifndef ENV_DIR
 override ENV_DIR := $(shell mktemp -d)/ci-framework

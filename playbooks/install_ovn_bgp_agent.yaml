@@ -1,0 +1,12 @@
+---
+- name: Deploy EDPM OVN BGP Agent Install
+  hosts: all
+  strategy: linear
+  become: True
+  tasks:
+    - name: Install edpm_ovn_bgp_agent
+      import_role:
+        name: osp.edpm.edpm_ovn_bgp_agent
+        tasks_from: install.yml
+      tags:
+        - edpm_ovn_bgp_agent

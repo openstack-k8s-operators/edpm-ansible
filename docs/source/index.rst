@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 2
 
    installation
-   contributing_roles
+   contributing
    usage
    roles
    plugins

@@ -1,0 +1,37 @@
+---
+- name: Deploy EDPM Network
+  hosts: all
+  strategy: linear
+  tasks:
+    - name: Grow volumes
+      import_role:
+        name: osp.edpm.edpm_growvols
+      tags:
+        - edpm_growvols
+    - name: Install edpm_bootstrap
+      import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: bootstrap.yml
+      tags:
+        - edpm_bootstrap
+    - name: Install edpm_kernel
+      import_role:
+        name: osp.edpm.edpm_kernel
+      tags:
+        - edpm_kernel
+    - name: Import edpm_tuned
+      import_role:
+        name: osp.edpm.edpm_tuned
+      tags:
+        - edpm_tuned
+    - name: Configure Kernel Args
+      import_role:
+        name: osp.edpm.edpm_kernel
+        tasks_from: kernelargs.yml
+      tags:
+        - edpm_kernel
+    - name: import edpm_network_config
+      import_role:
+        name: osp.edpm.edpm_network_config
+      tags:
+        - edpm_network_config

@@ -71,6 +71,7 @@
 
 # Reboot the node
 - name: Reboot after kernel args update
+  become: true
   ansible.builtin.reboot:
     post_reboot_delay: "{{ edpm_kernel_post_reboot_delay }}"
     reboot_timeout: "{{ edpm_kernel_reboot_timeout }}"

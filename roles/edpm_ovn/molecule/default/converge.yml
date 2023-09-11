@@ -25,3 +25,4 @@
         tenant_ip: "{{ ansible_host }}"
         edpm_ovn_dbs:
           - "{{ ansible_host }}"
+        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"

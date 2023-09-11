@@ -3,4 +3,69 @@ argument_specs:
   # ./roles/edpm_network_config/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_network_config role.
-    options: {}
+    options:
+      edpm_network_config_tool:
+        type: str
+        description: Which network config tool should be used
+        default: os-net-config
+        choices:
+          - os-net-config
+          - nmstate
+      edpm_network_config_update:
+        type: bool
+        description: Apply NetworkConfig or not
+        default: false
+      edpm_network_config_async_poll:
+        type: int
+        description: "How often will the edpm_os_net_config module be polled."
+        default: 3
+      edpm_network_config_async_timeout:
+        type: int
+        description: "Time before edpm_os_net_config call times out."
+        default: 300
+      edpm_network_config_debug:
+        type: bool
+        description: "Debugging output enabled"
+        default: false
+      edpm_network_config_hide_sensitive_logs:
+        type: bool
+        description: "Hide logs of potentially sensitive nature."
+        default: true
+      edpm_network_config_manage_service:
+        type: bool
+        description: "Enable the network service or not"
+        default: true
+      edpm_network_config_nmstate:
+        type: bool
+        description: "If enabled, use nmstate and network manager for network configuration."
+        default: false
+      edpm_network_config_os_net_config_mappings:
+        type: dict
+        description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
+        default: {}
+      edpm_network_config_safe_defaults:
+        type: bool
+        description: >
+          If enabled, safe defaults (DHCP for all interfaces) will be applied in
+          case of failing while applying the provided net config.
+        default: true
+      edpm_network_config_template:
+        type: path
+        description: "Which settings template should be rendered."
+        default: templates/single_nic_vlans/single_nic_vlans.j2
+      edpm_network_config_override:
+        type: dict
+        description: "Optional template content overrides"
+        default: {}
+      edpm_bond_interface_ovs_options:
+        type: str
+        description: "Binding options to be rendered in a template"
+        default: "bond_mode=active-backup"
+      neutron_physical_bridge_name:
+        type: str
+        description: "Name of the physical bridge"
+        default: br-ex
+      neutron_public_interface_name:
+        type: str
+        description: "Name of the public network interface"
+        default: nic1
