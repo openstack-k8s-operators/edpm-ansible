@@ -17,6 +17,13 @@
 
 # All variables intended for modification should be placed in this file.
 
+
+# seconds between retries for download tasks
+edpm_bootstrap_download_delay: 5
+
+# number of retries for download tasks
+edpm_bootstrap_download_retries: 5
+
 # List of packages that are requred to bootstrap EDPM.
 edpm_bootstrap_packages_bootstrap:
   - driverctl
