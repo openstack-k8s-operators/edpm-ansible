@@ -14,32 +14,32 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-# "edpm_bootstrap" will search for and load any operating system variable file
-
 - name: Ensure /var/log/journal exists
-  become: true
   ansible.builtin.file:
     path: /var/log/journal
     state: directory
-    mode: 0750
+    mode: '0750'
     owner: root
     group: root
     setype: var_log_t
+  become: true
 
 - name: Check cloud-init status
   ansible.builtin.shell: systemctl is-active cloud-init.service || systemctl is-enabled cloud-init.service
   failed_when: false
-  become: true
   register: cloud_init_enabled
+  become: true
 
-- debug:
+- name: Print cloud-init service status
+  ansible.builtin.debug:
     var: cloud_init_enabled
 
 - name: Check if cloud-init is disabled via kernel args
-  ansible.builtin.shell: cat /proc/cmdline | grep -q cloud-init=disabled
-  failed_when: false
-  check_mode: false
+  ansible.builtin.lineinfile:
+    path: /proc/cmdline
+    line: "cloud-init=disabled"
+    state: present
+  check_mode: true
   register: cloud_init_vendor_disabled
 
 - name: Wait for cloud-init to finish, if enabled
@@ -55,26 +55,12 @@
     - not ansible_check_mode
     - cloud_init_enabled.rc is defined
     - cloud_init_enabled.rc == 0
-    - cloud_init_vendor_disabled.rc is not defined or cloud_init_vendor_disabled.rc != 0
-
-# found within the "vars/" path. If no OS files are found the task will skip.
-- name: Gather variables for each operating system
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - skip: true
-      files:
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}.yml"
-  tags:
-    - always
+    - cloud_init_vendor_disabled is changed
+  become: true
 
 - name: Bootstrap command
-  become: true
   when: edpm_bootstrap_command != ""
+  become: true
   block:
     - name: Bootstrap command
       ansible.builtin.shell: "{{ edpm_bootstrap_command }}"
@@ -88,69 +74,17 @@
           stderr: "{{ bootstrap_cmd.stderr_lines }}"
       failed_when: bootstrap_cmd.rc != 0
 
-# Currently only supported on RHEL as edpm does not have a version package
-- name: Release version package
-  when:
-    - (ansible_facts['distribution'] | lower) == 'redhat'
-    - (edpm_bootstrap_release_version_package |list | length) > 0
-  block:
-    - name: Check release version package is installed
-      ansible.builtin.command: "rpm -q --whatprovides {{ edpm_bootstrap_release_version_package | join(' ') }}"
-      register: rpm_query_result
-      failed_when: false
-    - name: Deploy release version package
-      become: true
-      ansible.builtin.dnf:
-        name: "{{ edpm_bootstrap_release_version_package }}"
-        state: present
-      when:
-        - rpm_query_result.rc > 0
-
 - name: Import packages tasks
   ansible.builtin.import_tasks: packages.yml
 
 - name: Set selinux state
-  become: true
   ansible.posix.selinux:
     policy: targeted
     state: "{{ edpm_bootstrap_selinux_mode }}"
-
-- name: Enable openvswitch service if installed
   become: true
-  ansible.builtin.service:
-    name: openvswitch
-    enabled: true
-    state: started
-  register: openvswitch_service_start
-  failed_when:
-    - not 'Could not find the requested service' in openvswitch_service_start.msg|default('')
-    - openvswitch_service_start is failed
-
-- name: Deploy and enable network service
-  become: true
-  when:
-    - (edpm_bootstrap_legacy_network_packages | length) > 0
-  block:
-    - name: Check required legacy network packages for bootstrap EDPM is installed
-      ansible.builtin.command: "rpm -q --whatprovides {{ edpm_bootstrap_legacy_network_packages | join(' ') }}"
-      register: rpm_query_result
-      failed_when: false
-
-    - name: Deploy network-scripts required for deprecated network service
-      ansible.builtin.dnf:
-        name: "{{ edpm_bootstrap_legacy_network_packages }}"
-        state: present
-      when:
-        - rpm_query_result.rc > 0
-
-    - name: Ensure network service is enabled
-      ansible.builtin.systemd:
-        name: "{{ edpm_bootstrap_network_service }}"
-        enabled: true
 
 - name: Stop NetworkManager from updating resolv.conf
-  become: true
-  when: (edpm_bootstrap_network_service == 'NetworkManager') and (edpm_bootstrap_network_resolvconf_update == false)
+  when: ( edpm_bootstrap_network_service == 'NetworkManager' ) and ( not edpm_bootstrap_network_resolvconf_update )
   block:
     - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
@@ -161,7 +95,7 @@
         option: dns
         value: none
         backup: true
-        mode: 0644
+        mode: '0644'
     - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: /etc/NetworkManager/NetworkManager.conf
@@ -171,17 +105,29 @@
         option: rc-manager
         value: unmanaged
         backup: true
-        mode: 0644
+        mode: '0644'
     - name: Reload NetworkManager
-      ansible.builtin.service:
+      ansible.builtin.systemd:
         name: NetworkManager
         state: reloaded
+  become: true
+
+- name: Enable openvswitch service if installed
+  ansible.builtin.systemd:
+    name: openvswitch
+    enabled: true
+    state: started
+  register: openvswitch_service_start
+  failed_when:
+    - not 'Could not find the requested service' in openvswitch_service_start.msg|default('')
+    - openvswitch_service_start is failed
+  become: true
 
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
 
 - name: Set GID hugetlbfs user to match kolla pre-set
-  become: true
   ansible.builtin.group:
     name: hugetlbfs
     gid: 42477
+  become: true

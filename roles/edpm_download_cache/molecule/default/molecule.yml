@@ -16,20 +16,24 @@ platforms:
   ulimits:
   - host
 provisioner:
-  config_options:
-    defaults:
-      callbacks_enabled: profile_tasks, timer, yaml
-      interpreter_python: auto_silent
+  env:
+    ANSIBLE_STDOUT_CALLBACK: yaml
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance:
+            ansible_python_interpreter: /usr/bin/python3
   log: true
   name: ansible
 scenario:
   test_sequence:
-  - dependency
   - destroy
   - create
   - prepare
   - converge
+  - check
   - verify
   - destroy
 verifier:
-  name: ansible
+  name: testinfra

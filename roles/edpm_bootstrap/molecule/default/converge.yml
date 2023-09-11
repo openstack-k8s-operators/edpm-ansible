@@ -2,10 +2,14 @@
 - name: Converge
   hosts: all
   tasks:
-    # replace these tasks with whatever you find suitable to test
+    - name: "Download required role packages"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_bootstrap"
+        tasks_from: "download_cache.yml"
     - name: "Include edpm_bootstrap"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_bootstrap"
+        tasks_from: "bootstrap.yml"
       vars:
         edpm_bootstrap_command: |
           touch /tmp/edpm_bootstrap_command

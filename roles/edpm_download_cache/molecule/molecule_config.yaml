@@ -1,7 +1,5 @@
 dependency:
   name: galaxy
-  options:
-    role_file: collections.yml
 
 driver:
   name: podman
@@ -38,10 +36,7 @@ scenario:
     - converge
     - destroy
 
-collections:
-  - community.general
-
 tasks:
-  - name: "Include edpm_bootstrap"
+  - name: "Include edpm_download_cache"
     include_role:
-      name: "osp.edpm.edpm_bootstrap"
+      name: "osp.edpm.edpm_download_cache"
