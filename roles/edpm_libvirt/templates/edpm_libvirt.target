@@ -1,0 +1,11 @@
+[Unit]
+Wants=edpm_libvirt_virtlogd.service
+Wants=edpm_libvirt_virtnodedevd.service
+Wants=edpm_libvirt_virtproxyd.service
+Wants=edpm_libvirt_virtqemud.service
+Wants=edpm_libvirt_virtsecretd.service
+After=edpm_libvirt_virtlogd.service
+After=edpm_libvirt_virtnodedevd.service
+After=edpm_libvirt_virtproxyd.service
+After=edpm_libvirt_virtqemud.service
+After=edpm_libvirt_virtsecretd.service
