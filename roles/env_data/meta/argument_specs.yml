@@ -2,7 +2,7 @@
 argument_specs:
   # ./roles/env_data/tasks/main.yml entry point
   main:
-    short_description: The main entry point for the env_data role.
+    short_description: The main entry point for the osp.edpm.env_data role.
     description:
     - Role gathers information about local env and prints it as debug.
     - No arguments are expected or necessary.

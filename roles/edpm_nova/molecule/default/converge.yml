@@ -12,6 +12,6 @@
       when:
         - ansible_user_dir is undefined
   roles:
-    - role: "edpm_nova"
+    - role: osp.edpm.edpm_nova
       vars:
       edpm_nova_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"

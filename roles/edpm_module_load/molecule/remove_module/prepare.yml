@@ -21,4 +21,4 @@
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
         - kmod
-    - role: env_data
+    - role: osp.edpm.env_data

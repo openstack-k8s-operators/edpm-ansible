@@ -24,6 +24,6 @@
   tasks:
     - name: Execute test case tasks
       include_role:
-        name: edpm_nova_libvirt
+        name: osp.edpm.edpm_nova_libvirt
         tasks_from: "{{ test_task | default('main.yml') }}"
       tags: "{{ test_tags | default(omit) }}"

@@ -41,7 +41,7 @@
         - ansible_user_dir is undefined
 
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
 
   tasks:
     - name: Disable SELinux
@@ -88,6 +88,6 @@
 
     - name: Run install
       include_role:
-        name: edpm_podman
+        name: osp.edpm.edpm_podman
         tasks_from: install.yml
         vars_from: "redhat.yml"

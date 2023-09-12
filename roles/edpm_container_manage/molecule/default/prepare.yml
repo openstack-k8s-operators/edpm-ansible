@@ -23,7 +23,7 @@
   hosts: all
   become: true
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
   tasks:
     - name: Prepare the container configs directory
       file:

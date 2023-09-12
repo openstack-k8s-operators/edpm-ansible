@@ -20,4 +20,4 @@
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
-    - role: env_data
+    - role: osp.edpm.env_data

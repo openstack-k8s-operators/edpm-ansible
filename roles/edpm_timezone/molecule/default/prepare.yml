@@ -23,4 +23,4 @@
 - name: Prepare
   hosts: all
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
