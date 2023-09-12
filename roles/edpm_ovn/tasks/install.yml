@@ -18,13 +18,14 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    setype: "{{ item.setype }}"
+    setype: "container_file_t"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - {'path': /var/log/containers/openvswitch, 'setype': container_file_t, 'mode': '0750'}
-    - {'path': /var/log/containers/neutron, 'setype': container_file_t, 'mode': '0750'}
-    - {'path': /var/lib/openvswitch/ovn, 'setype': container_file_t}
-    - {'path': /var/lib/edpm-config/firewall, 'setype': container_file_t, 'mode': '0750'}
+    - {'path': "{{ edpm_ovn_neutron_metadata_agent_config_dir }}"}
+    - {'path': /var/log/containers/openvswitch, 'mode': '0750'}
+    - {'path': /var/log/containers/neutron, 'mode': '0750'}
+    - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
+    - {'path': /var/lib/openvswitch/ovn}
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
   ansible.posix.seboolean:
