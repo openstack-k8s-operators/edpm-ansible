@@ -15,12 +15,6 @@
 # under the License.
 
 
-# "{{ role_name }}" will search for and load any operating system variable file
-# found within the "vars/" path. If no OS files are found the task will skip.
-
-- name: Load required vars
-  ansible.builtin.include_tasks: vars.yml
-
 - name: Install packages
   ansible.builtin.include_tasks: install.yml
 

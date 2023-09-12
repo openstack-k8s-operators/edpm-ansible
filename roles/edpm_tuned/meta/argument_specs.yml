@@ -4,6 +4,16 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_tuned role.
     options:
+      edpm_tuned_download_delay:
+        type: int
+        default: 5
+        description: >
+          Seconds between retries for download tasks
+      edpm_tuned_download_retries:
+        type: int
+        default: 5
+        description: >
+          Number of retries for download tasks
       edpm_tuned_profile:
         type: str
         default: "throughput-performance"
@@ -23,9 +33,16 @@ argument_specs:
           for example: 2,4-7 .
           Please note that the value may be rendered in a different .conf
           file, depending on your local setup.
+      edpm_tuned_system_packages_default:
+        type: list
+        description: >
+          Default tuned packages to install.
+        default:
+          - tuned
+          - tuned-profiles-cpu-partitioning
       edpm_tuned_system_packages:
         type: list
         description: >
           Packages installed on the local system. Allows user to define this list
-          otherwise it will inherit from the OS specific variable file(s).
+          otherwise it will uses the default list.
         default: []
