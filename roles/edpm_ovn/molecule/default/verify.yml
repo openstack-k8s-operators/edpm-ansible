@@ -98,3 +98,17 @@
               - item.rc == 0
             fail_msg: "rule {{ item.item }} not loaded"
           with_items: "{{ notrack_rules_loaded.results }}"
+
+    - name: Ensure that 10-neutron-metadata.conf was copied into the container
+      block:
+        - name: metadata config file exists
+          become: true
+          ansible.builtin.stat:
+            path: "/var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent/10-neutron-metadata.conf"
+          register: metadata_config
+
+        - name: assert that the config exists
+          ansible.builtin.assert:
+            that:
+              - metadata_config.stat.exists
+            fail_msg: "metadata agent config file does not exist"
