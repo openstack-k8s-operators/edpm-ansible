@@ -67,14 +67,14 @@
     - name: Create registry
       shell: |-
         podman tag fedora:rawhide localhost:5000/my-fedora
-        podman run --entrypoint htpasswd registry:2.7.0 -Bbn testuser testpassword > {{ ansible_user_dir }}/auth/htpasswd
+        podman run --entrypoint htpasswd quay.rdoproject.org/openstack-k8s-operators/registry:2.7.0 -Bbn testuser testpassword > {{ ansible_user_dir }}/auth/htpasswd
       args:
         executable: /bin/bash
 
     - name: Create registry
       containers.podman.podman_container:
         name: registry
-        image: "registry:2.7.0"
+        image: "quay.rdoproject.org/openstack-k8s-operators/registry:2.7.0"
         restart_policy: always
         detach: true
         ports:
