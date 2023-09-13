@@ -1,0 +1,66 @@
+---
+argument_specs:
+  # ./roles/edpm_ovs_dpdk/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_ovs_dpdk role.
+    options:
+      edpm_ovs_dpdk_pmd_core_list:
+        type: str
+        default: ""
+        description: OvS DPDK PMD Core list
+      edpm_ovs_dpdk_lcore_list:
+        type: str
+        default: ""
+        description: OvS DPDK LCore list
+      edpm_ovs_dpdk_memory_channels:
+        type: int
+        default: 4
+        description: OvS DPDK memory channels
+      edpm_ovs_dpdk_extra:
+        type: str
+        default: ""
+        description: OvS DPDK extra configs
+      edpm_ovs_dpdk_socket_memory:
+        type: str
+        default: ""
+        description: OvS DPDK Socket Memory
+      edpm_ovs_dpdk_revalidator_cores:
+        type: str
+        default: ""
+        description: DPDK revalidator core list
+      edpm_ovs_dpdk_handler_cores:
+        type: str
+        default: ""
+        description: OvS DPDK handler Core list
+      edpm_ovs_dpdk_emc_insertion_probablity:
+        type: str
+        default: ""
+        description: OvS DPDK EMAC insertion probablity
+      edpm_ovs_dpdk_enable_tso:
+        type: bool
+        default: false
+        description: OvS DPDK TSO enable or not
+      edpm_ovs_dpdk_pmd_auto_lb:
+        type: bool
+        default: false
+        description: OvS DPDK PMD auto load balance enable or not
+      edpm_ovs_dpdk_pmd_load_threshold:
+        type: str
+        default: ""
+        description: OvS DPDK PMD load threshold
+      edpm_ovs_dpdk_pmd_improvement_threshold:
+        type: str
+        default: ""
+        description: OvS DPDK PMD improvement threshold
+      edpm_ovs_dpdk_pmd_rebal_interval:
+        type: str
+        default: ""
+        description: OvS DPDK PMD rebalance interval
+      edpm_ovs_dpdk_vhost_postcopy_support:
+        type: bool
+        default: false
+        description: OvS DPDK vhost postcopy support enable or not
+      edpm_ovs_dpdk_vhost_postcopy_ovs_options:
+        type: str
+        default: ""
+        description: OvS DPDK vhost postcopy ovs options

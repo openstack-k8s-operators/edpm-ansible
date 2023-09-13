@@ -1,0 +1,204 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check valid input for edpm_ovs_dpdk_pmd_core_list
+  ansible.builtin.fail:
+    msg: "List of PMD cores cannot be empty - edpm_ovs_dpdk_pmd_core_list"
+  when: not edpm_ovs_dpdk_pmd_core_list|string or edpm_ovs_dpdk_pmd_core_list == 'null'
+
+- name: PMD cores config
+  when: edpm_ovs_dpdk_pmd_core_list|string
+  block:
+    - name: Apply PMD cores config
+      ansible.builtin.set_fact:
+        pmd_cpu_mask:
+          pmd-cpu-mask: "{{ edpm_ovs_dpdk_pmd_core_list | osp.edpm.cpu_mask }}"
+
+    - name: Append other_config with PMD cores
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ {} | combine(pmd_cpu_mask) }}"
+
+- name: Set DPDK lcores config
+  when: edpm_ovs_dpdk_lcore_list|string
+  block:
+    - name: Apply DPDK lcores config
+      ansible.builtin.set_fact:
+        dpdk_lcore_mask:
+          dpdk-lcore-mask: "{{ edpm_ovs_dpdk_lcore_list | osp.edpm.cpu_mask }}"
+
+    - name: Append other_config with DPDK lcores
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_lcore_mask) }}"
+
+- name: Add memory channels to dpdk extra
+  ansible.builtin.set_fact:
+    edpm_ovs_dpdk_extra_internal: "{{ edpm_ovs_dpdk_extra }} -n {{ edpm_ovs_dpdk_memory_channels }}"
+
+- name: Set DPDK extra
+  block:
+    - name: Apply DPDK extra
+      ansible.builtin.set_fact:
+        dpdk_extra:
+          dpdk-extra: "'{{ edpm_ovs_dpdk_extra_internal }}'"
+
+    - name: Append other_config with DPDK extra
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_extra) }}"
+
+- name: Set socket-mem and socket-limit config
+  when: edpm_ovs_dpdk_socket_memory|string
+  block:
+    - name: Apply socket-mem config
+      ansible.builtin.set_fact:
+        dpdk_socket_mem:
+          dpdk-socket-mem: "{{ edpm_ovs_dpdk_socket_memory }}"
+
+    - name: Apply socket-limit config
+      ansible.builtin.set_fact:
+        dpdk_socket_limit:
+          dpdk-socket-limit: "{{ edpm_ovs_dpdk_socket_memory }}"
+
+    - name: Append other_config with ocket-mem and socket-limit config
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_socket_mem) | combine(dpdk_socket_limit) }}"
+
+- name: Set Revalidator threads config
+  when: edpm_ovs_dpdk_revalidator_cores|string
+  block:
+    - name: Apply Revalidator threads config
+      ansible.builtin.set_fact:
+        n_revalidator_threads:
+          n-revalidator-threads: "{{ edpm_ovs_dpdk_revalidator_cores }}"
+
+    - name: Append other_config with Revalidator threads
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(n_revalidator_threads) }}"
+
+- name: Set Handler threads config
+  when: edpm_ovs_dpdk_handler_cores|string
+  block:
+    - name: Apply Handler threads config
+      ansible.builtin.set_fact:
+        n_handler_threads:
+          n-handler-threads: "{{ edpm_ovs_dpdk_handler_cores }}"
+
+    - name: Append other_config with Handler thread
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(n_handler_threads) }}"
+
+- name: Set EMC Insertion Probability config
+  when: edpm_ovs_dpdk_emc_insertion_probablity|string
+  block:
+    - name: Apply EMC Insertion Probability config
+      ansible.builtin.set_fact:
+        emc_insert_inv_prob:
+          emc-insert-inv-prob: "{{ edpm_ovs_dpdk_emc_insertion_probablity }}"
+
+    - name: Append other_config with EMC Insertion Probability
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(emc_insert_inv_prob) }}"
+
+- name: Enable TSO in datapath
+  when: edpm_ovs_dpdk_enable_tso|bool
+  block:
+    - name: Enable TSO in datapath
+      ansible.builtin.set_fact:
+        userspace_tso_enable:
+          userspace-tso-enable: "{{ edpm_ovs_dpdk_enable_tso }}"
+
+    - name: Append other_config with enable TSO in datapath
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(userspace_tso_enable) }}"
+
+- name: Enable postcopy support
+  when: edpm_ovs_dpdk_vhost_postcopy_support|bool
+  block:
+    - name: Enable postcopy support
+      ansible.builtin.set_fact:
+        vhost_postcopy_support:
+          vhost-postcopy-support: "{{ edpm_ovs_dpdk_vhost_postcopy_support }}"
+
+    - name: Append other_config with enable postcopy support
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(vhost_postcopy_support) }}"
+
+    - name: Disable mlockall in ovs
+      ansible.builtin.replace:
+        path: '/etc/sysconfig/openvswitch'
+        regexp: '^OPTIONS.*'
+        replace: 'OPTIONS="{{ edpm_ovs_dpdk_vhost_postcopy_ovs_options }}"'
+
+- name: Return ovs OPTIONS to default
+  when: not edpm_ovs_dpdk_vhost_postcopy_support|bool
+  ansible.builtin.replace:
+    path: '/etc/sysconfig/openvswitch'
+    regexp: '^OPTIONS.*'
+    replace: 'OPTIONS=""'
+
+- name: Enable DPDK OVN PMD Auto Load Balance
+  when: edpm_ovs_dpdk_pmd_auto_lb|bool
+  block:
+    - name: Enable DPDK OVN PMD Auto Load Balance
+      ansible.builtin.set_fact:
+        pmd_auto_lb:
+          pmd-auto-lb: "{{ edpm_ovs_dpdk_pmd_auto_lb }}"
+
+    - name: Append other_config with enable DPDK OVN PMD Auto Load Balance
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb) }}"
+
+- name: Set minimum PMD thread load threshold
+  when: edpm_ovs_dpdk_pmd_load_threshold|string
+  block:
+    - name: Apply minimum PMD thread load threshold
+      ansible.builtin.set_fact:
+        pmd_auto_lb_load_threshold:
+          pmd-auto-lb-load-threshold: "{{ edpm_ovs_dpdk_pmd_load_threshold }}"
+
+    - name: Append other_config with minimum PMD thread load threshold
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_load_threshold) }}"
+
+- name: Set PMD load variance improvement threshold
+  when: edpm_ovs_dpdk_pmd_improvement_threshold|string
+  block:
+    - name: Apply PMD load variance improvement threshold
+      ansible.builtin.set_fact:
+        pmd_auto_lb_improvement_threshold:
+          pmd-auto-lb-improvement-threshold: "{{ edpm_ovs_dpdk_pmd_improvement_threshold }}"
+
+    - name: Append other_config with PMD load variance improvement threshold
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_improvement_threshold) }}"
+
+- name: Set PMD auto load balancing interval
+  when: edpm_ovs_dpdk_pmd_rebal_interval|string
+  block:
+    - name: Apply PMD auto load balancing interval
+      ansible.builtin.set_fact:
+        pmd_auto_lb_rebal_interval:
+          pmd-auto-lb-rebal-interval: "{{ edpm_ovs_dpdk_pmd_rebal_interval }}"
+
+    - name: Append other_config with PMD auto load balancing interval
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_rebal_interval) }}"
+
+- name: Configure OVS other_config
+  ansible.builtin.shell: >
+    ovs-vsctl set open . {% for key, value in edpm_ovs_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
+  register: ovs_other_config
+  changed_when: ovs_other_config.rc == 0
+  failed_when: ovs_other_config.rc != 0

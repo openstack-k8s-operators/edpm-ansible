@@ -1,0 +1,16 @@
+---
+
+DOCUMENTATION:
+  name: cpu_mask
+  author: "EDPM team"
+  version_added: 2.9
+  short_description: Calculates cpu mask for the list of CPus.
+  description: |
+    This filter will take the list of CPUs and will convert
+    that to a cpu mask value.
+EXAMPLES: |
+  "{{ cpu_list | osp.edpm.cpu_mask }}"
+RETURN:
+  _value:
+    description:
+    type: string
