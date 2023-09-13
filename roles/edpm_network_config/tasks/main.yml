@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Configure network with network role from system roles [nmstate]
+  when: edpm_network_config_tool == 'nmstate'
   block:
     - name: Retrieve role name [nmstate]
       ansible.builtin.set_fact:
@@ -28,9 +29,12 @@
       delegate_to: localhost
     - name: Install OVS NetworkManager plugin [nmstate]
       ansible.builtin.dnf:
-        name: NetworkManager-ovs
-        state: latest
+        name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
+        state: present
       register: nm_ovs_status
+      until: nm_ovs_status.rc == 0
+      retries: "{{ edpm_network_config_download_retries }}"
+      delay: "{{ edpm_network_config_download_delay }}"
     - name: Restart NetworkManager after plugin installation [nmstate]
       ansible.builtin.systemd:
         name: NetworkManager
@@ -39,7 +43,6 @@
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ systemrolename }}"
-  when: edpm_network_config_tool == 'nmstate'
 
 - name: Load edpm_network_config tasks [os-net-config]
   ansible.builtin.include_tasks:
