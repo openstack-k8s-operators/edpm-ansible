@@ -1,8 +1,7 @@
 ---
 # defaults file for edpm_ovn
 edpm_ovn_config_src: /var/lib/openstack/configs/ovn
-edpm_ovn_neutron_config_dir: "/var/lib/config-data/ansible-generated/neutron_ovn_metadata_agent"
-edpm_ovn_metadata_agent_config_dir: "/etc/neutron"
+edpm_ovn_neutron_metadata_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
 edpm_ovn_metadata_agent_log_dir: "/var/log/neutron"
 edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
@@ -56,7 +55,7 @@ edpm_ovn_controller_common_volumes:
 edpm_ovn_metadata_common_volumes:
   - /lib/modules:/lib/modules:ro
   - /run/openvswitch:/run/openvswitch:z
-  - "{{ edpm_ovn_neutron_config_dir }}/etc/neutron:/etc/neutron:z"
+  - "{{ edpm_ovn_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z"
   - /run/netns:/run/netns:shared
   - /var/log/containers/neutron:/var/log/neutron:z
   - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
@@ -101,7 +100,7 @@ edpm_ovn_metadata_agent_oslo_concurrency_lock_patch: '$state_path/lock'
 # agent
 edpm_ovn_metadata_agent_agent_report_interval: '300'
 
-# Rootwrap conf
+# rootwrap.conf
 edpm_ovn_metadata_agent_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
 edpm_ovn_metadata_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
 edpm_ovn_metadata_agent_rootwrap_DEFAULT_use_syslog: 'False'
@@ -110,9 +109,9 @@ edpm_ovn_metadata_agent_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
 edpm_ovn_metadata_agent_rootwrap_DEFAULT_daemon_timeout: '600'
 edpm_ovn_metadata_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
 
-# networking-ovn-metadata-agent.ini
+# neutron-ovn-metadata-agent.conf
 edpm_ovn_metadata_agent_metadata_agent_DEFAULT_debug: 'True'
-edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: ''
+edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host: '{{ edpm_ovn_metadata_agent_DEFAULT_host }}'
 edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_protocol: 'http'
 edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ''
 edpm_ovn_metadata_agent_metadata_agent_DEFAULT_metadata_workers: '2'

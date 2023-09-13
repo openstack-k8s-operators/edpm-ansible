@@ -104,10 +104,6 @@ argument_specs:
         default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
         description: ''
         type: str
-      edpm_ovn_metadata_agent_config_dir:
-        default: /etc/neutron
-        description: ''
-        type: str
       edpm_ovn_metadata_agent_image:
         default: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
         description: ''
@@ -129,8 +125,8 @@ argument_specs:
         description: ''
         type: str
       edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_host:
-        default: ''
-        description: ''
+        default: '{{ edpm_ovn_metadata_agent_DEFAULT_host }}'
+        description: 'Nova Metadata host to forward metadata requests to.'
         type: str
       edpm_ovn_metadata_agent_metadata_agent_DEFAULT_nova_metadata_protocol:
         default: http
@@ -250,7 +246,7 @@ argument_specs:
         default:
         - /lib/modules:/lib/modules:ro
         - /run/openvswitch:/run/openvswitch:z
-        - '{{ edpm_ovn_neutron_config_dir }}/etc/neutron:/etc/neutron:z'
+        - '{{ edpm_ovn_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z'
         - /run/netns:/run/netns:shared
         - /var/log/containers/neutron:/var/log/neutron:z
         - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
@@ -260,9 +256,9 @@ argument_specs:
         default: false
         description: ''
         type: bool
-      edpm_ovn_neutron_config_dir:
-        default: /var/lib/config-data/ansible-generated/neutron
-        description: ''
+      edpm_ovn_neutron_metadata_agent_config_dir:
+        default: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
+        description: 'The directory that contains configuration files for Neutron OVN Metadata Agent.'
         type: str
       edpm_ovn_of_probe_interval:
         default: 60
