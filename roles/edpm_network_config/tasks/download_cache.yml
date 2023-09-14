@@ -1,0 +1,23 @@
+---
+
+- name: Download packages needed by linux-system-role - nmstate
+  when: edpm_network_config_tool == 'nmstate'
+  ansible.builtin.dnf:
+    name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
+    download_only: true
+  become: true
+  register: edpm_network_config_systemrole_nmstate_dependencies_download
+  until: edpm_network_config_systemrole_nmstate_dependencies_download.rc == 0
+  retries: "{{ edpm_network_config_download_retries }}"
+  delay: "{{ edpm_network_config_download_delay }}"
+
+- name: Download os-net-config package
+  when: edpm_network_config_tool == 'os-net-config'
+  ansible.builtin.dnf:
+    name: "os-net-config"
+    download_only: true
+  become: true
+  register: edpm_network_config_onc_download
+  until: edpm_network_config_onc_download.rc == 0
+  retries: "{{ edpm_network_config_download_retries }}"
+  delay: "{{ edpm_network_config_download_delay }}"

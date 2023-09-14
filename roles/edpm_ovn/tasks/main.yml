@@ -19,6 +19,9 @@
 - name: Include bootstrap tasks
   ansible.builtin.import_tasks: bootstrap.yml
 
+- name: Configure firewall rules
+  ansible.builtin.import_tasks: firewall.yml
+
 - name: Configure OVS
   ansible.builtin.import_tasks: configure.yml
 
