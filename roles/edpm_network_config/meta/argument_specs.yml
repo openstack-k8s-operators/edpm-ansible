@@ -4,6 +4,19 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_network_config role.
     options:
+      edpm_network_config_systemrole_nmstate_dependencies:
+        type: list
+        default:
+          - NetworkManager-ovs
+        description: Packages needed by nmstate (via system-role)
+      edpm_network_config_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_network_config_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
       edpm_network_config_tool:
         type: str
         description: Which network config tool should be used

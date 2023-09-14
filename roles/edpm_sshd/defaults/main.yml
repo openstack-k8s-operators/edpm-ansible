@@ -19,9 +19,14 @@
 
 # All variables within this role should have a prefix of "edpm_sshd"
 # Mapping of sshd_config values
+# seconds between retries for download tasks
+edpm_sshd_download_delay: 5
 
-# Package state for ssh
-edpm_sshd_package_state: present
+# number of retries for download tasks
+edpm_sshd_download_retries: 5
+
+edpm_sshd_packages:
+  - openssh-server
 
 edpm_sshd_motd_enabled: false
 edpm_sshd_message_of_the_day: ''
