@@ -125,9 +125,3 @@
 
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
-
-- name: Set GID hugetlbfs user to match kolla pre-set
-  ansible.builtin.group:
-    name: hugetlbfs
-    gid: 42477
-  become: true
