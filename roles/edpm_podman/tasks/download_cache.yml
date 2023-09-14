@@ -1,0 +1,13 @@
+---
+
+- name: Download needed packages
+  ansible.builtin.dnf:
+    name:
+      - "{{ edpm_podman_package }}"
+      - "{{ edpm_buildah_package }}"
+    download_only: true
+  become: true
+  register: edpm_podman_packages_download
+  until: edpm_podman_packages_download.rc == 0
+  retries: "{{ edpm_podman_download_retries }}"
+  delay: "{{ edpm_podman_download_delay }}"

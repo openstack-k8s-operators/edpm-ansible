@@ -14,9 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Load vars
-  ansible.builtin.import_tasks: load_vars.yaml
-
 - name: Podman install
   ansible.builtin.import_tasks: install.yml
 

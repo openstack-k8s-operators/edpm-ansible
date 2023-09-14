@@ -16,6 +16,14 @@
 
 
 # All variables intended for modification should be placed in this file.
+
+
+# seconds between retries for download tasks
+edpm_podman_download_delay: 5
+
+# number of retries for download tasks
+edpm_podman_download_retries: 5
+
 edpm_podman_hide_sensitive_logs: "{{ hide_sensitive_logs | default(true) }}"
 
 edpm_podman_buildah_login: false

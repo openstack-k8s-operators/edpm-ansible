@@ -19,3 +19,8 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_bootstrap
     tasks_from: download_cache.yml
+
+- name: Download packages for edpm_podman role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: download_cache.yml

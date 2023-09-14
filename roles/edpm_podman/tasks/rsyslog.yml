@@ -39,7 +39,7 @@
       register: logconfig
 
     - name: Restart rsyslog service after logging conf change
-      ansible.builtin.service:
+      ansible.builtin.systemd:
         name: rsyslog
         state: restarted
       when: logconfig is changed
