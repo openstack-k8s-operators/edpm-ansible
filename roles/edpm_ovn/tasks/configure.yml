@@ -82,26 +82,12 @@
 
 - name: Configure neutron configuration files
   block:
-    - name: Ensure {{ edpm_ovn_neutron_config_dir }}/etc/neutron/plugins/networking-ovn exists
-      ansible.builtin.file:
-        path: "{{ edpm_ovn_neutron_config_dir }}/etc/neutron/plugins/networking-ovn"
-        state: directory
-        recurse: true
-
-    - name: Render neutron.conf file
+    - name: render neutron config files
       ansible.builtin.template:
-        src: "neutron.conf.j2"
-        dest: "{{ edpm_ovn_neutron_config_dir }}/etc/neutron/neutron.conf"
+        src: "{{ item.src }}"
+        dest: "{{ edpm_ovn_neutron_metadata_agent_config_dir }}/{{ item.dest }}"
+        setype: "container_file_t"
         mode: "0644"
-
-    - name: Render rootwrap.conf file
-      ansible.builtin.template:
-        src: "rootwrap.conf.j2"
-        dest: "{{ edpm_ovn_neutron_config_dir }}/etc/neutron/rootwrap.conf"
-        mode: "0644"
-
-    - name: Render networking-ovn-metadata-agent.ini file
-      ansible.builtin.template:
-        src: "networking-ovn-metadata-agent.ini.j2"
-        dest: "{{ edpm_ovn_neutron_config_dir }}/etc/neutron/plugins/networking-ovn/networking-ovn-metadata-agent.ini"
-        mode: "0644"
+      with_items:
+      - {"src": "rootwrap.conf.j2", "dest": "rootwrap.conf"}
+      - {"src": "neutron-ovn-metadata-agent.conf.j2", "dest": "neutron-ovn-metadata-agent.conf"}
