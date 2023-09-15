@@ -14,13 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Apply user provided Ddp package
+- name: Apply user provided DDP package
   block:
     - name: Get latest version of specified Ddp package(s)
       ansible.builtin.shell: "ls --sort=version -r /lib/firmware/intel/ice/{{ edpm_ddp_package }}/ice[_-]?*.pkg*"
       register: ddp_package_files
 
-    - name: Remove existing Ddp package
+    - name: Remove existing DDP package
       become: true
       block:
         - name: Check if previous ddp/ice.pkg exists
@@ -42,7 +42,7 @@
             state: absent
           when: ice_pkg_xz.stat.exists
 
-    - name: Select and deploy Ddp package
+    - name: Select and deploy DDP package
       become: true
       block:
         - name: check package file name ice.pkg
@@ -62,7 +62,7 @@
             src: '{{ ddp_package_file }}'
             dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
             state: link
-          when: (edpm_ddp_package|string) != ''
+          when: edpm_ddp_package|string != ''
 
         - name: Load the new ice package
           ansible.builtin.shell: |-
@@ -71,4 +71,4 @@
             modprobe ice
       when: ddp_package_files is defined
 
-  when: edpm_ddp_package|string != ""
+  when: edpm_ddp_package|string != "" and edpm_ddp_package|string != "ddp"
