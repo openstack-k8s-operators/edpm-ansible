@@ -1,6 +1,8 @@
 ---
 - project:
     name: openstack-k8s-operators/edpm-ansible
+    templates:
+      - podified-multinode-edpm-baremetal-pipeline
     github-check:
       jobs:
         - edpm-ansible-molecule-edpm_podman
@@ -8,10 +10,3 @@
         - edpm-ansible-molecule-edpm_kernel
         - edpm-ansible-molecule-edpm_libvirt
         - edpm-ansible-molecule-edpm_nova
-        - openstack-k8s-operators-content-provider
-        - podified-multinode-edpm-deployment-crc:
-            dependencies:
-              - openstack-k8s-operators-content-provider
-        - edpm-ansible-crc-podified-edpm-baremetal:
-            dependencies:
-              - openstack-k8s-operators-content-provider

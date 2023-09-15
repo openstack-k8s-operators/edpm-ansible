@@ -37,14 +37,16 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_bootstrap
     tasks_from: "packages.yml"
-  vars:
-    edpm_bootstrap_dnf_use_cacheonly: false
 
 - name: Install os-net-config package
   become: true
   ansible.builtin.dnf:
     name: os-net-config
-    state: latest
+    state: present
+  register: edpm_network_config_onc_download
+  until: edpm_network_config_onc_download.rc == 0
+  retries: "{{ edpm_network_config_download_retries }}"
+  delay: "{{ edpm_network_config_download_delay }}"
 
 - name: Ensure /var/lib/edpm-config directory exists
   become: true

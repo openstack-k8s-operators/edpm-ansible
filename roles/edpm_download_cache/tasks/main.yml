@@ -24,3 +24,13 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_podman
     tasks_from: download_cache.yml
+
+- name: Download packages for edpm_network_config role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_network_config
+    tasks_from: download_cache.yml
+
+- name: Download packages for edpm_sshd role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_sshd
+    tasks_from: download_cache.yml
