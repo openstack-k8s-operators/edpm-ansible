@@ -21,14 +21,17 @@
   become: true
   block:
     - name: Install additional packages
-      ansible.builtin.package:
-        name: "{{ item.key }}"
-        state: "{{ item.opt.state | default('present') }}"
-      loop: "{{ edpm_kernel_extra_packages | dict2items(key_name='key', value_name='opt') }}"
+      ansible.builtin.dnf:
+        name: "{{ edpm_kernel_extra_packages }}"
+        state: present
       register: _install_packages_result
+      when: edpm_kernel_extra_packages | length > 0
+      until: _install_packages_result.rc == 0
+      retries: "{{ edpm_kernel_download_retries }}"
+      delay: "{{ edpm_kernel_download_delay }}"
 
     - name: Remove dracut-config-generic
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: 'dracut-config-generic'
         state: absent
 

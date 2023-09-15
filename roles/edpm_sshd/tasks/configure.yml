@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import sshd load_vars tasks
-  ansible.builtin.import_tasks: load_vars.yml
 
 - name: Run sshd tasks as root
   become: true
@@ -56,7 +54,7 @@
       ansible.builtin.copy:
         content: "{{ edpm_sshd_banner_text }}"
         dest: /etc/issue
-        mode: 0644
+        mode: '0644'
       when:
         - edpm_sshd_banner_enabled | bool
 
@@ -64,7 +62,7 @@
       ansible.builtin.copy:
         content: "{{ edpm_sshd_message_of_the_day }}"
         dest: /etc/motd
-        mode: 0644
+        mode: '0644'
       when:
         - edpm_sshd_motd_enabled | bool
 
@@ -84,7 +82,7 @@
       ansible.builtin.template:
         dest: /etc/ssh/sshd_config
         src: sshd_config_block.j2
-        mode: 0600
+        mode: '0600'
         validate: '/usr/sbin/sshd -T -f %s'
       register: _sshd_config_result
 
@@ -102,9 +100,12 @@
             state: directory
             owner: root
             group: root
-            mode: 0750
+            mode: '0750'
 
         - name: Inject firewall configuration for sshd opening
           ansible.builtin.template:
             dest: '/var/lib/edpm-config/firewall/sshd-networks.yaml'
             src: 'firewall.yaml.j2'
+            owner: root
+            group: root
+            mode: '0644'

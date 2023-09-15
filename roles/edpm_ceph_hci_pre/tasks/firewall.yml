@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Ensure firewall directory is present
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_ceph_hci_pre_firewall_yaml_file | dirname }}"
     state: directory
@@ -23,6 +24,7 @@
     mode: '0750'
 
 - name: Inject firewall configuration for Ceph Server
+  become: true
   ansible.builtin.template:
     dest: "{{ edpm_ceph_hci_pre_firewall_yaml_file }}"
     src: 'firewall.yaml.j2'

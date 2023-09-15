@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import sshd load_vars tasks
-  ansible.builtin.import_tasks: load_vars.yml
 
 - name: Import sshd install tasks
   ansible.builtin.import_tasks: install.yml
