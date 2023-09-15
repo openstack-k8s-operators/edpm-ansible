@@ -1,0 +1,11 @@
+---
+
+- name: Download needed packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_logrotate_crond_cronie_package }}"
+    download_only: true
+  become: true
+  register: edpm_logrotate_crond_cronie_package_download
+  until: edpm_logrotate_crond_cronie_package_download.rc == 0
+  retries: "{{ edpm_logrotate_crond_download_retries }}"
+  delay: "{{ edpm_logrotate_crond_download_delay }}"
