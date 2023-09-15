@@ -5,9 +5,7 @@
   tasks:
 
     - name: load_vars edpm_sshd
-      ansible.builtin.include_role:
-        name: osp.edpm.edpm_sshd
-        tasks_from: load_vars.yml
+      ansible.builtin.include_vars: ../../defaults/main.yml
 
     - name: Gather package facts
       ansible.builtin.package_facts:
