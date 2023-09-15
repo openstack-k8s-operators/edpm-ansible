@@ -1,4 +1,11 @@
 ---
+
+# seconds between retries for download tasks
+edpm_chrony_download_delay: 5
+
+# number of retries for download tasks
+edpm_chrony_download_retries: 5
+
 edpm_chrony_role_action: all
 edpm_chrony_global_server_settings: iburst minpoll 6 maxpoll 10
 edpm_chrony_global_pool_settings: iburst minpoll 6 maxpoll 10

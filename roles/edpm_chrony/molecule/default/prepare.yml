@@ -17,15 +17,9 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-      test_deps_extra_packages:
-        - podman
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
 - name: Prepare container
   hosts: instance
   roles:
     - role: env_data
-  tasks:
-    - name: Force systemd to reread configs
-      ansible.builtin.systemd:
-        daemon_reload: true

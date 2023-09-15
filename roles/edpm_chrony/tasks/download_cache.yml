@@ -1,0 +1,12 @@
+---
+
+- name: Download needed packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_chrony_package_name }}"
+    download_only: true
+  become: true
+  when: edpm_chrony_manage_package | bool
+  register: edpm_chrony_package_download
+  until: edpm_chrony_package_download.rc == 0
+  retries: "{{ edpm_chrony_download_retries }}"
+  delay: "{{ edpm_chrony_download_delay }}"
