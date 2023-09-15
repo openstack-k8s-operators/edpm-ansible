@@ -101,7 +101,7 @@ argument_specs:
         description: ''
         type: str
       edpm_ovn_metadata_agent_agent_root_helper:
-        default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
+        default: sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf
         description: ''
         type: str
       edpm_ovn_metadata_agent_image:
@@ -137,7 +137,7 @@ argument_specs:
         description: ''
         type: str
       edpm_ovn_metadata_agent_metadata_agent_agent_root_helper:
-        default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
+        default: sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf
         description: ''
         type: str
       edpm_ovn_metadata_agent_metadata_agent_config:
