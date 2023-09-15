@@ -20,6 +20,12 @@
     name: osp.edpm.edpm_bootstrap
     tasks_from: download_cache.yml
 
+
+- name: Download packages for edpm_tuned role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_tuned
+    tasks_from: download_cache.yml
+
 - name: Download packages for edpm_kernel role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_kernel

@@ -17,10 +17,20 @@
 
 # All variables intended for modification should be placed in this file.
 
+# seconds between retries for download tasks
+edpm_tuned_download_delay: 5
+
+# number of retries for download tasks
+edpm_tuned_download_retries: 5
+
 edpm_tuned_profile: "throughput-performance"
 edpm_tuned_custom_profile: ""
 edpm_tuned_isolated_cores: ""
 
-# Packages installed on the local system. Allows user to define this list
-# otherwise it will inherit from the OS specific variable file(s).
-edpm_tuned_system_packages: "{{ _edpm_tuned_system_packages | default([]) }}"
+# Default tuned packages to install
+edpm_tuned_system_packages_default:
+  - tuned
+  - tuned-profiles-cpu-partitioning
+
+# Overridable tuned packages to install, if not defined it will use default.
+edpm_tuned_system_packages: "{{ edpm_tuned_system_packages_default | default([]) }}"
