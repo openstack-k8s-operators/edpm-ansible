@@ -4,6 +4,7 @@ approvers:
   - ci-approvers
   - openstack-approvers
   - compute-approvers
+  - network-approvers
 
 reviewers:
   - edpm-approvers
