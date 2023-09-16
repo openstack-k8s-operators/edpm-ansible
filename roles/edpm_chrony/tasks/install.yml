@@ -15,9 +15,6 @@
 # # under the License.
 
 
-- name: Load distro-specific variables
-  ansible.builtin.include_tasks: vars.yml
-
 - name: Populate services_facts
   ansible.builtin.service_facts:
 

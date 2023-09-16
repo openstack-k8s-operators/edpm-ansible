@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,6 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-edpm_sshd_packages:
-  - openssh-server
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_neutron_sriov"
+      vars:
+        edpm_neutron_sriov_DEFAULT_transport_url: "fake:/"

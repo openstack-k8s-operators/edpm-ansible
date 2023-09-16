@@ -19,13 +19,13 @@
   hosts: all
   pre_tasks:
    - name: Backing up /etc/default/grub
-     import_tasks: ../../resources/molecule/backup_grub.yml
+     ansible.builtin.import_tasks: ../../resources/molecule/backup_grub.yml
   roles:
-    - role: "edpm_kernel"
+    - role: "osp.edpm.edpm_kernel"
       edpm_kernel_extra_modules:
         dummy: {}
       edpm_kernel_extra_packages:
-        'kmod-kvdo': {}
+        - 'kmod-kvdo'
       edpm_kernel_sysctl_extra_settings:
         kernel.ftrace_dump_on_oops:
           value: 1

@@ -4,6 +4,14 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_sshd role.
     options:
+      edpm_sshd_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_sshd_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
       edpm_sshd_banner_enabled:
         type: bool
         default: false
@@ -14,10 +22,6 @@ argument_specs:
         type: bool
         description: Enable gssapi authentication?
         default: false
-      edpm_sshd_package_state:
-        type: str
-        default: present
-        description: Package state for ssh
       edpm_sshd_message_of_the_day:
         type: str
         default: ''
