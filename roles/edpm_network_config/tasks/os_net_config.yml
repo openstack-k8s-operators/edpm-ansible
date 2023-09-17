@@ -26,12 +26,12 @@
     - name: Render overidden network config
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
       ansible.builtin.copy:
-        content: "{{ edpm_network_config_override | to_yaml }}"
+        content: "{{ edpm_network_config_override }}"
         dest: "{{ nic_config_file }}"
         mode: '0644'
         backup: true
       when:
-        - edpm_network_config_override.keys()|length > 0
+        - edpm_network_config_override != ""
     - name: Render network_config from template
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
       ansible.builtin.template:
@@ -40,7 +40,7 @@
         mode: '0644'
         backup: true
       when:
-        - edpm_network_config_override.keys()|length == 0
+        - edpm_network_config_override == ""
     - name: Run edpm_os_net_config_module with network_config
       edpm_os_net_config:
         config_file: "{{ nic_config_file }}"
