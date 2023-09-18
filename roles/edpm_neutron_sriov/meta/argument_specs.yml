@@ -1,0 +1,126 @@
+---
+argument_specs:
+  # ./roles/edpm_neutron_sriov/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_neutron_sriov role.
+    options:
+      edpm_neutron_sriov_agent_config_dir:
+        default: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
+        description: |
+          The path to the directory containing Neutron SRIOV NIC agent config
+          files.
+        type: str
+      edpm_neutron_sriov_image:
+        default: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
+        description: Neutron SRIOV NIC agent container image.
+        type: str
+      edpm_neutron_sriov_common_volumes:
+        default:
+          - /lib/modules:/lib/modules:ro
+          - /dev:/dev
+          - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron:z"
+          - /var/lib/neutron:/var/lib/neutron:shared,z
+          - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - /var/log/containers/neutron:/var/log/neutron:z
+        description: List of volumes in a mount point form.
+        type: list
+      edpm_neutron_sriov_DEFAULT_debug:
+        default: false
+        description: "Enable or disable DEBUG mode in the Neutron agent"
+        type: bool
+      edpm_neutron_sriov_DEFAULT_rpc_response_timeout:
+        default: 60
+        description: ''
+        type: int
+      edpm_neutron_sriov_DEFAULT_transport_url:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_DEFAULT_host:
+        default: '{{ ansible_facts["nodename"] }}'
+        description: ''
+        type: str
+      edpm_neutron_sriov_oslo_concurrency_lock_patch:
+        default: '$state_path/lock'
+        description: ''
+        type: str
+      edpm_neutron_sriov_oslo_messaging_rabbit_heartbeat_timeout_threshold:
+        default: 60
+        description: ''
+        type: int
+      edpm_neutron_sriov_oslo_middleware_enable_proxy_headers_parsing:
+        default: 60
+        description: ''
+        type: int
+      edpm_neutron_sriov_rootwrap_DEFAULT_filters_path:
+        default: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+      edpm_neutron_sriov_rootwrap_DEFAULT_exec_dirs:
+        default: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
+      edpm_neutron_sriov_rootwrap_DEFAULT_use_syslog:
+        default: false
+        description: ''
+        type: bool
+      edpm_neutron_sriov_rootwrap_DEFAULT_syslog_log_facility:
+        default: 'syslog'
+        description: ''
+        type: str
+      edpm_neutron_sriov_rootwrap_DEFAULT_syslog_log_level:
+        default: 'ERROR'
+        description: ''
+        type: str
+      edpm_neutron_sriov_rootwrap_DEFAULT_daemon_timeout:
+        default: 600
+        description: ''
+        type: int
+      edpm_neutron_sriov_rootwrap_DEFAULT_rlimit_nofile:
+        default: 1024
+        description: ''
+        type: int
+      edpm_neutron_sriov_agent_DEFAULT_state_path:
+        default: '/var/lib/neutron'
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_AGENT_root_helper:
+        default: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_AGENT_report_interval:
+        default: 300
+        description: ''
+        type: int
+      edpm_neutron_sriov_agent_AGENT_extensions:
+        default: 'qos'
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_AGENT_polling_interval:
+        default: 2
+        description: ''
+        type: int
+      edpm_neutron_sriov_agent_SRIOV_NIC_physical_device_mappings:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_NIC_exclude_devices:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_bandwidths:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_hypervisors:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_default_hypervisor:
+        default: ''
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_inventory_defaults:
+        default: 'allocation_ratio:1.0,min_unit:1,step_size:1,reserved:0'
+        description: ''
+        type: str
+      edpm_neutron_sriov_agent_SRIOV_DRIVER_vnic_type_prohibit_list:
+        default: ''
+        description: ''
+        type: str

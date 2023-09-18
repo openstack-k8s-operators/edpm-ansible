@@ -16,8 +16,15 @@
 
 
 # All variables intended for modification should be placed in this file.
+
+# seconds between retries for download tasks
+edpm_kernel_download_delay: 5
+
+# number of retries for download tasks
+edpm_kernel_download_retries: 5
+
 edpm_kernel_extra_modules: {}
-edpm_kernel_extra_packages: {}
+edpm_kernel_extra_packages: []
 edpm_kernel_sysctl_extra_settings: {}
 edpm_kernel_args: ""
 edpm_kernel_reboot_timeout: 3600

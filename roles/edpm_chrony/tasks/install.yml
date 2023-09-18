@@ -15,9 +15,6 @@
 # # under the License.
 
 
-- name: Load distro-specific variables
-  ansible.builtin.include_tasks: vars.yml
-
 - name: Populate services_facts
   ansible.builtin.service_facts:
 
@@ -32,7 +29,11 @@
     - ansible_facts.services['ntpd.service']['state'] == 'running' or ansible_facts.services['ntpd.service']['status'] == 'enabled'
 
 - name: Install chronyd package
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name: "{{ edpm_chrony_package_name }}"
     state: present
-  when: edpm_chrony_manage_package|bool
+  when: edpm_chrony_manage_package | bool
+  register: edpm_chrony_package_download
+  until: edpm_chrony_package_download.rc == 0
+  retries: "{{ edpm_chrony_download_retries }}"
+  delay: "{{ edpm_chrony_download_delay }}"

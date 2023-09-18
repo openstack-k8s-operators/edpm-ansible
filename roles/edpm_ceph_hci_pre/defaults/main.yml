@@ -33,6 +33,10 @@ edpm_ceph_hci_pre_storage_ranges: []
 # If list is empty, the firewall rule will not specify a source address
 edpm_ceph_hci_pre_rgw_frontend_ranges: []
 
+# List of IP ranges which can connect to NFS front end
+# If list is empty, the firewall rule will not specify a source address
+edpm_ceph_hci_pre_nfs_frontend_ranges: []
+
 # List of IP ranges which can connect to Ceph Grafana front end
 # If list is empty, the firewall rule will not specify a source address
 edpm_ceph_hci_pre_grafana_frontend_ranges: []
@@ -66,8 +70,13 @@ edpm_ceph_hci_pre_firewall_services:
   - name: ceph_nfs
     num: 120
     dport:
-      - 2049
+      - 12049
     ranges: "{{ edpm_ceph_hci_pre_storage_ranges | list }}"
+  - name: ceph_nfs_frontend
+    num: 121
+    dport:
+      - 2049
+    ranges: "{{ edpm_ceph_hci_pre_nfs_frontend_ranges | list }}"
   - name: ceph_rgw
     num: 122
     dport:
@@ -123,4 +132,6 @@ edpm_ceph_hci_pre_enabled_services:
   - ceph_mgr
   - ceph_osd
   - ceph_rgw
+  - ceph_nfs
   - ceph_rgw_frontend
+  - ceph_nfs_frontend

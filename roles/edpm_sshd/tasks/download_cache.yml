@@ -1,0 +1,11 @@
+---
+
+- name: Download sshd packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_sshd_packages }}"
+    download_only: true
+  become: true
+  register: edpm_sshd_packages_download
+  until: edpm_sshd_packages_download.rc == 0
+  retries: "{{ edpm_sshd_download_retries }}"
+  delay: "{{ edpm_sshd_download_delay }}"

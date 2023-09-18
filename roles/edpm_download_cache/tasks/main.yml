@@ -20,6 +20,21 @@
     name: osp.edpm.edpm_bootstrap
     tasks_from: download_cache.yml
 
+- name: Download packages for edpm_podman role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: download_cache.yml
+
+- name: Download packages for edpm_tuned role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_tuned
+    tasks_from: download_cache.yml
+
+- name: Download packages for edpm_kernel role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_kernel
+    tasks_from: download_cache.yml
+
 - name: Download packages for edpm_network_config role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_network_config
@@ -28,4 +43,14 @@
 - name: Download packages for edpm_logrotate_crond role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_logrotate_crond
+    tasks_from: download_cache.yml
+
+- name: Download packages for edpm_chrony role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_chrony
+    tasks_from: download_cache.yml
+
+- name: Download packages for edpm_sshd role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_sshd
     tasks_from: download_cache.yml

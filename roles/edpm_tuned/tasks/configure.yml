@@ -14,14 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Load required vars
-  ansible.builtin.include_tasks: vars.yml
-
 - name: Ensure profile directory exists
   ansible.builtin.file:
     path: "/etc/tuned/{{ edpm_tuned_profile }}"
     state: directory
-    mode: 0755
+    mode: '0755'
   when:
     - (edpm_tuned_custom_profile is defined) and ((edpm_tuned_custom_profile | length) > 0)
 
@@ -29,7 +26,7 @@
   ansible.builtin.copy:
     content: "{{ edpm_tuned_custom_profile }}"
     dest: "/etc/tuned/{{ edpm_tuned_profile }}/tuned.conf"
-    mode: 0644
+    mode: '0644'
   when:
     - (edpm_tuned_custom_profile is defined) and ((edpm_tuned_custom_profile | length) > 0)
 
@@ -60,7 +57,7 @@
 - name: "Configure isolated cores for profile {{ edpm_tuned_profile }}"
   ansible.builtin.lineinfile:
     dest: "/etc/tuned/{{ edpm_tuned_profile }}-variables.conf"
-    mode: 0644
+    mode: '0644'
     regexp: '^isolated_cores=.*'
     line: 'isolated_cores={{ edpm_tuned_isolated_cores }}'
   become: true
@@ -79,3 +76,6 @@
         (edpm_tuned_active_profile['content'] | b64decode).strip()
         ) != edpm_tuned_profile
       )
+  register: _tuned_profile_command_execution
+  failed_when: _tuned_profile_command_execution.rc != 0
+  changed_when: _tuned_profile_command_execution.rc == 0

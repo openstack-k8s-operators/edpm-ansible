@@ -14,23 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Gather variables for each operating system for installing buildah
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - skip: true
-      files:
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}.yml"
-
 - name: Ensure buildah is installed
   become: true
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name: "{{ edpm_buildah_package }}"
     state: present
+  register: edpm_buildah_package_download
+  until: edpm_buildah_package_download.rc == 0
+  retries: "{{ edpm_podman_download_retries }}"
+  delay: "{{ edpm_podman_download_delay }}"
 
 - name: Perform container registry login(s) with buildah
   become: true
