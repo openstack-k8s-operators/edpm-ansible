@@ -42,7 +42,7 @@
       when:
         - edpm_network_config_override.keys()|length == 0
     - name: Run edpm_os_net_config_module with network_config
-      edpm_os_net_config:
+      osp.edpm.edpm_os_net_config:
         config_file: "{{ nic_config_file }}"
         debug: "{{ edpm_network_config_debug | bool }}"
         detailed_exit_codes: true

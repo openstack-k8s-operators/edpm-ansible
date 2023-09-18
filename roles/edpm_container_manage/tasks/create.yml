@@ -15,7 +15,7 @@
 # under the License.
 
 - name: "Create containers managed by Podman for {{ edpm_container_manage_config }}"
-  edpm_container_manage:
+  osp.edpm.edpm_container_manage:
     config_id: "{{ edpm_container_manage_config_id }}"
     config_dir: "{{ edpm_container_manage_config }}"
     config_patterns: "{{ edpm_container_manage_config_patterns }}"
@@ -36,7 +36,7 @@
 
 - name: "Manage container systemd services and cleanup old systemd healthchecks for {{ edpm_container_manage_config }}"
   become: true
-  container_systemd:
+  osp.edpm.container_systemd:
     container_config: "{{ container_config }}"
     systemd_healthchecks: "{{ (not edpm_container_manage_healthcheck_disabled | bool) }}"
   vars:

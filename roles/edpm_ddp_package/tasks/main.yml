@@ -59,7 +59,7 @@
           vars:
             ddp_package_file: "{{ ddp_package_files.stdout.split('\n')[0] }}"
           ansible.builtin.file:
-            src: '{{ ddp_package_file }}'
+            src: "{{ ddp_package_file }}"
             dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
             state: link
           when: (edpm_ddp_package|string) != ''

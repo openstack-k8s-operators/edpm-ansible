@@ -5,4 +5,4 @@
   vars:
     edpm_chrony_role_action: all
   roles:
-    - chrony
+    - osp.edpm.edpm_chrony
