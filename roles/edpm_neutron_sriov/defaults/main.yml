@@ -1,0 +1,71 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# All variables intended for modification should be placed in this file.
+
+# All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
+edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
+edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
+
+edpm_neutron_sriov_common_volumes:
+  - /lib/modules:/lib/modules:ro
+  - /dev:/dev
+  - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron:z"
+  - /var/lib/neutron:/var/lib/neutron:shared,z
+  - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
+  - /var/log/containers/neutron:/var/log/neutron:z
+
+# neutron.conf
+# DEFAULT
+edpm_neutron_sriov_DEFAULT_debug: false
+edpm_neutron_sriov_DEFAULT_rpc_response_timeout: 60
+edpm_neutron_sriov_DEFAULT_transport_url: ''
+edpm_neutron_sriov_DEFAULT_host: '{{ ansible_facts["nodename"] }}'
+# oslo_concurrency
+edpm_neutron_sriov_oslo_concurrency_lock_patch: '$state_path/lock'
+# oslo_messaging_rabbit
+edpm_neutron_sriov_oslo_messaging_rabbit_heartbeat_timeout_threshold: 60
+# oslo_middleware
+edpm_neutron_sriov_oslo_middleware_enable_proxy_headers_parsing: 60
+
+# rootwrap.conf
+# DEFAULT
+edpm_neutron_sriov_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+edpm_neutron_sriov_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
+edpm_neutron_sriov_rootwrap_DEFAULT_use_syslog: 'False'
+edpm_neutron_sriov_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
+edpm_neutron_sriov_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
+edpm_neutron_sriov_rootwrap_DEFAULT_daemon_timeout: 600
+edpm_neutron_sriov_rootwrap_DEFAULT_rlimit_nofile: 1024
+
+# neutron-sriov-agent.ini
+# DEFAULT
+edpm_neutron_sriov_agent_DEFAULT_state_path: '/var/lib/neutron'
+# AGENT
+edpm_neutron_sriov_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+edpm_neutron_sriov_agent_AGENT_report_interval: 300
+edpm_neutron_sriov_agent_AGENT_extensions: 'qos'
+edpm_neutron_sriov_agent_AGENT_polling_interval: 2
+# SRIOV_NIC
+edpm_neutron_sriov_agent_SRIOV_NIC_physical_device_mappings: ''
+edpm_neutron_sriov_agent_SRIOV_NIC_exclude_devices: ''
+edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_bandwidths: ''
+edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_hypervisors: ''
+edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_default_hypervisor: ''
+edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_inventory_defaults: 'allocation_ratio:1.0,min_unit:1,step_size:1,reserved:0'
+# SRIOV_DRIVER
+edpm_neutron_sriov_agent_SRIOV_DRIVER_vnic_type_prohibit_list: ''

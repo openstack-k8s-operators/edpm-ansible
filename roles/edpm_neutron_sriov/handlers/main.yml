@@ -14,12 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
-
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+- name: restart neutron-sriov-agent container
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: "edpm_neutron_sriov_agent.service"
+  listen: "restart neutron-sriov-agent"

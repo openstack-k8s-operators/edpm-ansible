@@ -21,3 +21,6 @@ aliases:
   compute-approvers:
   - gibizer
   - SeanMooney
+  network-approvers:
+  - booxter
+  - karelyatin

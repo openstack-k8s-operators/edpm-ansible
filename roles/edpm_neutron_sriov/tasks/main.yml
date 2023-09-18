@@ -14,6 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-_edpm_tuned_system_packages:
-  - tuned
-  - tuned-profiles-cpu-partitioning
+- name: Install neutron-sriov-agent
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure neutron-sriov-agent
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Ensure neutron-sriov-agent is running
+  ansible.builtin.import_tasks: run.yml

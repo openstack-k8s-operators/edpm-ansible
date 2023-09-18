@@ -14,12 +14,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
-
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+- name: Render neutron configuration files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_sriov_agent_config_dir }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0644"
+  with_items:
+    - {"src": "neutron.conf.j2", "dest": "neutron.conf"}
+    - {"src": "rootwrap.conf.j2", "dest": "rootwrap.conf"}
+    - {"src": "neutron-sriov-agent.ini.j2", "dest": "neutron-sriov-agent.ini"}
+  tags:
+    - configure
+    - neutron
+  notify:
+  - restart neutron-sriov-agent

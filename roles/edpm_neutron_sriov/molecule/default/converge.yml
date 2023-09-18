@@ -14,12 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
-
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_neutron_sriov"
+      vars:
+        edpm_neutron_sriov_DEFAULT_transport_url: "fake:/"

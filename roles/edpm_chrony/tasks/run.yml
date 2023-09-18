@@ -15,9 +15,6 @@
 # # under the License.
 
 
-- name: Load distro-specific variables
-  ansible.builtin.include_tasks: vars.yml
-
 - name: Ensure chronyd is running
   ansible.builtin.service:
     enabled: "{{ (edpm_chrony_service_state | default('started') in ['running', 'started']) | bool }}"

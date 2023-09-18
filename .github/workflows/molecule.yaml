@@ -25,6 +25,7 @@ jobs:
         - edpm_container_standalone
         - edpm_logrotate_crond
         - edpm_network_config
+        - edpm_neutron_sriov
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_nova_compute

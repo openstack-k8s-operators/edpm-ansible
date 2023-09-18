@@ -15,11 +15,8 @@
 # under the License.
 
 
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
+# While options found within the vars/ path can be overridden using extra
+# vars, items within this path are considered part of the role and not
+# intended to be modified.
 
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+# All variables within this role should have a prefix of "edpm_neutron_sriov"

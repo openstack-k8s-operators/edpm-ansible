@@ -1,0 +1,19 @@
+[DEFAULT]
+state_path = {{ edpm_neutron_sriov_agent_DEFAULT_state_path }}
+
+[AGENT]
+extensions = {{ edpm_neutron_sriov_agent_AGENT_extensions }}
+polling_interval = {{ edpm_neutron_sriov_agent_AGENT_polling_interval }}
+root_helper = {{ edpm_neutron_sriov_agent_AGENT_root_helper }}
+report_interval = {{ edpm_neutron_sriov_agent_AGENT_report_interval }}
+
+[SRIOV_NIC]
+physical_device_mappings = {{ edpm_neutron_sriov_agent_SRIOV_NIC_physical_device_mappings }}
+exclude_devices = {{ edpm_neutron_sriov_agent_SRIOV_NIC_exclude_devices }}
+resource_provider_bandwidths = {{ edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_bandwidths }}
+resource_provider_hypervisors = {{ edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_hypervisors }}
+resource_provider_default_hypervisor = {{ edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_default_hypervisor }}
+resource_provider_inventory_defaults = {{ edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_inventory_defaults }}
+
+[SRIOV_DRIVER]
+vnic_type_prohibit_list = {{ edpm_neutron_sriov_agent_SRIOV_DRIVER_vnic_type_prohibit_list }}
