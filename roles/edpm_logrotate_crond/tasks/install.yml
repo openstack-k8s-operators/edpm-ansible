@@ -17,9 +17,13 @@
 
 - name: Install cronie
   become: true
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name: "{{ edpm_logrotate_crond_cronie_package }}"
     state: present
+  register: edpm_logrotate_crond_cronie_package_download
+  until: edpm_logrotate_crond_cronie_package_download.rc == 0
+  retries: "{{ edpm_logrotate_crond_download_retries }}"
+  delay: "{{ edpm_logrotate_crond_download_delay }}"
 
 - name: Allow logrotate to read inside containers
   become: true

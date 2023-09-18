@@ -19,6 +19,12 @@
 
 # All variables within this role should have a prefix of "edpm_logrotate_crond"
 
+# seconds between retries for download tasks
+edpm_logrotate_crond_download_delay: 5
+
+# number of retries for download tasks
+edpm_logrotate_crond_download_retries: 5
+
 edpm_logrotate_crond_cronie_package: cronie
 
 # Pid namespace for podman container. Only change for testing.
