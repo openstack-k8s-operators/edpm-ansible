@@ -19,17 +19,18 @@
   ansible.builtin.file:
     path: "{{ edpm_podman_socket_path | dirname }}"
     state: directory
-    mode: 0755
+    mode: '0755'
 
 - name: Create required systemd unit file for podman service
   become: true
   ansible.builtin.template:
     src: podman.service.j2
     dest: "/etc/systemd/system/{{ edpm_podman_service_unit_name }}"
-    mode: 0644
+    mode: '0644'
 
 - name: Enable podman service unit
-  ansible.builtin.service:
+  become: true
+  ansible.builtin.systemd:
     name: "{{ edpm_podman_service_unit_name }}"
     state: started
     enabled: true
