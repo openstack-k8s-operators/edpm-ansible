@@ -1,0 +1,38 @@
+
+- name: verify systemd unit exists
+  block:
+    - name: Check if systemd file exists {{ item.name }}
+      become: true
+      ansible.builtin.stat:
+        path: "/etc/systemd/system/{{ item.name }}"
+      register: unit_exists
+    - name: Assert systemd unit exists {{ item.name }}
+      ansible.builtin.assert:
+        that:
+          - unit_exists.stat.exists
+        fail_msg: "Systemd unit file for {{ item.name }} does not exist"
+    - name: Check if systemd unit is enabled {{ item.name }}
+      when: item.enabled | default(true)
+      ansible.builtin.command: systemctl is-enabled {{ item.name }}
+      register: unit_enabled
+      failed_when: false
+      changed_when: false
+      ignore_errors: true
+    - name: Assert systemd unit is enabled {{ item.name }}
+      ansible.builtin.assert:
+        that:
+          - unit_enabled.stdout == item.enabled | default("enabled")
+        fail_msg: "Systemd unit {{ item.name }} is not enabled"
+    - name: Check if systemd unit is running {{ item.name }}
+      when: item.running | default(true)
+      ansible.builtin.command: systemctl is-active {{ item.name }}
+      register: unit_running
+      failed_when: false
+      changed_when: false
+      ignore_errors: true
+    - name: Assert systemd unit is running {{ item.name }}
+      when: item.running | default(true)
+      ansible.builtin.assert:
+        that:
+          - unit_running.stdout == "active"
+        fail_msg: "Systemd unit {{ item.name }} is not running"

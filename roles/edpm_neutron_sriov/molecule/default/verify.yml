@@ -16,9 +16,9 @@
         - "/var/log/containers/stdouts"
 
     - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       with_items:
-        - "edpm_neutron_sriov_agent"
+        - {"name": "edpm_neutron_sriov_agent.service"}
 
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"

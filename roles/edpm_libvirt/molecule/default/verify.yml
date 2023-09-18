@@ -27,13 +27,13 @@
     - name: ensure ceph secret is configured
       ansible.builtin.include_tasks: "test-helpers/verify_ceph_secret.yaml"
     - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       with_items:
-        - "edpm_libvirt_virtlogd"
-        - "edpm_libvirt_virtnodedevd"
-        - "edpm_libvirt_virtproxyd"
-        - "edpm_libvirt_virtqemud"
-        - "edpm_libvirt_virtsecretd"
+        - { "name": "edpm_libvirt_virtlogd.service" }
+        - { "name": "edpm_libvirt_virtnodedevd.service" }
+        - { "name": "edpm_libvirt_virtproxyd.service" }
+        - { "name": "edpm_libvirt_virtqemud.service" }
+        - { "name": "edpm_libvirt_virtsecretd.service" }
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       with_items:
@@ -42,3 +42,9 @@
         - "libvirt_virtproxyd"
         - "libvirt_virtqemud"
         - "libvirt_virtsecretd"
+    - name: ensure libvirt.target exist and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      with_items:
+        - { "name": "edpm_libvirt.target", "enabled": "static"}
+        - { "name": "edpm_libvirt_guests.service", "running":false }
+        - { "name": "virt-guest-shutdown.target", "enabled": "static", "running":false }
