@@ -18,7 +18,7 @@ argument_specs:
         default:
           - /lib/modules:/lib/modules:ro
           - /dev:/dev
-          - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron:z"
+          - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron.conf.d:z"
           - /var/lib/neutron:/var/lib/neutron:shared,z
           - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
           - /var/log/containers/neutron:/var/log/neutron:z
@@ -81,7 +81,7 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_sriov_agent_AGENT_root_helper:
-        default: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+        default: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
         description: ''
         type: str
       edpm_neutron_sriov_agent_AGENT_report_interval:
