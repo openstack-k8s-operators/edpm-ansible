@@ -57,6 +57,12 @@
         tasks_from: configure.yml
       tags:
         - edpm_iscsid
+    - name: Configure edpm_multipathd
+      import_role:
+        name: osp.edpm.edpm_multipathd
+        tasks_from: configure.yml
+      tags:
+        - edpm_multipathd
     - name: Configure nftables
       import_role:
         name:      osp.edpm.edpm_nftables
