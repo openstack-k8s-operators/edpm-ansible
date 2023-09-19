@@ -25,8 +25,8 @@
     mode: "{{ item.mode | default('750') }}"
     recurse: true
   with_items:
-    - { 'path': /var/lib/openstack/config/containers}
-    - { 'path': /var/lib/openstack/config/ceilometer}
+    - { 'path': "{{edpm_ceilometer_config_dest}}/containers" }
+    - { 'path': "{{edpm_ceilometer_config_dest}}/ceilometer" }
   tags:
     - edpm_telemetry
 
@@ -52,12 +52,12 @@
     mode: "{{ item.mode | default('640') }}"
     remote_src: "{{ telemetry_test | default('false') }}"
   with_items:
-    - { 'src': "/var/lib/config-data/merged/ceilometer.conf", "dest": "/var/lib/openstack/config/ceilometer/ceilometer.conf" }
-    - { 'src': "/var/lib/config-data/merged/polling.yaml", "dest": "/var/lib/openstack/config/ceilometer/polling.yaml" }
-    - { 'src': "/var/lib/config-data/merged/ceilometer_agent_compute.json", "dest": "/var/lib/openstack/config/containers/ceilometer_agent_compute.json" }
-    - { 'src': "/var/lib/config-data/merged/ceilometer-agent-compute.json", "dest": "/var/lib/openstack/config/ceilometer/ceilometer-agent-compute.json" }
-    - { 'src': "/var/lib/config-data/merged/ceilometer_agent_ipmi.json", "dest": "/var/lib/openstack/config/containers/ceilometer_agent_ipmi.json" }
-    - { 'src': "/var/lib/config-data/merged/ceilometer-agent-ipmi.json", "dest": "/var/lib/openstack/config/ceilometer/ceilometer-agent-ipmi.json" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/ceilometer.conf", "dest": "{{edpm_ceilometer_config_dest}}/ceilometer/ceilometer.conf" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/polling.yaml", "dest": "{{edpm_ceilometer_config_dest}}/ceilometer/polling.yaml" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/ceilometer_agent_compute.json", "dest": "{{edpm_ceilometer_config_dest}}/containers/ceilometer_agent_compute.json" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/ceilometer-agent-compute.json", "dest": "{{edpm_ceilometer_config_dest}}/ceilometer/ceilometer-agent-compute.json" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/ceilometer_agent_ipmi.json", "dest": "{{edpm_ceilometer_config_dest}}/containers/ceilometer_agent_ipmi.json" }
+    - { 'src': "{{edpm_ceilometer_config_src}}/ceilometer-agent-ipmi.json", "dest": "{{edpm_ceilometer_config_dest}}/ceilometer/ceilometer-agent-ipmi.json" }
   tags:
     - edpm_telemetry
 
@@ -65,7 +65,7 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
-    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_config: '{{edpm_ceilometer_config_dest}}/containers'
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'ceilometer_agent_compute.json'
     edpm_container_manage_clean_orphans: false
@@ -76,7 +76,7 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
-    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_config: '{{edpm_ceilometer_config_dest}}/containers'
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'ceilometer_agent_ipmi.json'
