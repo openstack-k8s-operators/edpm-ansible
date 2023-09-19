@@ -54,3 +54,8 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_sshd
     tasks_from: download_cache.yml
+
+- name: Download images for edpm_libvirt role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_libvirt
+    tasks_from: download_cache.yml
