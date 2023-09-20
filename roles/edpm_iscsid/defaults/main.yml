@@ -20,12 +20,6 @@
 # All variables within this role should have a prefix of "edpm_iscsid"
 edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
-# seconds between retries for download tasks
-edpm_iscsid_image_download_delay: 5
-
-# number of retries for download tasks
-edpm_iscsid_image_download_retries: 5
-
 edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
 edpm_iscsid_volumes:
   - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
