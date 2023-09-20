@@ -32,9 +32,9 @@
       notify:
       - restart neutron-sriov-agent
 
-    - name: discover secrets in {{ edpm_ovn_config_src }}
+    - name: discover secrets in {{ edpm_neutron_sriov_agent_config_src }}
       ansible.builtin.find:
-        paths: "{{ edpm_ovn_config_src }}"
+        paths: "{{ edpm_neutron_sriov_agent_config_src }}"
         file_type: file
         recurse: yes
         patterns:

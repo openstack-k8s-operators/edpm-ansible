@@ -19,4 +19,4 @@
   roles:
     - role: "edpm_neutron_sriov"
       vars:
-        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_neutron_sriov_agent_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
