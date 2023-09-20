@@ -25,8 +25,8 @@
         testuser: testpassword
   tasks:
     - include_role:
-        name: edpm_podman
+        name: osp.edpm.edpm_podman
         tasks_from: login.yml
     - include_role:
-        name: edpm_podman
+        name: osp.edpm.edpm_podman
         tasks_from: buildah_login.yml

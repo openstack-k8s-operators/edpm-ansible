@@ -14,4 +14,4 @@
       when:
         - ansible_user_dir is undefined
   roles:
-    - role: "edpm_libvirt"
+    - role: osp.edpm.edpm_libvirt

@@ -28,7 +28,7 @@
   gather_facts: true
   tasks:
     - include_role:
-        name: env_data
+        name: osp.edpm.env_data
 
     # The openvswitch kernel module needs to be loaded on the host
     - name: install and modprobe openvswitch

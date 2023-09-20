@@ -26,7 +26,7 @@
 - name: Prepare container
   hosts: instance
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
   tasks:
     - name: Mock ovs-vswitchd service
       community.general.ini_file:

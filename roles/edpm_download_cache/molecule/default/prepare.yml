@@ -27,4 +27,4 @@
 - name: Prepare container
   hosts: instance
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data

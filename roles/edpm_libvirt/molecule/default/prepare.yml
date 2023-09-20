@@ -19,7 +19,7 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-    - role: env_data
+    - role: osp.edpm.env_data
 
 - name: Setup DUT
   hosts: all
@@ -33,11 +33,11 @@
 
     - name: set timezone
       ansible.builtin.import_role:
-        name: "edpm_timezone"
+        name: osp.edpm.edpm_timezone
 
     - name: install podman
       ansible.builtin.import_role:
-        name: "edpm_podman"
+        name: osp.edpm.edpm_podman
 
     - name: Create firewall directory
       become: true

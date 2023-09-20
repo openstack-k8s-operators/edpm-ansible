@@ -19,7 +19,7 @@
   become: true
   hosts: all
   roles:
-    - role: edpm_container_rm
+    - role: osp.edpm.edpm_container_rm
       edpm_container_cli: podman
       edpm_containers_to_rm:
         - podman-container1

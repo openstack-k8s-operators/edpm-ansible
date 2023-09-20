@@ -26,4 +26,4 @@
   become: true
   gather_facts: true
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
