@@ -63,9 +63,9 @@ argument_specs:
           case of failing while applying the provided net config.
         default: true
       edpm_network_config_template:
-        type: path
+        type: str
         description: "Which settings template should be rendered."
-        default: templates/single_nic_vlans/single_nic_vlans.j2
+        default: ""
       edpm_network_config_override:
         type: str
         description: "Optional template content overrides"
