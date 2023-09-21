@@ -15,3 +15,11 @@
   tags:
     - edpm_podman
     - download_cache
+
+- name: Download images for edpm_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovn
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_ovn
+    - download_cache
