@@ -18,6 +18,13 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_iscsid"
+
+# seconds between retries for download tasks
+edpm_iscsid_image_download_delay: 5
+
+# number of retries for download tasks
+edpm_iscsid_image_download_retries: 5
+
 edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
 edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"

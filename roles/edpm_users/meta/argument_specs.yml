@@ -1,0 +1,32 @@
+---
+argument_specs:
+  # ./roles/edpm_users/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_users role.
+    description:
+     - |
+        This role will create the users and groups listed in this variable and is intended to be used
+        whenever we required users and or groups to be created on the host that match the users and or groups
+        of the containers running on the host. it can also create directories and set their ownership and permissions.
+        This is useful for example when we want to create a directory on the host that will be used by a container
+        to share content with a process running on the host like ovs-dpdk. ovs-dpdk requires a directory to be created
+        to share vhost-user unix socket between qemu executing in the libvirt_virtqemd container and ovs-vswitchd
+        executing in the host. that directory and the user and group of the vhost-user unix socket must share the
+        same uid and gid when accessed form both the container and the host.
+    options:
+      edpm_users_users:
+        type: list
+        default:
+          - { "name": "qemu", "uid": "107", "gid": "107", "shell": "/sbin/nologin", "comment": "qemu user" }
+          - { "name": "hugetlbfs", "gid": "42477", "group_only": true }
+        description: |
+          The list of users and or groups to create on the compute node.
+      edpm_users_extra_dirs:
+        type: list
+        default:
+          - { "path": "/var/lib/vhost_sockets", "owner": "qemu", "group": "qemu", "setype": "virt_cache_t", "seuser": "system_u", "mode": "0755" }
+        description: |
+          The list of directories to create on the compute node for communication with host processes.
+          This shoudl only be used for directories that are required to be shared between containers and host processes.
+          Where the host directories are created solely for the purpose of sharing content between containers or
+          to persist data this should not be used.
