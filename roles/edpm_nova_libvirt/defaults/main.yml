@@ -60,7 +60,6 @@ edpm_nova_libvirt_qemu_client_certificate_key_size_real: "{{
     default(edpm_certificate_key_size |
       default('2048', true)
     ) }}"
-edpm_nova_libvirt_vhostuser_socket_group: qemu  # role specific
 edpm_nova_libvirt_qemu_memory_backing_dir: ""  # role specific
 edpm_nova_libvirt_nova_compute_libvirt_type: kvm
 edpm_nova_libvirt_enabled_perf_events: []

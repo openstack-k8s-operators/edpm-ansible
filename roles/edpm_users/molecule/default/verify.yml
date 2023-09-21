@@ -1,0 +1,40 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: lookup all host_users
+      ansible.builtin.shell: "getent passwd | awk -F':' '{print $1}'"
+      register: host_users
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: assert expected host_users exist
+      ansible.builtin.assert:
+        that:
+          - item in host_users.stdout_lines
+        fail_msg: "User {{ item }} does not exist"
+      loop:
+        - "qemu"
+    - name: lookup all host_groups
+      ansible.builtin.shell: "getent group | awk -F':' '{print $1}'"
+      register: host_groups
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: assert expected host_groups exist
+      ansible.builtin.assert:
+        that:
+          - item in host_groups.stdout_lines
+        fail_msg: "group {{ item }} does not exist"
+      loop:
+        - "qemu"
+        - "hugetlbfs"
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      with_items:
+        - /var/lib/vhost_sockets

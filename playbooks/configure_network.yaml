@@ -14,6 +14,15 @@
         tasks_from: bootstrap.yml
       tags:
         - edpm_bootstrap
+    # This should be done very early in the bootstrap process
+    # to ensure that the created users and groups are available
+    # before any packages are installed or services are started
+    # that may need them.
+    - name: Configure host users and groups
+      tags:
+        - edpm_users
+      ansible.builtin.import_role:
+        name:  edpm_users
     - name: Install edpm_kernel
       import_role:
         name: osp.edpm.edpm_kernel

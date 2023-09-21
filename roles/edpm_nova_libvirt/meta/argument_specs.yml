@@ -301,10 +301,6 @@ argument_specs:
         default: true
         description: ''
         type: bool
-      edpm_nova_libvirt_vhostuser_socket_group:
-        default: qemu
-        description: ''
-        type: str
       edpm_nova_libvirt_virtlogd_log_filters:
         default: 1:logging 4:object 4:json 4:event 1:util
         description: ''
