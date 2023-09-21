@@ -115,6 +115,8 @@ def _run_os_net_config(config_file, cleanup=False, debug=False,
         argv.append('--noop')
     if use_nmstate:
         argv.append('--provider nmstate')
+    else:
+        argv.append('--provider ifcfg')
     cmd = " ".join(argv)
 
     # Apply the provided network configuration
