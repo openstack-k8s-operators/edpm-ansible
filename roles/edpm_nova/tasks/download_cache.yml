@@ -5,6 +5,6 @@
     name: "{{ edpm_nova_compute_image }}"
   become: true
   register: edpm_nova_image_download
-  until: edpm_nova_image_download.failed == failed
+  until: edpm_nova_image_download.failed == false
   retries: "{{ edpm_nova_image_download_retries }}"
   delay: "{{ edpm_nova_image_download_delay }}"

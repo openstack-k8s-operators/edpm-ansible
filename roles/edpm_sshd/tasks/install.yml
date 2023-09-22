@@ -19,7 +19,7 @@
   become: true
   block:
     - name: Install the OpenSSH server
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: "{{ edpm_sshd_packages }}"
         state: present
       register: _sshd_install_result

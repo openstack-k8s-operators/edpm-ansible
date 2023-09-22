@@ -1,0 +1,10 @@
+---
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ edpm_libvirt_image }}"
+  become: true
+  register: edpm_libvirt_image_download
+  until: edpm_libvirt_image_download.failed == false
+  retries: "{{ edpm_libvirt_image_download_retries }}"
+  delay: "{{ edpm_libvirt_image_download_delay }}"

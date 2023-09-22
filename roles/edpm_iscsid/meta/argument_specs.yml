@@ -4,6 +4,14 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_iscsid role.
     options:
+      edpm_iscsid_image_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_iscsid_image_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
       edpm_iscsid_debug:
         type: bool
         default: false
@@ -18,14 +26,14 @@ argument_specs:
       edpm_iscsid_volumes:
         type: list
         default:
-        - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
-        - /dev:/dev
-        - /run:/run
-        - /sys:/sys
-        - /lib/modules:/lib/modules:ro
-        - /etc/iscsi:/etc/iscsi:z
-        - /etc/target:/etc/target:z
-        - /var/lib/iscsi:/var/lib/iscsi:z
+          - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
+          - /dev:/dev
+          - /run:/run
+          - /sys:/sys
+          - /lib/modules:/lib/modules:ro
+          - /etc/iscsi:/etc/iscsi:z
+          - /etc/target:/etc/target:z
+          - /var/lib/iscsi:/var/lib/iscsi:z
         description: List of iscsid volume mounts with permissions.
       edpm_iscsid_chap_algs:
         type: str
