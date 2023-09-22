@@ -4,6 +4,13 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_libvirt role.
     options:
+      edpm_libvirt_image_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_libvirt_image_download_retries:
+        type: int
+        default: 5
       edpm_libvirt_image:
         type: str
         description: The image to use for the libvirt_virt* containers.
