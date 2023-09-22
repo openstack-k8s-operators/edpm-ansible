@@ -4,6 +4,12 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_neutron_sriov role.
     options:
+      edpm_neutron_sriov_agent_config_src:
+        default: "/var/lib/openstack/configs/neutron-sriov"
+        description: |
+          The path to the directory containing source of the Neutron SRIOV NIC
+          agent configs.
+        type: str
       edpm_neutron_sriov_agent_config_dir:
         default: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
         description: |

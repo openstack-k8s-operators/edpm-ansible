@@ -9,3 +9,5 @@
         telemetry_test: true
         ansible_user: root
         ansible_user_dir: /root
+        edpm_ceilometer_config_src: /var/lib/openstack/config
+        edpm_ceilometer_config_dest: /var/lib/openstack/config

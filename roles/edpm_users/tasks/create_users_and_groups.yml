@@ -14,11 +14,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-# All variables intended for modification should be placed in this file.
-# Directory in the ansibleEE container
-edpm_ceilometer_config_src: /var/lib/openstack/config/telemetry
-# Directory in the compute node
-edpm_ceilometer_config_dest: /var/lib/openstack/config
-# Image to use for node_exporter
-telemetry_node_exporter_image: "quay.io/prometheus/node-exporter:v1.5.0"
+- name: create host user and group
+  become: true
+  tags:
+    - edpm_users
+  block:
+    - name: Ensure {{ item.name }} group is present on the host
+      ansible.builtin.group:
+        name: "{{ item.name }}"
+        gid: "{{ item.gid }}"
+        state: present
+    - name: Ensure {{ item.name }} user is present on the host
+      when: not (item.group_only | default(false))
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        group: "{{ item.name }}"
+        state: present
+        shell: "{{ item.shell }}"
+        comment: "{{ item.comment }}"

@@ -26,12 +26,12 @@
   tasks:
     - name: Create config-data merged directory
       file:
-        path: /var/lib/config-data/merged
+        path: /var/lib/openstack/config
         state: directory
 
     - name: Create ceilometer.conf
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/ceilometer.conf"
+        dest: "/var/lib/openstack/config/ceilometer.conf"
         mode: 0644
         owner: root
         group: root
@@ -62,7 +62,7 @@
 
     - name: Create polling.yaml
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/polling.yaml"
+        dest: "/var/lib/openstack/config/polling.yaml"
         mode: 0644
         owner: root
         group: root
@@ -90,7 +90,7 @@
 
     - name: Create ceilometer_agent_compute.json
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/ceilometer_agent_compute.json"
+        dest: "/var/lib/openstack/config/ceilometer_agent_compute.json"
         mode: 0644
         owner: root
         group: root
@@ -114,7 +114,7 @@
 
     - name: Create ceilometer-agent-compute.json
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/ceilometer-agent-compute.json"
+        dest: "/var/lib/openstack/config/ceilometer-agent-compute.json"
         mode: 0644
         owner: root
         group: root
@@ -146,7 +146,7 @@
 
     - name: Create ceilometer_agent_ipmi.json
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/ceilometer_agent_ipmi.json"
+        dest: "/var/lib/openstack/config/ceilometer_agent_ipmi.json"
         mode: 0644
         owner: root
         group: root
@@ -170,7 +170,7 @@
 
     - name: Create ceilometer-agent-ipmi.json
       ansible.builtin.copy:
-        dest: "/var/lib/config-data/merged/ceilometer-agent-ipmi.json"
+        dest: "/var/lib/openstack/config/ceilometer-agent-ipmi.json"
         mode: 0644
         owner: root
         group: root

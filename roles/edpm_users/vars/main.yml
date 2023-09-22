@@ -15,10 +15,8 @@
 # under the License.
 
 
-# All variables intended for modification should be placed in this file.
-# Directory in the ansibleEE container
-edpm_ceilometer_config_src: /var/lib/openstack/config/telemetry
-# Directory in the compute node
-edpm_ceilometer_config_dest: /var/lib/openstack/config
-# Image to use for node_exporter
-telemetry_node_exporter_image: "quay.io/prometheus/node-exporter:v1.5.0"
+# While options found within the vars/ path can be overridden using extra
+# vars, items within this path are considered part of the role and not
+# intended to be modified.
+
+# All variables within this role should have a prefix of "edpm_users"

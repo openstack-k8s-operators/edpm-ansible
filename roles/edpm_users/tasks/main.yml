@@ -14,11 +14,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: create host users and groups
+  ansible.builtin.include_tasks: create_users_and_groups.yml
+  with_items: "{{ edpm_users_users }}"
 
-# All variables intended for modification should be placed in this file.
-# Directory in the ansibleEE container
-edpm_ceilometer_config_src: /var/lib/openstack/config/telemetry
-# Directory in the compute node
-edpm_ceilometer_config_dest: /var/lib/openstack/config
-# Image to use for node_exporter
-telemetry_node_exporter_image: "quay.io/prometheus/node-exporter:v1.5.0"
+- name: create host directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{item.seuser | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop: "{{ edpm_users_extra_dirs }}"

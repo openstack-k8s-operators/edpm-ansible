@@ -44,32 +44,6 @@
     content: ""
     dest: /etc/ssh/ssh_known_hosts
     force: false
-# qemu user on host will be cretaed by libvirt package install, ensure
-# the qemu user created with same uid/gid as like libvirt package.
-# These specific values are required since ovs is running on host.
-# Once ovs with DPDK is containerized, we could modify this uid/gid
-# to match with kolla config values.
-- name: Ensure qemu group is present on the host
-  ansible.builtin.group:
-    name: qemu
-    gid: 107
-    state: present
-- name: Ensure qemu user is present on the host
-  ansible.builtin.user:
-    name: qemu
-    uid: 107
-    group: qemu
-    state: present
-    shell: /sbin/nologin
-    comment: qemu user
-- name: Create directory for vhost-user sockets with qemu ownership
-  ansible.builtin.file:
-    path: /var/lib/vhost_sockets
-    state: directory
-    owner: qemu
-    group: "{{ edpm_nova_libvirt_vhostuser_socket_group }}"
-    setype: virt_cache_t
-    seuser: system_u
 - name: Ensure ceph configurations exist
   ansible.builtin.file:
     path: "{{ edpm_nova_libvirt_ceph_config_path }}"
