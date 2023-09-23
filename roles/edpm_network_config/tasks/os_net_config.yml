@@ -31,16 +31,16 @@
         mode: '0644'
         backup: true
       when:
-        - edpm_network_config_override != ""
+        - edpm_network_config_template == ""
     - name: Render network_config from template
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
-      ansible.builtin.template:
-        src: "{{ edpm_network_config_template }}"
+      ansible.builtin.copy:
+        content: "{{ edpm_network_config_template }}"
         dest: "{{ nic_config_file }}"
         mode: '0644'
         backup: true
       when:
-        - edpm_network_config_override == ""
+        - edpm_network_config_template != ""
     - name: Run edpm_os_net_config_module with network_config
       edpm_os_net_config:
         config_file: "{{ nic_config_file }}"
