@@ -1,0 +1,10 @@
+---
+
+- name: Download needed container
+  containers.podman.podman_image:
+    name: "{{ edpm_multipathd_image }}"
+  become: true
+  register: edpm_multipathd_image_download
+  until: edpm_multipathd_image_download.failed == false
+  retries: "{{ edpm_multipathd_image_download_retries }}"
+  delay: "{{ edpm_multipathd_image_download_delay }}"
