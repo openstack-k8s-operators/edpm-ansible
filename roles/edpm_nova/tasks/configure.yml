@@ -33,6 +33,7 @@
   - { "path": "/var/log/containers/nova", "mode": "0750" }
   - { "path": "/var/log/containers/stdouts" }
   - { "path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root"}
+  - { "path": "/etc/multipath" }
   - { "path": "/etc/iscsi" }
   - { "path": "/var/lib/iscsi" }
   - { "path": "/run/openvswitch" }

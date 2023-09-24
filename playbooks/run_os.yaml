@@ -53,3 +53,9 @@
         tasks_from: run.yml
       tags:
         - edpm_iscsid
+    - name: Run edpm_multipathd
+      import_role:
+        name: osp.edpm.edpm_multipathd
+        tasks_from: run.yml
+      tags:
+        - edpm_multipathd

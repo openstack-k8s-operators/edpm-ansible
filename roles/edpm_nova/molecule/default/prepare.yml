@@ -67,3 +67,9 @@
     - name: install libvirt
       import_role:
         name: osp.edpm.edpm_libvirt
+    - name: ensure /etc/multipath.conf exists
+      become: true
+      ansible.builtin.file:
+        path: /etc/multipath.conf
+        state: touch
+        mode: "0644"
