@@ -1,13 +1,5 @@
 ---
 
-- name: Install podman
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_podman
-    tasks_from: install.yml
-  tags:
-    - edpm_podman
-    - download_cache
-
 - name: Login to container registries if needed
   ansible.builtin.include_role:
     name: osp.edpm.edpm_podman
