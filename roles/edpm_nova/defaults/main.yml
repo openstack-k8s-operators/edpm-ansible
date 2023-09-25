@@ -16,6 +16,13 @@
 
 
 # All variables intended for modification should be placed in this file.
+
+# seconds between retries for download tasks
+edpm_nova_image_download_delay: 5
+
+# number of retries for download tasks
+edpm_nova_image_download_retries: 5
+
 # Note that the src dir is in the AEE container but the
 # dest dir is on the target host
 edpm_nova_config_src: /var/lib/openstack/configs

@@ -4,6 +4,14 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_nova role.
     options:
+      edpm_nova_image_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_nova_image_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
       edpm_nova_config_src:
         type: str
         default: /var/lib/openstack/config
