@@ -66,10 +66,6 @@ argument_specs:
         type: str
         description: "Which settings template should be rendered."
         default: ""
-      edpm_network_config_override:
-        type: str
-        description: "Optional template content overrides"
-        default: ""
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"
