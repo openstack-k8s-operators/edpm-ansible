@@ -32,10 +32,26 @@
     - edpm_ovn
     - download_cache
 
+- name: Download images for edpm_multipathd role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_multipathd
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_multipathd
+    - download_cache
+
 - name: Download images for edpm_libvirt role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_libvirt
     tasks_from: download_cache.yml
   tags:
     - edpm_libvirt
+    - download_cache
+
+- name: Download images for edpm_nova role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nova
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_nova
     - download_cache
