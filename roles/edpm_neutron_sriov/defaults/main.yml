@@ -18,6 +18,7 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
+edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/neutron-sriov"
 edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
 edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
 

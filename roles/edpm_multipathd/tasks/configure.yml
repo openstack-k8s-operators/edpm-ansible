@@ -1,0 +1,115 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Run multipathd install tasks with root privileges
+  become: true
+  block:
+    - name: Record the current multipath configuration
+      ansible.builtin.stat:
+        path: /etc/multipath.conf
+      register: stat_before
+      check_mode: false
+
+    - name: Install custom multipath.conf if one is specified
+      ansible.builtin.copy:
+        src: "{{ edpm_multipathd_custom_config_dir }}/{{ edpm_multipathd_custom_config_file }}"
+        dest: /etc/multipath.conf
+        mode: "0644"
+      when:
+        - edpm_multipathd_custom_config_file|length > 0
+
+    - name: Ensure /etc/multipath.conf exists
+      when:
+        - edpm_multipathd_custom_config_file|length == 0
+      block:
+        - name: Check for existing /etc/multipath.conf
+          ansible.builtin.stat:
+            path: /etc/multipath.conf
+          register: result
+          check_mode: false
+        - name: Create /etc/multipath.conf if file is missing
+          ansible.builtin.copy:
+            src: "{{ role_path }}/files/multipath.conf"
+            dest: /etc/multipath.conf
+            mode: "0644"
+          when:
+            - not result.stat.exists or result.stat.size == 0
+
+    - name: Check if a blacklist section is present
+      ansible.builtin.shell: grep -q '^blacklist\s*{' /etc/multipath.conf
+      failed_when: false
+      changed_when: false
+      register: blacklist_section
+
+    - name: Add a blacklist section if it's missing
+      block:
+        - name: Start the blacklist section
+          ansible.builtin.lineinfile:
+            path: /etc/multipath.conf
+            line: 'blacklist {'
+        - name: Terminate the blacklist section
+          ansible.builtin.replace:
+            path: /etc/multipath.conf
+            regexp: '^(blacklist {)'
+            replace: '\1\n}'
+      when:
+        - blacklist_section.rc|int == 1
+
+    - name: Remove global blacklist if multipathd is enabled
+      ansible.builtin.replace:
+        path: /etc/multipath.conf
+        regexp: '^blacklist\s*{\n[\s]+devnode \"\.\*\"'
+        replace: 'blacklist {'
+      when:
+        - edpm_multipathd_enable | bool
+
+    - name: Add global blacklist if multipathd is disabled
+      ansible.builtin.lineinfile:
+        path: /etc/multipath.conf
+        insertafter: '^blacklist\s*{'
+        regexp: '^[\s]+devnode \"\.\*\"'
+        line: '        devnode ".*"'
+      when:
+        - not (edpm_multipathd_enable|bool)
+
+    - name: Configure /etc/multipath.conf variables
+      ansible.builtin.lineinfile:
+        path: /etc/multipath.conf
+        insertafter: '^defaults'
+        firstmatch: true
+        regexp: "^\\s+{{ item.var }}"
+        line: "        {{ item.var }} {{ (item.value|bool) | ternary('yes', 'no') }}"
+      loop:
+        - {var: find_multipaths, value: "{{edpm_multipathd_find_multipaths}}"}
+        - {var: recheck_wwid, value: "{{edpm_multipathd_recheck_wwid}}"}
+        - {var: skip_kpartx, value: "{{edpm_multipathd_skip_kpartx}}"}
+        - {var: user_friendly_names, value: "{{edpm_multipathd_user_friendly_names}}"}
+      loop_control:
+        index_var: multipath_var_index
+
+    - name: Record the new multipath configuration
+      ansible.builtin.stat:
+        path: /etc/multipath.conf
+      register: stat_after
+      check_mode: false
+
+    - name: Record multipath containers require a restart
+      when:
+        - not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum
+      ansible.builtin.file:
+        path: "{{ edpm_multipathd_restart_sentinel }}"
+        state: touch
+        mode: "0644"
