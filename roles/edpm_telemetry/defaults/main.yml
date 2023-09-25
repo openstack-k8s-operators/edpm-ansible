@@ -17,7 +17,7 @@
 
 # All variables intended for modification should be placed in this file.
 # Directory in the ansibleEE container
-edpm_ceilometer_config_src: /var/lib/openstack/config/telemetry
+edpm_ceilometer_config_src: /var/lib/openstack/configs/telemetry
 # Directory in the compute node
 edpm_ceilometer_config_dest: /var/lib/openstack/config
 # Image to use for node_exporter
