@@ -26,6 +26,7 @@
     - edpm_telemetry
 
 - name: create systemd service file for node_exporter
+  become: true
   copy:
     dest: "/etc/systemd/system/edpm_node_exporter.service"
     content: |
