@@ -40,6 +40,7 @@ edpm_bootstrap_packages_bootstrap:
   - tmpwatch
   - sysstat
   - iproute-tc
+  - ksmtuned
 
 edpm_bootstrap_release_version_package:
   - rhosp-release
