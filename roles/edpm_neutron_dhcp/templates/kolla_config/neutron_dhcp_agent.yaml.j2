@@ -1,0 +1,16 @@
+command: "/usr/bin/neutron-dhcp-agent"
+permissions:
+  - owner: neutron:neutron
+    path: /var/log/neutron
+    recurse: true
+  - owner: neutron:neutron
+    path: /var/lib/neutron
+    recurse: true
+  - optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/certs/neutron_dhcp_agent.crt
+    perm: 0644
+  - optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/private/neutron_dhcp_agent.key
+    perm: 0644

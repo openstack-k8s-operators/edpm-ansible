@@ -63,3 +63,8 @@
   tags:
     - edpm_neutron_sriov
     - download_cache
+
+- name: Download images for edpm_neutron_dhcp role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_dhcp
+    tasks_from: download_cache.yml

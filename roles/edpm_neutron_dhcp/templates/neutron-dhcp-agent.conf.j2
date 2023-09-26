@@ -1,0 +1,27 @@
+[DEFAULT]
+interface_driver = openvswitch
+ovs_use_veth = False
+state_path = {{ edpm_neutron_dhcp_agent_DEFAULT_state_path }}
+host = {{ edpm_neutron_dhcp_agent_DEFAULT_host }}
+resync_interval = {{ edpm_neutron_dhcp_agent_DEFAULT_resync_interval }}
+resync_throttle = {{ edpm_neutron_dhcp_agent_DEFAULT_resync_throttle }}
+dhcp_driver = {{ edpm_neutron_dhcp_agent_DEFAULT_dhcp_driver }}
+enable_isolated_metadata = {{ edpm_neutron_dhcp_agent_DEFAULT_enable_isolated_metadata }}
+force_metadata = {{ edpm_neutron_dhcp_agent_DEFAULT_force_metadata }}
+enable_metadata_network = {{ edpm_neutron_dhcp_agent_DEFAULT_enable_metadata_network }}
+num_sync_threads = {{ edpm_neutron_dhcp_agent_DEFAULT_num_sync_threads }}
+bulk_reload_interval = {{ edpm_neutron_dhcp_agent_DEFAULT_bulk_reload_interval }}
+dnsmasq_dns_servers = {{ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_dns_servers }}
+dnsmasq_local_resolv = {{ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_local_resolv }}
+dnsmasq_lease_max = {{ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_lease_max }}
+dnsmasq_enable_addr6_list = {{ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_enable_addr6_list }}
+{% if edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_base_log_dir %}
+dnsmasq_base_log_dir = {{ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_base_log_dir }}
+{% endif %}
+dhcp_broadcast_reply = {{ edpm_neutron_dhcp_agent_DEFAULT_dhcp_broadcast_reply }}
+
+
+[AGENT]
+root_helper = {{ edpm_neutron_dhcp_agent_AGENT_root_helper }}
+report_interval = {{ edpm_neutron_dhcp_agent_AGENT_report_interval }}
+availability_zone = {{ edpm_neutron_dhcp_agent_AGENT_availability_zone }}
