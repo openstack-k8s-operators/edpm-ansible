@@ -17,6 +17,12 @@
 
 # All variables intended for modification should be placed in this file.
 
+# seconds between retries for download tasks
+edpm_neutron_sriov_images_download_delay: 5
+
+# number of retries for download tasks
+edpm_neutron_sriov_images_download_retries: 5
+
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
 edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/neutron-sriov"
 edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"

@@ -55,3 +55,11 @@
   tags:
     - edpm_nova
     - download_cache
+
+- name: Download images for edpm_neutron_sriov role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_sriov
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_neutron_sriov
+    - download_cache
