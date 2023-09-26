@@ -15,13 +15,7 @@
 # under the License.
 
 - name: deploy node_exporter container
-  containers.podman.podman_container:
-    image: "{{ telemetry_node_exporter_image }}"
-    name: node_exporter
-    state: present
-    recreate: yes
-    ports:
-      - "9100:9100"
+  command: "podman create --name node_exporter --publish 9100:9100 {{ telemetry_node_exporter_image }}"
   tags:
     - edpm_telemetry
 
