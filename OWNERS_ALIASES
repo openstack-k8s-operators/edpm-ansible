@@ -10,7 +10,8 @@ aliases:
   - rabi
   - jpodivin
   ci-approvers:
-  - Sandeepyadav93
+  - lewisdenny
+  - frenzyfriday
   - viroel
   openstack-approvers:
   - abays
