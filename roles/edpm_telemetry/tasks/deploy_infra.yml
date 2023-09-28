@@ -14,6 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: delete node_exporter instance
+  command: "podman rm -f node_exporter"
+  tags:
+    - edpm_telemetry
+
 - name: deploy node_exporter container
   command: "podman create --name node_exporter --publish 9100:9100 {{ telemetry_node_exporter_image }}"
   tags:
