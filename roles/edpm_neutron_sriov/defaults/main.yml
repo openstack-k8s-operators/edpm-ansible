@@ -64,7 +64,7 @@ edpm_neutron_sriov_rootwrap_DEFAULT_rlimit_nofile: 1024
 edpm_neutron_sriov_agent_DEFAULT_state_path: '/var/lib/neutron'
 # AGENT
 edpm_neutron_sriov_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
-edpm_neutron_sriov_agent_AGENT_report_interval: 300
+edpm_neutron_sriov_agent_AGENT_report_interval: 30
 edpm_neutron_sriov_agent_AGENT_extensions: 'qos'
 edpm_neutron_sriov_agent_AGENT_polling_interval: 2
 # SRIOV_NIC
