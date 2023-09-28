@@ -17,7 +17,7 @@
 
 - name: Output growvols_args
   ansible.builtin.debug:
-    var: growvols_args
+    msg: "{{ growvols_args }}"
 
 - name: Find the growvols utility
   ansible.builtin.shell: >
