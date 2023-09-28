@@ -28,7 +28,6 @@ jobs:
         - edpm_neutron_sriov
         - edpm_nftables
         - edpm_nodes_validation
-        - edpm_nova_compute
         - edpm_ovn
         - edpm_sshd
         - edpm_ssh_known_hosts
@@ -42,7 +41,6 @@ jobs:
         # - edpm_ovn_bgp_agent
         # - edpm_chrony
         # - edpm_podman
-        # - edpm_nova_libvirt # Will not be tested PR#94
         # - edpm_module_load
         # - edpm_kernel
         # - edpm_frr
