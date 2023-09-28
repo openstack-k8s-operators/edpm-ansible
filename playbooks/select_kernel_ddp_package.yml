@@ -1,0 +1,11 @@
+---
+- name: Select Kernel DDP Package
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: Run edpm_ddp_package
+      import_role:
+        name: osp.edpm.edpm_ddp_package
+      tags:
+        - edpm_ddp_package
