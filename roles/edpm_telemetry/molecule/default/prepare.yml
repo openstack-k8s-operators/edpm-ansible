@@ -25,14 +25,15 @@
     - role: osp.edpm.env_data
   tasks:
     - name: Create config-data merged directory
-      file:
+      ansible.builtin.file:
         path: /var/lib/openstack/config
         state: directory
+        mode: "0775"
 
     - name: Create ceilometer.conf
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/ceilometer.conf"
-        mode: 0644
+        dest: /var/lib/openstack/config/ceilometer.conf
+        mode: "0644"
         owner: root
         group: root
         content: |
@@ -62,8 +63,8 @@
 
     - name: Create polling.yaml
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/polling.yaml"
-        mode: 0644
+        dest: /var/lib/openstack/config/polling.yaml
+        mode: "0644"
         owner: root
         group: root
         content: |
@@ -90,8 +91,8 @@
 
     - name: Create ceilometer_agent_compute.json
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/ceilometer_agent_compute.json"
-        mode: 0644
+        dest: /var/lib/openstack/config/ceilometer_agent_compute.json
+        mode: '0644'
         owner: root
         group: root
         content: |
@@ -114,8 +115,8 @@
 
     - name: Create ceilometer-agent-compute.json
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/ceilometer-agent-compute.json"
-        mode: 0644
+        dest: /var/lib/openstack/config/ceilometer-agent-compute.json
+        mode: "0644"
         owner: root
         group: root
         content: |
@@ -146,8 +147,8 @@
 
     - name: Create ceilometer_agent_ipmi.json
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/ceilometer_agent_ipmi.json"
-        mode: 0644
+        dest: /var/lib/openstack/config/ceilometer_agent_ipmi.json
+        mode: "0644"
         owner: root
         group: root
         content: |
@@ -170,8 +171,8 @@
 
     - name: Create ceilometer-agent-ipmi.json
       ansible.builtin.copy:
-        dest: "/var/lib/openstack/config/ceilometer-agent-ipmi.json"
-        mode: 0644
+        dest: /var/lib/openstack/config/ceilometer-agent-ipmi.json
+        mode: "0644"
         owner: root
         group: root
         content: |
