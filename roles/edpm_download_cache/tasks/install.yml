@@ -1,0 +1,16 @@
+---
+
+- name: Grow volumes
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_growvols
+  tags:
+    - edpm_growvols
+    - download_cache
+
+- name: Install podman
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: install.yml
+  tags:
+    - edpm_podman
+    - download_cache

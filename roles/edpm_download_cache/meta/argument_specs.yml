@@ -4,6 +4,10 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_download_cache role.
     options:
+      edpm_download_role_install_requirements:
+        type: bool
+        default: true
+        description: Download and install role dependencies
       edpm_download_cache_packages:
         type: bool
         default: true
