@@ -1,0 +1,12 @@
+---
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop:
+    - "{{ edpm_frr_image }}"
+  become: true
+  register: edpm_frr_images_download
+  until: edpm_frr_images_download.failed == false
+  retries: "{{ edpm_frr_images_download_retries }}"
+  delay: "{{ edpm_frr_images_download_delay }}"

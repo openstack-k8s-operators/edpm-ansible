@@ -84,3 +84,9 @@ edpm_frr_volumes:
   - /var/lib/config-data/ansible-generated/frr:/var/lib/kolla/config_files/src:ro
   - /var/log/containers/frr:/var/log/frr:z
   - /run/frr:/run/frr:shared,z
+
+# seconds between retries for download tasks
+edpm_frr_images_download_delay: 5
+
+# number of retries for download tasks
+edpm_frr_images_download_retries: 5
