@@ -1,5 +1,5 @@
 ---
-# Copyright 2021 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,15 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Converge
-  hosts: all
-  gather_facts: true
-  become: true
-  tasks:
-    - ansible.builtin.include_role:
-        name: "osp.edpm.edpm_ovn"
-      vars:
-        tenant_ip: "{{ ansible_host }}"
-        edpm_ovn_dbs:
-          - "{{ ansible_host }}"
-        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+- name: Ensure the Openvswitch package is installed
+  ansible.builtin.package:
+    name: openvswitch
+    state: present
+
+- name: Ensure the OVS service is running
+  ansible.builtin.systemd:
+    name: openvswitch
+    state: started

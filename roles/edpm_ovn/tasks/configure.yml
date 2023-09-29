@@ -79,34 +79,3 @@
       ansible.builtin.shell: >
         ovs-vsctl --timeout=5 --id=@manager -- create Manager target=\"ptcp:6640:127.0.0.1\" -- add Open_vSwitch . manager_options @manager
       when: ovs_manager_configured.rc == 1
-
-- name: Configure neutron configuration files
-  block:
-    - name: render neutron config files
-      ansible.builtin.template:
-        src: "{{ item.src }}"
-        dest: "{{ edpm_ovn_neutron_metadata_agent_config_dir }}/{{ item.dest }}"
-        setype: "container_file_t"
-        mode: "0644"
-      loop:
-      - {"src": "rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
-      - {"src": "neutron-ovn-metadata-agent.conf.j2", "dest": "01-neutron-ovn-metadata-agent.conf"}
-
-    - name: discover secrets in {{ edpm_ovn_config_src }}
-      ansible.builtin.find:
-        paths: "{{ edpm_ovn_config_src }}"
-        file_type: file
-        recurse: yes
-        patterns:
-        - "*metadata*conf"
-      register: edpm_neutron_metadata_secrets
-      delegate_to: localhost
-      become: false
-
-    - name: flatten secrets into {{ edpm_ovn_neutron_metadata_agent_config_dir }}
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ edpm_ovn_neutron_metadata_agent_config_dir }}/{{ item.path | basename }}"
-        setype: "container_file_t"
-        mode: "0644"
-      loop: "{{ edpm_neutron_metadata_secrets.files }}"

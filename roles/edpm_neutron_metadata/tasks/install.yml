@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,9 +21,8 @@
     setype: "container_file_t"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - {'path': /var/log/containers/openvswitch, 'mode': '0750'}
-    - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
-    - {'path': /var/lib/openvswitch/ovn}
+    - {'path': "{{ edpm_neutron_metadata_agent_config_dir }}"}
+    - {'path': "/var/log/containers/neutron"}
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
   ansible.posix.seboolean:
@@ -33,22 +32,3 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
-
-- name: Copy in cleanup script
-  ansible.builtin.copy:
-    src: neutron-cleanup
-    dest: '/usr/libexec/neutron-cleanup'
-    force: true
-    mode: '0755'
-
-- name: Copy in cleanup service
-  ansible.builtin.copy:
-    src: neutron-cleanup.service
-    dest: '/usr/lib/systemd/system/neutron-cleanup.service'
-    force: true
-    mode: '0644'
-
-- name: Enabling the cleanup service
-  ansible.builtin.service:
-    name: neutron-cleanup
-    enabled: true

@@ -5,7 +5,6 @@
     name: "{{ item }}"
   loop:
     - "{{ edpm_ovn_controller_agent_image }}"
-    - "{{ edpm_ovn_metadata_agent_image }}"
   become: true
   register: edpm_ovn_images_download
   until: edpm_ovn_images_download.failed == false

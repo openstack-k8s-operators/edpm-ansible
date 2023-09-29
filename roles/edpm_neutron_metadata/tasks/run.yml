@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,12 +19,12 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
-- name: Run ovn_controller container
+- name: Run ovn_metadata_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_standalone_service: ovn_controller
+    edpm_container_standalone_service: ovn_metadata_agent
     edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
+      ovn_metadata_agent: "{{ lookup('template', 'ovn_metadata_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+      ovn_metadata_agent: "{{ lookup('template', 'kolla_ovn_metadata_agent.yaml.j2') | from_yaml }}"

@@ -1,0 +1,11 @@
+---
+- name: Deploy EDPM Neutron OVN Metadata agent
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: Neutron OVN Metadata agent
+      import_role:
+        name: osp.edpm.edpm_neutron_metadata
+      tags:
+        - edpm_neutron_metadata
