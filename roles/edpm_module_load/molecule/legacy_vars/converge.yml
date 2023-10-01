@@ -18,6 +18,6 @@
 - name: Converge
   hosts: all
   roles:
-    - role: "edpm_module_load"
+    - role: osp.edpm.edpm_module_load
       modules:
         - name: dummy

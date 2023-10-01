@@ -34,7 +34,7 @@
       test_deps_extra_packages:
         - runc
         - containernetworking-plugins
-    - role: env_data
+    - role: osp.edpm.env_data
   post_tasks:
     - name: pull an image
       containers.podman.podman_image:

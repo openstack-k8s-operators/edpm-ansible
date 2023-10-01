@@ -25,11 +25,11 @@
   vars:
     edpm_nftables_src: /opt/edpm-firewall
   roles:
-    - role: env_data
+    - role: osp.edpm.env_data
   tasks:
     - name: Cleanup nftables
       ansible.builtin.import_role:
-        name: edpm_nftables
+        name: osp.edpm.edpm_nftables
         tasks_from: cleanup.yml
     - name: Create snippet directory
       become: true

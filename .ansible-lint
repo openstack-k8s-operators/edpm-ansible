@@ -1,15 +1,19 @@
+---
+
 exclude_paths:
-- ../ # needed by pre-commit
-- roles/**/molecule
-- /molecule
-- /zuul.d
-- /.github
-- /docs
-- /openstack_ansibleee
-- /scripts
-- /tests
+  - ../  # needed by pre-commit
+  - roles/**/molecule
+  - /molecule
+  - /zuul.d
+  - /.github
+  - /docs
+  - /openstack_ansibleee
+  - /scripts
+  - /tests
 parseable: true
 quiet: false
 verbosity: 1
 use_default_rules: true
 profile: production
+skip_list:
+  - command-instead-of-shell

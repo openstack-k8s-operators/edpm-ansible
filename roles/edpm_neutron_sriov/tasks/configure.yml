@@ -14,18 +14,39 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Render neutron configuration files
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ edpm_neutron_sriov_agent_config_dir }}/{{ item.dest }}"
-    setype: "container_file_t"
-    mode: "0644"
-  with_items:
-    - {"src": "neutron.conf.j2", "dest": "neutron.conf"}
-    - {"src": "rootwrap.conf.j2", "dest": "rootwrap.conf"}
-    - {"src": "neutron-sriov-agent.ini.j2", "dest": "neutron-sriov-agent.ini"}
-  tags:
-    - configure
-    - neutron
-  notify:
-  - restart neutron-sriov-agent
+- name: Configure neutron configuration files
+  block:
+    - name: Render neutron configuration files
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ edpm_neutron_sriov_agent_config_dir }}/{{ item.dest }}"
+        setype: "container_file_t"
+        mode: "0644"
+      with_items:
+        - {"src": "neutron.conf.j2", "dest": "01-neutron.conf"}
+        - {"src": "rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
+        - {"src": "neutron-sriov-agent.conf.j2", "dest": "01-neutron-sriov-agent.conf"}
+      tags:
+        - configure
+        - neutron
+      notify:
+      - restart neutron-sriov-agent
+
+    - name: discover secrets in {{ edpm_neutron_sriov_agent_config_src }}
+      ansible.builtin.find:
+        paths: "{{ edpm_neutron_sriov_agent_config_src }}"
+        file_type: file
+        recurse: yes
+        patterns:
+        - "*sriov*conf"
+      register: edpm_neutron_sriov_secrets
+      delegate_to: localhost
+      become: false
+
+    - name: flatten secrets into {{ edpm_neutron_sriov_agent_config_dir }}
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ edpm_neutron_sriov_agent_config_dir }}/{{ item.path | basename }}"
+        setype: "container_file_t"
+        mode: "0644"
+      with_items: "{{ edpm_neutron_sriov_secrets.files }}"

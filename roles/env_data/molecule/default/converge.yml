@@ -18,6 +18,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include env_data"
+    - name: "Include osp.edpm.env_data"
       ansible.builtin.include_role:
         name: "osp.edpm.env_data"

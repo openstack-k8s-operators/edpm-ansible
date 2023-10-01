@@ -1,0 +1,49 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+edpm_container_cli: "{{ container_cli | default('podman') }}"
+
+# All variables intended for modification should be placed in this file.
+
+edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
+edpm_multipathd_image_download_delay: 5
+edpm_multipathd_image_download_retries: 5
+
+edpm_multipathd_command: "/usr/sbin/multipathd -d"
+edpm_multipathd_volumes:
+  - /var/lib/kolla/config_files/multipathd.json:/var/lib/kolla/config_files/config.json:ro
+  - /dev:/dev
+  - /run/udev:/run/udev
+  - /sys:/sys
+  - /lib/modules:/lib/modules:ro
+  - /etc/iscsi:/etc/iscsi:ro
+  - /var/lib/iscsi:/var/lib/iscsi:z
+  - /etc/multipath:/etc/multipath:z
+  - /etc/multipath.conf:/etc/multipath.conf:ro
+
+# These should not need to be overridden except in unique situations.
+edpm_multipathd_restart_sentinel: /etc/multipath/.multipath_restart_required
+edpm_multipathd_custom_config_dir: /runner/multipath
+edpm_multipathd_enable: true
+
+# These should not need to be overridden as they are the recommended values.
+edpm_multipathd_find_multipaths: true
+edpm_multipathd_recheck_wwid: true
+edpm_multipathd_skip_kpartx: true
+edpm_multipathd_user_friendly_names: false
+
+# This may be overridden to deploy a custom multipath.conf file.
+edpm_multipathd_custom_config_file: ''

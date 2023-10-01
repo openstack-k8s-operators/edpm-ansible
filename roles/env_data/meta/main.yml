@@ -18,7 +18,7 @@
 galaxy_info:
   namespace: openstack
   author: OpenStack
-  description: EDPM OpenStack Role -- env_data
+  description: EDPM OpenStack Role -- osp.edpm.env_data
   company: Red Hat
   license: Apache-2.0
   min_ansible_version: '2.9'

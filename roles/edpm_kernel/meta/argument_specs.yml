@@ -52,3 +52,7 @@ argument_specs:
         type: dict
         default: {}
         description: Hugepages configuration dictionary.
+      edpm_kernel_enable_ksm:
+        default: false
+        description: Enable/Disable KSM (disabling it unloads all shared PageKSM!)
+        type: bool

@@ -26,12 +26,11 @@ repos:
         # W503 - line break before binary operator, ignored by default
         entry: flake8 --ignore=E501,W503
   - repo: https://github.com/ansible-community/ansible-lint
-    rev: v6.14.2
+    rev: v6.20.3
     hooks:
       - id: ansible-lint
         additional_dependencies:
-          - ansible-core
-          - yamllint
+          - ansible-core == 2.14.6
   - repo: https://github.com/openstack-dev/bashate.git
     rev: 2.1.1
     hooks:

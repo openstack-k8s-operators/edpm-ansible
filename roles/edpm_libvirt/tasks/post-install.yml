@@ -61,7 +61,7 @@
   ansible.builtin.template:
     src: "firewall.yaml"
     dest: "/var/lib/edpm-config/firewall/vnc.yaml"
-    mode: "640"
+    mode: "0640"
 - name: Configure firewall for the vnc
   tags:
     - install
@@ -76,3 +76,28 @@
   ansible.builtin.include_role:
       name: osp.edpm.edpm_nftables
       tasks_from: "run.yml"
+
+- name: Install edpm_nova_libvirt_guests systemd unit file (podman)
+  become: true
+  tags:
+    - install
+    - post-libvirt
+  block:
+    - name: Set up systemd target for libvirt services
+      ansible.builtin.template:
+        dest: "/etc/systemd/system/edpm_libvirt.target"
+        src: "edpm_libvirt.target"
+        mode: "0644"
+      notify: "restart edpm_libvirt.target"
+    - name: Install libvirt-guests unit to stop nova_compute container before shutdown VMs
+      ansible.builtin.template:
+        dest: "/etc/systemd/system/edpm_libvirt_guests.service"
+        src: "edpm_libvirt_guests.service"
+        mode: "0644"
+      notify: "reload edpm_libvirt_guests"
+    - name: Making sure virt-guest-shutdown.target is present
+      ansible.builtin.template:
+        dest: "/etc/systemd/system/virt-guest-shutdown.target"
+        src: "virt-guest-shutdown.target"
+        mode: "0644"
+      notify: "reload edpm_libvirt_guests"

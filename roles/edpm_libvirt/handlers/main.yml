@@ -21,3 +21,21 @@
     name: "edpm_{{ item }}.service"
   loop: "{{ edpm_libvirt_containers }}"
   listen: "restart libvirt"
+
+
+- name: restart edpm_libvirt.target
+  become: true
+  ansible.builtin.systemd:
+    name: edpm_libvirt.target
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  listen: "restart edpm_libvirt.target"
+
+- name: reload edpm_libvirt_guests
+  become: true
+  ansible.builtin.systemd:
+    name: edpm_libvirt_guests
+    enabled: true
+    daemon_reload: true
+  listen: "reload edpm_libvirt_guests"

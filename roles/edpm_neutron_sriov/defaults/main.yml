@@ -17,14 +17,21 @@
 
 # All variables intended for modification should be placed in this file.
 
+# seconds between retries for download tasks
+edpm_neutron_sriov_images_download_delay: 5
+
+# number of retries for download tasks
+edpm_neutron_sriov_images_download_retries: 5
+
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
+edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/neutron-sriov"
 edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
 edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
 
 edpm_neutron_sriov_common_volumes:
   - /lib/modules:/lib/modules:ro
   - /dev:/dev
-  - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron:z"
+  - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron.conf.d:z"
   - /var/lib/neutron:/var/lib/neutron:shared,z
   - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
   - /var/log/containers/neutron:/var/log/neutron:z
@@ -56,8 +63,8 @@ edpm_neutron_sriov_rootwrap_DEFAULT_rlimit_nofile: 1024
 # DEFAULT
 edpm_neutron_sriov_agent_DEFAULT_state_path: '/var/lib/neutron'
 # AGENT
-edpm_neutron_sriov_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
-edpm_neutron_sriov_agent_AGENT_report_interval: 300
+edpm_neutron_sriov_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
+edpm_neutron_sriov_agent_AGENT_report_interval: 30
 edpm_neutron_sriov_agent_AGENT_extensions: 'qos'
 edpm_neutron_sriov_agent_AGENT_polling_interval: 2
 # SRIOV_NIC

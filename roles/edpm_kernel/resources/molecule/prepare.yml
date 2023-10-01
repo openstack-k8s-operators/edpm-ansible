@@ -19,4 +19,4 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-    - role: env_data
+    - role: osp.edpm.env_data

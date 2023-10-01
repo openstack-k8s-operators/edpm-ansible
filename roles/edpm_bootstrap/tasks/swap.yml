@@ -15,25 +15,22 @@
 # under the License.
 
 - name: Configure swap file
+  when:
+    - not edpm_bootstrap_swap_partition_enabled|bool
+    - edpm_bootstrap_swap_size_megabytes|int > 0
   become: true
   block:
     - name: Create swapfile if needed
       ansible.builtin.command:
         cmd: dd if=/dev/zero of={{ edpm_bootstrap_swap_path }} count={{ edpm_bootstrap_swap_size_megabytes }} bs=1M
         creates: "{{ edpm_bootstrap_swap_path }}"
-      register: new_swapfile
+      notify: "create and activate swap"
     - name: Set permission on swapfile
       ansible.builtin.file:
         path: "{{ edpm_bootstrap_swap_path }}"
         owner: root
         group: root
         mode: "0600"
-    - name: Setup linux swap area on file if needed
-      ansible.builtin.command: mkswap "{{ edpm_bootstrap_swap_path }}"
-      when: new_swapfile is changed
-    - name: Activate swapfile
-      ansible.builtin.command: swapon "{{ edpm_bootstrap_swap_path }}"
-      when: new_swapfile is changed
     - name: Enable swapfile on fstab
       ansible.posix.mount:
         name: none
@@ -43,11 +40,9 @@
         state: present
         passno: 0
         dump: 0
-  when:
-  - not edpm_bootstrap_swap_partition_enabled|bool
-  - edpm_bootstrap_swap_size_megabytes|int > 0
 
 - name: Configure swap partition
+  when: edpm_bootstrap_swap_partition_enabled | bool
   become: true
   block:
     - name: Check if partition exists by its label
@@ -69,8 +64,12 @@
         - edpm_bootstrap_swap_partition_label is defined
         - swap_partition_label.stat.exists
     - name: Gather swap partition by its type
-      ansible.builtin.shell: lsblk -f --output FSTYPE,UUID | awk '/swap/ {print $2}'
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          lsblk -f --output FSTYPE,UUID | awk '/swap/ {print $2}'
       register: swap_partitions
+      changed_when: false
       when:
         - edpm_bootstrap_swap_partition_label is not defined
         - not swap_partition_label.stat.exists
@@ -91,7 +90,9 @@
         - swap_partitions.stdout_lines | length > 0
     - name: Activate swap partitions
       ansible.builtin.command: swapon -a
+      register: _swapon_command
+      changed_when: _swapon_command.rc == 0
+      failed_when: _swapon_command.rc != 0
       when:
         - mount_label_output is changed
         - mount_uuid_output is changed
-  when: edpm_bootstrap_swap_partition_enabled | bool

@@ -1,0 +1,13 @@
+---
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop:
+    - "{{ edpm_ovn_controller_agent_image }}"
+    - "{{ edpm_ovn_metadata_agent_image }}"
+  become: true
+  register: edpm_ovn_images_download
+  until: edpm_ovn_images_download.failed == false
+  retries: "{{ edpm_ovn_images_download_retries }}"
+  delay: "{{ edpm_ovn_images_download_delay }}"

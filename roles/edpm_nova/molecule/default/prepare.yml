@@ -19,7 +19,7 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-    - role: env_data
+    - role: osp.edpm.env_data
 
 - name: Setup DUT
   hosts: all
@@ -43,10 +43,10 @@
         state: link
     - name: set timezone
       import_role:
-        name: "edpm_timezone"
+        name: osp.edpm.edpm_timezone
     - name: install podman
       import_role:
-        name: "edpm_podman"
+        name: osp.edpm.edpm_podman
     - name: Create firewall directory
       become: true
       ansible.builtin.file:
@@ -66,4 +66,10 @@
               dport: 22
     - name: install libvirt
       import_role:
-        name: "edpm_libvirt"
+        name: osp.edpm.edpm_libvirt
+    - name: ensure /etc/multipath.conf exists
+      become: true
+      ansible.builtin.file:
+        path: /etc/multipath.conf
+        state: touch
+        mode: "0644"

@@ -35,7 +35,7 @@
         line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${EDPM_KERNEL_ARGS}"'
         insertafter: '^EDPM_KERNEL_ARGS.*'
     - include_role:
-        name: "edpm_kernel"
+        name: osp.edpm.edpm_kernel
         tasks_from: kernelargs.yml
       vars:
         edpm_kernel_defer_reboot: true

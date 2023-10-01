@@ -34,3 +34,9 @@
         tasks_from: install.yml
       tags:
         - edpm_iscsid
+    - name: Install edpm_multipathd
+      import_role:
+        name: osp.edpm.edpm_multipathd
+        tasks_from: install.yml
+      tags:
+        - edpm_multipathd

@@ -18,3 +18,9 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_download_cache"
+
+edpm_download_role_install_requirements: true
+
+edpm_download_cache_packages: true
+
+edpm_download_cache_container_images: true

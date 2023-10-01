@@ -24,15 +24,12 @@
     setype: var_log_t
   become: true
 
-- name: Check cloud-init status
-  ansible.builtin.shell: systemctl is-active cloud-init.service || systemctl is-enabled cloud-init.service
-  failed_when: false
-  register: cloud_init_enabled
-  become: true
+- name: Gather services facts
+  ansible.builtin.service_facts:
 
 - name: Print cloud-init service status
   ansible.builtin.debug:
-    var: cloud_init_enabled
+    var: ansible_facts.services["cloud-init.service"]
 
 - name: Check if cloud-init is disabled via kernel args
   ansible.builtin.lineinfile:
@@ -53,8 +50,9 @@
   delay: 5
   when:
     - not ansible_check_mode
-    - cloud_init_enabled.rc is defined
-    - cloud_init_enabled.rc == 0
+    - ansible_facts.services["cloud-init.service"] is defined
+    - ansible_facts.services["cloud-init.service"].state == "running"
+    - ansible_facts.services["cloud-init.service"].status == "enabled"
     - cloud_init_vendor_disabled is changed
   become: true
 
@@ -65,6 +63,7 @@
     - name: Bootstrap command
       ansible.builtin.shell: "{{ edpm_bootstrap_command }}"
       register: bootstrap_cmd
+      changed_when: bootstrap_cmd.rc == 0
       failed_when: false
 
     - name: Bootstrap command output
@@ -85,6 +84,7 @@
 
 - name: Stop NetworkManager from updating resolv.conf
   when: ( edpm_bootstrap_network_service == 'NetworkManager' ) and ( not edpm_bootstrap_network_resolvconf_update )
+  become: true
   block:
     - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
@@ -110,7 +110,6 @@
       ansible.builtin.systemd:
         name: NetworkManager
         state: reloaded
-  become: true
 
 - name: Enable openvswitch service if installed
   ansible.builtin.systemd:
@@ -125,9 +124,3 @@
 
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
-
-- name: Set GID hugetlbfs user to match kolla pre-set
-  ansible.builtin.group:
-    name: hugetlbfs
-    gid: 42477
-  become: true

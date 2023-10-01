@@ -1,0 +1,57 @@
+---
+
+- name: Login to container registries if needed
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: login.yml
+  tags:
+    - edpm_podman
+    - download_cache
+
+- name: Download images for edpm_iscsid role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_iscsid
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_iscsid
+    - download_cache
+
+- name: Download images for edpm_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovn
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_ovn
+    - download_cache
+
+- name: Download images for edpm_multipathd role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_multipathd
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_multipathd
+    - download_cache
+
+- name: Download images for edpm_libvirt role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_libvirt
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_libvirt
+    - download_cache
+
+- name: Download images for edpm_nova role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nova
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_nova
+    - download_cache
+
+- name: Download images for edpm_neutron_sriov role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_sriov
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_neutron_sriov
+    - download_cache

@@ -63,13 +63,9 @@ argument_specs:
           case of failing while applying the provided net config.
         default: true
       edpm_network_config_template:
-        type: path
+        type: str
         description: "Which settings template should be rendered."
-        default: templates/single_nic_vlans/single_nic_vlans.j2
-      edpm_network_config_override:
-        type: dict
-        description: "Optional template content overrides"
-        default: {}
+        default: ""
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"

@@ -4,6 +4,20 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_neutron_sriov role.
     options:
+      edpm_neutron_sriov_images_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_neutron_sriov_images_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
+      edpm_neutron_sriov_agent_config_src:
+        default: "/var/lib/openstack/configs/neutron-sriov"
+        description: |
+          The path to the directory containing source of the Neutron SRIOV NIC
+          agent configs.
+        type: str
       edpm_neutron_sriov_agent_config_dir:
         default: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
         description: |
@@ -18,7 +32,7 @@ argument_specs:
         default:
           - /lib/modules:/lib/modules:ro
           - /dev:/dev
-          - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron:z"
+          - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron.conf.d:z"
           - /var/lib/neutron:/var/lib/neutron:shared,z
           - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
           - /var/log/containers/neutron:/var/log/neutron:z
@@ -81,11 +95,11 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_sriov_agent_AGENT_root_helper:
-        default: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+        default: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
         description: ''
         type: str
       edpm_neutron_sriov_agent_AGENT_report_interval:
-        default: 300
+        default: 30
         description: ''
         type: int
       edpm_neutron_sriov_agent_AGENT_extensions:

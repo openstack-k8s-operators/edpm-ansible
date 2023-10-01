@@ -1,0 +1,83 @@
+---
+argument_specs:
+  # ./roles/edpm_multipathd/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_multipathd role.
+    options:
+      edpm_multipathd_image:
+        default: 'quay.io/podified-antelope-centos9/openstack-multipathd:current-podified'
+        description: 'URL of the multipathd image.'
+        type: str
+      edpm_multipathd_image_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_multipathd_image_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
+      edpm_multipathd_command:
+        default: '/usr/sbin/multipathd -d'
+        description: 'The command to start the multipathd daemon.'
+        type: str
+      edpm_multipathd_volumes:
+        default:
+        - /var/lib/kolla/config_files/multipathd.json:/var/lib/kolla/config_files/config.json:ro
+        - /dev:/dev
+        - /run/udev:/run/udev
+        - /sys:/sys
+        - /lib/modules:/lib/modules:ro
+        - /etc/iscsi:/etc/iscsi:ro
+        - /var/lib/iscsi:/var/lib/iscsi:z
+        - /etc/multipath:/etc/multipath:z
+        - /etc/multipath.conf:/etc/multipath.conf:ro
+        description: List of volumes in a mount point format.
+        type: list
+      edpm_multipathd_restart_sentinel:
+        default: '/etc/multipath/.multipath_restart_required'
+        description: >-
+          Path to the sentinel file that is used to signal when the multipath
+          daemon needs to be restarted.
+        type: str
+      edpm_multipathd_custom_config_dir:
+        default: '/runner/multipath'
+        description: >-
+          Directory used by the ansibleee-runner pod to install a custom
+          multipath.conf file.
+        type: str
+      edpm_multipathd_enable:
+        default: true
+        description: 'Whether to enable the multipath daemon.'
+        type: bool
+      edpm_multipathd_find_multipaths:
+        default: true
+        description: >-
+          Whether to automatically create a multipath device for each path.
+        type: bool
+      edpm_multipathd_recheck_wwid:
+        default: true
+        description: >-
+          Whether to recheck the path WWID when a failed path is restored.
+        type: bool
+      edpm_multipathd_skip_kpartx:
+        default: true
+        description: >-
+          Whether to skip automatically creating partitions on the device.
+        type: bool
+      edpm_multipathd_user_friendly_names:
+        default: false
+        description: >-
+          Whether to enable assigning a user friendly name to each path.
+        type: bool
+      edpm_multipathd_custom_config_file:
+        default: ''
+        description: >-
+          Fully qualified path of a local multipath.conf file to be
+          installed on the overcloud nodes. By default, a minimal
+          multipath.conf file will be installed. NOTE - Other TripleO
+          multipath parameters will override any corresponding
+          value in the local custom config file. For example, if
+          MultipathdEnableUserFriendlyNames is False, the files on the
+          overcloud nodes will be updated match, even if the setting is
+          enabled in the local custom file.
+        type: str

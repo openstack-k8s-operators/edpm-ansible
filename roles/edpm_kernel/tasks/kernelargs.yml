@@ -197,7 +197,7 @@
 # Kernel modules loading
 - name: Load type1 IOMMU driver for VFIO on boot
   ansible.builtin.import_role:
-    name: edpm_module_load
+    name: osp.edpm.edpm_module_load
   vars:
     modules:
       - name: vfio_iommu_type1

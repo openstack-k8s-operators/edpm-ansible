@@ -14,20 +14,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: deploy node_exporter container
+- name: Deploy node_exporter container
+  become: true
   containers.podman.podman_container:
     image: "{{ telemetry_node_exporter_image }}"
     name: node_exporter
     state: present
-    recreate: yes
+    recreate: true
     ports:
       - "9100:9100"
   tags:
     - edpm_telemetry
 
-- name: create systemd service file for node_exporter
-  copy:
-    dest: "/etc/systemd/system/edpm_node_exporter.service"
+- name: Create systemd service file for node_exporter
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/edpm_node_exporter.service
+    mode: "0644"
     content: |
       [Unit]
       Description=node_exporter container
@@ -52,7 +55,7 @@
   tags:
     - edpm_telemetry
 
-- name: restart node_exporter
+- name: Restart node_exporter
   become: true
   ansible.builtin.systemd:
     state: restarted

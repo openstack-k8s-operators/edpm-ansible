@@ -16,9 +16,9 @@
         - "/var/log/containers/stdouts"
 
     - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_service.yaml"
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       with_items:
-        - "edpm_neutron_sriov_agent"
+        - {"name": "edpm_neutron_sriov_agent.service"}
 
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
@@ -37,3 +37,17 @@
             that:
               - log_file.stat.exists
             fail_msg: "File /var/log/containers/neutron/neutron-sriov-nic-agent.log does not exist"
+
+    - name: Ensure that 10-neutron-sriov.conf was copied into the container
+      block:
+        - name: sriov config file exists
+          become: true
+          ansible.builtin.stat:
+            path: "/var/lib/config-data/ansible-generated/neutron-sriov-agent/10-neutron-sriov.conf"
+          register: sriov_config
+
+        - name: assert that the config exists
+          ansible.builtin.assert:
+            that:
+              - sriov_config.stat.exists
+            fail_msg: "sriov agent config file does not exist"

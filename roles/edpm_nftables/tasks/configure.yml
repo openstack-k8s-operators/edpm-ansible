@@ -53,7 +53,7 @@
 - name: Load firewall snippets
   become: true
   register: edpm_nftables_rules_list
-  osp.edpm.edpm_nftables_from_files:
+  edpm_nftables_from_files:
     src: "{{ edpm_nftables_src }}"
 
 - name: nftables files generation

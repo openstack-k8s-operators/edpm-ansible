@@ -44,7 +44,7 @@
 - name: Generate containers configs data
   block:
     - name: "Find all matching configs configs for in {{ edpm_container_manage_config }}"
-      osp.edpm.container_config_data:
+      container_config_data:
         config_path: "{{ edpm_container_manage_config }}"
         config_pattern: "{{ edpm_container_manage_config_patterns }}"
         config_overrides: "{{ edpm_container_manage_config_overrides }}"
@@ -60,7 +60,7 @@
   become: true
   block:
     - name: "Update container configs with new config hashes"
-      osp.edpm.container_config_hash:
+      container_config_hash:
       when:
         - edpm_container_manage_update_config_hash|bool
     - name: "Delete orphan containers from {{ edpm_container_manage_config }}"
