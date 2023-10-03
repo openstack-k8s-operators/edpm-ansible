@@ -29,9 +29,6 @@ This Ansible role allows to do the following tasks:
 
   * The container config_id doesn't match with the one in input.
 
-  * The container's name starts with "ceph". Ceph containers are not
-    managed by this role.
-
   Once the previous conditions checked, then these reasons will make the
   containers deleted:
 
