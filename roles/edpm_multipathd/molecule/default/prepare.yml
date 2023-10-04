@@ -14,11 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Prepare
   hosts: all
   roles:
-    - role: test_deps
+    - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
         - iproute
         - iscsi-initiator-utils
