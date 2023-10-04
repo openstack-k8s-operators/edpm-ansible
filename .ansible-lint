@@ -1,10 +1,22 @@
+---
+
 exclude_paths:
-    - ../
+  - ../  # needed by pre-commit
+  - roles/**/molecule
+  - roles/**/files
+  - molecule
+  - zuul.d
+  - .github
+  - docs
+  - openstack_ansibleee
+  - scripts
+  - tests
+  - plugins/tests/molecule
+  - contribute
 parseable: true
 quiet: false
 verbosity: 1
-# Mocking modules is not recommended as it prevents testing of invalid
-# arguments or lack of their presence at runtime. It is preffered to
-# make use of requirements.yml to declare them.
-# mock_roles:
-# mock_modules:
+use_default_rules: true
+profile: production
+skip_list:
+  - command-instead-of-shell
