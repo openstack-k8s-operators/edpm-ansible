@@ -2,7 +2,7 @@
 - project:
     name: openstack-k8s-operators/edpm-ansible
     templates:
-      - podified-multinode-edpm-pipeline
+      - podified-multinode-edpm-baremetal-pipeline
     github-check:
       jobs:
         - edpm-ansible-molecule-edpm_podman
