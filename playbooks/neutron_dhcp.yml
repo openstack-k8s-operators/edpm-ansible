@@ -1,11 +1,12 @@
 ---
+
 - name: Deploy EDPM Neutron DHCP agent
   hosts: all
   strategy: linear
   become: true
   tasks:
     - name: Neutron DHCP agent
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_neutron_dhcp
       tags:
         - edpm_neutron_dhcp
