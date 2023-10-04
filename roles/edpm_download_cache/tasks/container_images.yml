@@ -76,3 +76,11 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_dhcp
     tasks_from: download_cache.yml
+
+- name: Download images for edpm_logrotate_crond role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_logrotate_crond
+    tasks_from: download_cache_images.yml
+  tags:
+    - edpm_logrotate_crond
+    - download_cache
