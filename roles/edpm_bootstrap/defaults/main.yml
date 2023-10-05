@@ -41,6 +41,10 @@ edpm_bootstrap_packages_bootstrap:
   - sysstat
   - iproute-tc
   - ksmtuned
+  # This is required for correct management of cgroups applied to qemu
+  # instances without this libvirt falls back to a legacy cgroup
+  # codepath that is no-longer tested or supported in rhel as of rhel 8...
+  - systemd-container
 
 edpm_bootstrap_release_version_package:
   - rhosp-release
