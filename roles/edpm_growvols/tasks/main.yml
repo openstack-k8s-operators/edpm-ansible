@@ -23,6 +23,7 @@
   ansible.builtin.shell: >
     PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
     which growvols
+  changed_when: find_growvols.rc == 0
   failed_when: false
   become: true
   register: find_growvols
@@ -34,10 +35,12 @@
       ansible.builtin.set_fact:
         growvols_path: "{{ find_growvols.stdout_lines[0] }}"
 
-    - name: "Running {{ growvols_path }} {{growvols_args}}"
-      ansible.builtin.shell: "{{ growvols_path }} --yes {{growvols_args}}"
+    - name: "Running {{ growvols_path + growvols_args }}"
+      ansible.builtin.shell: "{{ growvols_path }} --yes {{ growvols_args }}"
       become: true
       register: run_growvols
+      changed_when: run_growvols.rc == 0
+      failed_when: run_growvols.rc != 0
 
     - name: Output of growvols stdout
       ansible.builtin.debug:
