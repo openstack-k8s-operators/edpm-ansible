@@ -6,14 +6,14 @@ argument_specs:
     options:
       edpm_container_standalone_common_volumes:
         default:
-        - /etc/hosts:/etc/hosts:ro
-        - /etc/localtime:/etc/localtime:ro
-        - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
-        - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
-        - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-        - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
-        - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
-        - /dev/log:/dev/log
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+          - /dev/log:/dev/log
         description: List of volumes in a mount point format.
         type: list
       edpm_container_standalone_container_defs:
@@ -26,8 +26,8 @@ argument_specs:
         type: path
       edpm_container_standalone_internal_tls_volumes:
         default:
-        - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
-        - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
+          - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
+          - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
         description: List of TLS volumes in a mount point format.
         type: list
       edpm_container_standalone_kolla_config_dir:

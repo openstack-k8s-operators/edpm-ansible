@@ -17,22 +17,7 @@
 
 # "edpm_container_standalone" will search for and load any operating system variable file
 
-# found within the "vars/" path. If no OS files are found the task will skip.
-- name: Gather variables for each operating system
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - skip: true
-      files:
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}.yml"
-  tags:
-    - always
-
-- name: Ensure {{ edpm_container_standalone_kolla_config_dir }} exists
+- name: "Ensure directory exists: {{ edpm_container_standalone_kolla_config_dir }}"
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_kolla_config_dir }}"
     state: directory
@@ -43,26 +28,26 @@
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
-    mode: 0600
+    mode: "0600"
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
-- name: Create {{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}
+- name: "Create config file {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
-- name: Render {{ edpm_container_standalone_service }} container definitions
+- name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
-    mode: 0644
+    mode: "0644"
   # NOTE(tkajinam): Some containers can contain secrets in their environments.
   #                 Hide the output to avoid dumping these to output.
   no_log: true
   loop: "{{ edpm_container_standalone_container_defs | dict2items }}"
 
-- name: Run {{ edpm_container_standalone_service }}  containers
+- name: "Run containers: [ {{ edpm_container_standalone_service }} ]"
   ansible.builtin.include_role:
     name: edpm_container_manage
   vars:
