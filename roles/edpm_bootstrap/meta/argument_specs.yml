@@ -30,6 +30,7 @@ argument_specs:
           - sysstat
           - iproute-tc
           - ksmtuned
+          - systemd-container
         description: "List of packages that are requred to bootstrap EDPM."
 
       edpm_bootstrap_release_version_package:
