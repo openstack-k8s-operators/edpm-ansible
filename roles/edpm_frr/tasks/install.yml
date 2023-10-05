@@ -29,6 +29,7 @@
 - name: Ensure /run/frr is present upon reboot
   ansible.builtin.copy:
     dest: /etc/tmpfiles.d/run-frr.conf
+    mode: "0755"
     content: |
       d /run/frr 0755 root root - -
 

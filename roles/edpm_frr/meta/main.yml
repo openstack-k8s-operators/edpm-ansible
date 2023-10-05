@@ -21,7 +21,7 @@ galaxy_info:
   description: EDPM OpenStack Role -- edpm_frr
   company: Red Hat
   license: Apache-2.0
-  min_ansible_version: 2.9
+  min_ansible_version: '2.9'
   #
   # Provide a list of supported platforms, and for each platform a list of versions.
   # If you don't wish to enumerate all versions for a particular platform, use 'all'.
@@ -31,8 +31,8 @@ galaxy_info:
   platforms:
     - name: 'EL'
       versions:
-        - 8
-        - 9
+        - '8'
+        - '9'
 
   galaxy_tags:
     - edpm

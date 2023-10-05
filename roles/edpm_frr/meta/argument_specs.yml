@@ -77,8 +77,8 @@ argument_specs:
         type: int
       edpm_frr_bgp_l2vpn_peers:
         default:
-        - 192.168.0.1
-        - 192.168.0.2
+          - 192.168.0.1
+          - 192.168.0.2
         description: List of VPN peer IPv4 addresses.
         type: list
       edpm_frr_bgp_l2vpn_peers_scope:
@@ -111,7 +111,7 @@ argument_specs:
         type: list
       edpm_frr_bgp_uplinks:
         default:
-        - nic1
+          - nic1
         description: ''
         type: list
       edpm_frr_bgp_uplinks_scope:
@@ -172,18 +172,18 @@ argument_specs:
         type: float
       edpm_frr_volumes:
         default:
-        - /etc/hosts:/etc/hosts:ro
-        - /etc/localtime:/etc/localtime:ro
-        - /dev/log:/dev/log:rw
-        - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
-        - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
-        - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-        - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
-        - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
-        - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
-        - /var/lib/config-data/ansible-generated/frr:/var/lib/kolla/config_files/src:ro
-        - /var/log/containers/frr:/var/log/frr:z
-        - /run/frr:/run/frr:shared,z
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /dev/log:/dev/log:rw
+          - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+          - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
+          - /var/lib/config-data/ansible-generated/frr:/var/lib/kolla/config_files/src:ro
+          - /var/log/containers/frr:/var/log/frr:z
+          - /run/frr:/run/frr:shared,z
         description: List of FRR volumes in a mountpoint form.
         type: list
       edpm_frr_watchfrr:

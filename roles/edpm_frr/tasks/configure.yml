@@ -15,14 +15,17 @@
 # under the License.
 
 - name: Identify the real interfaces via os-net-config
-  ansible.builtin.shell: os-net-config -i
+  ansible.builtin.command: os-net-config -i
   register: os_net_config_result
+  changed_when: os_net_config_result.rc == 0
+  failed_when: os_net_config_result.rc != 0
 
 - name: Os-net-config from json
   ansible.builtin.set_fact:
     iface_map: "{{ os_net_config_result.stdout }}"
 
 - name: FRR uplink interfaces
+  when: edpm_frr_bgp_uplinks
   block:
     - name: Construct FRR uplink interfaces from os-net-config mappings
       ansible.builtin.set_fact:
@@ -33,7 +36,6 @@
         msg: |
           Failed to map at least one interface from {{ edpm_frr_bgp_uplinks }} to {{ iface_map }}.
           Please check value of Ansible variable edpm_frr_bgp_uplinks.
-  when: edpm_frr_bgp_uplinks
 
 - name: Configure FRR
   become: true
