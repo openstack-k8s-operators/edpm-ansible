@@ -43,7 +43,7 @@
 - name: Download packages for edpm_logrotate_crond role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_logrotate_crond
-    tasks_from: download_cache.yml
+    tasks_from: download_cache_packages.yml
   tags:
     - edpm_logrotate_crond
     - download_cache

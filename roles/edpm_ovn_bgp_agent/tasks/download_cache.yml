@@ -2,9 +2,7 @@
 
 - name: Download needed container images
   containers.podman.podman_image:
-    name: "{{ item }}"
-  loop:
-    - "{{ edpm_ovn_bgp_agent_image }}"
+    name: "{{ edpm_ovn_bgp_agent_image }}"
   become: true
   register: edpm_ovn_bgp_agent_images_download
   until: edpm_ovn_bgp_agent_images_download.failed == false
