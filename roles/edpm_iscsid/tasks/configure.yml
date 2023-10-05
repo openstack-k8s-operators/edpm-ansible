@@ -26,57 +26,52 @@
 # .initiator_reset sentinel file.
 
 - name: Ensure the system has a unique IQN
-  when: initiator_reset_state.stat.exists == False
+  when: not initiator_reset_state.stat.exists
   become: true
   block:
 
-  - name: Generate a unique IQN
-    ansible.builtin.command: podman run -ti --rm --name iscsid_config {{ edpm_iscsid_image }} /usr/sbin/iscsi-iname
-    register: iscsi_iname
+    - name: Generate a unique IQN
+      containers.podman.podman_container:
+        name: iscsid_config
+        image: "{{ edpm_iscsid_image }}"
+        rm: true
+        tty: true
+        detach: false
+        command: /usr/sbin/iscsi-iname
+      register: iscsi_iname
 
-  - name: Save the new IQN
-    ansible.builtin.copy:
-      dest: /etc/iscsi/initiatorname.iscsi
-      content: "InitiatorName={{ iscsi_iname.stdout }}"
+    - name: Save the new IQN
+      ansible.builtin.copy:
+        dest: /etc/iscsi/initiatorname.iscsi
+        mode: "0644"
+        content: "InitiatorName={{ iscsi_iname.stdout | trim }}"
 
-  - name: Record the IQN has been reset
-    ansible.builtin.file:
-      path: /etc/iscsi/.initiator_reset
-      state: touch
+    - name: Record the IQN has been reset
+      ansible.builtin.file:
+        path: /etc/iscsi/.initiator_reset
+        mode: "0600"
+        state: touch
 
-- name: Check if /etc/iscsi/iscsid.conf exists
+- name: Check if /etc/iscsi/iscsid.conf exists on the host
   ansible.builtin.stat:
     path: /etc/iscsi/iscsid.conf
   register: result
 
-- name: Create /etc/iscsi/iscsid.conf if necessary
-  when: result.stat.exists == False
-  become: true
-  block:
-
-  - name: Fetch iscsid.conf from the iscsid container
-    ansible.builtin.command: podman run -ti --rm --name iscsid_config {{ edpm_iscsid_image }} cat /etc/iscsi/iscsid.conf
-    register: iscsid_conf
-
-  - name: Create a local copy of iscsid.conf
-    ansible.builtin.copy:
-      dest: /etc/iscsi/iscsid.conf
-      content: "{{ iscsid_conf.stdout }}"
-      mode: 0600
-    check_mode: false
+- name: Copy iscsid.conf from the iscsid container to the host
+  when: not result.stat.exists
+  containers.podman.podman_container:
+    name: iscsid_config
+    image: "{{ edpm_iscsid_image }}"
+    rm: true
+    command: cp /etc/iscsi/iscsid.conf /host/etc/iscsi/
+    volume:
+      - /etc/iscsi:/host/etc/iscsi
 
 - name: Write CHAP algorithms
+  become: true
   ansible.builtin.lineinfile:
     path: "/etc/iscsi/iscsid.conf"
     line: "node.session.auth.chap_algs = {{ edpm_iscsid_chap_algs }}"
     regexp: "^node.session.auth.chap_algs"
     insertafter: "^#node.session.auth.chap.algs"
-  become: true
-  register: modify_stat
-
-- name: Record the iscsid container restart is required
-  when : modify_stat.changed
-  become: true
-  ansible.builtin.file:
-   path: /etc/iscsi/.iscsid_restart_required
-   state: touch
+  notify: Record the iscsid container restart is required
