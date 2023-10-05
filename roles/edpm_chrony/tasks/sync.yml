@@ -18,6 +18,12 @@
 - name: Force NTP sync
   become: true
   ansible.builtin.command: chronyc makestep
+  register: _makestep_command_output
+  changed_when: _makestep_command_output.rc == 0
+  failed_when: _makestep_command_output.rc != 0
 
 - name: Ensure system is NTP time synced
   ansible.builtin.command: chronyc waitsync 30
+  register: _waitsync_command_output
+  changed_when: _waitsync_command_output.rc == 0
+  failed_when: _waitsync_command_output.rc != 0

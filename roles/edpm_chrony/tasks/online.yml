@@ -4,7 +4,7 @@
   ansible.builtin.copy:
     src: files/chrony-online.service
     dest: /etc/systemd/system/chrony-online.service
-    mode: 0644
+    mode: "0644"
 
 - name: Enable chrony-online.service
   become: true
