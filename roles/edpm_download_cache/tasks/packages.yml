@@ -13,8 +13,8 @@
     name: osp.edpm.edpm_podman
     tasks_from: download_cache.yml
   tags:
-  - edpm_podman
-  - download_cache
+    - edpm_podman
+    - download_cache
 
 - name: Download packages for edpm_tuned role
   ansible.builtin.include_role:
