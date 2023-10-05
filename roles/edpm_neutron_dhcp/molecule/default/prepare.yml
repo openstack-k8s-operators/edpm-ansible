@@ -22,7 +22,6 @@
       test_deps_extra_packages:
         - iproute
         - podman
-        - openvswitch
 
 - name: Prepare
   hosts: all
@@ -38,9 +37,3 @@
         sudo modprobe openvswitch
       delegate_to: localhost
       run_once: true
-
-    # Openvswitch service needs to be running on "fake host" so that /run/openvswitch exists
-    - name: Ensure Openvswitch is running
-      ansible.builtin.service:
-        name: "openvswitch"
-        state: "started"
