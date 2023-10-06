@@ -15,7 +15,7 @@
 # under the License.
 
 - name: Import download_cache tasks
-  ansible.builtin.import_role: download_cache.yml
+  ansible.builtin.import_tasks: download_cache.yml
 
 - name: Import bootstrap tasks
   ansible.builtin.import_tasks: bootstrap.yml
