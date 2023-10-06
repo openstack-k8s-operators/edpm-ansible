@@ -10,3 +10,4 @@
         - edpm-ansible-molecule-edpm_kernel
         - edpm-ansible-molecule-edpm_libvirt
         - edpm-ansible-molecule-edpm_nova
+        - edpm-ansible-molecule-edpm_frr
