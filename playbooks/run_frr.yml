@@ -1,11 +1,12 @@
 ---
+
 - name: Deploy EDPM FRR Run
   hosts: all
   strategy: linear
-  become: True
+  become: true
   tasks:
     - name: Run edpm_frr
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_frr
         tasks_from: run.yml
       tags:

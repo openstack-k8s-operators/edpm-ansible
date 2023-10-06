@@ -1,10 +1,11 @@
 ---
+
 - name: EDPM Download cache
   hosts: all
   strategy: linear
   tasks:
     - name: Import edpm_download_cache
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_download_cache
       tags:
         - edpm_download_cache

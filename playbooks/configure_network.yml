@@ -1,15 +1,16 @@
 ---
+
 - name: Deploy EDPM Network
   hosts: all
   strategy: linear
   tasks:
     - name: Grow volumes
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_growvols
       tags:
         - edpm_growvols
     - name: Install edpm_bootstrap
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_bootstrap
         tasks_from: bootstrap.yml
       tags:
@@ -19,34 +20,34 @@
     # before any packages are installed or services are started
     # that may need them.
     - name: Configure host users and groups
+      ansible.builtin.import_role:
+        name: edpm_users
       tags:
         - edpm_users
-      ansible.builtin.import_role:
-        name:  edpm_users
     - name: Install edpm_kernel
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_kernel
       tags:
         - edpm_kernel
     - name: Import edpm_tuned
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_tuned
       tags:
         - edpm_tuned
     - name: Configure Kernel Args
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_kernel
         tasks_from: kernelargs.yml
       tags:
         - edpm_kernel
     - name: Configure KSM for kernel
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_kernel
         tasks_from: ksm.yml
       tags:
         - edpm_kernel
-    - name: import edpm_network_config
-      import_role:
+    - name: Import edpm_network_config
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_network_config
       tags:
         - edpm_network_config

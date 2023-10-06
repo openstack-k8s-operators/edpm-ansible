@@ -1,10 +1,11 @@
 ---
-- name: osp.edpm.edpm_nodes_validation
+
+- name: EDPM Node validation
   hosts: all
   strategy: linear
   tasks:
-    - name: import edpm_nodes_validation
-      import_role:
+    - name: Import edpm_nodes_validation
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_nodes_validation
       tags:
         - edpm_nodes_validation

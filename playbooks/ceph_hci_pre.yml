@@ -1,5 +1,6 @@
 ---
-- name: osp.edpm.edpm_ceph_hci_pre
+
+- name: Prepare EDPM to Host Ceph
   hosts: all
   strategy: linear
   tasks:

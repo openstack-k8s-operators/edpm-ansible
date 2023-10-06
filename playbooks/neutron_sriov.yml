@@ -1,11 +1,12 @@
 ---
+
 - name: Deploy EDPM Neutron SR-IOV agent
   hosts: all
   strategy: linear
   become: true
   tasks:
     - name: Neutron SR-IOV agent
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_neutron_sriov
       tags:
         - edpm_neutron_sriov

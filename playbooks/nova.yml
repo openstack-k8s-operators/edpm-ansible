@@ -1,10 +1,11 @@
 ---
+
 - name: Deploy EDPM Nova
   hosts: all
   strategy: linear
   tasks:
-    - name: nova
-      import_role:
+    - name: Deploy EDPM Nova
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_nova
       tags:
         - edpm_nova
