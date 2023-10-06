@@ -50,9 +50,15 @@
       run_once: true
       ansible.builtin.set_fact:
         ssh_known_hosts_lines: |-
+          {%- set key_types = {
+                'ssh_host_key_rsa_public': 'ssh-rsa',
+                'ssh_host_key_ed25519_public': 'ssh-ed25519',
+                'ssh_host_key_ecdsa_public': 'ecdsa-sha2-nistp256',
+              }
+          -%}
           {% for host in groups['all'] | intersect(play_hosts) %}
           {%   set hostdata = hostvars[host] %}
-          {%   if 'ssh_host_key_rsa_public' in hostdata['ansible_facts'] %}
+          {%   if hostdata['ansible_facts'].keys() | intersect(key_types.keys()) %}
           {%     set entries = [] %}
           {%     set enabled_host_networks = hostdata['edpm_role_networks']|default([]) %}
           {%     for network in enabled_host_networks %}
@@ -67,8 +73,13 @@
           {%       set _ = entries.append('[' ~ hostdata['canonical_hostname'] ~ ']*') %}
           {%     endif %}
           {%     set _ = entries.append('[' ~ host ~ ']*') %}
-          {%     set line = entries|unique|join(',') ~ ' ssh-rsa ' ~ hostdata['ansible_facts']['ssh_host_key_rsa_public'] %}
+          {%     set host = entries|unique|join(',') %}
+          {%     for key, type in key_types.items() %}
+          {%       if key in hostdata['ansible_facts'] %}
+          {%         set line = host ~ ' ' ~ type ~ ' ' ~ hostdata['ansible_facts'][key] %}
           {{ line }}
+          {%       endif %}
+          {%     endfor %}
           {%   endif %}
           {% endfor %}
 
