@@ -1,5 +1,6 @@
+---
 
-- name: render nova container
+- name: Render nova container
   become: true
   tags:
     - install
@@ -8,10 +9,10 @@
     src: "nova_compute.json.j2"
     dest: "/var/lib/openstack/config/containers/nova_compute.json"
     setype: "container_file_t"
-    mode: 0644
+    mode: "0644"
   notify:
-  - restart nova
-- name: deploy nova container
+    - Restart nova
+- name: Deploy nova container
   tags:
     - install
     - nova

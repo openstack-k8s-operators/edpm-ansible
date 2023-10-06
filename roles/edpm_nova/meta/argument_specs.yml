@@ -27,7 +27,7 @@ argument_specs:
           will be rendered on the compute node.
       edpm_nova_compute_image:
         type: str
-        default:  "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+        default: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
         description: |
           The container image to use for the nova compute container.
           This image is used to create the nova compute container
