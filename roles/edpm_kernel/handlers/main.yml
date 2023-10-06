@@ -17,3 +17,10 @@
 - name: Delete PageKSM
   ansible.builtin.command: echo 2 >/sys/kernel/mm/ksm/run
   become: true
+  changed_when: false
+
+- name: Reload sysctl
+  ansible.builtin.systemd:
+    name: systemd-sysctl.service
+    state: restarted
+  become: true
