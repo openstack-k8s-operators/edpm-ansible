@@ -15,8 +15,13 @@
 # under the License.
 
 - name: Get the command line args of the node
-  ansible.builtin.command: cat /proc/cmdline
-  register: cmdline
+  ansible.builtin.slurp:
+    src: "/proc/cmdline"
+  register: cmdline_encoded
+
+- name: Save the decoded cmdline
+  ansible.builtin.set_fact:
+    cmdline: "{{ cmdline_encoded['content'] | b64decode }}"
 
 - name: TSX KernelArgs compute node reboot prevention
   when:
@@ -109,9 +114,9 @@
           ansible.builtin.set_fact:
             edpm_kernel_args: >-
               {{ _kernel_args |
-                 regex_replace('[\s]+default_hugepagesz=', ' default_hugepagesz=') |
-                 regex_replace('[\s]+', ' ') |
-                 regex_replace('[\s]+$', '')
+                regex_replace('[\s]+default_hugepagesz=', ' default_hugepagesz=') |
+                regex_replace('[\s]+', ' ') |
+                regex_replace('[\s]+$', '')
               }}
 
 - name: Check if the kernelargs entry is already present in the file
@@ -139,17 +144,20 @@
         dest: /etc/default/grub
         regexp: 'EDPM_KERNEL_ARGS'
         state: absent
-    - name: Ensure the kernel args ( {{ edpm_kernel_args }} ) is present as GRUB_EDPM_KERNEL_ARGS
+
+    - name: "Ensure the kernel args are present as GRUB_EDPM_KERNEL_ARGS: {{ edpm_kernel_args }}"
       ansible.builtin.lineinfile:
         dest: /etc/default/grub
         regexp: '^GRUB_EDPM_KERNEL_ARGS.*'
         insertafter: '^GRUB_CMDLINE_LINUX.*'
         line: 'GRUB_EDPM_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
+
     - name: Add GRUB_EDPM_KERNEL_ARGS to the GRUB_CMDLINE_LINUX parameter
       ansible.builtin.lineinfile:
         dest: /etc/default/grub
         line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${GRUB_EDPM_KERNEL_ARGS}"'
         insertafter: '^GRUB_EDPM_KERNEL_ARGS.*'
+
     - name: Check grub config paths
       ansible.builtin.stat:
         path: "{{ item }}"
@@ -159,20 +167,27 @@
         - /boot/efi/EFI/redhat
         - /boot/efi/EFI/centos
         - /boot/efi/EFI/fedora
+
     - name: Generate grub config
       ansible.builtin.command: "grub2-mkconfig -o /boot/grub2/grub.cfg"
+      register: _grub2_mkconfig
+      changed_when: _grub2_mkconfig.rc == 0
+      failed_when: _grub2_mkconfig.rc != 0
 
     - name: Generate EFI grub config
       ansible.builtin.command: "grub2-mkconfig -o {{ item.stat.path }}/grub.cfg"
-      when: item.stat.exists|bool
+      when: item.stat.exists | bool
       loop: "{{ grub_stat.results }}"
+      register: _grub2_mkconfig_efi
+      changed_when: _grub2_mkconfig_efi.rc == 0
+      failed_when: _grub2_mkconfig_efi.rc != 0
 
     - name: Copy grubenv to EFI directory
       ansible.builtin.copy:
         remote_src: true
         src: /boot/grub2/grubenv
         dest: "{{ item.stat.path }}/grubenv"
-        mode: 0644
+        mode: "0644"
       when: item.stat.exists|bool
       loop: "{{ grub_stat.results }}"
 
@@ -189,6 +204,9 @@
       when:
         - tuned_active_profile.stat.exists
         - tuned_active_profile.stat.size | int > 0
+      register: _tuned_adm
+      changed_when: _tuned_adm.rc == 0
+      failed_when: _tuned_adm.rc != 0
 
     - name: Set reboot required fact
       ansible.builtin.set_fact:
@@ -215,7 +233,7 @@
         - grub_file_entry_check is not changed
 
     - name: Skipping reboot for deployed node
-      ansible.builtin.debug:
+      ansible.builtin.debug:  # noqa: no-handler
         msg: "Reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
       when:
         - grub_file_entry_check is changed
