@@ -15,37 +15,37 @@
 # under the License.
 
 
-- name: "Check if {{ container }} service healthcheck exists in systemd"
+- name: "Check if service healthcheck exists in systemd: [ {{ container }} ]"
   ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.service"
   register: systemd_healthcheck_exists
 
-- name: "Tear-down {{ container }} healthcheck"
+- name: "Tear-down healthcheck: [ {{ container }} ]"
   when:
     - systemd_healthcheck_exists.stat.exists
   block:
-    - name: "Stop and disable {{ container }} healthcheck"
+    - name: "Stop and disable healthcheck: [ {{ container }} ]"
       ansible.builtin.systemd:
         name: "edpm_{{ container }}_healthcheck"
         state: stopped
         enabled: false
 
-    - name: "Remove {{ container }} healthcheck service"
+    - name: "Remove healthcheck service: [ {{ container }} ]"
       ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.service"
         state: absent
 
-    - name: "Remove {{ container }} healthcheck timer"
+    - name: "Remove healthcheck timer: [ {{ container }} ]"
       ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}_healthcheck.timer"
         state: absent
 
-- name: "Check if {{ container }} service exists in systemd"
+- name: "Check if service exists in systemd: [ {{ container }} ]"
   ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}.service"
   register: systemd_exists
 
-- name: "Tear-down {{ container }} container"
+- name: "Tear-down container: [ {{ container }} ]"
   when:
     - systemd_exists.stat.exists
   block:
@@ -55,17 +55,17 @@
         state: stopped
         enabled: false
 
-    - name: "Remove {{ container }} systemd service"
+    - name: "Remove systemd service: [ {{ container }} ]"
       ansible.builtin.file:
         path: "/etc/systemd/system/edpm_{{ container }}.service"
         state: absent
 
-- name: "Check if {{ container }} service requires exists in systemd"
+- name: "Check if service requires exists in systemd: [ {{ container }} ]"
   ansible.builtin.stat:
     path: "/etc/systemd/system/edpm_{{ container }}.service.requires"
   register: systemd_requires_exists
 
-- name: "Remove {{ container }} systemd requires"
+- name: "Remove systemd requires: [ {{ container }} ]"
   ansible.builtin.file:
     path: "/etc/systemd/system/edpm_{{ container }}.service.requires"
     state: absent
