@@ -57,7 +57,7 @@ to configure the DNF repositories of the VM.
     pushd repo-setup-main
     python3 -m venv ./venv
     PBR_VERSION=0.0.0 ./venv/bin/pip install ./
-    sudo ./venv/bin/repo-setup current-podified-dev
+    sudo ./venv/bin/repo-setup current-podified
     popd
     popd
 
