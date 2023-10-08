@@ -1,6 +1,7 @@
 ---
 
 - name: Setup linux swap area on file if needed
+  become: true
   ansible.builtin.command: mkswap "{{ edpm_bootstrap_swap_path }}"
   register: _mkswap_command
   changed_when: _mkswap_command.rc == 0
@@ -8,6 +9,7 @@
   listen: "create and activate swap"
 
 - name: Activate swap
+  become: true
   ansible.builtin.command: swapon "{{ edpm_bootstrap_swap_path }}"
   register: _swapon_command
   changed_when: _swapon_command.rc == 0
