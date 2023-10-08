@@ -21,6 +21,6 @@
     dest: "{{ edpm_chrony_config_file_location }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: edpm_chrony_config
   notify: Restart chronyd
