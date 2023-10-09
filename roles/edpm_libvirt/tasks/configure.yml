@@ -11,7 +11,7 @@
     owner: "{{ item.owner | default(ansible_user) }}"
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items:
+  loop:
   - { "path": "/var/lib/openstack/config/libvirt"}
   - { "path": "/var/lib/openstack/config/containers"}
   - { 'path': "/var/lib/nova"}
@@ -52,7 +52,7 @@
     dest: "/var/lib/openstack/config/libvirt/{{ item.dest }}"
     setype: "container_file_t"
     mode: 0644
-  with_items:
+  loop:
   - {"src": "libvirt_virtlogd/virtlogd.conf", "dest": "libvirt_virtlogd/virtlogd.conf"}
   - {"src": "libvirt_virtnodedevd/virtnodedevd.conf", "dest": "libvirt_virtnodedevd/virtnodedevd.conf"}
   - {"src": "libvirt_virtproxyd/virtproxyd.conf", "dest": "libvirt_virtproxyd/virtproxyd.conf"}

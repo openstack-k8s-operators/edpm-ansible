@@ -9,7 +9,7 @@
   tasks:
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
-      with_items:
+      loop:
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
@@ -26,17 +26,17 @@
         - "/var/log/containers/nova"
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
-      with_items:
+      loop:
         - { "name": "edpm_nova_compute.service" }
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
-      with_items:
+      loop:
         - "nova_compute"
     - name: ensure kolla_set_configs copied the expected files
       become: true
       ansible.builtin.shell: |
         podman logs nova_compute 2>&1 | grep "{{item}}" > /dev/null
-      with_items:
+      loop:
         - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
         - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
         - "Copying /var/lib/kolla/config_files/02-nova-log.conf to /etc/nova/nova.conf.d/02-nova-log.conf"

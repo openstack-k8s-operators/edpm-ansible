@@ -16,7 +16,7 @@
 
 - name: create host users and groups
   ansible.builtin.include_tasks: create_users_and_groups.yml
-  with_items: "{{ edpm_users_users }}"
+  loop: "{{ edpm_users_users }}"
 
 - name: create host directories
   become: true

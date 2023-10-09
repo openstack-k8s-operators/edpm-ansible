@@ -11,7 +11,7 @@
     owner: "{{ item.owner | default(ansible_user) }}"
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items:
+  loop:
   - { "path": "{{edpm_nova_config_dest}}" }
   - { "path": "/var/lib/openstack/config/containers"}
 - name: create persistent directories
@@ -26,7 +26,7 @@
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items:
+  loop:
   - { "path": "/var/lib/nova"}
   - { "path": "/var/lib/_nova_secontext"}
   - { "path": "/var/lib/nova/instances"}
@@ -46,7 +46,7 @@
     dest: "{{edpm_nova_config_dest}}/{{ item.dest }}"
     setype: "container_file_t"
     mode: 0644
-  with_items:
+  loop:
   - {"src": "config.json.j2", "dest": "config.json"}
   - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
   notify:
@@ -71,6 +71,6 @@
     dest: "{{edpm_nova_config_dest}}/{{ item.path | basename }}"
     setype: "container_file_t"
     mode: "0644"
-  with_items: "{{ edpm_nova_configmaps.files }}"
+  loop: "{{ edpm_nova_configmaps.files }}"
   notify:
   - restart nova

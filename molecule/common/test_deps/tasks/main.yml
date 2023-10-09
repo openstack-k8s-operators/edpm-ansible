@@ -60,7 +60,7 @@
         name: "{{ item }}"
         state: absent
         keepcache: false
-      with_items:
+      loop:
         - ubi-9-appstream
         - ubi-9-baseos
         - ubi-9-codeready-builder

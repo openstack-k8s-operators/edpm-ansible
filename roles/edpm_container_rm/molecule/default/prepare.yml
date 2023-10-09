@@ -38,6 +38,6 @@
         detach: true
         image: centos:stream9
         command: bash
-      with_items:
+      loop:
         - podman-container1
         - podman-container2

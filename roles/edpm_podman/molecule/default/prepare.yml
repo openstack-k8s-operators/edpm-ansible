@@ -46,6 +46,6 @@
         image: "ubi8:latest"
         detach: true
         command: sleep 1d
-      with_items:
+      loop:
         - test-container1
         - test-container2
