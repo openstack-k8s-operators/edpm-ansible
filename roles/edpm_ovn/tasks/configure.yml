@@ -58,7 +58,7 @@
 
     - name: Append other_config with hw-offload
       ansible.builtin.set_fact:
-        other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
+        edpm_ovn_ovs_other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
 
 - name: Configure OVS external_ids
   ansible.builtin.shell: >
