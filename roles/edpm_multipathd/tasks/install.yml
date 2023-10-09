@@ -17,15 +17,8 @@
 - name: Run multipathd install tasks with root privileges
   become: true
   block:
-    - name: Check if multipathd is deployed on the host
-      ansible.builtin.command: systemctl is-enabled --quiet multipathd
-      failed_when: false
-      register: multipathd_enabled_result
-      check_mode: false
-
-    - name: Set fact multipathd_enabled
-      set_fact:
-        multipathd_enabled: "{{ multipathd_enabled_result.rc == 0 }}"
+    - name: Gather services facts
+      ansible.builtin.service_facts:
 
     - name: Stop multipathd service on the host
       ansible.builtin.systemd:
@@ -33,8 +26,9 @@
         state: stopped
         enabled: false
       when:
-        - multipathd_enabled|bool
-      ignore_errors: true
+        - ansible_facts.service["multipathd"] is defined
+        - ansible_facts.service["multipathd"].status == "enabled"
+      failed_when: false
       loop:
         - multipathd.service
         - multipathd.socket

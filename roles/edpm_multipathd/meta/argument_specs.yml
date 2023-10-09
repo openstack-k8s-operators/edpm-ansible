@@ -22,15 +22,15 @@ argument_specs:
         type: str
       edpm_multipathd_volumes:
         default:
-        - /var/lib/kolla/config_files/multipathd.json:/var/lib/kolla/config_files/config.json:ro
-        - /dev:/dev
-        - /run/udev:/run/udev
-        - /sys:/sys
-        - /lib/modules:/lib/modules:ro
-        - /etc/iscsi:/etc/iscsi:ro
-        - /var/lib/iscsi:/var/lib/iscsi:z
-        - /etc/multipath:/etc/multipath:z
-        - /etc/multipath.conf:/etc/multipath.conf:ro
+          - /var/lib/kolla/config_files/multipathd.json:/var/lib/kolla/config_files/config.json:ro
+          - /dev:/dev
+          - /run/udev:/run/udev
+          - /sys:/sys
+          - /lib/modules:/lib/modules:ro
+          - /etc/iscsi:/etc/iscsi:ro
+          - /var/lib/iscsi:/var/lib/iscsi:z
+          - /etc/multipath:/etc/multipath:z
+          - /etc/multipath.conf:/etc/multipath.conf:ro
         description: List of volumes in a mount point format.
         type: list
       edpm_multipathd_restart_sentinel:
