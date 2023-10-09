@@ -22,7 +22,7 @@
         dest: /usr/local/sbin/containers-tmpwatch
         owner: root
         group: root
-        mode: 0755
+        mode: "0755"
         content: |
           #!/bin/sh
           tmpwatch --nodirs \
@@ -55,7 +55,7 @@
       ansible.builtin.template:
         src: logrotate-crond.conf.j2
         dest: "{{ edpm_logrotate_crond_config_dir }}/etc/logrotate-crond.conf"
-        mode: 0644
+        mode: "0644"
 
     - name: Configure cron entry command
       ansible.builtin.cron:
@@ -68,7 +68,9 @@
         weekday: "*"
         env: false
         name: openstack
-        job: sleep `expr ${RANDOM} \% 90`; /usr/sbin/logrotate -s /var/lib/logrotate/logrotate-crond.status /etc/logrotate-crond.conf 2>&1|logger -t logrotate-crond
+        job: >
+          sleep `expr ${RANDOM} \% 90`; /usr/sbin/logrotate -s /var/lib/logrotate/logrotate-crond.status /etc/logrotate-crond.conf 2>&1|
+          logger -t logrotate-crond
 
     - name: Configure cron entry $PATH env var
       ansible.builtin.cron:
