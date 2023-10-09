@@ -1,5 +1,6 @@
 ---
-- name: create container config dirs
+
+- name: Create container config dirs
   tags:
     - configure
     - nova
@@ -12,14 +13,14 @@
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-  - { "path": "{{edpm_nova_config_dest}}" }
-  - { "path": "/var/lib/openstack/config/containers"}
-- name: create persistent directories
+    - { "path": "{{ edpm_nova_config_dest }}", "mode": "0755" }
+    - { "path": "/var/lib/openstack/config/containers", "mode": "0755" }
+- name: Create persistent directories
   tags:
     - configure
     - nova
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     setype: "container_file_t"
     state: "directory"
@@ -27,50 +28,50 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-  - { "path": "/var/lib/nova"}
-  - { "path": "/var/lib/_nova_secontext"}
-  - { "path": "/var/lib/nova/instances"}
-  - { "path": "/var/log/containers/nova", "mode": "0750" }
-  - { "path": "/var/log/containers/stdouts" }
-  - { "path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root"}
-  - { "path": "/etc/multipath" }
-  - { "path": "/etc/iscsi" }
-  - { "path": "/var/lib/iscsi" }
-  - { "path": "/run/openvswitch" }
-- name: render nova config files
+    - { "path": "/var/lib/nova", "mode": "0755" }
+    - { "path": "/var/lib/_nova_secontext", "mode": "0755" }
+    - { "path": "/var/lib/nova/instances", "mode", "0755" }
+    - { "path": "/var/log/containers/nova", "mode": "0750" }
+    - { "path": "/var/log/containers/stdouts" }
+    - { "path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root" }
+    - { "path": "/etc/multipath" }
+    - { "path": "/etc/iscsi" }
+    - { "path": "/var/lib/iscsi" }
+    - { "path": "/run/openvswitch" }
+- name: Render nova config files
   tags:
     - configure
     - nova
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "{{edpm_nova_config_dest}}/{{ item.dest }}"
+    dest: "{{ edpm_nova_config_dest }}/{{ item.dest }}"
     setype: "container_file_t"
-    mode: 0644
+    mode: "0644"
   loop:
-  - {"src": "config.json.j2", "dest": "config.json"}
-  - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
+    - { "src": "config.json.j2", "dest": "config.json" }
+    - { "src": "nova-blank.conf", "dest": "nova-blank.conf" }
   notify:
-  - restart nova
+    - Restart nova
 
-- name: discover configmaps in {{ edpm_nova_config_src }}
+- name: Discover configmaps in {{ edpm_nova_config_src }}
   ansible.builtin.find:
     paths: "{{ edpm_nova_config_src }}"
     file_type: file
-    recurse: yes
+    recurse: true
   register: edpm_nova_configmaps
   changed_when: false
   check_mode: false
   delegate_to: localhost
 
-- name: flatten configmaps into {{edpm_nova_config_dest}}
+- name: Flatten configmaps into {{ edpm_nova_config_dest }}
   tags:
     - configure
     - nova
   ansible.builtin.copy:
     src: "{{ item.path }}"
-    dest: "{{edpm_nova_config_dest}}/{{ item.path | basename }}"
+    dest: "{{ edpm_nova_config_dest }}/{{ item.path | basename }}"
     setype: "container_file_t"
     mode: "0644"
   loop: "{{ edpm_nova_configmaps.files }}"
   notify:
-  - restart nova
+    - Restart nova

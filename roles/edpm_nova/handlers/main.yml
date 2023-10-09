@@ -13,9 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-- name: restart nova container
+- name: Restart nova container
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: "edpm_nova_compute.service"
-  listen: "restart nova"
+  listen: "Restart nova"

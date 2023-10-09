@@ -15,14 +15,14 @@
 # under the License.
 
 
-- name: configure nova
-  include_tasks: configure.yml
+- name: Configure nova
+  ansible.builtin.include_tasks: configure.yml
 
-- name: install nova
-  include_tasks: install.yml
+- name: Install nova
+  ansible.builtin.include_tasks: install.yml
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
-- name: post-install nova
-  include_tasks: post-install.yml
+- name: Post-install nova
+  ansible.builtin.include_tasks: post-install.yml
