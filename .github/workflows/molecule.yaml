@@ -23,7 +23,9 @@ jobs:
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
+        - edpm_growvols
         - edpm_logrotate_crond
+        - edpm_multipathd
         - edpm_network_config
         - edpm_neutron_sriov
         - edpm_nftables
@@ -37,14 +39,9 @@ jobs:
         - env_data
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
-        # - edpm_iscsid
         # - edpm_ovn_bgp_agent
-        # - edpm_chrony
-        # - edpm_podman
-        # - edpm_module_load
-        # - edpm_kernel
         # - edpm_frr
-        # - edpm_growvols
+        # - edpm_iscsid
 
     runs-on: ubuntu-22.04
     steps:

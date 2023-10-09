@@ -9,19 +9,19 @@ import re
 # hence skipping them here.
 SKIP_LIST = [
     "edpm_libvirt",
+    "edpm_ovn",
     "edpm_nova",
-    "edpm_nova_compute",
-    "edpm_nova_libvirt",
     "edpm_module_load",
     "edpm_chrony",
     "edpm_podman",
     "edpm_ceph_client_files",
     "edpm_ddp_package",
     "edpm_frr",
-    "edpm_growvols",
     "edpm_kernel",
     "edpm_ovn_bgp_agent",
-    "test_deps"
+    "test_deps",
+    "edpm_ceph_hci_pre",
+    "edpm_download_cache",
 ]
 
 FAILURE_PATTERNS = [
