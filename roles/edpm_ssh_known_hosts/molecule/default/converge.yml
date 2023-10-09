@@ -20,7 +20,13 @@
   pre_tasks:
     - name: Override ssh_host_key_rsa_public test value in ansible_facts
       ansible.builtin.set_fact:
-        ansible_facts: "{{ ansible_facts|combine({'ssh_host_key_rsa_public': 'AAAATEST'}) }}"
+        ansible_facts: "{{ ansible_facts|combine({'ssh_host_key_rsa_public': 'AAAATESTRSA'}) }}"
+    - name: Override ssh_host_key_ed25519_public test value in ansible_facts
+      ansible.builtin.set_fact:
+        ansible_facts: "{{ ansible_facts|combine({'ssh_host_key_ed25519_public': 'AAAATESTED'}) }}"
+    - name: Override ssh_host_key_ecdsa_public test value in ansible_facts
+      ansible.builtin.set_fact:
+        ansible_facts: "{{ ansible_facts|combine({'ssh_host_key_ecdsa_public': 'AAAATESTECDSA'}) }}"
   tasks:
   - name: "Include edpm_ssh_known_hosts"
     ansible.builtin.include_role:
