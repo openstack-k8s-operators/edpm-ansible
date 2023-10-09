@@ -58,8 +58,6 @@
               proto: tcp
               dport: 22
 
-    # edpm_nova molecule depends on edpm_libvirt so it tests
-    # the case where this directory does not exsit
     - name: Create Ceph client file directory
       become: true
       ansible.builtin.file:

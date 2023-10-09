@@ -35,7 +35,7 @@
   # dont set owner/group or mode on these, as they are managed
   # by other roles, just ensure they exist.
   - { "path": "/var/log/containers/stdouts" }
-  - { "path": "/etc/ceph" }
+  - { "path": "/var/lib/openstack/config/ceph" }
 - name: render libvirt container
   tags:
     - install
