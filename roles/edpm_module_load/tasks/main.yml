@@ -26,9 +26,9 @@
         state: directory
         setype: etc_t
         selevel: s0
-        mode: 0755
+        mode: "0755"
 
-    - name: "Load modules"
+    - name: Load modules
       community.general.modprobe:
         name: "{{ item.name }}"
         params: "{{ item.params | default(omit) }}"
@@ -37,11 +37,11 @@
       loop_control:
         label: "{{ item.name }}"
 
-    - name: "Persist modules via modules-load.d"
+    - name: Persist modules via modules-load.d
       ansible.builtin.template:
         dest: "/etc/modules-load.d/{{ item.name }}.conf"
         src: module-load.conf.j2
-        mode: 0644
+        mode: "0644"
       loop: "{{ edpm_modules }}"
       loop_control:
         label: "{{ item.name }}"
@@ -49,7 +49,7 @@
       when:
         - (item.state | default('present')) == 'present'
 
-    - name: "Drop module persistence"
+    - name: Drop module persistence
       ansible.builtin.file:
         path: "/etc/modules-load.d/{{ item.name }}.conf"
         state: absent
@@ -60,13 +60,13 @@
       when:
         - (item.state | default('present')) == 'absent'
 
-    - name: "Set modules persistence via /etc/modules"
+    - name: Set modules persistence via /etc/modules
       ansible.builtin.lineinfile:
         dest: /etc/modules
         line: "{{ item.name }} {{ item.params | default('') }}"
         state: "{{ item.state | default('present') }}"
         create: true
-        mode: 0644
+        mode: "0644"
       loop: "{{ edpm_modules }}"
       loop_control:
         label: "{{ item.name }}"
