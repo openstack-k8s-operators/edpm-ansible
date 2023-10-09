@@ -1,25 +1,32 @@
 ---
-- name: ensure /var/run/libvirt is present upon reboot
+
+- name: Ensure /var/run/libvirt is present upon reboot
   tags:
     - install
     - libvirt
   become: true
   ansible.builtin.copy:
-        dest: /etc/tmpfiles.d/run-libvirt.conf
-        content: |
-          d /run/libvirt 0755 root root - -
-- name: create tempfiles
+    dest: /etc/tmpfiles.d/run-libvirt.conf
+    mode: "0644"
+    content: |
+      d /run/libvirt 0755 root root - -
+
+- name: Create Tempfiles
   tags:
     - install
     - libvirt
   become: true
-  command: systemd-tmpfiles --create
-- name: create persistent directories
+  ansible.builtin.command: systemd-tmpfiles --create
+  register: _systemd_tmpfiles_command
+  changed_when: _systemd_tmpfiles_command.rc == 0
+  failed_when: _systemd_tmpfiles_command.rc != 0
+
+- name: Create persistent directories
   tags:
     - install
     - libvirt
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     setype: "{{ item.setype | default('container_file_t') }}"
     state: directory
@@ -27,16 +34,16 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-  # qemu is not in the libvirt group in the container images so use
-  # mode 755 to make /var/lib/libvirt traversable.
-  - { "path": "/var/lib/libvirt", "mode": "0755" }
-  - { "path": "/var/log/containers/libvirt", "mode": "0750" }
-  - { "path": "/var/log/containers/qemu", "mode": "0750" }
-  # dont set owner/group or mode on these, as they are managed
-  # by other roles, just ensure they exist.
-  - { "path": "/var/log/containers/stdouts" }
-  - { "path": "/var/lib/openstack/config/ceph" }
-- name: render libvirt container
+    # qemu is not in the libvirt group in the container images so use
+    # mode 755 to make /var/lib/libvirt traversable.
+    - { "path": "/var/lib/libvirt", "mode": "0755" }
+    - { "path": "/var/log/containers/libvirt", "mode": "0750" }
+    - { "path": "/var/log/containers/qemu", "mode": "0750" }
+    # dont set owner/group or mode on these, as they are managed
+    # by other roles, just ensure they exist.
+    - { "path": "/var/log/containers/stdouts" }
+    - { "path": "/var/lib/openstack/config/ceph" }
+- name: Render libvirt container
   tags:
     - install
     - libvirt
@@ -44,11 +51,12 @@
     src: "{{ item }}/{{ item }}.json.j2"
     dest: "/var/lib/openstack/config/containers/{{ item }}.json"
     setype: "container_file_t"
-    mode: 0644
+    mode: "0644"
   loop: "{{ edpm_libvirt_containers }}"
   notify:
-  - restart libvirt
-- name: deploy libvirt containers
+    - Restart libvirt
+
+- name: Deploy libvirt containers
   tags:
     - install
     - libvirt
@@ -60,12 +68,13 @@
     edpm_container_manage_config_patterns: "libvirt*.json"
     edpm_container_manage_clean_orphans: false
   register: edpm_container_manage_result
-- name: notify on container changes
+
+- name: Notify on container changes
   tags:
     - install
     - libvirt
-  ansible.builtin.debug:
+  ansible.builtin.debug:  # noqa: no-handler
     msg: "container changes: {{ edpm_container_manage_result.changed }}"
   when: edpm_container_manage_result.changed
   changed_when: edpm_container_manage_result.changed
-  notify: restart libvirt
+  notify: Restart libvirt
