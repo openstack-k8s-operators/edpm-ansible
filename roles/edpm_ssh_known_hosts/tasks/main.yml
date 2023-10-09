@@ -63,16 +63,16 @@
           {%     set enabled_host_networks = hostdata['edpm_role_networks']|default([]) %}
           {%     for network in enabled_host_networks %}
           {%       if (network ~ '_ip') in hostdata %}
-          {%         set _ = entries.append('[' ~ hostdata[network ~ '_ip'] ~ ']*') %}
+          {%         set _ = entries.append(hostdata[network ~ '_ip']) %}
           {%       endif %}
           {%       if (network ~ '_hostname') in hostdata %}
-          {%         set _ = entries.append('[' ~ hostdata[network ~ '_hostname'] ~ ']*') %}
+          {%         set _ = entries.append(hostdata[network ~ '_hostname']) %}
           {%       endif %}
           {%     endfor %}
           {%     if 'canonical_hostname' in hostdata %}
-          {%       set _ = entries.append('[' ~ hostdata['canonical_hostname'] ~ ']*') %}
+          {%       set _ = entries.append(hostdata['canonical_hostname']) %}
           {%     endif %}
-          {%     set _ = entries.append('[' ~ host ~ ']*') %}
+          {%     set _ = entries.append(host) %}
           {%     set host = entries|unique|join(',') %}
           {%     for key, type in key_types.items() %}
           {%       if key in hostdata['ansible_facts'] %}
