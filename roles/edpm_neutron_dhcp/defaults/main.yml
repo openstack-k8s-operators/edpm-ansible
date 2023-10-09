@@ -53,7 +53,7 @@ edpm_neutron_dhcp_oslo_middleware_enable_proxy_headers_parsing: 60
 # DEFAULT
 edpm_neutron_dhcp_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
 edpm_neutron_dhcp_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
-edpm_neutron_dhcp_rootwrap_DEFAULT_use_syslog: False
+edpm_neutron_dhcp_rootwrap_DEFAULT_use_syslog: false
 edpm_neutron_dhcp_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
 edpm_neutron_dhcp_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
 edpm_neutron_dhcp_rootwrap_DEFAULT_daemon_timeout: 600
@@ -66,17 +66,17 @@ edpm_neutron_dhcp_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}'
 edpm_neutron_dhcp_agent_DEFAULT_resync_interval: 5
 edpm_neutron_dhcp_agent_DEFAULT_resync_throttle: 1
 edpm_neutron_dhcp_agent_DEFAULT_dhcp_driver: 'neutron.agent.linux.dhcp.Dnsmasq'
-edpm_neutron_dhcp_agent_DEFAULT_enable_isolated_metadata: False
-edpm_neutron_dhcp_agent_DEFAULT_force_metadata: False
-edpm_neutron_dhcp_agent_DEFAULT_enable_metadata_network: False
+edpm_neutron_dhcp_agent_DEFAULT_enable_isolated_metadata: false
+edpm_neutron_dhcp_agent_DEFAULT_force_metadata: false
+edpm_neutron_dhcp_agent_DEFAULT_enable_metadata_network: false
 edpm_neutron_dhcp_agent_DEFAULT_num_sync_threads: 4
 edpm_neutron_dhcp_agent_DEFAULT_bulk_reload_interval: 0
 edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_dns_servers: ''
 edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_base_log_dir: ''
-edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_local_resolv: False
+edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_local_resolv: false
 edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_lease_max: 16777216
-edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_enable_addr6_list: False
-edpm_neutron_dhcp_agent_DEFAULT_dhcp_broadcast_reply: False
+edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_enable_addr6_list: false
+edpm_neutron_dhcp_agent_DEFAULT_dhcp_broadcast_reply: false
 # AGENT
 edpm_neutron_dhcp_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
 edpm_neutron_dhcp_agent_AGENT_report_interval: 30
