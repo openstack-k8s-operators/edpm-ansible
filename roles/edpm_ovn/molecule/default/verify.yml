@@ -36,7 +36,7 @@
           ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
           register: rule_exists
           ignore_errors: true
-          with_items:
+          loop:
             - "118 neutron vxlan networks"
             - "119 neutron geneve networks"
             - "120 neutron geneve networks no conntrack"
@@ -47,14 +47,14 @@
             that:
               - item.rc == 0
             fail_msg: "firewall rule {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
-          with_items: "{{ rule_exists.results }}"
+          loop: "{{ rule_exists.results }}"
 
         - name: Check rule content
           become: true
           ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
           register: rule_content_exists
           ignore_errors: true
-          with_items:
+          loop:
             - "EDPM_INPUT udp dport { 4789 } ct state new counter accept"
             - "EDPM_INPUT udp dport { 6081 } ct state untracked counter accept"
             - "EDPM_OUTPUT udp dport { 6081 } counter notrack"
@@ -65,14 +65,14 @@
             that:
               - item.rc == 0
             fail_msg: "rule content {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
-          with_items: "{{ rule_content_exists.results }}"
+          loop: "{{ rule_content_exists.results }}"
 
         - name: Check input chain rules are loaded
           become: true
           ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep -q "{{ item }}.*accept"
           register: input_rules_loaded
           ignore_errors: true
-          with_items:
+          loop:
             - "udp dport 4789 ct state new counter"
             - "udp dport 6081 ct state untracked counter"
 
@@ -81,14 +81,14 @@
             that:
               - item.rc == 0
             fail_msg: "rule {{ item.item }} not loaded"
-          with_items: "{{ input_rules_loaded.results }}"
+          loop: "{{ input_rules_loaded.results }}"
 
         - name: Check notrack rules are loaded
           become: true
           ansible.builtin.shell: nft list table inet raw | awk '/chain {{ item }} {/,/}/' | grep -q "udp dport 6081 counter packets.*notrack"
           register: notrack_rules_loaded
           ignore_errors: true
-          with_items:
+          loop:
             - EDPM_OUTPUT
             - EDPM_PREROUTING
 
@@ -97,7 +97,7 @@
             that:
               - item.rc == 0
             fail_msg: "rule {{ item.item }} not loaded"
-          with_items: "{{ notrack_rules_loaded.results }}"
+          loop: "{{ notrack_rules_loaded.results }}"
 
     - name: Ensure that 10-neutron-metadata.conf was copied into the container
       block:

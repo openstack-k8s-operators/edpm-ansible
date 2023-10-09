@@ -9,7 +9,7 @@
   tasks:
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
-      with_items:
+      loop:
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
@@ -28,7 +28,7 @@
       ansible.builtin.include_tasks: "test-helpers/verify_ceph_secret.yaml"
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
-      with_items:
+      loop:
         - { "name": "edpm_libvirt_virtlogd.service" }
         - { "name": "edpm_libvirt_virtnodedevd.service" }
         - { "name": "edpm_libvirt_virtproxyd.service" }
@@ -36,7 +36,7 @@
         - { "name": "edpm_libvirt_virtsecretd.service" }
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
-      with_items:
+      loop:
         - "libvirt_virtlogd"
         - "libvirt_virtnodedevd"
         - "libvirt_virtproxyd"
@@ -44,7 +44,7 @@
         - "libvirt_virtsecretd"
     - name: ensure libvirt.target exist and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
-      with_items:
+      loop:
         - { "name": "edpm_libvirt.target", "enabled": "static"}
         - { "name": "edpm_libvirt_guests.service", "running":false }
         - { "name": "virt-guest-shutdown.target", "enabled": "static", "running":false }

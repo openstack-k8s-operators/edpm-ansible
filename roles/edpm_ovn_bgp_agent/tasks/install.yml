@@ -20,7 +20,7 @@
     state: directory
     setype: "{{ item.setype }}"
     mode: "{{ item.mode }}"
-  with_items:
+  loop:
     - { 'path': /var/log/containers/ovn-bgp-agent, 'setype': container_file_t, 'mode': '0750' }
     - { 'path': "{{ edpm_ovn_bgp_agent_config_basedir }}", 'setype': container_file_t, 'mode': '0750' }
 

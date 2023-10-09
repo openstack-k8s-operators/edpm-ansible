@@ -36,5 +36,5 @@
         - "hugetlbfs"
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
-      with_items:
+      loop:
         - /var/lib/vhost_sockets
