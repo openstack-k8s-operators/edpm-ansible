@@ -30,20 +30,20 @@
         - configure
         - neutron
       notify:
-      - restart neutron-dhcp-agent
+        - Restart neutron-dhcp-agent
 
-    - name: discover secrets in {{ edpm_neutron_dhcp_agent_config_src }}
+    - name: Discover secrets in {{ edpm_neutron_dhcp_agent_config_src }}
       ansible.builtin.find:
         paths: "{{ edpm_neutron_dhcp_agent_config_src }}"
         file_type: file
-        recurse: yes
+        recurse: true
         patterns:
-        - "*dhcp*conf"
+          - "*dhcp*conf"
       register: edpm_neutron_dhcp_secrets
       delegate_to: localhost
       become: false
 
-    - name: flatten secrets into {{ edpm_neutron_dhcp_agent_config_dir }}
+    - name: Flatten secrets into {{ edpm_neutron_dhcp_agent_config_dir }}
       ansible.builtin.copy:
         src: "{{ item.path }}"
         dest: "{{ edpm_neutron_dhcp_agent_config_dir }}/{{ item.path | basename }}"

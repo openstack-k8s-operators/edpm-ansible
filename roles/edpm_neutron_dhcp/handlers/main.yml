@@ -14,9 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: restart neutron-dhcp-agent container
+- name: Restart neutron-dhcp-agent container
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: "edpm_neutron_dhcp_agent.service"
-  listen: "restart neutron-dhcp-agent"
+  listen: "Restart neutron-dhcp-agent"

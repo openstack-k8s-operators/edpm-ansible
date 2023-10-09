@@ -23,22 +23,22 @@
   loop:
     - {'path': "/var/lib/openstack/config/containers", "mode": "0750" }
     - {'path': "/var/lib/neutron", "mode": "0750" }
-    - {'path': "{{ edpm_neutron_dhcp_agent_config_dir }}", 'mode': '0755'}
+    - {'path': "{{ edpm_neutron_dhcp_agent_config_dir }}", "mode": "0755" }
     - {'path': "/var/log/containers/stdouts"}
     - {'path': "/var/log/containers/neutron"}
   tags:
     - install
     - neutron
 
-- name: render neutron-dhcp-agent container
+- name: Render neutron-dhcp-agent container
   become: true
   ansible.builtin.template:
     src: "neutron_dhcp_agent.yaml.j2"
     dest: "/var/lib/openstack/config/containers/neutron_dhcp_agent.yaml"
     setype: "container_file_t"
-    mode: 0644
+    mode: "0644"
   notify:
-  - restart neutron-dhcp-agent
+    - Restart neutron-dhcp-agent
   tags:
     - install
     - neutron
