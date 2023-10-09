@@ -66,6 +66,7 @@
   register: ovs_external_ids
   changed_when: ovs_external_ids.rc == 0
   failed_when: ovs_external_ids.rc != 0
+  when: edpm_ovn_ovs_external_ids | length > 0
 
 - name: Configure OVS other_config
   ansible.builtin.shell: >
@@ -73,6 +74,7 @@
   register: ovs_other_config
   changed_when: ovs_other_config.rc == 0
   failed_when: ovs_other_config.rc != 0
+  when: edpm_ovn_ovs_other_config | length > 0
 
 - name: Add OVS Manager
   block:

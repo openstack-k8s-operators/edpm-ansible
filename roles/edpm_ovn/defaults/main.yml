@@ -85,5 +85,4 @@ edpm_ovn_ovs_external_ids:
   rundir: "/var/run/openvswitch"
 
 # Set openvswitch other_config.
-edpm_ovn_ovs_other_config:
-  vlan-limit: 0
+edpm_ovn_ovs_other_config: {}
