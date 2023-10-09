@@ -15,10 +15,17 @@
 # under the License.
 
 - name: Apply user provided DDP package
+  when: edpm_ddp_package | string != "" and edpm_ddp_package | string != "ddp"
   block:
+    - name: List DDP packages
+      ansible.builtin.find:
+        path: "/lib/firmware/intel/ice/{{ edpm_ddp_package }}"
+        patterns: "ice[_-]?*.pkg*"
+      register: _find_ddp_package_files
+
     - name: Get latest version of specified Ddp package(s)
-      ansible.builtin.shell: "ls --sort=version -r /lib/firmware/intel/ice/{{ edpm_ddp_package }}/ice[_-]?*.pkg*"
-      register: ddp_package_files
+      ansible.builtin.set_fact:
+        ddp_last_package_file: "{{ _find_ddp_package_files.files | map(attribute='path') | list | community.general.version_sort | last }}"
 
     - name: Remove existing DDP package
       become: true
@@ -44,31 +51,37 @@
 
     - name: Select and deploy DDP package
       become: true
+      when: ddp_last_package_file is defined
       block:
-        - name: check package file name ice.pkg
+        - name: Check package file name ice.pkg
           ansible.builtin.set_fact:
             package_filename: "ice.pkg"
           when: ice_pkg.stat.exists
 
-        - name: check package file name ice.pkg.xz
+        - name: Check package file name ice.pkg.xz
           ansible.builtin.set_fact:
             package_filename: "ice.pkg.xz"
           when: ice_pkg_xz.stat.exists
 
         - name: Confiure ddp/ice.pkg
-          vars:
-            ddp_package_file: "{{ ddp_package_files.stdout.split('\n')[0] }}"
           ansible.builtin.file:
-            src: '{{ ddp_package_file }}'
+            src: '{{ ddp_last_package_file }}'
             dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
             state: link
-          when: edpm_ddp_package|string != ''
+          when: edpm_ddp_package | string != ''
 
-        - name: Load the new ice package
-          ansible.builtin.shell: |-
-            dracut -f
-            rmmod ice
-            modprobe ice
-      when: ddp_package_files is defined
+        - name: Rebuild initramfs image
+          ansible.builtin.command: dracut -f
+          register: _dracut_command_output
+          changed_when: _dracut_command_output.rc == 0
+          failed_when: _dracut_command_output.rc != 0
 
-  when: edpm_ddp_package|string != "" and edpm_ddp_package|string != "ddp"
+        - name: Unload ice module
+          community.general.modprobe:
+            name: ice
+            state: absent
+
+        - name: Looad new ice module
+          community.general.modprobe:
+            name: ice
+            state: present
