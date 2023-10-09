@@ -30,20 +30,20 @@
         - configure
         - neutron
       notify:
-      - restart neutron-sriov-agent
+        - Restart neutron-sriov-agent
 
-    - name: discover secrets in {{ edpm_neutron_sriov_agent_config_src }}
+    - name: Discover secrets in {{ edpm_neutron_sriov_agent_config_src }}
       ansible.builtin.find:
         paths: "{{ edpm_neutron_sriov_agent_config_src }}"
         file_type: file
-        recurse: yes
+        recurse: true
         patterns:
-        - "*sriov*conf"
+          - "*sriov*conf"
       register: edpm_neutron_sriov_secrets
       delegate_to: localhost
       become: false
 
-    - name: flatten secrets into {{ edpm_neutron_sriov_agent_config_dir }}
+    - name: Flatten secrets into {{ edpm_neutron_sriov_agent_config_dir }}
       ansible.builtin.copy:
         src: "{{ item.path }}"
         dest: "{{ edpm_neutron_sriov_agent_config_dir }}/{{ item.path | basename }}"

@@ -21,24 +21,24 @@
     state: directory
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - {'path': "/var/lib/openstack/config/containers", "mode": "0750" }
-    - {'path': "/var/lib/neutron", "mode": "0750" }
-    - {'path': "{{ edpm_neutron_sriov_agent_config_dir }}", 'mode': '0755'}
-    - {'path': "/var/log/containers/stdouts"}
-    - {'path': "/var/log/containers/neutron"}
+    - { 'path': "/var/lib/openstack/config/containers", "mode": "0750" }
+    - { 'path': "/var/lib/neutron", "mode": "0750" }
+    - { 'path': "{{ edpm_neutron_sriov_agent_config_dir }}", "mode": "0755" }
+    - { 'path': "/var/log/containers/stdouts" }
+    - { 'path': "/var/log/containers/neutron" }
   tags:
     - install
     - neutron
 
-- name: render neutron-sriov-agent container
+- name: Render neutron-sriov-agent container
   become: true
   ansible.builtin.template:
     src: "neutron_sriov_agent.yaml.j2"
     dest: "/var/lib/openstack/config/containers/neutron_sriov_agent.yaml"
     setype: "container_file_t"
-    mode: 0644
+    mode: "0644"
   notify:
-  - restart neutron-sriov-agent
+    - Restart neutron-sriov-agent
   tags:
     - install
     - neutron
