@@ -1,4 +1,5 @@
 ---
+
 argument_specs:
   # ./roles/edpm_ovn_bgp_agent/tasks/main.yml entry point
   main:
@@ -82,7 +83,7 @@ argument_specs:
       edpm_ovn_bgp_agent_ovs_manager:
         type: str
         default: "ptcp:6640:127.0.0.1"
-        description:  OVSDB connection method.
+        description: OVSDB connection method.
       edpm_ovn_bgp_agent_image:
         type: str
         default: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
