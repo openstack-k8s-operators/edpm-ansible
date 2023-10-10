@@ -27,7 +27,7 @@
   become: true
   when:
     - ansible_facts.selinux.status == "enabled"
-  sefcontext:
+  community.general.sefcontext:
     target: "/var/lib/edpm-config(/.*)?"
     setype: container_file_t
     selevel: s0
@@ -55,7 +55,7 @@
     state: directory
     setype: container_file_t
     selevel: s0
-    mode: '0750'
+    mode: "0750"
 
 - name: Check for previous run of NetworkConfig
   become: true
@@ -97,21 +97,21 @@
       ansible.builtin.file:
         path: /etc/os-net-config
         state: directory
-        mode: '0755'
+        mode: "0755"
 
     - name: Create os-net-config mappings from lookup data
       edpm_os_net_config_mappings:
         net_config_data_lookup:
           "{{ edpm_network_config_os_net_config_mappings }}"
-      when: not ansible_check_mode|bool
+      when: not ansible_check_mode | bool
       register: os_net_config_mappings_result
 
     - name: Write os-net-config mappings file /etc/os-net-config/mapping.yaml
       ansible.builtin.copy:
         content: "{{ os_net_config_mappings_result.mapping | to_nice_yaml }}"
         dest: /etc/os-net-config/mapping.yaml
-        mode: '0644'
-      when: os_net_config_mappings_result.changed|bool
+        mode: "0644"
+      when: os_net_config_mappings_result.changed | bool # noqa: no-handler
 
     - name: Manage NetworkConfig with edpm_os_net_config module
       block:
@@ -127,7 +127,7 @@
       ansible.builtin.copy:
         content: "{{ network_config_result.rc }}"
         dest: /var/lib/edpm-config/os-net-config.returncode
-        mode: '0644'
+        mode: "0644"
       when:
         - network_config_result.rc is defined
 
@@ -138,7 +138,7 @@
           network:
             config: disabled
         dest: /etc/cloud/cloud.cfg.d/99-edpm-disable-network-config.cfg
-        mode: '0644'
+        mode: "0644"
       when:
         - network_config_result.rc is defined
         - network_config_result.rc == 0
