@@ -14,9 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: restart neutron-sriov-agent container
+- name: Restart neutron-sriov-agent container
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: "edpm_neutron_sriov_agent.service"
-  listen: "restart neutron-sriov-agent"
+  listen: "Restart neutron-sriov-agent"
