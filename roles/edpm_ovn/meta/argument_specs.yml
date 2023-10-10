@@ -30,15 +30,15 @@ argument_specs:
         type: str
       edpm_ovn_bridge_mappings:
         default:
-        - datacentre:br-ex
+          - datacentre:br-ex
         description: ''
         type: list
       edpm_ovn_chassis_mac_first_octets:
         default:
-        - 0e
-        - 1e
-        - 2e
-        - 3e
+          - 0e
+          - 1e
+          - 2e
+          - 3e
         description: ''
         type: list
       edpm_ovn_chassis_mac_mapping_prefixes:
@@ -66,18 +66,18 @@ argument_specs:
         type: str
       edpm_ovn_controller_common_volumes:
         default:
-        - /lib/modules:/lib/modules:ro
-        - /run:/run
-        - /var/lib/openvswitch/ovn:/run/ovn:shared,z
-        - /var/log/containers/openvswitch:/var/log/openvswitch:z
-        - /var/log/containers/openvswitch:/var/log/ovn:z
-        - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
+          - /lib/modules:/lib/modules:ro
+          - /run:/run
+          - /var/lib/openvswitch/ovn:/run/ovn:shared,z
+          - /var/log/containers/openvswitch:/var/log/openvswitch:z
+          - /var/log/containers/openvswitch:/var/log/ovn:z
+          - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
         description: List of volumes in a mount point form.
         type: list
       edpm_ovn_controller_tls_volumes:
         default:
-        - /etc/pki/tls/certs/:/etc/pki/tls/certs/
-        - /etc/pki/tls/private/:/etc/pki/tls/private/
+          - /etc/pki/tls/certs/:/etc/pki/tls/certs/
+          - /etc/pki/tls/private/:/etc/pki/tls/private/
         description: List of TLS volumes in a mount point form.
         type: list
       edpm_ovn_dbs:

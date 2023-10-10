@@ -16,28 +16,28 @@
 
 - name: Apply ovsdb configuration from configMaps
   block:
-  - name: Check that config file exists
-    stat:
-      path: "{{ edpm_ovn_config_src }}/ovsdb-config"
-    register: ovsdb_config_exists
-    delegate_to: localhost
-    become: false
+    - name: Check that config file exists
+      ansible.builtin.stat:
+        path: "{{ edpm_ovn_config_src }}/ovsdb-config"
+      register: ovsdb_config_exists
+      delegate_to: localhost
+      become: false
 
-  - name: Load ovsdb configuration from file
-    ansible.builtin.include_vars:
-      file: "{{ edpm_ovn_config_src }}/ovsdb-config"
-      name: edpm_ovn_configmap_facts
-    when:
-      ovsdb_config_exists.stat.exists
-    delegate_to: localhost
-    become: false
+    - name: Load ovsdb configuration from file
+      ansible.builtin.include_vars:
+        file: "{{ edpm_ovn_config_src }}/ovsdb-config"
+        name: edpm_ovn_configmap_facts
+      when:
+        ovsdb_config_exists.stat.exists
+      delegate_to: localhost
+      become: false
 
-  - name: Append ovsdb configMap options to external_ids
-    ansible.builtin.set_fact:
-      edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(edpm_ovn_configmap_facts|default({})) }}"
+    - name: Append ovsdb configMap options to external_ids
+      ansible.builtin.set_fact:
+        edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(edpm_ovn_configmap_facts | default({})) }}"
 
 - name: Configure GW ports on chassis setting when enabled
-  when: edpm_enable_chassis_gw|default(false)
+  when: edpm_enable_chassis_gw | default(false)
   block:
     - name: Set enable-chassis-as-gw
       ansible.builtin.set_fact:
@@ -62,20 +62,32 @@
 
 - name: Configure OVS external_ids
   ansible.builtin.shell: >
-    ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() %} external_ids:{{ key }}={{ value }} {% endfor %}
+    ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
+  register: ovs_external_ids
+  changed_when: ovs_external_ids.rc == 0
+  failed_when: ovs_external_ids.rc != 0
 
 - name: Configure OVS other_config
   ansible.builtin.shell: >
     ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
+  register: ovs_other_config
+  changed_when: ovs_other_config.rc == 0
+  failed_when: ovs_other_config.rc != 0
 
 - name: Add OVS Manager
   block:
     - name: Check if OVS Manager already exists
       ansible.builtin.shell: >
+        set -o pipefail
         ovs-vsctl show | grep -q "Manager"
       register: ovs_manager_configured
-      ignore_errors: yes
+      changed_when: true
+      failed_when: false
+
     - name: Add OVS Manager if not exists
       ansible.builtin.shell: >
         ovs-vsctl --timeout=5 --id=@manager -- create Manager target=\"ptcp:6640:127.0.0.1\" -- add Open_vSwitch . manager_options @manager
       when: ovs_manager_configured.rc == 1
+      register: ovs_manager_if_not_exists
+      changed_when: ovs_manager_if_not_exists.rc == 0
+      failed_when: ovs_manager_if_not_exists.rc != 0
