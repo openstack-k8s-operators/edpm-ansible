@@ -35,11 +35,5 @@
           & stop
         create: true
         path: /etc/rsyslog.d/podman.conf
-        mode: 0644
-      register: logconfig
-
-    - name: Restart rsyslog service after logging conf change
-      ansible.builtin.systemd:
-        name: rsyslog
-        state: restarted
-      when: logconfig is changed
+        mode: "0644"
+      notify: Restart rsyslog

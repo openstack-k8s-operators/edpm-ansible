@@ -9,5 +9,5 @@
   ansible.builtin.file:
     path: /etc/rsyslog.d/openstack-healthcheck.conf
     state: absent
-  ignore_errors: true
+  failed_when: false
   notify: Restart rsyslog

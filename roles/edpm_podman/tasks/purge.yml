@@ -15,17 +15,16 @@
 # under the License.
 
 
-- name: Podman image prune
+- name: Clean podman images
   become: true
-  block:
-    - name: Clean podman images
-      ansible.builtin.command: podman image prune -a -f
-  rescue:
-    # In case -f isn't available yet, we fallback to old way.
-    # https://bugs.launchpad.net/edpm/+bug/1889418
-    - name: Clean podman images
-      ansible.builtin.command: podman image prune -a
+  ansible.builtin.command: podman image prune -a -f
+  register: clean_podman_image
+  changed_when: clean_podman_image.rc == 0
+  failed_when: clean_podman_image.rc != 0
 
 - name: Clean podman volumes
   become: true
   ansible.builtin.command: podman volume prune -f
+  register: clean_podman_volumes
+  changed_when: clean_podman_volumes.rc == 0
+  failed_when: clean_podman_volumes.rc != 0

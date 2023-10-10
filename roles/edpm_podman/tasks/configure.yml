@@ -19,7 +19,7 @@
 - name: Configure edpm_container_manage to generate systemd drop-in dependencies
   ansible.builtin.copy:
     dest: /etc/sysconfig/podman_drop_in
-    mode: '0644'
+    mode: "0644"
     content: |
       This file makes edpm_container_manage generate additional systemd
       dependencies for containers that have special
