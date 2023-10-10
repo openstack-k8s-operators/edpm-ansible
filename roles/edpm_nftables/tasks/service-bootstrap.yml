@@ -14,23 +14,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# systemctl will return 0 if enabled, 3 if disabled
-- name: Get nftables service state
-  ansible.builtin.command: systemctl status nftables
-  register: nftables_status
-  failed_when: nftables_status.rc not in [0, 3]
+- name: Gather service facts
+  ansible.builtin.service_facts:
 
 - name: Switch firewall engine
   become: true
   when:
-    - nftables_status.rc == 3
+    - ansible_facts.services["nftables.service"] is defined
+    - ansible_facts.services["nftables.service"].status == "disabled"
   block:
-    # systemctl will return 0 if success, 1 if unit not found
     - name: Ensure legacy iptables services are off
-      ansible.builtin.command: "systemctl disable --now {{ item }}"
-      register: ipt_service
-      failed_when:
-        - ipt_service.rc not in [0, 1]
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: false
+        state: stopped
       loop:
         - iptables.service
         - ip6tables.service
@@ -43,3 +40,6 @@
 
     - name: Empty nftables from anything that may lay around
       ansible.builtin.command: nft flush ruleset
+      register: nft_flush_ruleset
+      changed_when: nft_flush_ruleset.rc == 0
+      failed_when: nft_flush_ruleset.rc != 0

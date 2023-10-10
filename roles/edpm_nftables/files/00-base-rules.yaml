@@ -1,8 +1,10 @@
+---
+
 - rule:
     proto: all
     state:
-    - RELATED
-    - ESTABLISHED
+      - RELATED
+      - ESTABLISHED
   rule_name: 000 accept related established rules
 - rule:
     ipversion: ipv4
@@ -24,7 +26,7 @@
     ipversion: ipv6
     proto: udp
     state:
-    - NEW
+      - NEW
   rule_name: 004 accept ipv6 dhcpv6
 - rule:
     jump: LOG

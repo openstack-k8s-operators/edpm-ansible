@@ -23,12 +23,13 @@
         state: directory
         owner: root
         group: root
-        mode: '0750'
+        mode: "0750"
 
     - name: Push default ruleset snipet
       ansible.builtin.copy:
         dest: "{{ edpm_nftables_src }}/edpm-nftables-base.yaml"
         src: 00-base-rules.yaml
+        mode: "0644"
 
 - name: IPtables compatibility layout
   become: true
@@ -39,16 +40,21 @@
         src: iptables.nft
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     - name: Load empty ruleset
       ansible.builtin.command: nft -f /etc/nftables/iptables.nft
+      register: nft_iptables
+      changed_when: nft_iptables.rc == 0
+      failed_when: nft_iptables.rc != 0
 
 # Get current nft rules in JSON format, with our iptables compat content.
 - name: Get current nftables content
   become: true
   ansible.builtin.command: nft -j list ruleset
   register: nft_current_rules
+  changed_when: nft_current_rules.rc == 0
+  failed_when: nft_current_rules.rc != 0
 
 - name: Load firewall snippets
   become: true
@@ -56,15 +62,15 @@
   edpm_nftables_from_files:
     src: "{{ edpm_nftables_src }}"
 
-- name: nftables files generation
+- name: Generate nftables files
   become: true
   when:
-    - not ansible_check_mode|bool
+    - not ansible_check_mode
   block:
     # Create a dedicated file for jumps - makes easier to manage afterward.
     # That one will be loaded upon boot only.
     - name: Generate chain jumps
-      ignore_errors: "{{ ansible_check_mode|bool }}"
+      ignore_errors: "{{ ansible_check_mode }}"
       vars:
         current_nft: "{{ nft_current_rules }}"
         nft_is_update: false
@@ -75,14 +81,14 @@
         src: jump-chain.j2
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     # Create a special "update chain jumps" file, adding just the MISSING
     # jumps in the main, default chains. This will avoid useless duplication
     # upon update/day-2 operation, since we cannot really flush INPUT and other
     # default chains.
     - name: Generate chain jumps
-      ignore_errors: "{{ ansible_check_mode|bool }}"
+      ignore_errors: "{{ ansible_check_mode }}"
       vars:
         current_nft: "{{ nft_current_rules }}"
         nft_is_update: true
@@ -93,7 +99,7 @@
         src: jump-chain.j2
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     # Note: we do NOT include this one for boot, since chains are
     # already empty!
@@ -107,7 +113,7 @@
         src: flush-chain.j2
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     - name: Generate nft edpm chains
       register: nft_chains
@@ -119,7 +125,7 @@
         src: chains.j2
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     - name: Generate nft ruleset in static file
       register: nft_ruleset
@@ -131,7 +137,7 @@
         src: ruleset.j2
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
 
     - name: Create a sentinel file when nft rules are changed
       ansible.builtin.file:
@@ -139,7 +145,7 @@
         state: touch
         owner: root
         group: root
-        mode: '0600'
+        mode: "0600"
       when:
         - nft_ruleset is defined
         - nft_ruleset is changed
@@ -151,13 +157,17 @@
 - name: Validate all of the generated content before loading
   become: true
   when:
-    - not ansible_check_mode|bool
+    - not ansible_check_mode
   ansible.builtin.shell: >-
+    set -o pipefail;
     cat /etc/nftables/edpm-chains.nft
     /etc/nftables/edpm-flushes.nft
     /etc/nftables/edpm-rules.nft
     /etc/nftables/edpm-update-jumps.nft
     /etc/nftables/edpm-jumps.nft | nft -c -f -
+  register: nftables_validate
+  changed_when: nftables_validate.rc == 0
+  failed_when: nftables_validate.rc != 0
 
 # Order is important here.
 # Please keep that in mind in case you want to add some new ruleset in their
