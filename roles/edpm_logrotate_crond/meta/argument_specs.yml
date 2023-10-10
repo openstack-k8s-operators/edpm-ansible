@@ -84,7 +84,7 @@ argument_specs:
         description: Configures the dateext parameter.
       edpm_logrotate_crond_dateformat:
         default: null
-        description:  Configures the dateformat parameter used with dateext parameter.
+        description: Configures the dateformat parameter used with dateext parameter.
       edpm_logrotate_crond_dateyesterday:
         default: null
         description: Configures the dateyesterday parameter used with dateext parameter.
