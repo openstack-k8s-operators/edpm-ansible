@@ -100,7 +100,7 @@ Add extraMount to your OpenStackDataPlane CR
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use kustomize or "oc edit" to add the edpm-ansible PVC to the
-OpenStackDataPlane's /spec/roles/edpm-compute/nodeTemplate/extraMounts. The
+OpenStackDataPlane's /spec/nodeTemplate/extraMounts. The
 mountPath is where the edpm-ansible *roles* and *plugins* directories are
 located inside the openstack-ansibleee-runner container image. The
 OpenStackDataPlane CR should contain the following snippet:
@@ -108,16 +108,14 @@ OpenStackDataPlane CR should contain the following snippet:
 .. code-block:: console
 
   spec:
-    roles:
-      edpm-compute:
-        nodeTemplate:
-          extraMounts:
-          - extraVolType: edpm-ansible
-            mounts:
-            - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
-              name: edpm-ansible
-            volumes:
-            - name: edpm-ansible
-              persistentVolumeClaim:
-                claimName: edpm-ansible
-                readOnly: true
+    nodeTemplate:
+      extraMounts:
+      - extraVolType: edpm-ansible
+        mounts:
+        - mountPath: /usr/share/ansible/collections/ansible_collections/osp/edpm
+          name: edpm-ansible
+        volumes:
+        - name: edpm-ansible
+          persistentVolumeClaim:
+            claimName: edpm-ansible
+            readOnly: true
