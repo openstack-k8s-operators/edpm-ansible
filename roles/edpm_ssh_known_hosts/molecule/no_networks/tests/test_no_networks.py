@@ -25,7 +25,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_ssh_host_keys(host):
     expected = [
-        'instance ssh-rsa AAAATEST',
+        'instance* ssh-rsa AAAATEST',
     ]
 
     for line in expected:

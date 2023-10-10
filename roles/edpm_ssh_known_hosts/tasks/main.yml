@@ -72,7 +72,7 @@
           {%     if 'canonical_hostname' in hostdata %}
           {%       set _ = entries.append(hostdata['canonical_hostname']) %}
           {%     endif %}
-          {%     set _ = entries.append(host) %}
+          {%     set _ = entries.append(host ~ '*') %}
           {%     set host = entries|unique|join(',') %}
           {%     for key, type in key_types.items() %}
           {%       if key in hostdata['ansible_facts'] %}
