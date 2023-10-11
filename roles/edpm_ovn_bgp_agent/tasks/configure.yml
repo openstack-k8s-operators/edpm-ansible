@@ -18,7 +18,7 @@
   ansible.builtin.template:
     src: ovn-bgp-agent.conf.j2
     dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/bgp-agent.conf"
-    mode: '640'
+    mode: "640"
     selevel: s0
     setype: container_file_t
   register: _ovn_bgp_agent_config_result
@@ -27,10 +27,15 @@
   block:
     - name: Check if OVS Manager already exists
       ansible.builtin.shell: >
+        set -o pipefail
         ovs-vsctl show | grep -q "Manager"
       register: ovs_manager_configured
-      ignore_errors: yes
+      failed_when: false
+      changed_when: true
     - name: Add OVS Manager if not exists
       ansible.builtin.shell: >
         ovs-vsctl --timeout=5 --id=@manager -- create Manager target=\"{{ edpm_ovn_bgp_agent_ovs_manager }}\" -- add Open_vSwitch . manager_options @manager
       when: ovs_manager_configured.rc == 1
+      register: ovs_manager_if_not_exists
+      changed_when: ovs_manager_if_not_exists.rc == 0
+      failed_when: ovs_manager_if_not_exists.rc != 0
