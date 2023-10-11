@@ -19,7 +19,7 @@
   become: true
   check_mode: false
   tags:
-  - edpm_ssh_known_hosts
+    - edpm_ssh_known_hosts
   block:
     - name: Create temporary file for ssh_known_hosts
       ansible.builtin.tempfile:
@@ -42,7 +42,7 @@
       ansible.builtin.copy:
         content: "{{ existing_ssh_known_hosts['content'] | b64decode }}"
         dest: "{{ ssh_known_hosts_tmp.path }}"
-        mode: 0644
+        mode: "0644"
       when:
         - _ssh_known_hosts.stat.exists | bool
 
@@ -88,14 +88,17 @@
         path: "{{ ssh_known_hosts_tmp.path }}"
         block: "{{ ssh_known_hosts_lines }}"
         create: true
-        mode: 0644
+        mode: "0644"
 
-    # Workaround https://bugs.launchpad.net/edpm/+bug/1810932
+    # Workaround https://bugs.launchpad.net/tripleo/+bug/1810932
     # Ansible modules perform a replace instead of in-place modification.
     # This breaks propagation of changes to containers that bind mount ssh_known_hosts
     - name: In-place update of /etc/ssh_known_hosts
       ansible.builtin.shell: |-
         cat '{{ ssh_known_hosts_tmp.path }}' > /etc/ssh/ssh_known_hosts
+      register: update_ssh_known_hosts
+      changed_when: update_ssh_known_hosts.rc == 0
+      failed_when: update_ssh_known_hosts.rc != 0
 
     - name: Remove temp file
       ansible.builtin.file:
