@@ -37,3 +37,5 @@
   no_log: "{{ edpm_podman_hide_sensitive_logs | bool }}"
   loop: "{{ query('dict', edpm_container_registry_logins) }}"
   register: registry_login_buildah
+  changed_when: registry_login_buildah.rc == 0
+  failed_when: registry_login_buildah.rc != 0

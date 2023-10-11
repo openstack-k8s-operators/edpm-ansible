@@ -40,6 +40,9 @@
       ansible.builtin.command: ip link delete cni0
       when:
         - '"cni0" in ansible_facts["interfaces"]'
+      register: delete_legacy_interface
+      changed_when: delete_legacy_interface.rc == 0
+      failed_when: delete_legacy_interface.rc != 0
 
     # don't update the network config if the network is already running
     # meaning cni-podman0 is running somewhere
@@ -53,7 +56,7 @@
             path: /etc/cni/net.d
             state: directory
             recurse: true
-            mode: '0755'
+            mode: "0755"
             owner: root
             group: root
 
@@ -61,7 +64,7 @@
           ansible.builtin.copy:
             dest: /etc/cni/net.d/87-podman-bridge.conflist
             content: "{{ edpm_podman_default_network_config | to_json }}"
-            mode: '0644'
+            mode: "0644"
             owner: root
             group: root
 
@@ -74,18 +77,20 @@
             path: /etc/containers/networks
             state: directory
             recurse: true
-            mode: '0755'
+            mode: "0755"
             owner: root
             group: root
         - name: Get current podman network
           ansible.builtin.shell: |
             podman network inspect podman
           register: podman_network_inspect
+          changed_when: podman_network_inspect.rc == 0
+          failed_when: podman_network_inspect.rc != 0
         - name: Update the default network configuration
           ansible.builtin.template:
             src: podman_network_config.j2
             dest: /etc/containers/networks/podman.json
-            mode: '0644'
+            mode: "0644"
             owner: root
             group: root
           when:
@@ -98,7 +103,7 @@
         owner: root
         group: root
         setype: etc_t
-        mode: '0644'
+        mode: "0644"
 
     - name: Write containers.conf
       community.general.ini_file:
@@ -106,7 +111,7 @@
         owner: root
         group: root
         setype: etc_t
-        mode: '0644'
+        mode: "0644"
         create: true
         section: "{{ item.section }}"
         option: "{{ item.option }}"
