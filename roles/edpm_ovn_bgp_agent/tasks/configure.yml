@@ -26,7 +26,7 @@
 - name: Add OVS Manager
   block:
     - name: Check if OVS Manager already exists
-      ansible.builtin.shell: >
+      ansible.builtin.shell: |
         set -o pipefail
         ovs-vsctl show | grep -q "Manager"
       register: ovs_manager_configured
