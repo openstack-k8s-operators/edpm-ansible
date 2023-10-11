@@ -48,10 +48,10 @@
 
 - name: Configure firewall for the ovn
   ansible.builtin.include_role:
-      name: osp.edpm.edpm_nftables
-      tasks_from: "configure.yml"
+    name: osp.edpm.edpm_nftables
+    tasks_from: "configure.yml"
 
 - name: Apply firewall for the ovn
   ansible.builtin.include_role:
-      name: osp.edpm.edpm_nftables
-      tasks_from: "run.yml"
+    name: osp.edpm.edpm_nftables
+    tasks_from: "run.yml"

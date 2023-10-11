@@ -17,9 +17,15 @@
 - name: Cleanup hw-offload when no longer required
   ansible.builtin.shell: >
     ovs-vsctl remove open . other_config hw-offload
+  register: cleanup_hw_offload
+  changed_when: cleanup_hw_offload.rc == 0
+  failed_when: cleanup_hw_offload.rc != 0
   when: not edpm_enable_hw_offload | bool
 
 - name: Cleanup enable-chassis-as-gw when chassis GW not enabled
   ansible.builtin.shell: >
     ovs-vsctl remove open . external_ids ovn-cms-options
+  register: cleanup_enable_chassis_as_gw
+  changed_when: cleanup_enable_chassis_as_gw.rc == 0
+  failed_when: cleanup_enable_chassis_as_gw.rc != 0
   when: not edpm_enable_chassis_gw | bool
