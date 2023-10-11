@@ -20,8 +20,8 @@
     path: "{{ item.path }}"
     state: directory
     setype: "{{ item.setype | default('container_file_t') }}"
-    owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
     mode: "{{ item.mode | default('750') }}"
     recurse: true
   loop:
@@ -52,12 +52,18 @@
     mode: "{{ item.mode | default('640') }}"
     remote_src: "{{ telemetry_test | default('false') }}"
   loop:
-    - { "src": "{{ edpm_ceilometer_config_src }}/ceilometer.conf", "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf" }
-    - { "src": "{{ edpm_ceilometer_config_src }}/polling.yaml", "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml" }
-    - { "src": "{{ edpm_ceilometer_config_src }}/ceilometer_agent_compute.json", "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json" }
-    - { "src": "{{ edpm_ceilometer_config_src }}/ceilometer-agent-compute.json", "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json" }
-    - { "src": "{{ edpm_ceilometer_config_src }}/ceilometer_agent_ipmi.json", "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json" }
-    - { "src": "{{ edpm_ceilometer_config_src }}/ceilometer-agent-ipmi.json", "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json" }
+    - "src": "{{ edpm_ceilometer_config_src }}/ceilometer.conf"
+      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
+    - "src": "{{ edpm_ceilometer_config_src }}/polling.yaml"
+      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
+    - "src": "{{ edpm_ceilometer_config_src }}/ceilometer_agent_compute.json"
+      "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json"
+    - "src": "{{ edpm_ceilometer_config_src }}/ceilometer-agent-compute.json"
+      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json"
+    - "src": "{{ edpm_ceilometer_config_src }}/ceilometer_agent_ipmi.json"
+      "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
+    - "src": "{{ edpm_ceilometer_config_src }}/ceilometer-agent-ipmi.json"
+      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
   tags:
     - edpm_telemetry
 
