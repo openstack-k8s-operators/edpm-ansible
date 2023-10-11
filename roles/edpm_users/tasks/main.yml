@@ -14,11 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: create host users and groups
+- name: Create host users and groups
   ansible.builtin.include_tasks: create_users_and_groups.yml
   loop: "{{ edpm_users_users }}"
 
-- name: create host directories
+- name: Create host directories
   become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -26,6 +26,6 @@
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     setype: "{{ item.setype | default(omit) }}"
-    seuser: "{{item.seuser | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop: "{{ edpm_users_extra_dirs }}"

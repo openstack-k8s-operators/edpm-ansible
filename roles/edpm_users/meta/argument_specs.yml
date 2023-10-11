@@ -4,7 +4,7 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_users role.
     description:
-     - |
+      - |
         This role will create the users and groups listed in this variable and is intended to be used
         whenever we required users and or groups to be created on the host that match the users and or groups
         of the containers running on the host. it can also create directories and set their ownership and permissions.
