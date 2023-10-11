@@ -38,6 +38,13 @@
     tasks_from: download_cache.yml
   tags:
     - edpm_ovn_bgp_agent
+
+- name: Download images for edpm_neutron_metadata role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_metadata
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_neutron_metadata
     - download_cache
 
 - name: Download images for edpm_multipathd role

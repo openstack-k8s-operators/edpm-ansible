@@ -19,9 +19,9 @@
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
-      test_deps_edpm_packages:
+      test_deps_extra_packages:
         - openvswitch
-        - libibverbs
+        - iproute
         - podman
 - name: Prepare
   hosts: all

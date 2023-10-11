@@ -1,0 +1,52 @@
+---
+# defaults file for edpm_ovn
+
+# seconds between retries for download tasks
+edpm_neutron_metadata_images_download_delay: 5
+
+# number of retries for download tasks
+edpm_neutron_metadata_images_download_retries: 5
+
+edpm_neutron_metadata_config_src: /var/lib/openstack/configs/neutron-metadata
+edpm_neutron_metadata_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
+edpm_neutron_metadata_agent_log_dir: "/var/log/neutron"
+
+edpm_neutron_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
+
+edpm_neutron_metadata_common_volumes:
+  - /run/openvswitch:/run/openvswitch:z
+  - "{{ edpm_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z"
+  - /run/netns:/run/netns:shared
+  - /var/log/containers/neutron:/var/log/neutron:z
+  - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
+
+# Neutron conf
+# DEFAULT
+edpm_neutron_metadata_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}' # also in missing vars
+#edpm_ovn_metadata_agent_DEFAULT_: ''
+# oslo_concurrency
+edpm_neutron_metadata_agent_oslo_concurrency_lock_patch: '$state_path/lock'
+# agent
+edpm_neutron_metadata_agent_agent_report_interval: '300'
+
+# rootwrap.conf
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_use_syslog: 'False'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_daemon_timeout: '600'
+edpm_neutron_metadata_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
+
+# neutron-ovn-metadata-agent.conf
+edpm_neutron_metadata_agent_DEFAULT_debug: 'True'
+edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host: '{{ edpm_neutron_metadata_agent_DEFAULT_host }}'
+edpm_neutron_metadata_agent_DEFAULT_nova_metadata_protocol: 'http'
+edpm_neutron_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ''
+edpm_neutron_metadata_agent_DEFAULT_metadata_workers: '2'
+edpm_neutron_metadata_agent_DEFAULT_state_path: '/var/lib/neutron'
+edpm_neutron_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
+edpm_neutron_metadata_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
+edpm_neutron_metadata_agent_ovs_ovsdb_connection_timeout: '180'
+edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval: '60000'
+edpm_neutron_metadata_agent_ovn_ovn_sb_connection: ''

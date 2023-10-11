@@ -1,0 +1,12 @@
+---
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+  loop:
+    - "{{ edpm_neutron_metadata_agent_image }}"
+  become: true
+  register: edpm_neutron_metadata_images_download
+  until: edpm_neutron_metadata_images_download.failed == false
+  retries: "{{ edpm_neutron_metadata_images_download_retries }}"
+  delay: "{{ edpm_neutron_metadata_images_download_delay }}"

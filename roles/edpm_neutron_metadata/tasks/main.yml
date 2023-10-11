@@ -1,5 +1,5 @@
 ---
-# Copyright 2021 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,16 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+- name: Include host prep tasks
+  ansible.builtin.import_tasks: install.yml
 
-- name: Converge
-  hosts: all
-  gather_facts: true
-  become: true
-  tasks:
-    - ansible.builtin.include_role:
-        name: "osp.edpm.edpm_ovn"
-      vars:
-        tenant_ip: "{{ ansible_host }}"
-        edpm_ovn_dbs:
-          - "{{ ansible_host }}"
-        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+- name: Include bootstrap tasks
+  ansible.builtin.import_tasks: bootstrap.yml
+
+- name: Configure neutron metadata agent
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Ensure neutron-metadata-agent is running
+  ansible.builtin.import_tasks: run.yml
