@@ -31,5 +31,8 @@
     # config, we need to ensure the host keys exist
     - name: Generate sshd host keys
       ansible.builtin.command: ssh-keygen -A
-      when:
+      register: generate_sshd_host_keys
+      changed_when: generate_sshd_host_keys.rc == 0
+      failed_when: generate_sshd_host_keys.rc != 0
+      when: # noqa: no-handler
         - _sshd_install_result.changed

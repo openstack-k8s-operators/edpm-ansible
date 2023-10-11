@@ -1,4 +1,5 @@
 ---
+
 argument_specs:
   # ./roles/edpm_sshd/tasks/main.yml entry point
   main:
@@ -30,7 +31,7 @@ argument_specs:
         default: ''
       edpm_sshd_password_authentication:
         type: bool
-        default: False
+        default: false
         description: Enable password authentication?
       edpm_sshd_server_options:
         type: dict
