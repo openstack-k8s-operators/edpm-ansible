@@ -1,0 +1,12 @@
+---
+
+- name: Deploy EDPM OVN BGP Agent
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: EDPM OVN BGP Agent
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovn_bgp_agent
+      tags:
+        - edpm_ovn_bgp_agent
