@@ -11,3 +11,4 @@
         - edpm-ansible-molecule-edpm_libvirt
         - edpm-ansible-molecule-edpm_nova
         - edpm-ansible-molecule-edpm_frr
+        - edpm-ansible-molecule-edpm_iscsid
