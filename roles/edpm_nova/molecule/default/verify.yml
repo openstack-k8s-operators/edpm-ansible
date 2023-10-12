@@ -40,3 +40,17 @@
         - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
         - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
         - "Copying /var/lib/kolla/config_files/02-nova-log.conf to /etc/nova/nova.conf.d/02-nova-log.conf"
+
+    - name: Check if user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: nova
+      register: nova_user
+
+    - name: Assert that nova user is created with kolla uid and gid
+      ansible.builtin.assert:
+        that:
+          # user
+          - "nova_user.ansible_facts.getent_passwd.nova[1] == '42436'"
+          # group
+          - "nova_user.ansible_facts.getent_passwd.nova[2] == '42436'"
