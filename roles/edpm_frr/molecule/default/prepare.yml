@@ -17,3 +17,33 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - podman
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      test_deps_edpm_packages:
+          - openvswitch
+          - python3-pip
+          - os-net-config
+  tasks:
+    - name: Install os-net-config
+      ansible.builtin.package:
+        name: os-net-config
+      become: true
+
+    - name: Setup for FRR
+      become: true
+      block:
+      - name: Force systemd to reread configs
+        ansible.builtin.systemd:
+          daemon_reload: true
+
+      - name: "Download required role packages"
+        ansible.builtin.import_role:
+          name: "osp.edpm.edpm_bootstrap"
+          tasks_from: "download_cache.yml"
+
+      - name: "Include edpm_bootstrap"
+        ansible.builtin.import_role:
+          name: "osp.edpm.edpm_bootstrap"
+          tasks_from: "bootstrap.yml"
