@@ -40,6 +40,8 @@
         - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
         - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
         - "Copying /var/lib/kolla/config_files/02-nova-log.conf to /etc/nova/nova.conf.d/02-nova-log.conf"
+        - "Copying /var/lib/kolla/config_files/ssh-config to /var/lib/nova/.ssh/config"
+        - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
 
     - name: Check if user exists
       ansible.builtin.getent:
@@ -54,3 +56,14 @@
           - "nova_user.ansible_facts.getent_passwd.nova[1] == '42436'"
           # group
           - "nova_user.ansible_facts.getent_passwd.nova[2] == '42436'"
+
+    - name: Stat /home/nova/.ssh/authorized_keys
+      become: true
+      ansible.builtin.stat:
+        path: /home/nova/.ssh/authorized_keys
+      register: nova_authorized_keys
+
+    - name: Assert that nova user has authorized_keys on the host
+      ansible.builtin.assert:
+        that:
+          - "nova_authorized_keys.stat.mode == '0600'"

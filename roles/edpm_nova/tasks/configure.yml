@@ -50,6 +50,7 @@
   loop:
     - {"src": "config.json.j2", "dest": "config.json"}
     - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
+    - {"src": "ssh-config", "dest": "ssh-config"}
   notify:
     - Restart nova
 
@@ -86,3 +87,22 @@
     edpm_users_extra_dirs: []
   tags:
     - edpm_users
+
+- name: Create .ssh directory for the nova user on the host
+  become: true
+  ansible.builtin.file:
+    path: "/home/nova/.ssh"
+    state: "directory"
+    owner: nova
+    group: nova
+    mode: '0700'
+
+- name: Copy the migration ssh public key as authorized_keys to the nova user
+  become: true
+  ansible.builtin.copy:
+    src: "{{ edpm_nova_config_dest }}/ssh-publickey"
+    remote_src: true
+    dest: "/home/nova/.ssh/authorized_keys"
+    mode: '0600'
+    owner: nova
+    group: nova
