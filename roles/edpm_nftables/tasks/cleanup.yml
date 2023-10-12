@@ -4,6 +4,9 @@
   block:
     - name: Empty ruleset
       ansible.builtin.command: nft flush ruleset
+      register: nft_flush_ruleset
+      changed_when: nft_flush_ruleset.rc == 0
+      failed_when: nft_flush_ruleset.rc != 0
 
     - name: Remove generated files
       ansible.builtin.file:
