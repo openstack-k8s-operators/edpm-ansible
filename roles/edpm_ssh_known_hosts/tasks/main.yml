@@ -73,6 +73,13 @@
           {%       set _ = entries.append(hostdata['canonical_hostname']) %}
           {%     endif %}
           {%     set _ = entries.append(host ~ '*') %}
+          {%     if 'ansible_port' in hostdata and hostdata['ansible_port']|int != 22 %}
+          {%       set hosts = [] %}
+          {%       for host in entries %}
+          {%           set _ = hosts.append("[%s]:%s" % (host, hostdata['ansible_port']) ) %}
+          {%       endfor %}
+          {%       set entries = hosts %}
+          {%     endif %}
           {%     set host = entries|unique|join(',') %}
           {%     for key, type in key_types.items() %}
           {%       if key in hostdata['ansible_facts'] %}

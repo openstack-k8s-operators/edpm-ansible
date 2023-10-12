@@ -25,6 +25,7 @@ provisioner:
           allovercloud:
             hosts:
               instance:
+                ansible_port: 2222
                 canonical_hostname: centos.localdomain
                 ctlplane_hostname: centos.ctlplane.localdomain
                 ctlplane_ip: 10.0.0.1
