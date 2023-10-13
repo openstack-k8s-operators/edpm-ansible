@@ -21,6 +21,8 @@
 - name: Gather repository list
   ansible.builtin.command: dnf repolist
   register: repo_list
+  changed_when: false
+  failed_when: repo_list.rc != 0
 
 - name: Output installed packages
   ansible.builtin.debug:
