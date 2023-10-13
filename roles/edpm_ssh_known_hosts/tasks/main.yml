@@ -72,6 +72,9 @@
           {%     if 'canonical_hostname' in hostdata %}
           {%       set _ = entries.append(hostdata['canonical_hostname']) %}
           {%     endif %}
+          {%     if 'ctlplane_ip' in hostdata %}
+          {%       set _ = entries.append(hostdata['ctlplane_ip']) %}
+          {%     endif %}
           {%     set _ = entries.append(host ~ '*') %}
           {%     if 'ansible_port' in hostdata and hostdata['ansible_port']|int != 22 %}
           {%       set hosts = [] %}
