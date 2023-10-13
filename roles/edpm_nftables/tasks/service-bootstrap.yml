@@ -31,6 +31,8 @@
       loop:
         - iptables.service
         - ip6tables.service
+      when:
+        - ansible_facts.services["{{ item }}"] is defined
 
     - name: Ensure nftables service is enabled and running
       ansible.builtin.systemd:
