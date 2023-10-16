@@ -75,3 +75,14 @@
   loop: "{{ edpm_nova_configmaps.files }}"
   notify:
     - Restart nova
+
+- name: Configure nova user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42436 is matching with the uid and gid created by kolla in the nova containers
+      - {"name": "nova", "uid": "42436", "gid": "42436", "shell": "/bin/sh", "comment": "nova user"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
