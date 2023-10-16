@@ -67,7 +67,7 @@ edpm_ovn_bgp_agent_tls_volumes:
   - /etc/pki/tls/certs/ovn_bgp_agent.crt:/etc/pki/tls/certs/ovn_bgp_agent.crt
   - /etc/pki/tls/private/ovn_bgp_agent.key:/etc/pki/tls/private/ovn_bgp_agent.key
 
-   # we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
+  # we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
 
 # seconds between retries for download tasks
 edpm_ovn_bgp_agent_images_download_delay: 5

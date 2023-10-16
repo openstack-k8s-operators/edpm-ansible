@@ -34,5 +34,5 @@
       register: generate_sshd_host_keys
       changed_when: generate_sshd_host_keys.rc == 0
       failed_when: generate_sshd_host_keys.rc != 0
-      when: # noqa: no-handler
+      when:  # noqa: no-handler
         - _sshd_install_result.changed
