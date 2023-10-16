@@ -14,16 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: configure libvirt
+- name: Configure libvirt
   ansible.builtin.include_tasks: configure.yml
 
-- name: install libvirt
+- name: Install libvirt
   ansible.builtin.include_tasks: install.yml
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
-- name: post-install libvirt
+- name: Post-install libvirt
   ansible.builtin.include_tasks: post-install.yml
 
 - name: Flush post-install handlers
