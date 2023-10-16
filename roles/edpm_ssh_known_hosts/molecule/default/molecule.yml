@@ -25,17 +25,10 @@ provisioner:
           allovercloud:
             hosts:
               instance:
-                ansible_port: 2222
+                ansible_port: "2222"
                 canonical_hostname: centos.localdomain
-                ctlplane_hostname: centos.ctlplane.localdomain
                 ctlplane_ip: 10.0.0.1
-                edpm_role_networks:
-                - ctlplane
-                - internal_api
-                - management
-                internal_api_hostname: centos.internalapi.localdomain
                 internal_api_ip: 10.0.1.1
-                management_ip: 10.0.0.1
         hosts:
           instance:
             ansible_python_interpreter: /usr/bin/python3

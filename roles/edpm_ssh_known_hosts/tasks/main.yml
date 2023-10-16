@@ -60,15 +60,6 @@
           {%   set hostdata = hostvars[host] %}
           {%   if hostdata['ansible_facts'].keys() | intersect(key_types.keys()) %}
           {%     set entries = [] %}
-          {%     set enabled_host_networks = hostdata['edpm_role_networks']|default([]) %}
-          {%     for network in enabled_host_networks %}
-          {%       if (network ~ '_ip') in hostdata %}
-          {%         set _ = entries.append(hostdata[network ~ '_ip']) %}
-          {%       endif %}
-          {%       if (network ~ '_hostname') in hostdata %}
-          {%         set _ = entries.append(hostdata[network ~ '_hostname']) %}
-          {%       endif %}
-          {%     endfor %}
           {%     if 'canonical_hostname' in hostdata %}
           {%       set _ = entries.append(hostdata['canonical_hostname']) %}
           {%     endif %}
