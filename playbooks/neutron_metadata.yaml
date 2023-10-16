@@ -5,7 +5,7 @@
   become: true
   tasks:
     - name: Neutron OVN Metadata agent
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_neutron_metadata
       tags:
         - edpm_neutron_metadata

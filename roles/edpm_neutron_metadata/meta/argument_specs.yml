@@ -102,11 +102,11 @@ argument_specs:
         type: str
       edpm_neutron_metadata_common_volumes:
         default:
-        - /run/openvswitch:/run/openvswitch:z
-        - '{{ edpm_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z'
-        - /run/netns:/run/netns:shared
-        - /var/log/containers/neutron:/var/log/neutron:z
-        - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - /run/openvswitch:/run/openvswitch:z
+          - '{{ edpm_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z'
+          - /run/netns:/run/netns:shared
+          - /var/log/containers/neutron:/var/log/neutron:z
+          - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
         description: ''
         type: list
       edpm_neutron_metadata_agent_config_dir:
