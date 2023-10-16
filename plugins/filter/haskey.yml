@@ -1,3 +1,5 @@
+---
+
 DOCUMENTATION:
   name: haskey
   author: "EDPM team"
@@ -16,7 +18,7 @@ DOCUMENTATION:
     with reverse, we'll just exclude the items which had a key from
     excluded_keys in the reversed list.
 EXAMPLES: |
- "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
+  "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
 RETURN:
   _value:
     description: dictionaries containing key
