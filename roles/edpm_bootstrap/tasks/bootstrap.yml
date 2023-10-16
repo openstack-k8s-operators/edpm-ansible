@@ -51,8 +51,9 @@
   when:
     - not ansible_check_mode
     - ansible_facts.services["cloud-init.service"] is defined
-    - ansible_facts.services["cloud-init.service"].state == "running"
-    - ansible_facts.services["cloud-init.service"].status == "enabled"
+    - ansible_facts.services["cloud-init.service"]["status"] != "not-found"
+    - ansible_facts.services["cloud-init.service"]["state"] == "running"
+    - ansible_facts.services["cloud-init.service"]["status"] == "enabled"
     - cloud_init_vendor_disabled is changed
   become: true
 

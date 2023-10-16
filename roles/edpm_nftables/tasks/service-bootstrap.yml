@@ -21,6 +21,7 @@
   become: true
   when:
     - ansible_facts.services["nftables.service"] is defined
+    - ansible_facts.services["nftables.service"]["status"] != "not-found"
     - ansible_facts.services["nftables.service"].status == "disabled"
   block:
     - name: Ensure legacy iptables services are off
@@ -32,7 +33,8 @@
         - iptables.service
         - ip6tables.service
       when:
-        - ansible_facts.services["{{ item }}"] is defined
+        - ansible_facts.services[item] is defined
+        - ansible_facts.services[item]["status"] != "not-found"
 
     - name: Ensure nftables service is enabled and running
       ansible.builtin.systemd:
