@@ -14,17 +14,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: create host user and group
+- name: Create host user and group
   become: true
   tags:
     - edpm_users
   block:
-    - name: Ensure {{ item.name }} group is present on the host
+    - name: Ensure group is present on the host [ {{ item.name }} ]
       ansible.builtin.group:
         name: "{{ item.name }}"
         gid: "{{ item.gid }}"
         state: present
-    - name: Ensure {{ item.name }} user is present on the host
+    - name: Ensure user is present on the host [ {{ item.name }} ]
       when: not (item.group_only | default(false))
       ansible.builtin.user:
         name: "{{ item.name }}"
