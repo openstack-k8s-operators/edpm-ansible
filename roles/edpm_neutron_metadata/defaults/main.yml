@@ -22,8 +22,8 @@ edpm_neutron_metadata_common_volumes:
 
 # Neutron conf
 # DEFAULT
-edpm_neutron_metadata_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}' # also in missing vars
-#edpm_ovn_metadata_agent_DEFAULT_: ''
+edpm_neutron_metadata_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}'  # also in missing vars
+# edpm_ovn_metadata_agent_DEFAULT_: ''
 # oslo_concurrency
 edpm_neutron_metadata_agent_oslo_concurrency_lock_patch: '$state_path/lock'
 # agent
