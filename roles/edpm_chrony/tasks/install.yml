@@ -20,13 +20,14 @@
 
 - name: Disable NTP before configuring Chrony
   ansible.builtin.service:
-    name: ansible_facts.services['ntpd.service']['name']
+    name: ansible_facts.services["ntpd.service"]["name"]
     state: stopped
     enabled: false
   when:
     - not ansible_check_mode
-    - ansible_facts.services['ntpd.service'] is defined
-    - ansible_facts.services['ntpd.service']['state'] == 'running' or ansible_facts.services['ntpd.service']['status'] == 'enabled'
+    - ansible_facts.services["ntpd.service"] is defined
+    - ansible_facts.services["ntpd.service"]["status"] != "not-found"
+    - ansible_facts.services["ntpd.service"]["state"] == 'running' or ansible_facts.services['ntpd.service']['status'] == 'enabled'
 
 - name: Install chronyd package
   ansible.builtin.dnf:
