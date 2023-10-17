@@ -18,4 +18,9 @@ if [ -n "$RUNNER_CMDLINE" ]; then
     echo "$RUNNER_CMDLINE" >> /runner/env/cmdline
 fi
 
+if [ -n "$RUNNER_EXTRA_VARS" ]; then
+    echo "---" > /runner/env/extravars
+    echo "$RUNNER_EXTRA_VARS" >> /runner/env/extravars
+fi
+
 # Contents from ansible-runner entrypoint
