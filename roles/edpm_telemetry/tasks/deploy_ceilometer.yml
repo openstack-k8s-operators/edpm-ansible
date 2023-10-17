@@ -25,8 +25,8 @@
     mode: "{{ item.mode | default('750') }}"
     recurse: true
   loop:
-    - { "path": "{{ edpm_ceilometer_config_dest }}/containers" }
-    - { "path": "{{ edpm_ceilometer_config_dest }}/ceilometer" }
+    - {"path": "{{ edpm_ceilometer_config_dest }}/containers"}
+    - {"path": "{{ edpm_ceilometer_config_dest }}/ceilometer"}
   tags:
     - edpm_telemetry
 
@@ -41,7 +41,7 @@
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { "path": "/var/log/containers/ceilometer", "mode": "0750" }
+    - {"path": "/var/log/containers/ceilometer", "mode": "0750"}
   tags:
     - edpm_telemetry
 

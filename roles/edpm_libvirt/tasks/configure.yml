@@ -13,11 +13,11 @@
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { "path": "/var/lib/openstack/config/libvirt"}
-    - { "path": "/var/lib/openstack/config/containers"}
-    - { 'path': "/var/lib/nova"}
-    - { "path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
-    - { "path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
+    - {"path": "/var/lib/openstack/config/libvirt"}
+    - {"path": "/var/lib/openstack/config/containers"}
+    - {'path': "/var/lib/nova"}
+    - {"path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
+    - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
 
 - name: Create container config dirs
   become: true

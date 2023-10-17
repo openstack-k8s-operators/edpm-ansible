@@ -94,10 +94,10 @@
         regexp: "^\\s+{{ item.var }}"
         line: "        {{ item.var }} {{ (item.value | bool) | ternary('yes', 'no') }}"
       loop:
-        - { var: find_multipaths, value: "{{ edpm_multipathd_find_multipaths }}" }
-        - { var: recheck_wwid, value: "{{ edpm_multipathd_recheck_wwid }}" }
-        - { var: skip_kpartx, value: "{{ edpm_multipathd_skip_kpartx }}" }
-        - { var: user_friendly_names, value: "{{ edpm_multipathd_user_friendly_names }}" }
+        - {var: find_multipaths, value: "{{ edpm_multipathd_find_multipaths }}"}
+        - {var: recheck_wwid, value: "{{ edpm_multipathd_recheck_wwid }}"}
+        - {var: skip_kpartx, value: "{{ edpm_multipathd_skip_kpartx }}"}
+        - {var: user_friendly_names, value: "{{ edpm_multipathd_user_friendly_names }}"}
       loop_control:
         index_var: multipath_var_index
 

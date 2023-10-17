@@ -19,7 +19,7 @@
 
 # All variables within this role should have a prefix of "edpm_users"
 edpm_users_users:
-  - { "name": "qemu", "uid": "107", "gid": "107", "shell": "/sbin/nologin", "comment": "qemu user" }
-  - { "name": "hugetlbfs", "gid": "42477", "group_only": true }
+  - {"name": "qemu", "uid": "107", "gid": "107", "shell": "/sbin/nologin", "comment": "qemu user"}
+  - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
 edpm_users_extra_dirs:
-  - { "path": "/var/lib/vhost_sockets", "owner": "qemu", "group": "qemu", "setype": "virt_cache_t", "seuser": "system_u", "mode": "0755" }
+  - {"path": "/var/lib/vhost_sockets", "owner": "qemu", "group": "qemu", "setype": "virt_cache_t", "seuser": "system_u", "mode": "0755"}
