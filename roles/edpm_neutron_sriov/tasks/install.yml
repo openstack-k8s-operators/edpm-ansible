@@ -21,11 +21,11 @@
     state: directory
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { 'path': "/var/lib/openstack/config/containers", "mode": "0750" }
-    - { 'path': "/var/lib/neutron", "mode": "0750" }
-    - { 'path': "{{ edpm_neutron_sriov_agent_config_dir }}", "mode": "0755" }
-    - { 'path': "/var/log/containers/stdouts" }
-    - { 'path': "/var/log/containers/neutron" }
+    - {'path': "/var/lib/openstack/config/containers", "mode": "0750"}
+    - {'path': "/var/lib/neutron", "mode": "0750"}
+    - {'path': "{{ edpm_neutron_sriov_agent_config_dir }}", "mode": "0755"}
+    - {'path': "/var/log/containers/stdouts"}
+    - {'path': "/var/log/containers/neutron"}
   tags:
     - install
     - neutron

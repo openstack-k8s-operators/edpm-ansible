@@ -36,13 +36,13 @@
   loop:
     # qemu is not in the libvirt group in the container images so use
     # mode 755 to make /var/lib/libvirt traversable.
-    - { "path": "/var/lib/libvirt", "mode": "0755" }
-    - { "path": "/var/log/containers/libvirt", "mode": "0750" }
-    - { "path": "/var/log/containers/qemu", "mode": "0750" }
+    - {"path": "/var/lib/libvirt", "mode": "0755"}
+    - {"path": "/var/log/containers/libvirt", "mode": "0750"}
+    - {"path": "/var/log/containers/qemu", "mode": "0750"}
     # dont set owner/group or mode on these, as they are managed
     # by other roles, just ensure they exist.
-    - { "path": "/var/log/containers/stdouts" }
-    - { "path": "/var/lib/openstack/config/ceph" }
+    - {"path": "/var/log/containers/stdouts"}
+    - {"path": "/var/lib/openstack/config/ceph"}
 - name: Render libvirt container
   tags:
     - install

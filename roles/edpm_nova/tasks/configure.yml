@@ -13,8 +13,8 @@
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { "path": "{{ edpm_nova_config_dest }}", "mode": "0755" }
-    - { "path": "/var/lib/openstack/config/containers", "mode": "0755" }
+    - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
+    - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
 - name: Create persistent directories
   tags:
     - configure
@@ -28,16 +28,16 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - { "path": "/var/lib/nova", "mode": "0755" }
-    - { "path": "/var/lib/_nova_secontext", "mode": "0755" }
-    - { "path": "/var/lib/nova/instances", "mode", "0755" }
-    - { "path": "/var/log/containers/nova", "mode": "0750" }
-    - { "path": "/var/log/containers/stdouts" }
-    - { "path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root" }
-    - { "path": "/etc/multipath" }
-    - { "path": "/etc/iscsi" }
-    - { "path": "/var/lib/iscsi" }
-    - { "path": "/run/openvswitch" }
+    - {"path": "/var/lib/nova", "mode": "0755"}
+    - {"path": "/var/lib/_nova_secontext", "mode": "0755"}
+    - {"path": "/var/lib/nova/instances", "mode", "0755"}
+    - {"path": "/var/log/containers/nova", "mode": "0750"}
+    - {"path": "/var/log/containers/stdouts"}
+    - {"path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root"}
+    - {"path": "/etc/multipath"}
+    - {"path": "/etc/iscsi"}
+    - {"path": "/var/lib/iscsi"}
+    - {"path": "/run/openvswitch"}
 - name: Render nova config files
   tags:
     - configure
@@ -48,8 +48,8 @@
     setype: "container_file_t"
     mode: "0644"
   loop:
-    - { "src": "config.json.j2", "dest": "config.json" }
-    - { "src": "nova-blank.conf", "dest": "nova-blank.conf" }
+    - {"src": "config.json.j2", "dest": "config.json"}
+    - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
   notify:
     - Restart nova
 
