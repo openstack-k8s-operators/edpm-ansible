@@ -21,7 +21,6 @@
         - iproute
         - podman
 - name: Prepare
-  hosts: all
-  become: true
+  hosts: instance
   roles:
     - role: osp.edpm.env_data

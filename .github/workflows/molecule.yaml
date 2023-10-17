@@ -41,7 +41,6 @@ jobs:
         # Following roles will be included in test matrix only after their
         # molecule tests deemed functional and stable
         # - edpm_ovn_bgp_agent
-        # - edpm_iscsid
 
     runs-on: ubuntu-22.04
     steps:

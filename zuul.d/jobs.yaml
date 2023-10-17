@@ -41,3 +41,8 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_frr
+- job:
+    name: edpm-ansible-molecule-edpm_iscsid
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_iscsid
