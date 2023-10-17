@@ -43,10 +43,8 @@
         enabled: false
       when: stat_iscsid_socket.stat.exists
 
-    - name: Check if iscsi.service is enabled
-      ansible.builtin.command: systemctl is-enabled --quiet iscsi.service
-      failed_when: false
-      register: iscsi_service_enabled_result
+    - name: Gather services facts
+      ansible.builtin.service_facts:
 
     - name: Stop iscsi.service
       ansible.builtin.systemd:
@@ -54,5 +52,6 @@
         state: stopped
         enabled: false
       when:
-        - iscsi_service_enabled_result is changed
-        - iscsi_service_enabled_result.rc == 0
+        - ansible_facts.services["iscsi.service"] is defined
+        - ansible_facts.services["iscsi.service"]["status"] != "not-found"
+        - ansible_facts.services["iscsi.service"]["status"] == "enabled"
