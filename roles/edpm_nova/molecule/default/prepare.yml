@@ -64,6 +64,14 @@
             rule:
               proto: tcp
               dport: 22
+    - name: Create ssh_known_hosts file
+      become: true
+      ansible.builtin.file:
+        path: '/etc/ssh/ssh_known_hosts'
+        state: touch
+        owner: root
+        group: root
+        mode: '0655'
     - name: install libvirt
       ansible.builtin.import_role:
         name: osp.edpm.edpm_libvirt
@@ -81,11 +89,3 @@
         owner: root
         group: root
         mode: 0755
-    - name: Create ssh_known_hosts file
-      become: true
-      ansible.builtin.file:
-        path: '/etc/ssh/ssh_known_hosts'
-        state: touch
-        owner: root
-        group: root
-        mode: '0655'

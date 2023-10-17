@@ -16,6 +16,7 @@
         - "/var/lib/openstack/config/containers"
         - "/var/log/containers"
         - "/var/log/containers/stdouts"
+        - "/etc/ssh/ssh_known_hosts"
         # extrenal deps
         - "/var/lib/openstack/config/ceph"
         # libvirt directories

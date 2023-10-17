@@ -105,3 +105,12 @@
                                     'allow rwx pool=\1') | join(', ') }}
       vars:
         pools: ['vms', 'volumes', 'images']
+
+    - name: Create ssh_known_hosts file
+      become: true
+      ansible.builtin.file:
+        path: '/etc/ssh/ssh_known_hosts'
+        state: touch
+        owner: root
+        group: root
+        mode: '0655'
