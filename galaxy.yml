@@ -1,12 +1,20 @@
+---
+
 namespace: osp
 name: edpm
 version: 0.0.1
 readme: README.rst
 authors:
   - EDPM Team (github.com/openstack-k8s-operators/edpm-ansible)
-description: Ansible collection for edpm project
+description: Ansible collection for EDPM project
 license_file: LICENSE
 tags:
+  - cloud
+  - infrastructure
+  - linux
+  - tools
+  - networking
+  - security
   - RHOSP
   - EDPM
 dependencies:
