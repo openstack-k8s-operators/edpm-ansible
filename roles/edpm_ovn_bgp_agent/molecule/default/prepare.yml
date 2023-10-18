@@ -13,7 +13,53 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-- name: Prepare test_deps
+- name: Prepare
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      test_deps_edpm_packages:
+        - openvswitch
+        - os-net-config
+  tasks:
+    - ansible.builtin.include_role:
+        name: osp.edpm.env_data
+
+    # The openvswitch kernel module needs to be loaded on the host
+    - name: Install and modprobe openvswitch
+      shell: |
+        sudo dnf -y install openvswitch
+        sudo modprobe openvswitch
+      delegate_to: localhost
+      run_once: true
+
+    - name: Install os-net-config
+      ansible.builtin.package:
+        name: os-net-config
+      become: true
+
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true
+      become: true
+
+    - name: "Download required role packages"
+      ansible.builtin.import_role:
+        name: "osp.edpm.edpm_bootstrap"
+        tasks_from: "download_cache.yml"
+
+    - name: "Include edpm_bootstrap"
+      ansible.builtin.import_role:
+        name: "osp.edpm.edpm_bootstrap"
+        tasks_from: "bootstrap.yml"
+      become: true
+
+    - name: "Download required role packages"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_frr"
+        tasks_from: "download_cache.yml"
+    - ansible.builtin.include_role:
+        name: "osp.edpm.edpm_frr"
+        apply:
+          become: true

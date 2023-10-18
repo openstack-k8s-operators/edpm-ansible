@@ -46,3 +46,8 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_iscsid
+- job:
+    name: edpm-ansible-molecule-edpm_ovn_bgp_agent
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_ovn_bgp_agent
