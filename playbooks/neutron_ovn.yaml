@@ -1,0 +1,11 @@
+---
+- name: Deploy EDPM Neutron OVN agent
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: Neutron OVN agent
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_neutron_ovn
+      tags:
+        - edpm_neutron_ovn

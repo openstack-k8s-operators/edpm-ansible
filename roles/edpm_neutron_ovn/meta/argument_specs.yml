@@ -1,0 +1,100 @@
+---
+argument_specs:
+  # ./roles/edpm_neutron_ovn/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_neutron_ovn role.
+    options:
+      edpm_neutron_ovn_images_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_neutron_ovn_images_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
+      edpm_neutron_ovn_agent_image:
+        default: quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified
+        description: The container image to use to deploy Neutron OVN agent
+        type: str
+      edpm_neutron_ovn_agent_log_dir:
+        default: /var/log/neutron
+        description: Log directory to be used by Neutron OVN agent
+        type: str
+      edpm_neutron_ovn_agent_DEFAULT_debug:
+        default: 'True'
+        description: Enable debug mode
+        type: str
+      edpm_neutron_ovn_agent_agent_root_helper:
+        default: sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf
+        description: Neutron OVN agent root_helper command
+        type: str
+      edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout:
+        default: '180'
+        description: Timeout in seconds for the OVSDB connection transaction
+        type: str
+      edpm_neutron_ovn_agent_ovn_ovn_nb_connection:
+        default: ''
+        description: The connection string for the OVN_Northbound OVSDB
+        type: str
+      edpm_neutron_ovn_agent_ovn_ovn_sb_connection:
+        default: ''
+        description: The connection string for the OVN_Southbound OVSDB
+        type: str
+      edpm_neutron_ovn_agent_ovn_ovsdb_probe_interval:
+        default: '60000'
+        description: The probe interval for the OVSDB session in milliseconds
+        type: str
+      edpm_neutron_ovn_agent_ovs_ovsdb_connection:
+        default: tcp:127.0.0.1:6640
+        description: The connection string for the OVSDB backend
+        type: str
+      edpm_neutron_ovn_agent_ovs_ovsdb_connection_timeout:
+        default: '180'
+        description: Timeout in seconds for the OVSDB connection transaction
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_daemon_timeout:
+        default: '600'
+        description: Rootwrap daemon exits after this seconds of inactivity
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_exec_dirs:
+        default: /sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin
+        description: List of directories to search executables in
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_filters_path:
+        default: /etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap
+        description: List of directories to load filter definitions from
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_rlimit_nofile:
+        default: '1024'
+        description: Rootwrap daemon limits itself to that many file descriptors
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_syslog_log_facility:
+        default: syslog
+        description: Which syslog facility to use
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_syslog_log_level:
+        default: ERROR
+        description: Type of messages to log
+        type: str
+      edpm_neutron_ovn_agent_rootwrap_DEFAULT_use_syslog:
+        default: 'False'
+        description: Enable logging to syslog
+        type: str
+      edpm_neutron_ovn_common_volumes:
+        default:
+          - /run/openvswitch:/run/openvswitch:z
+          - '{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z'
+          - /var/log/containers/neutron:/var/log/neutron:z
+          - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
+        description: Volume mounts for Neutron OVN agent
+        type: list
+      edpm_neutron_ovn_agent_config_src:
+        default: "/var/lib/openstack/configs/neutron-ovn"
+        description: |
+          The path to the directory containing source of the Neutron OVN
+          agent configs.
+        type: str
+      edpm_neutron_ovn_agent_config_dir:
+        default: /var/lib/config-data/ansible-generated/neutron-ovn-agent
+        description: 'The directory that contains configuration files for Neutron OVN Agent.'
+        type: str

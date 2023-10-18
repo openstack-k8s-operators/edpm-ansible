@@ -1,0 +1,15 @@
+[DEFAULT]
+debug = {{ edpm_neutron_ovn_agent_DEFAULT_debug }}
+
+[agent]
+root_helper = {{ edpm_neutron_ovn_agent_agent_root_helper }}
+
+[ovs]
+ovsdb_connection = {{ edpm_neutron_ovn_agent_ovs_ovsdb_connection }}
+ovsdb_connection_timeout = {{ edpm_neutron_ovn_agent_ovs_ovsdb_connection_timeout }}
+
+[ovn]
+ovsdb_connection_timeout = {{ edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout }}
+ovsdb_probe_interval = {{ edpm_neutron_ovn_agent_ovn_ovsdb_probe_interval }}
+ovn_nb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_nb_connection }}
+ovn_sb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_sb_connection }}
