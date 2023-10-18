@@ -20,3 +20,4 @@ use_default_rules: true
 profile: production
 skip_list:
   - command-instead-of-shell
+  - galaxy[version-incorrect]
