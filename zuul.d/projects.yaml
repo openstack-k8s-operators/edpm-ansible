@@ -12,3 +12,4 @@
         - edpm-ansible-molecule-edpm_nova
         - edpm-ansible-molecule-edpm_frr
         - edpm-ansible-molecule-edpm_iscsid
+        - edpm-ansible-molecule-edpm_ovn_bgp_agent

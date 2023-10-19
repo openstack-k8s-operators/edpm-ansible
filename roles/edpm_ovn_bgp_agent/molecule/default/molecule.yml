@@ -4,20 +4,21 @@ dependency:
   options:
     role-file: collections.yml
 driver:
-  name: podman
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
-- command: /sbin/init
-  dockerfile: ../../../../molecule/common/Containerfile.j2
-  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-  name: instance
-  privileged: true
-  registry:
-    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
-  ulimits:
-  - host
+  - name: instance
 provisioner:
   log: true
   name: ansible
+  inventory:
+    host_vars:
+      instance:
+        ctlplane_ip: "10.0.0.1"
+
 scenario:
   test_sequence:
   - dependency
