@@ -45,10 +45,15 @@
         - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
         - "Copying /var/lib/kolla/config_files/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
 
+    - name: slurp host specific config
+      ansible.builtin.slurp:
+        src: /var/lib/openstack/config/nova/02-nova-host-specific.conf
+      register: host_specific_config
+
     - name: Assert that my_ip is rendered into the host specific config
       ansible.builtin.assert:
         that:
-          - "'10.0.0.3' in lookup('ansible.builtin.file', '/var/lib/openstack/config/nova/02-nova-host-specific.conf')"
+          - "'10.0.0.3' in host_specific_config.content | b64decode"
 
     - name: Check if user exists
       ansible.builtin.getent:
