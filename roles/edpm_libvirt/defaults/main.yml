@@ -20,16 +20,34 @@
 # All variables within this role should have a prefix of "edpm_libvirt"
 
 # seconds between retries for download tasks
-edpm_libvirt_image_download_delay: 5
-
+edpm_libvirt_download_delay: 5
 # number of retries for download tasks
-edpm_libvirt_image_download_retries: 5
-
-edpm_libvirt_image: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
-edpm_libvirt_containers:
-  - "libvirt_virtlogd"
-  - "libvirt_virtnodedevd"
-  - "libvirt_virtproxyd"
-  - "libvirt_virtqemud"
-  - "libvirt_virtsecretd"
-edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph/
+edpm_libvirt_download_retries: 5
+# this sould map to the libvirt
+edpm_libvirt_services:
+  - virtlogd
+  - virtnodedevd
+  - virtproxyd
+  - virtqemud
+  - virtsecretd
+edpm_libvirt_packages:
+  # main libvirt packages
+  - libvirt
+  - libvirt-admin
+  - libvirt-client
+  - libvirt-daemon
+  # qemu pakcages
+  - qemu-kvm
+  - qemu-img
+  # libguestfs is need for config drive and ephermeral disks
+  - libguestfs
+  - libseccomp
+  # swtpm is needed for TPM support
+  - swtpm
+  - swtpm-tools
+  # edk2-ovmf is needed for UEFI support
+  - edk2-ovmf
+  # ceph-common is needed for ceph support to provide the ceph client lib
+  # for qemu and the ceph udev rules
+  - ceph-common
+edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph

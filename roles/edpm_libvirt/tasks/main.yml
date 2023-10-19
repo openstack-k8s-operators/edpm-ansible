@@ -17,11 +17,11 @@
 - name: Ensure libvirt user
   ansible.builtin.include_tasks: user.yml
 
-- name: Configure libvirt
-  ansible.builtin.include_tasks: configure.yml
-
 - name: Install libvirt
   ansible.builtin.include_tasks: install.yml
+
+- name: Configure libvirt
+  ansible.builtin.include_tasks: configure.yml
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers

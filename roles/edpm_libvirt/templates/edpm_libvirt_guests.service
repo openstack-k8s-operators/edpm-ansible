@@ -10,8 +10,8 @@ Documentation=https://libvirt.org
 
 [Service]
 EnvironmentFile=-/etc/sysconfig/libvirt-guests
-ExecStart=/bin/podman exec libvirt_virtproxyd /bin/rm -f /var/lib/libvirt/libvirt-guests
-ExecStop=/bin/podman exec libvirt_virtproxyd /bin/sh -x /usr/libexec/libvirt-guests.sh shutdown
+ExecStart=/bin/rm -f /var/lib/libvirt/libvirt-guests
+ExecStop=/bin/sh -x /usr/libexec/libvirt-guests.sh shutdown
 Type=oneshot
 RemainAfterExit=yes
 StandardOutput=journal+console
