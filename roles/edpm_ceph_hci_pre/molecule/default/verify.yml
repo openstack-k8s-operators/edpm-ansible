@@ -27,7 +27,7 @@
           - item.rule.proto == 'tcp'
           - item.rule_name | regex_search('^[0-9]{3} allow ceph_.*$')
           - item.rule.dport | list
-          - item.rule.dport[0] | regex_search('^([0-9]{4})$|^([0-9]{4}:[0-9]{4})$')
+          - item.rule.dport[0] | regex_search('^([0-9]{4,5})$|^([0-9]{4,5}:[0-9]{4,5})$')
       loop: "{{ ceph_networks.stdout | from_yaml }}"
 
     - name: Read generated file from overrides
@@ -41,5 +41,5 @@
           - item.rule.source == '172.18.0.0/24'
           - item.rule_name | regex_search('^[0-9]{3} allow ceph_.* from 172.18.0.0/24$')
           - item.rule.dport | list
-          - item.rule.dport[0] | regex_search('^([0-9]{4})$|^([0-9]{4}:[0-9]{4})$')
+          - item.rule.dport[0] | regex_search('^([0-9]{4,5})$|^([0-9]{4,5}:[0-9]{4,5})$')
       loop: "{{ ceph_networks_overrides.stdout | from_yaml }}"

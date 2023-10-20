@@ -20,7 +20,6 @@ SKIP_LIST = [
     "edpm_kernel",
     "edpm_ovn_bgp_agent",
     "test_deps",
-    "edpm_ceph_hci_pre",
     "edpm_download_cache",
 ]
 
