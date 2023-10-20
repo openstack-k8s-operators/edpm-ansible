@@ -51,3 +51,8 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_ovn_bgp_agent
+- job:
+    name: edpm-ansible-molecule-edpm_neutron_dhcp
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_neutron_dhcp
