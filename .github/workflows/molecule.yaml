@@ -37,6 +37,7 @@ jobs:
         - edpm_timezone
         - edpm_tuned
         - edpm_telemetry
+        - edpm_users
         - env_data
 
     runs-on: ubuntu-22.04
