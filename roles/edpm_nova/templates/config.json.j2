@@ -19,6 +19,19 @@
             "owner": "nova",
             "perm": "0700",
             "optional": true
+        },
+        {
+            "source": "/var/lib/kolla/config_files/ssh-privatekey",
+            "dest": "/var/lib/nova/.ssh/",
+            "owner": "nova",
+            "perm": "0600",
+            "optional": true
+        },
+        {
+            "source": "/var/lib/kolla/config_files/ssh-config",
+            "dest": "/var/lib/nova/.ssh/config",
+            "owner": "nova",
+            "perm": "0600"
         }
     ],
     "permissions": [
@@ -36,6 +49,16 @@
             "path": "/var/lib/nova",
             "owner": "nova:nova",
             "recurse": true
+        },
+        {
+            "path": "/var/lib/nova/.ssh/",
+            "owner": "nova:nova",
+            "perm:": "0700"
+        },
+        {
+            "path": "/var/lib/nova/.ssh/*",
+            "owner": "nova:nova",
+            "perm:": "0600"
         }
     ]
 }
