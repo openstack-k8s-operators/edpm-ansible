@@ -20,6 +20,7 @@ jobs:
         tested_role:
         - edpm_bootstrap
         - edpm_ceph_client_files
+        - edpm_ceph_hci_pre
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
