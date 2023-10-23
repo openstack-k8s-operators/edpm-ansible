@@ -29,6 +29,7 @@ jobs:
         - edpm_multipathd
         - edpm_network_config
         - edpm_neutron_metadata
+        - edpm_neutron_ovn
         - edpm_neutron_sriov
         - edpm_nftables
         - edpm_nodes_validation

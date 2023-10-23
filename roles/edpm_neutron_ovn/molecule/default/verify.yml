@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure that 10-neutron-ovn.conf was copied into the container
+      block:
+        - name: ovn-agent config file exists
+          become: true
+          ansible.builtin.stat:
+            path: "/var/lib/config-data/ansible-generated/neutron-ovn-agent/10-neutron-ovn.conf"
+          register: ovn_agent_config
+
+        - name: assert that the config exists
+          ansible.builtin.assert:
+            that:
+              - ovn_agent_config.stat.exists
+            fail_msg: "ovn agent config file does not exist"

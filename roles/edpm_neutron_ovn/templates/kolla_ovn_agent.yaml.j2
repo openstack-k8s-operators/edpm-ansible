@@ -1,0 +1,16 @@
+command: "neutron-ovn-agent --log-file={{ edpm_neutron_ovn_agent_log_dir }}/ovn-agent.log"
+permissions:
+  - owner: neutron:neutron
+    path: /var/log/neutron
+    recurse: true
+  - owner: neutron:neutron
+    path: /var/lib/neutron
+    recurse: true
+  - optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/certs/ovn_agent.crt
+    perm: 0644
+  - optional: true
+    owner: neutron:neutron
+    path: /etc/pki/tls/private/ovn_agent.key
+    perm: 0644
