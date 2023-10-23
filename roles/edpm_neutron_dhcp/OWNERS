@@ -1,8 +1,6 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 approvers:
-  - slawqo
   - network-approvers
 
 reviewers:
-  - slawqo
   - network-approvers
