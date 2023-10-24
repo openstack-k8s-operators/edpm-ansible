@@ -48,3 +48,17 @@
         - { "name": "edpm_libvirt.target", "enabled": "static"}
         - { "name": "edpm_libvirt_guests.service", "running":false }
         - { "name": "virt-guest-shutdown.target", "enabled": "static", "running":false }
+
+    - name: Check if user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: libvirt
+      register: libvirt_user
+
+    - name: Assert that libvirt user is created with kolla uid and gid
+      ansible.builtin.assert:
+        that:
+          # user
+          - "libvirt_user.ansible_facts.getent_passwd.libvirt[1] == '42473'"
+          # group
+          - "libvirt_user.ansible_facts.getent_passwd.libvirt[2] == '42473'"
