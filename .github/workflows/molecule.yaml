@@ -24,6 +24,7 @@ jobs:
         - edpm_container_manage
         - edpm_container_rm
         - edpm_container_standalone
+        - edpm_download_cache
         - edpm_growvols
         - edpm_logrotate_crond
         - edpm_multipathd
