@@ -16,6 +16,9 @@ platforms:
   ulimits:
   - host
 provisioner:
+  config_options:
+    defaults:
+      remote_tmp: /tmp
   log: true
   name: ansible
 scenario:
@@ -28,4 +31,4 @@ scenario:
   - verify
   - destroy
 verifier:
-  name: ansible
+  name: testinfra

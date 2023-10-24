@@ -1,6 +1,8 @@
 start_order: 2
 image: "{{ edpm_neutron_metadata_agent_image }}"
 net: host
+pid: host
+cgroupns: host
 privileged: true
 user: root
 restart: always

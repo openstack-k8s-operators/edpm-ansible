@@ -19,10 +19,16 @@
     path: "{{ item.path }}"
     state: directory
     setype: "container_file_t"
+    owner: "{{ item.owner | default(lookup('pipe', 'whoami')) }}"
+    group: "{{ item.group | default(lookup('pipe', 'whoami')) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {'path': "{{ edpm_neutron_metadata_agent_config_dir }}"}
     - {'path': "/var/log/containers/neutron"}
+    - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn-metadata-proxy", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/external/pids", "mode": "0755"}
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
   ansible.posix.seboolean:
@@ -32,3 +38,21 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+
+- name: Configure sidecar containers scripts
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_metadata_agent_lib_dir }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  with_items:
+    - {"src": "wrappers/haproxy.j2", "dest": "ovn_metadata_haproxy_wrapper"}
+
+- name: Configure kill_scripts for sidecar containers
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  with_items:
+    - {"src": "wrappers/kill-script.j2", "dest": "haproxy-kill"}

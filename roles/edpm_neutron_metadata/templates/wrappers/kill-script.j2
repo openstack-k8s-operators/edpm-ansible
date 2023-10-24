@@ -1,0 +1,8 @@
+#!/bin/bash
+{% if edpm_neutron_metadata_agent_sidecar_debug -%}
+set -x
+{%- endif %}
+
+LOG_FILE={{ edpm_neutron_metadata_agent_log_dir }}/kill-script.log
+
+{% include 'kill-script_common_part.j2' %}
