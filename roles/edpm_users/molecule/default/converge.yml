@@ -5,3 +5,11 @@
     - name: "Include edpm_users"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_users"
+    - name: "Include edpm_users with non default config"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_users"
+      vars:
+        edpm_users_users:
+          - {"name": "libvirt", "uid": "42473", "gid": "42473", "shell": "/sbin/nologin", "comment": "libvirt user"}
+          - {"name": "nova", "uid": "42436", "gid": "42436", "shell": "/bin/sh", "comment": "nova user", groups: "libvirt"}
+        edpm_users_extra_dirs: []
