@@ -96,14 +96,14 @@ Create an NFS PV, and a PVC that can be mounted on the ansibleee pods.
 
     % oc apply -f edpm-ansible-storage.yaml
 
-Add extraMount to your OpenStackDataPlane CR
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Add extraMount to your OpenStackDataPlaneNodeSet CR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use kustomize or "oc edit" to add the edpm-ansible PVC to the
-OpenStackDataPlane's /spec/nodeTemplate/extraMounts. The
+OpenStackDataPlaneNodeSet's /spec/nodeTemplate/extraMounts. The
 mountPath is where the edpm-ansible *roles* and *plugins* directories are
 located inside the openstack-ansibleee-runner container image. The
-OpenStackDataPlane CR should contain the following snippet:
+OpenStackDataPlaneNodeSet CR should contain the following snippet:
 
 .. code-block:: console
 
