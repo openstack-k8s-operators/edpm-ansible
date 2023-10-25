@@ -58,6 +58,18 @@
           # group
           - "nova_user.ansible_facts.getent_passwd.nova[2] == '42436'"
 
+    - name: Lookup libvirt group
+      ansible.builtin.getent:
+        database: group
+        key: libvirt
+      register: libvirt_group
+
+    - name: Assert that nova is in the libvirt group
+      ansible.builtin.assert:
+        that:
+          # 2: the users in the group
+          - "'nova' in libvirt_group.ansible_facts.getent_group.libvirt[2]"
+
     - name: Stat /home/nova/.ssh/authorized_keys
       become: true
       ansible.builtin.stat:
