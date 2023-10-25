@@ -13,6 +13,13 @@ platforms:
       - compute
 provisioner:
   name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          compute-1:
+            ctlplane_ip: 10.0.0.3
+
 verifier:
   name: ansible
 scenario:
