@@ -28,11 +28,16 @@ When using OpenShift Local (aka CRC), your export will be something like this:
 
 .. code-block:: console
 
-    % cat <<EOF >/etc/exports
-    ${HOME}/edpm-ansible 192.168.130.0/24(rw,sync,no_root_squash)
-    EOF
+    % echo "${HOME}/edpm-ansible 192.168.130.0/24(rw,sync,no_root_squash)" > /etc/exports
 
     % exportfs -r
+
+Make sure nfs-server and firewalld are started:
+
+.. code-block:: console
+
+    % systemctl start firewalld
+    % systemctl start nfs-server
 
 .. tip::
 
@@ -55,12 +60,12 @@ Create an NFS PV, and a PVC that can be mounted on the ansibleee pods.
    NFS volume mounts. The approach of using an NFS PV and PVC works just as
    well, and avoids the need to fiddle with SCC policies.
 
-.. code-block:: console
+.. code-block:: shell
 
-    % # E.g. ${HOME}/edpm-ansible
-    % NFS_SHARE=<Path to your edpm-ansible directory>
-    % NFS_SERVER=<IP of your NFS server>
-    % cat <<EOF >edpm-ansible-storage.yaml
+    # E.g. ${HOME}/edpm-ansible
+    NFS_SHARE=<Path to your edpm-ansible directory>
+    NFS_SERVER=<IP of your NFS server>
+    cat <<EOF >edpm-ansible-storage.yaml
     apiVersion: v1
     kind: PersistentVolume
     metadata:
@@ -94,7 +99,7 @@ Create an NFS PV, and a PVC that can be mounted on the ansibleee pods.
           storage: 1Gi
     EOF
 
-    % oc apply -f edpm-ansible-storage.yaml
+    oc apply -f edpm-ansible-storage.yaml
 
 Add extraMount to your OpenStackDataPlaneNodeSet CR
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
