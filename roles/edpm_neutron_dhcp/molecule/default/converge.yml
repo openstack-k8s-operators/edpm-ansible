@@ -16,6 +16,8 @@
 
 - name: Converge
   hosts: all
+  gather_facts: true
+  become: true
   roles:
     - role: "edpm_neutron_dhcp"
       vars:
