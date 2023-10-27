@@ -42,10 +42,10 @@
         src: /usr/share/zoneinfo/UTC
         state: link
     - name: set timezone
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_timezone
     - name: install podman
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_podman
     - name: Create firewall directory
       become: true
@@ -65,7 +65,7 @@
               proto: tcp
               dport: 22
     - name: install libvirt
-      import_role:
+      ansible.builtin.import_role:
         name: osp.edpm.edpm_libvirt
     - name: ensure /etc/multipath.conf exists
       become: true
@@ -73,3 +73,11 @@
         path: /etc/multipath.conf
         state: touch
         mode: "0644"
+    - name: Create Ceph client file directory
+      become: true
+      ansible.builtin.file:
+        path: '/var/lib/openstack/config/ceph/'
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
