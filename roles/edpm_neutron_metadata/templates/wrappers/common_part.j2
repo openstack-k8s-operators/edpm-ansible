@@ -1,0 +1,37 @@
+{% raw -%}
+
+CLI="nsenter --net=/run/netns/${NETNS} --preserve-credentials -m -t 1 podman"
+LOGGING="--log-driver k8s-file --log-opt path=/var/log/containers/stdouts/${NAME}.log"
+
+LIST=$($CLI ps -a --filter name=${NAME_PREFIX}- --format '{{.ID}}:{{.Names}}:{{.Status}}' | awk '{print $1}')
+
+# Find orphaned containers left for dead after its main process terminated by neutron parent process
+# FIXME(cjeanner): https://github.com/containers/libpod/issues/1703
+ORPHANS=$(printf "%s\n" "${LIST}" | grep -E ":(Exited|Created)")
+if [ -n "${ORPHANS}" ]; then
+    for orphan in $(printf "%s\n" "${ORPHANS}" | awk -F':' '{print $1}'); do
+        echo "Removing orphaned container ${orphan}"
+        # TODO(slaweq): script should at least log what error
+        # prevented to stop or rm orphaned container if there will be any error
+        $CLI stop ${orphan} || true
+        $CLI rm -f ${orphan} || true
+    done
+fi
+
+# If the NAME is already taken by a container, give it an unique name
+printf "%s\n" "${LIST}" | grep -q "${NAME}$" && NAME="${NAME}-$(date +%Y-%m-%d-%H%M%S-%N)"
+echo "Starting a new child container ${NAME}"
+$CLI run --detach ${LOGGING} \
+     -v ${NEUTRON_CONFIG_DIR}:/etc/neutron:ro \
+     -v /run/netns:/run/netns:shared \
+     -v ${NEUTRON_LIB_DIR}:/var/lib/neutron:shared \
+     -v /dev/log:/dev/log \
+     --net host \
+     --pid host \
+     --cgroupns host \
+     --privileged \
+     -u root \
+     --name $NAME \
+    ${IMAGE_NAME} \
+    "${CMD[@]}"
+{%- endraw %}

@@ -1,8 +1,10 @@
 start_order: 1
 image: "{{ edpm_neutron_dhcp_image }}"
 net: host
+pid: host
+cgroupns: host
 privileged: true
-user: neutron
+user: root
 restart: always
 volumes:
   {% set edpm_neutron_dhcp_volumes = [] %}

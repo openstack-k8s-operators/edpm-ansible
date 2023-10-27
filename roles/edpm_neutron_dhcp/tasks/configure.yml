@@ -50,3 +50,23 @@
         setype: "container_file_t"
         mode: "0644"
       loop: "{{ edpm_neutron_dhcp_secrets.files }}"
+
+- name: Configure sidecar containers scripts
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_dhcp_agent_lib_dir }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  loop:
+    - {"src": "wrappers/haproxy.j2", "dest": "dhcp_agent_haproxy_wrapper"}
+    - {"src": "wrappers/dnsmasq.j2", "dest": "dhcp_agent_dnsmasq_wrapper"}
+
+- name: Configure kill_scripts for sidecar containers
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_dhcp_agent_lib_dir }}/kill_scripts/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  with_items:
+    - {"src": "wrappers/kill-script.j2", "dest": "haproxy-kill"}
+    - {"src": "wrappers/kill-script.j2", "dest": "dnsmasq-kill"}

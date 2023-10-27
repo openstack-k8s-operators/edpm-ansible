@@ -19,8 +19,8 @@
     path: "{{ item.path }}"
     setype: "container_file_t"
     state: directory
-    owner: "{{ item.owner | default(lookup('env', 'USER')) }}"
-    group: "{{ item.group | default(lookup('env', 'USER')) }}"
+    owner: "{{ item.owner | default(lookup('pipe', 'whoami')) }}"
+    group: "{{ item.group | default(lookup('pipe', 'whoami')) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {'path': "/var/lib/openstack/config/containers", "mode": "0750"}
@@ -28,6 +28,10 @@
     - {'path': "{{ edpm_neutron_dhcp_agent_config_dir }}", "mode": "0755"}
     - {'path': "/var/log/containers/stdouts", "mode": "0755"}
     - {'path': "/var/log/containers/neutron", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}/kill_scripts", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}/ns-metadata-proxy", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}/external/pids", "mode": "0755"}
   tags:
     - install
     - neutron
