@@ -19,55 +19,18 @@
   hosts: all
   vars:
     edpm_network_config_template: |
-         ---
-         {% set control_virtual_ip = net_vip_map.ctlplane %}
-         {% set public_virtual_ip = vip_port_map.external.ip_address %}
-         {% if ':' in control_virtual_ip %}
-         {%   set control_virtual_cidr = 128 %}
-         {% else %}
-         {%   set control_virtual_cidr = 32 %}
-         {%   endif %}
-         {% if ':' in public_virtual_ip %}
-         {%   set public_virtual_cidr = 128 %}
-         {% else %}
-         {%   set public_virtual_cidr = 32 %}
-         {%   endif %}
-         network_config:
-         - type: ovs_bridge
-           name: br-ctlplane
-           use_dhcp: false
-           mtu: {{ ctlplane_mtu }}
-           ovs_extra:
-           - br-set-external-id br-ctlplane bridge-id br-ctlplane
-           addresses:
-           - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
-           - ip_netmask: {{ control_virtual_ip}}/{{ control_virtual_cidr }}
-           - ip_netmask: {{ public_virtual_ip}}/{{ public_virtual_cidr }}
-           routes: {{ ctlplane_host_routes }}
-           dns_servers: {{ ctlplane_dns_nameservers }}
-           domain: {{ dns_search_domains }}
-           members:
-             - type: interface
-               name: {{ neutron_public_interface_name }}
-               primary: true
-               mtu: {{ ctlplane_mtu }}
+      ---
+      network_config:
+        - type: interface
+          name: dummy0
+          use_dhcp: false
+          use_dhcpv6: false
+          addresses:
+            - ip_netmask: 192.168.180.2
+          routes:
+            - ip_netmask: 192.168.181.0/24
+              next_hop: 192.168.180.1
     edpm_network_config_manage_service: false
     edpm_network_config_hide_sensitive_logs: false
-    ctlplane_mtu: 1500
-    ctlplane_ip: 203.0.113.1
-    ctlplane_subnet_cidr: 24
-    ctlplane_host_routes: []
-    ctlplane_dns_nameservers: []
-    dns_search_domains: []
-    neutron_public_interface_name: dummy0
-    net_vip_map:
-      ctlplane: 203.0.113.3
-      ctlplane_subnet: 203.0.113.0/24
-      ctlplane_uri: 203.0.113.3
-    vip_port_map:
-      external:
-        ip_address: 203.0.113.1
-        ip_address_uri: 203.0.113.1
-        ip_subnet: 203.0.113.0/24
   roles:
     - role: "osp.edpm.edpm_network_config"
