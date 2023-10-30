@@ -127,8 +127,7 @@ argument_specs:
         description: Sets external_id data from provided variables using Jinja templating
         type: dict
       edpm_ovn_ovs_other_config:
-        default:
-          vlan-limit: 0
+        default: {}
         description: Openvswitch other_config
         type: dict
       edpm_ovn_protocol:
