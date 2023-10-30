@@ -1,0 +1,96 @@
+# we have to use shell to extract the values because openvswitch ansible
+# module doesn't seem to support dashes in key names, see:
+# https://github.com/ansible-collections/openvswitch.openvswitch/issues/111
+- name: Verify ovn-remote
+  ansible.builtin.shell: >
+    /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-remote
+  register: output
+  failed_when: output.stdout != '"tcp:1.2.3.4:5678"'
+
+- name: Verify ovn-encap-type
+  ansible.builtin.shell: >
+    /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-encap-type
+  register: output
+  failed_when: output.stdout != 'geneve'
+
+- name: Verify ovn firewall rules are applied
+  block:
+    - name: Rule source file exists
+      become: true
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/firewall/ovn.yaml"
+      register: rule_source_exists
+
+    - name: Assert ovn rule source file exists
+      ansible.builtin.assert:
+        that:
+          - rule_source_exists.stat.exists
+        fail_msg: "ovn rules source file does not exist"
+
+    - name: Check if nftables rule exists in /etc/nftables/edpm-rules.nft
+      become: true
+      ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
+      register: rule_exists
+      ignore_errors: true
+      loop:
+        - "118 neutron vxlan networks"
+        - "119 neutron geneve networks"
+        - "120 neutron geneve networks no conntrack"
+        - "121 neutron geneve networks no conntrack"
+
+    - name: Assert nftables rule exists in /etc/nftables/edpm-rules.nft
+      ansible.builtin.assert:
+        that:
+          - item.rc == 0
+        fail_msg: "firewall rule {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
+      loop: "{{ rule_exists.results }}"
+
+    - name: Check rule content
+      become: true
+      ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
+      register: rule_content_exists
+      ignore_errors: true
+      loop:
+        - "EDPM_INPUT udp dport { 4789 } ct state new counter accept"
+        - "EDPM_INPUT udp dport { 6081 } ct state untracked counter accept"
+        - "EDPM_OUTPUT udp dport { 6081 } counter notrack"
+        - "EDPM_PREROUTING udp dport { 6081 } counter notrack"
+
+    - name: Assert rule content exists
+      ansible.builtin.assert:
+        that:
+          - item.rc == 0
+        fail_msg: "rule content {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
+      loop: "{{ rule_content_exists.results }}"
+
+    - name: Check input chain rules are loaded
+      become: true
+      ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep -q "{{ item }}.*accept"
+      register: input_rules_loaded
+      ignore_errors: true
+      loop:
+        - "udp dport 4789 ct state new counter"
+        - "udp dport 6081 ct state untracked counter"
+
+    - name: Assert rule content exists
+      ansible.builtin.assert:
+        that:
+          - item.rc == 0
+        fail_msg: "rule {{ item.item }} not loaded"
+      loop: "{{ input_rules_loaded.results }}"
+
+    - name: Check notrack rules are loaded
+      become: true
+      ansible.builtin.shell: nft list table inet raw | awk '/chain {{ item }} {/,/}/' | grep -q "udp dport 6081 counter packets.*notrack"
+      register: notrack_rules_loaded
+      ignore_errors: true
+      loop:
+        - EDPM_OUTPUT
+        - EDPM_PREROUTING
+
+    - name: Assert rule content exists
+      ansible.builtin.assert:
+        that:
+          - item.rc == 0
+        fail_msg: "rule {{ item.item }} not loaded"
+      loop: "{{ notrack_rules_loaded.results }}"

@@ -26,5 +26,4 @@
         edpm_ovn_dbs:
           - "{{ ansible_host }}"
         edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
-        # TODO(ihar): migrate the scenario to symlinks to reuse logic from default
-        edpm_ovn_encap_type: vxlan
+        edpm_enable_hw_offload: true

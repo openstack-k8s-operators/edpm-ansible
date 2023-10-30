@@ -10,4 +10,4 @@
       ansible.builtin.shell: >
         /usr/bin/ovs-vsctl get open_vswitch . other_config:hw-offload
       register: output
-      failed_when: output.rc == 0
+      failed_when: output.stdout != "True"
