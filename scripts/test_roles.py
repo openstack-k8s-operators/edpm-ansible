@@ -15,7 +15,6 @@ SKIP_LIST = [
     "edpm_chrony",
     "edpm_podman",
     "edpm_ceph_client_files",
-    "edpm_ddp_package",
     "edpm_frr",
     "edpm_kernel",
     "edpm_ovn_bgp_agent",
