@@ -61,7 +61,7 @@ argument_specs:
         description: List of directories to search executables in
         type: str
       edpm_neutron_ovn_agent_rootwrap_DEFAULT_filters_path:
-        default: /etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap
+        default: /usr/share/neutron/rootwrap
         description: List of directories to load filter definitions from
         type: str
       edpm_neutron_ovn_agent_rootwrap_DEFAULT_rlimit_nofile:

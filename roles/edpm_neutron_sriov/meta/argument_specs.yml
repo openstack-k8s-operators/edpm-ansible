@@ -67,7 +67,7 @@ argument_specs:
         description: ''
         type: int
       edpm_neutron_sriov_rootwrap_DEFAULT_filters_path:
-        default: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+        default: '/usr/share/neutron/rootwrap'
       edpm_neutron_sriov_rootwrap_DEFAULT_exec_dirs:
         default: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
       edpm_neutron_sriov_rootwrap_DEFAULT_use_syslog:

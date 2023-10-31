@@ -51,7 +51,7 @@ edpm_neutron_sriov_oslo_middleware_enable_proxy_headers_parsing: 60
 
 # rootwrap.conf
 # DEFAULT
-edpm_neutron_sriov_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+edpm_neutron_sriov_rootwrap_DEFAULT_filters_path: '/usr/share/neutron/rootwrap'
 edpm_neutron_sriov_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
 edpm_neutron_sriov_rootwrap_DEFAULT_use_syslog: 'False'
 edpm_neutron_sriov_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
