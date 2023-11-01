@@ -13,3 +13,5 @@
         - edpm-ansible-molecule-edpm_frr
         - edpm-ansible-molecule-edpm_iscsid
         - edpm-ansible-molecule-edpm_ovn_bgp_agent
+        - data-plane-adoption-github-rdo-centos-9-extracted-crc:
+            voting: false
