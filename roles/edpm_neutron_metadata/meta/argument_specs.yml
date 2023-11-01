@@ -87,7 +87,7 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_metadata_agent_rootwrap_DEFAULT_filters_path:
-        default: /etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap
+        default: /usr/share/neutron/rootwrap
         description: ''
         type: str
       edpm_neutron_metadata_agent_rootwrap_DEFAULT_rlimit_nofile:

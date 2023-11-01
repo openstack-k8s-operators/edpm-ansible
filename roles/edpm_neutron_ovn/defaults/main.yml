@@ -24,7 +24,7 @@ edpm_neutron_ovn_common_volumes:
 edpm_neutron_ovn_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}'  # also in missing vars
 
 # rootwrap.conf
-edpm_neutron_ovn_agent_rootwrap_DEFAULT_filters_path: '/etc/neutron/rootwrap.d,/usr/share/neutron/rootwrap'
+edpm_neutron_ovn_agent_rootwrap_DEFAULT_filters_path: '/usr/share/neutron/rootwrap'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_use_syslog: 'False'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
