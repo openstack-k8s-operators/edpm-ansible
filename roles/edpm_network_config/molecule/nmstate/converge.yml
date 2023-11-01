@@ -18,14 +18,19 @@
 - name: Converge
   hosts: all
   vars:
-    edpm_network_config_tool: nmstate
-    network_provider: nm
-    network_state:
+    # edpm_network_config - nmstate
+    edpm_network_config_tool: 'nmstate'
+    edpm_network_config_template: |
+      ---
       interfaces:
-      - name: dummy0
-        type: dummy
-        state: down
-        ipv4:
-          enabled: false
+        - name: dummy0
+          type: dummy
+          state: up
+          ipv4:
+            address:
+            - ip: 192.168.180.2
+              prefix-length: 24
+            dhcp: false
+            enabled: true
   roles:
-    - role: "osp.edpm.edpm_network_config"
+    - role: osp.edpm.edpm_network_config
