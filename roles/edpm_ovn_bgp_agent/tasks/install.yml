@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Create persistent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory

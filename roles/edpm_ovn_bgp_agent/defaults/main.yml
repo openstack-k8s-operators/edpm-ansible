@@ -30,6 +30,7 @@ edpm_ovn_bgp_agent_certificate: /etc/pki/tls/certs/ovn_bgp_agent.crt
 edpm_ovn_bgp_agent_ca_cert: /etc/ipa/ca.crt
 edpm_ovn_bgp_agent_internal_tls_enable: false
 edpm_ovn_bgp_agent_config_basedir: "/var/lib/config-data/ansible-generated/ovn-bgp-agent"
+edpm_ovn_bgp_agent_config_src: "/var/lib/openstack/configs/ovn-bgp-agent"
 edpm_ovn_bgp_agent_bgp_as: 64999
 edpm_ovn_bgp_agent_clear_vrf_routes_on_startup: false
 edpm_ovn_bgp_agent_bgp_nic: bgp-nic

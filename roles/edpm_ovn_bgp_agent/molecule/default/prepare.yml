@@ -59,7 +59,19 @@
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         tasks_from: "download_cache.yml"
-    - ansible.builtin.include_role:
+
+    - name: "Running FRR"
+      ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         apply:
           become: true
+
+    - name: "Running OVN"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_ovn"
+        apply:
+          become: true
+      vars:
+        tenant_ip: "{{ ansible_host }}"
+        edpm_ovn_dbs:
+          - "{{ ansible_host }}"

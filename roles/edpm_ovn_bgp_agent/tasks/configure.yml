@@ -18,10 +18,29 @@
   ansible.builtin.template:
     src: ovn-bgp-agent.conf.j2
     dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/bgp-agent.conf"
-    mode: "640"
+    mode: "644"
     selevel: s0
     setype: container_file_t
   register: _ovn_bgp_agent_config_result
+
+- name: Discover secrets in {{ edpm_ovn_bgp_agent_config_src }}
+  ansible.builtin.find:
+    paths: "{{ edpm_ovn_bgp_agent_config_src }}"
+    file_type: file
+    recurse: true
+    patterns:
+      - "*ovn-bgp-agent*conf"
+  register: edpm_ovn_bgp_agent_secrets
+  delegate_to: localhost
+  become: false
+
+- name: Flatten secrets into {{ edpm_ovn_bgp_agent_config_basedir }}
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/{{ item.path | basename }}"
+    setype: "container_file_t"
+    mode: "0644"
+  loop: "{{ edpm_ovn_bgp_agent_secrets.files }}"
 
 - name: Add OVS Manager
   block:

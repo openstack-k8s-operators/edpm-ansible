@@ -21,7 +21,7 @@
 
 - name: Run ovn_bgp_agent container
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+    name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: ovn_bgp_agent
     edpm_container_standalone_container_defs:
