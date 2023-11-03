@@ -1,13 +1,10 @@
 command: bash -c $* -- eval if [ -f /usr/libexec/frr/frrinit.sh ]; then /usr/libexec/frr/frrinit.sh start; else /usr/lib/frr/frr start; fi  && exec /bin/sleep infinity
 config_files:
-  - source: "/var/lib/kolla/config_files/src/*"
-    dest: "/"
+  - source: "/var/lib/kolla/config_files/src/etc/frr/*"
+    dest: /etc/frr/
     merge: true
     preserve_properties: true
 permissions:
-  - path: /etc/frr
-    owner: frr:frr
-    recurse: true
   - path: /var/log/frr
     owner: frr:frr
     recurse: true

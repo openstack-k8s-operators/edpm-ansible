@@ -1,0 +1,95 @@
+---
+- name: Verify frr
+  gather_facts: false
+  hosts: compute-1
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        - "/var/lib/edpm-config/container-startup-config/frr"
+        - "/var/lib/config-data/ansible-generated/frr"
+        - "/var/log/containers/frr"
+        - "/etc/tmpfiles.d/"
+        - "/var/lib/config-data/ansible-generated/frr/etc/frr"
+
+    - name: ensure that /etc/tmpfiles.d/run-frr.conf file for frr exist
+      become: true
+      block:
+        - name: Check if file /etc/tmpfiles.d/run-frr.conf exist
+          ansible.builtin.stat:
+            path: /etc/tmpfiles.d/run-frr.conf
+          register: check_frr_file
+        - name: Assert file /etc/tmpfiles.d/run-frr.conf exist
+          ansible.builtin.assert:
+            that:
+              - check_frr_file.stat.exists
+            fail_msg: "File /etc/tmpfiles.d/run-frr.conf does not exist"
+
+    - name: ensure that /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf file exist
+      become: true
+      block:
+        - name: Check if file /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf exist
+          ansible.builtin.stat:
+            path: /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf
+          register: check_frr_conf_file
+        - name: Assert file /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf exist
+          ansible.builtin.assert:
+            that:
+              - check_frr_conf_file.stat.exists
+            fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf does not exist"
+
+    - name: ensure that /var/lib/config-data/ansible-generated/frr/etc/frr/daemons file exist
+      become: true
+      block:
+        - name: Check if file /var/lib/config-data/ansible-generated/frr/etc/frr/daemons exist
+          ansible.builtin.stat:
+            path: /var/lib/config-data/ansible-generated/frr/etc/frr/daemons
+          register: check_frr_daemons_file
+        - name: Assert file /var/lib/config-data/ansible-generated/frr/etc/frr/daemons exist
+          ansible.builtin.assert:
+            that:
+              - check_frr_daemons_file.stat.exists
+            fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/daemons does not exist"
+
+    - name: "Use lookup to get container frr log"
+      vars:
+        local_file: /var/log/containers/frr/frr.log
+        remote_file: /home/zuul/frr_container.log
+      when: lookup( 'file', local_file, errors='ignore' )
+      copy:
+        src: "{{ local_file}}"
+        dest: "{{ remote_file }}"
+
+    - name: "Use lookup to get stdout frr.log"
+      vars:
+        local_file: /var/log/containers/stdouts/frr.log
+        remote_file: /home/zuul/frr_stdouts.log
+      when: lookup( 'file', local_file, errors='ignore' )
+      copy:
+        src: "{{ local_file}}"
+        dest: "{{ remote_file }}"
+
+    - name: ensure podman container exists and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+      loop:
+        - "frr"
+
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_frr.service"}
+
+    - name: ensure that log file for frr exist
+      become: true
+      block:
+        - name: Check if file /var/log/containers/frr/frr.log exist
+          ansible.builtin.stat:
+            path: /var/log/containers/frr/frr.log
+          register: log_file
+        - name: Assert file /var/log/containers/frr/frr.log exist
+          ansible.builtin.assert:
+            that:
+              - log_file.stat.exists
+            fail_msg: "File /var/log/containers/frr/frr.log does not exist"
