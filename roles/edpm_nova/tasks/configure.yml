@@ -51,6 +51,18 @@
     - {"src": "config.json.j2", "dest": "config.json"}
     - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
     - {"src": "ssh-config", "dest": "ssh-config"}
+    # NOTE(gibi): This is unfortunate as we would like to avoid config
+    # generation in ansible. This config is only needed to specify the IP
+    # address of the node nova-compute should use. Right now this is hardcoded
+    # to use the ctlplane_ip. In the future we might want to support
+    # configuring which network nova-compute uses when connecting between
+    # compute nodes. However that needs careful syncing between IPs in the
+    # known_hosts file and IPs in the TLS certificates.
+    # NOTE(gibi): There is an upstream nova blueprint that will allow us to
+    # remove this host specific configuration in the future (not earlier than
+    # openstack Caracal)
+    # https://blueprints.launchpad.net/nova/+spec/libvirt-migrate-with-hostname-instead-of-ip
+    - {"src": "02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
   notify:
     - Restart nova
 
