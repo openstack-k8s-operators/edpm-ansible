@@ -30,6 +30,7 @@
       tags:
         - edpm_sshd
     - name: Configure edpm_chrony
+      when: timesync_ntp_servers is not defined
       ansible.builtin.import_role:
         name: osp.edpm.edpm_chrony
         tasks_from: config.yml

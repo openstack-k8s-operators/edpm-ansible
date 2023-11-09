@@ -16,6 +16,7 @@ Contents:
    usage
    roles
    plugins
+   playbooks
 
 Indices and tables
 ==================
