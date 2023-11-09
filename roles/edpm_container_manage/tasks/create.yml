@@ -14,6 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: "podman info"
+  ansible.builtin.shell: "podman info"
+  register: podman_out
+
+- name: Debug podman
+  ansible.builtin.debug: var=podman_out
+
 - name: "Create containers managed by Podman for {{ edpm_container_manage_config }}"
   edpm_container_manage:
     config_id: "{{ edpm_container_manage_config_id }}"

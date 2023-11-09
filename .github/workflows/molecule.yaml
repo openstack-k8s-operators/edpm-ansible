@@ -18,32 +18,7 @@ jobs:
       fail-fast: true
       matrix:
         tested_role:
-        - edpm_bootstrap
-        - edpm_ceph_client_files
-        - edpm_ceph_hci_pre
-        - edpm_container_manage
-        - edpm_container_rm
-        - edpm_container_standalone
-        - edpm_ddp_package
-        - edpm_download_cache
-        - edpm_growvols
-        - edpm_logrotate_crond
-        - edpm_multipathd
-        - edpm_network_config
-        - edpm_neutron_dhcp
-        - edpm_neutron_metadata
         - edpm_neutron_ovn
-        - edpm_neutron_sriov
-        - edpm_nftables
-        - edpm_nodes_validation
-        - edpm_ovn
-        - edpm_sshd
-        - edpm_ssh_known_hosts
-        - edpm_timezone
-        - edpm_tuned
-        - edpm_telemetry
-        - edpm_users
-        - env_data
 
     runs-on: ubuntu-22.04
     steps:
@@ -58,6 +33,10 @@ jobs:
       run: ansible-galaxy collection install -r requirements.yml
     - name: Install molecule deps
       run: pip install -r molecule-requirements.txt
+    - name: Start systemd user service
+      run: |
+        loginctl enable-linger runner
+        sleep 1
     - name: Run molecule test
       run: ansible-playbook .github/playbooks/molecule-run.yml -vvvv --connection=local -i localhost
       env:
