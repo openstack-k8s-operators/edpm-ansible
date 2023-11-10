@@ -17,29 +17,19 @@
         tasks_from: install.yml
       tags:
         - edpm_sshd
-    - name: Set up time services
-      when: timesync_ntp_servers is defined
-      block:
-        - name: Set FQCN for the timesync role
-          ansible.builtin.set_fact:
-            timesyncfqcn:
-              "{%- if ansible_facts['distribution'] == 'RedHat' -%}
-                redhat.rhel{%- else -%}
-                fedora.linux{%- endif -%}
-              _system_roles.timesync"
-          delegate_to: localhost
-        - name: Install and configure time service using timesync system role
-          ansible.builtin.include_role:
-            name: "{{timesyncfqcn}}"
-          tags:
-            - dataplane_chrony
-    - name: Install edpm_chrony
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: install.yml
+    - name: Set FQCN for the timesync role
+      ansible.builtin.set_fact:
+        timesyncfqcn:
+          "{%- if ansible_facts['distribution'] == 'RedHat' -%}
+            redhat.rhel{%- else -%}
+            fedora.linux{%- endif -%}
+          _system_roles.timesync"
+      delegate_to: localhost
+    - name: Install and configure time service using timesync system role
+      ansible.builtin.include_role:
+        name: "{{timesyncfqcn}}"
       tags:
-        - edpm_chrony
-      when: timesync_ntp_servers is not defined
+        - dataplane_chrony
     - name: Install edpm_logrotate_crond
       ansible.builtin.import_role:
         name: osp.edpm.edpm_logrotate_crond
