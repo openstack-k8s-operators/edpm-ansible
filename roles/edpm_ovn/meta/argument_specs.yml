@@ -96,10 +96,6 @@ argument_specs:
         default: false
         description: ''
         type: bool
-      edpm_ovn_of_probe_interval:
-        default: 60
-        description: ''
-        type: int
       edpm_ovn_ofctrl_wait_before_clear:
         default: 8000
         description: ''
@@ -118,7 +114,6 @@ argument_specs:
           ovn-match-northd-version: true
           ovn-monitor-all: true
           ovn-ofctrl-wait-before-clear: '{{ edpm_ovn_ofctrl_wait_before_clear }}'
-          ovn-openflow-probe-interval: '{{ edpm_ovn_of_probe_interval }}'
           ovn-remote: '{% set db_addresses = [] %}{% for host in edpm_ovn_dbs %}{{ db_addresses.append([edpm_ovn_protocol,
             host, edpm_ovn_sb_server_port] | join('':'')) }}{% endfor %}{{ db_addresses
             | join('','') }}'

@@ -41,7 +41,6 @@ edpm_enable_hw_offload: false
 edpm_ovn_multi_rhel: false
 edpm_enable_internal_tls: false
 edpm_ovn_sb_server_port: 6642
-edpm_ovn_of_probe_interval: 60
 edpm_ovn_remote_probe_interval: 60000
 edpm_ovn_ofctrl_wait_before_clear: 8000
 edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
@@ -75,7 +74,6 @@ edpm_ovn_ovs_external_ids:
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
   ovn-match-northd-version: true
   ovn-monitor-all: true
-  ovn-openflow-probe-interval: "{{ edpm_ovn_of_probe_interval }}"
   ovn-remote: >-
     "{%- set db_addresses = [] -%}{%- for host in edpm_ovn_dbs -%}
     {{ db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) }}{%- endfor -%}
