@@ -3,6 +3,8 @@
 - name: Prepare EDPM to Host Ceph
   hosts: all
   strategy: linear
+  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
+  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
   tasks:
     - name: Prepare EDPM to Host Ceph
       ansible.builtin.import_role:
