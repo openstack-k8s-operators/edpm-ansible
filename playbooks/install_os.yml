@@ -17,17 +17,9 @@
         tasks_from: install.yml
       tags:
         - edpm_sshd
-    - name: Set FQCN for the timesync role
-      ansible.builtin.set_fact:
-        timesyncfqcn:
-          "{%- if ansible_facts['distribution'] == 'RedHat' -%}
-            redhat.rhel{%- else -%}
-            fedora.linux{%- endif -%}
-          _system_roles.timesync"
-      delegate_to: localhost
     - name: Install and configure time service using timesync system role
       ansible.builtin.include_role:
-        name: "{{timesyncfqcn}}"
+        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.timesync' }}"
       tags:
         - dataplane_chrony
     - name: Install edpm_logrotate_crond

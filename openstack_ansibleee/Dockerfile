@@ -18,5 +18,6 @@ COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /bin/edpm_entrypoint
 RUN sed -i '1d' /bin/entrypoint
 RUN cat /bin/entrypoint >> /bin/edpm_entrypoint
 RUN chmod +x /bin/edpm_entrypoint
+ENV EDPM_SYSTEMROLES='fedora.linux_system_roles'
 WORKDIR /runner
 ENTRYPOINT ["edpm_entrypoint"]
