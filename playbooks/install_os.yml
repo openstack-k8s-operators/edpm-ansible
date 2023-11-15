@@ -25,6 +25,7 @@
             fedora.linux{%- endif -%}
           _system_roles.timesync"
       delegate_to: localhost
+      delegate_facts: true
     - name: Install and configure time service using timesync system role
       ansible.builtin.include_role:
         name: "{{timesyncfqcn}}"

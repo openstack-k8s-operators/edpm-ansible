@@ -25,6 +25,7 @@
             fedora.linux{%- endif -%}
           _system_roles.network"
       delegate_to: localhost
+      delegate_facts: true
     - name: Install OVS NetworkManager plugin [nmstate]
       ansible.builtin.dnf:
         name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
