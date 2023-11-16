@@ -91,3 +91,16 @@
       ansible.builtin.assert:
         that:
           - "nova_authorized_keys.stat.mode == '0600'"
+
+    - name: Stat /var/lib/nova/compute_id
+      become: true
+      ansible.builtin.stat:
+        path: /var/lib/nova/compute_id
+      register: compute_id
+
+    - name: Assert that compute_id exists, not empty, and read-only
+      ansible.builtin.assert:
+        that:
+          - "compute_id.stat.size == 37"
+          - "compute_id.stat.mode == '0400'"
+          - "compute_id.stat.attr_flags == 'i'"
