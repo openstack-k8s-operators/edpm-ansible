@@ -15,13 +15,13 @@
 # under the License.
 
 - name: Install role requirements
-  ansible.builtin.include_tasks: install.yml
+  ansible.builtin.include_tasks: install.yaml
   when: edpm_download_role_install_requirements | bool
 
 - name: Download packages
-  ansible.builtin.include_tasks: packages.yml
+  ansible.builtin.include_tasks: packages.yaml
   when: edpm_download_cache_packages | bool
 
 - name: Download container images
-  ansible.builtin.include_tasks: container_images.yml
+  ansible.builtin.include_tasks: container_images.yaml
   when: edpm_download_cache_container_images | bool

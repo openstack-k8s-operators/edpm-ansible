@@ -1,5 +1,4 @@
 ---
-
 - name: EDPM Download cache
   hosts: all
   strategy: linear
