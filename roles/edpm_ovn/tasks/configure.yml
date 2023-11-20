@@ -36,17 +36,31 @@
       ansible.builtin.set_fact:
         edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(edpm_ovn_configmap_facts | default({})) }}"
 
-- name: Configure GW ports on chassis setting when enabled
-  when: edpm_enable_chassis_gw | default(false)
+- name: Configure OVN CMS Options
   block:
-    - name: Set enable-chassis-as-gw
+    - name: Configure GW ports on chassis setting when enabled
       ansible.builtin.set_fact:
-        cms_options:
-          ovn-cms-options: "enable-chassis-as-gw"
+        chassis_options:
+          - "enable-chassis-as-gw"
+      when: edpm_enable_chassis_gw | default(false)
 
-    - name: Append CMS options to external_ids
+    - name: Configure external port hosting on chassis setting when enabled
       ansible.builtin.set_fact:
-        edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(cms_options) }}"
+        chassis_options: "{{ chassis_options | default([]) + ['enable-chassis-as-extport-host'] }}"
+      when: edpm_enable_chassis_extport | default(false)
+
+    - name: Build OVN CMS Options
+      ansible.builtin.set_fact:
+        ovn_cms_options:
+          ovn-cms-options: "{{ chassis_options | join(',') }}"
+      when:
+        - chassis_options is defined
+
+    - name: Append OVN CMS Options to external_ids
+      ansible.builtin.set_fact:
+        edpm_ovn_ovs_external_ids: "{{ edpm_ovn_ovs_external_ids | combine(ovn_cms_options | default({})) }}"
+      when:
+        - ovn_cms_options is defined
 
 - name: Configure hw-offload when required
   when: edpm_enable_hw_offload | default(false)

@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Include default tasks
+      ansible.builtin.include_tasks:
+        file: ../default/verify-tasks.yml
+
+    - name: Verify enable-chassis-as-gw
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-cms-options
+      register: output
+      failed_when: output.stdout != "enable-chassis-as-gw"

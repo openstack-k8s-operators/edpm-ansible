@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2021 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,19 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Cleanup
+- name: Converge
   hosts: all
-  gather_facts: false
-  any_errors_fatal: true
+  gather_facts: true
   become: true
   tasks:
-    - name: Cleanup edpm_ovn
-      ansible.builtin.import_role:
+    - include_role:
         name: "osp.edpm.edpm_ovn"
-        tasks_from: cleanup.yml
-
-    - name: Verify ovn-cms-options was cleared up
-      ansible.builtin.shell: >
-        /usr/bin/ovs-vsctl get open . external_ids
-      register: output
-      failed_when: "'ovn-cms-options' in output.stdout"
+      vars:
+        tenant_ip: "{{ ansible_host }}"
+        edpm_ovn_dbs:
+          - "{{ ansible_host }}"
+        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_enable_chassis_gw: true
