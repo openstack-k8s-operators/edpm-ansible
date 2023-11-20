@@ -57,22 +57,8 @@
     - cloud_init_vendor_disabled is changed
   become: true
 
-- name: Bootstrap command
-  when: edpm_bootstrap_command != ""
-  become: true
-  block:
-    - name: Bootstrap command
-      ansible.builtin.shell: "{{ edpm_bootstrap_command }}"
-      register: bootstrap_cmd
-      changed_when: bootstrap_cmd.rc == 0
-      failed_when: false
-
-    - name: Bootstrap command output
-      ansible.builtin.debug:
-        msg:
-          stdout: "{{ bootstrap_cmd.stdout_lines }}"
-          stderr: "{{ bootstrap_cmd.stderr_lines }}"
-      failed_when: bootstrap_cmd.rc != 0
+- name: Execute bootstrap command
+  ansible.builtin.import_tasks: bootstrap_command.yml
 
 - name: Import packages tasks
   ansible.builtin.import_tasks: packages.yml

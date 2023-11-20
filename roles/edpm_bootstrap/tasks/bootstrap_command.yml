@@ -1,0 +1,39 @@
+---
+
+- name: Check if bootstrap command has been executed
+  ansible.builtin.stat:
+    path: "{{ edpm_bootstrap_command_done_file }}"
+  register: edpm_bootstrap_command_executed
+
+- name: Bootstrap command
+  when:
+    - edpm_bootstrap_command != ""
+    - not edpm_bootstrap_command_executed.stat.exists
+  become: true
+  block:
+
+    - name: Bootstrap command
+      ansible.builtin.shell: "{{ edpm_bootstrap_command }}"
+      register: bootstrap_cmd
+      changed_when: bootstrap_cmd.rc == 0
+      failed_when: false
+
+    - name: Bootstrap command output
+      ansible.builtin.debug:
+        msg:
+          stdout: "{{ bootstrap_cmd.stdout_lines }}"
+          stderr: "{{ bootstrap_cmd.stderr_lines }}"
+      failed_when: bootstrap_cmd.rc != 0
+
+    - name: Mark bootstrap command as executed on node
+      ansible.builtin.file:
+        path: "{{ edpm_bootstrap_command_done_file }}"
+        state: touch
+        mode: '0600'
+
+  rescue:
+
+    - name: "Delete {{ edpm_bootstrap_command_done_file }}"
+      ansible.builtin.file:
+        path: "{{ edpm_bootstrap_command_done_file }}"
+        state: absent
