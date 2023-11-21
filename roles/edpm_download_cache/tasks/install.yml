@@ -1,5 +1,13 @@
 ---
 
+- name: Execute bootstrap command
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_bootstrap
+    tasks_from: bootstrap_command.yml
+  tags:
+    - edpm_bootstrap
+    - download_cache
+
 - name: Grow volumes
   ansible.builtin.import_role:
     name: osp.edpm.edpm_growvols
