@@ -20,3 +20,6 @@
 
 - name: Import deploy_infra telemetry tasks
   ansible.builtin.import_tasks: deploy_infra.yml
+
+- name: Configure logging
+  ansible.builtin.import_tasks: enable_logging.yml

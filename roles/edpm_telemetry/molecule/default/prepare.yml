@@ -200,3 +200,16 @@
               }
             ]
           }
+    - name: Create 10-telemetry.conf
+      ansible.builtin.copy:
+        dest: /var/lib/openstack/config/10-telemetry.conf
+        mode: '0644'
+        owner: root
+        group: root
+        content: |
+          module(load="imjournal" PersistStateInterval="10"
+                StateFile="journal_state")
+
+          action(type="omfwd" target="172.17.0.80" port="10514" protocol="tcp"
+                      action.resumeRetryCount="100"
+                      queue.type="linkedList" queue.size="10000")
