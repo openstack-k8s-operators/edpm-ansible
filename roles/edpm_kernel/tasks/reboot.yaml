@@ -65,13 +65,18 @@
       loop:
         - "{{ ifcfg_files.files }}"
 
-- name: Reboot debug message
+- name: Display reboot debug message
   ansible.builtin.debug:
-    msg: "Going to reboot the node after applying kernel args..."
+    msg: "Creating edpm_kernel file under reboot_required for applying kernel args settings"
 
-# Reboot the node
-- name: Reboot after kernel args update
-  become: true
-  ansible.builtin.reboot:
-    post_reboot_delay: "{{ edpm_kernel_post_reboot_delay }}"
-    reboot_timeout: "{{ edpm_kernel_reboot_timeout }}"
+- name: Create a reboot_required directory if it does not exist
+  ansible.builtin.file:
+    path: /var/lib/openstack/reboot_required
+    state: directory
+    mode: '0755'
+
+- name: Create file for reboot required
+  ansible.builtin.file:
+    path: /var/lib/openstack/reboot_required/edpm_kernel
+    state: touch
+    mode: '0600'

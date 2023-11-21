@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,22 +17,7 @@
 
 # All variables intended for modification should be placed in this file.
 
-# seconds between retries for download tasks
-edpm_kernel_download_delay: 5
-
-# number of retries for download tasks
-edpm_kernel_download_retries: 5
-
-edpm_kernel_extra_modules: {}
-edpm_kernel_extra_packages: []
-edpm_kernel_sysctl_extra_settings: {}
-edpm_kernel_args: ""
-edpm_kernel_defer_reboot: false
-edpm_kernel_hugepages: {}
-edpm_kernel_hugepages_remove: false
-
-# This should be synced with edpm_nova_compute role
-edpm_nova_compute_config_dir: /var/lib/config-data/ansible-generated/nova_libvirt
-
-# KSM control
-edpm_kernel_enable_ksm: false
+edpm_reboot_force_reboot: false
+edpm_reboot_nova_compute_config_dir: /var/lib/openstack/config/nova
+edpm_reboot_timeout_reboot: 3600
+edpm_reboot_post_reboot_delay: 60
