@@ -25,5 +25,4 @@ This Ansible role allows to do the following tasks:
          edpm_ovs_dpdk_lcore_list: "0,12"
          edpm_ovs_dpdk_socket_memory: "4096"
          edpm_ovs_dpdk_memory_channels: 4
-         edpm_ovs_dpdk_vhost_postcopy_support: tru
-         edpm_nova_libvirt_vhostuser_socket_group: 'hugetlbfs'
+         edpm_ovs_dpdk_vhost_postcopy_support: true
