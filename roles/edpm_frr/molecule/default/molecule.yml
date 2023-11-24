@@ -23,11 +23,8 @@ provisioner:
 
 scenario:
   test_sequence:
-  - dependency
-  - destroy
-  - create
   - prepare
   - converge
-  - destroy
+  - verify
 verifier:
   name: ansible

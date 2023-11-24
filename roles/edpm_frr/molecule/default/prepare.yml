@@ -25,6 +25,12 @@
           - openvswitch
           - python3-pip
           - os-net-config
+  pre_tasks:
+    - name: set basic user fact
+      set_fact:
+        ansible_user: "{{ lookup('env', 'USER') }}"
+      when:
+        - ansible_user is undefined
   tasks:
     # needed due to regression in 1.11.1
     # see https://github.com/containers/crun/issues/1338
@@ -41,6 +47,18 @@
       ansible.builtin.package:
         name: os-net-config
       become: true
+
+    - name: Create persistent directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        setype: "{{ item.setype | default('container_file_t') }}"
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - {'path': /etc/tmpfiles.d/, 'owner': 'root', 'group': 'root', 'mode': '0755'}
 
     - name: Setup for FRR
       become: true
