@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Create persistent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -26,6 +27,7 @@
     - {'path': /run/frr, 'setype': container_file_t, 'mode': '0755'}
 
 - name: Ensure /run/frr is present upon reboot
+  become: true
   ansible.builtin.copy:
     dest: /etc/tmpfiles.d/run-frr.conf
     mode: "0755"

@@ -77,3 +77,7 @@ edpm_bootstrap_swap_partition_label: swap1
 # Shell command that is executed before any packages are installed by the role.
 # Can be used to register systems using any arbitrary registration command(s).
 edpm_bootstrap_command: ""
+
+# The path of the file that will be used as a marker when the edpm_bootstrap_command
+# has been executed on the node.
+edpm_bootstrap_command_done_file: /.bootstrap_command_done

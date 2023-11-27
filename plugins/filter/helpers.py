@@ -15,6 +15,7 @@
 # under the License.
 
 import ast
+import binascii
 import json
 import re
 
@@ -25,7 +26,8 @@ class FilterModule:
             'needs_delete': self.needs_delete,
             'haskey': self.haskey,
             'dict_to_list': self.dict_to_list,
-            'jump_chain_targets': self.jump_chain_targets
+            'jump_chain_targets': self.jump_chain_targets,
+            'cpu_mask': self.cpu_mask
         }
 
     def needs_delete(self, container_infos, config, config_id,
@@ -190,3 +192,30 @@ class FilterModule:
                 if 'target' in target.get('jump', {}).keys():
                     targets.append(target['jump']['target'])
         return targets
+
+    def cpu_mask(self, cpu_list):
+        """Return a cpu mask for the list of CPUs.
+        Example - for input of 1,13 the mask would be 2002
+        :param cpu_list: list
+        :returns: cpu mask
+        """
+        mask = 0
+        cpus = []
+        for cpu in cpu_list.split(','):
+            if '-' in cpu:
+                rng = cpu.split('-')
+                cpus.extend(range(int(rng[0]), int(rng[1]) + 1))
+            else:
+                cpus.append(int(cpu))
+        cpus.sort()
+        max_val = int(cpus[-1])
+        byte_arr = bytearray(int(max_val / 8) + 1)
+
+        for item in cpus:
+            pos = int(int(item) / 8)
+            bit = int(item) % 8
+            byte_arr[pos] |= 2**bit
+
+        byte_arr.reverse()
+        mask = binascii.hexlify(byte_arr)
+        return mask.decode("utf-8").lstrip("0")

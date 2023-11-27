@@ -16,7 +16,7 @@
 
 - name: Ensure /usr/libexec/edpm-start-podman-container exists
   ansible.builtin.import_role:
-    name: edpm_container_manage
+    name: osp.edpm.edpm_container_manage
     tasks_from: shutdown.yml
 
 - name: Run ovn_bgp_agent container

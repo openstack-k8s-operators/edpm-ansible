@@ -17,12 +17,11 @@
         tasks_from: install.yml
       tags:
         - edpm_sshd
-    - name: Install edpm_chrony
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: install.yml
+    - name: Install and configure time service using timesync system role
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.timesync' }}"
       tags:
-        - edpm_chrony
+        - dataplane_chrony
     - name: Install edpm_logrotate_crond
       ansible.builtin.import_role:
         name: osp.edpm.edpm_logrotate_crond

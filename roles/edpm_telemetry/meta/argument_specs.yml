@@ -23,7 +23,7 @@ argument_specs:
         type: "str"
         required: true
         description: "The name of the node_exporter podman image"
-      edpm_ceilometer_config_src:
+      edpm_telemetry_config_src:
         type: "str"
         required: true
         description: "The path on the ansibleEE container where the config files are stored"
@@ -31,3 +31,7 @@ argument_specs:
         type: "str"
         required: true
         description: "The path in the compute node where the config files are copied to"
+      edpm_rsyslog_config_dest:
+        type: "str"
+        required: true
+        description: "The path in the compute node where the rsyslog config files are copied to"

@@ -14,11 +14,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Include host prep tasks for ovn_cluster
+  ansible.builtin.import_tasks: install_ovn.yml
+  when: edpm_ovn_bgp_agent_local_ovn_routing
+
 - name: Include host prep tasks
   ansible.builtin.import_tasks: install.yml
 
+- name: Configure in node ovn cluster for ovn_bgp_agent
+  ansible.builtin.import_tasks: configure_ovn.yml
+  when: edpm_ovn_bgp_agent_local_ovn_routing
+
 - name: Configure ovn_bgp_agent
   ansible.builtin.import_tasks: configure.yml
+
+- name: Ensure in node ovn cluster for ovn_bgp_agent is running
+  ansible.builtin.import_tasks: run_ovn.yml
+  when: edpm_ovn_bgp_agent_local_ovn_routing
 
 - name: Ensure ovn_bgp_agent is running
   ansible.builtin.import_tasks: run.yml

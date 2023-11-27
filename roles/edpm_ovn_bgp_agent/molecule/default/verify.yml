@@ -12,15 +12,15 @@
         - "/var/log/containers/ovn-bgp-agent"
         - "/var/lib/edpm-config/container-startup-config/ovn_bgp_agent"
 
-    - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
-      loop:
-        - {"name": "edpm_ovn_bgp_agent.service"}
-
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
         - "ovn_bgp_agent"
+
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_ovn_bgp_agent.service"}
 
     - name: ensure that log file for ovn_bgp_agent exist
       become: true
@@ -35,16 +35,11 @@
               - log_file.stat.exists
             fail_msg: "File /var/log/containers/stdouts/ovn_bgp_agent.log does not exist"
 
-    - name: Ensure that 10-ovn_bgp_agent.conf was copied into the container
-      block:
-        - name: ovn_bgp_agent config file exists
-          become: true
-          ansible.builtin.stat:
-            path: "/var/lib/config-data/ansible-generated/ovn-bgp-agent/etc/ovn-bgp-agent/10-ovn-bgp-agent.conf"
-          register: ovn_bgp_agent_config
 
-        - name: assert that the config exists
-          ansible.builtin.assert:
-            that:
-              - ovn_bgp_agent_config.stat.exists
-            fail_msg: "ovn_bgp_agent config file does not exist"
+    - name: ensure kolla_set_configs copied the expected files
+      become: true
+      ansible.builtin.shell: |
+        podman logs ovn_bgp_agent 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/bgp-agent.conf to /etc/ovn-bgp-agent/bgp-agent.conf"
+        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/10-neutron-ovn.conf to /etc/ovn-bgp-agent/10-neutron-ovn.conf"

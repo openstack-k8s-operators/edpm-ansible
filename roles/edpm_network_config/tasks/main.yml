@@ -17,14 +17,6 @@
 - name: Configure network with network role from system roles [nmstate]
   when: edpm_network_config_tool == 'nmstate'
   block:
-    - name: Retrieve role name [nmstate]
-      ansible.builtin.set_fact:
-        systemrolename:
-          "{%- if ansible_facts['distribution'] == 'RedHat' -%}
-            redhat.rhel{%- else -%}
-            fedora.linux{%- endif -%}
-          _system_roles.network"
-      delegate_to: localhost
     - name: Install OVS NetworkManager plugin [nmstate]
       ansible.builtin.dnf:
         name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
@@ -43,7 +35,7 @@
         network_state: "{{ edpm_network_config_template | from_yaml }}"
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
-        name: "{{ systemrolename }}"
+        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES',  default='fedora.linux_system_roles') + '.network' }}"
 
 - name: Load edpm_network_config tasks [os-net-config]
   ansible.builtin.include_tasks:

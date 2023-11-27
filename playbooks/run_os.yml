@@ -11,24 +11,6 @@
         tasks_from: run.yml
       tags:
         - edpm_sshd
-    - name: Run edpm_chrony
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: run.yml
-      tags:
-        - edpm_chrony
-    - name: Run edpm_chrony (Online)
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: online.yml
-      tags:
-        - edpm_chrony
-    - name: Run edpm_chrony (Sync)
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_chrony
-        tasks_from: sync.yml
-      tags:
-        - edpm_chrony
     - name: Run edpm_timezone
       ansible.builtin.import_role:
         name: osp.edpm.edpm_timezone

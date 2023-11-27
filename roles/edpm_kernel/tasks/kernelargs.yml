@@ -63,10 +63,10 @@
 
     - name: Parsing running hugepage configuration from /proc/cmdline
       when: >
-        "default_hugepagesz" in cmdline.stdout
+        "default_hugepagesz" in cmdline
       ansible.builtin.import_tasks: hugepages_parsing.yaml
       vars:
-        cmdline_text: "{{ cmdline.stdout }}"
+        cmdline_text: "{{ cmdline }}"
 
     - name: Validating hugepage config from /proc/cmdline against EDPM parameter
       ansible.builtin.import_tasks: hugepages_validations.yaml
@@ -131,9 +131,9 @@
 - name: Kernel args configuration
   become: true
   when:
-    - cmdline.stdout_lines is defined
+    - cmdline is defined
     - edpm_kernel_args|string
-    - edpm_kernel_args not in cmdline.stdout
+    - edpm_kernel_args not in cmdline
   block:
     # Leapp does not recognise grun entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub

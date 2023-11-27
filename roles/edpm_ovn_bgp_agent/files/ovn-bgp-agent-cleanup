@@ -1,0 +1,12 @@
+#!/bin/bash
+# Cleanup ovn-bgp-agent OVS bridges. To be called on startup to avoid
+# "difficult-to-debug" issues with partially configured resources.
+
+$BGP_BRIDGE=${INT_BRIDGE:-"br-bgp"}
+
+for port in `ovs-vsctl list-ports ${BGP_BRIDGE}`; do
+    skip_cleanup=`ovs-vsctl --if-exists get Interface $port external_ids:skip_cleanup`
+    if ! [[ "x$skip_cleanup" == "x\"true\"" ]]; then
+        ovs-vsctl del-port ${BGP_BRIDGE} $port
+    fi
+done

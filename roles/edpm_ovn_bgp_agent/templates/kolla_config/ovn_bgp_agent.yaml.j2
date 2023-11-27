@@ -8,6 +8,12 @@ permissions:
   - path: /var/log/ovn-bgp-agent
     owner: ovn-bgp:ovn-bgp
     recurse: true
+  - path: /var/log/openvswitch
+    owner: root:root
+    recurse: true
+  - path: /var/log/ovn
+    owner: root:root
+    recurse: true
 {% if edpm_ovn_bgp_agent_internal_tls_enable == true %}
   - path: /etc/pki/tls/certs/ovn_bgp_agent.crt
     owner: ovn-bgp:ovn-bgp
