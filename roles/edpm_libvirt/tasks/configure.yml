@@ -15,6 +15,9 @@
   loop:
     - {"path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
     - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/libvirt", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/libvirt/private", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/CA", "owner": "root", "group": "root"}
 
 - name: Render libvirt config files
   tags:
@@ -86,6 +89,7 @@
   register: run_libvirt
   failed_when: run_libvirt.rc not in [0, 1]
   changed_when: false
+
 - name: Restore selinux label for /run/libvirt to virt_var_run_t
   tags:
     - configure
@@ -94,3 +98,20 @@
   ansible.builtin.command: "restorecon -R /run/libvirt"
   changed_when: true
   when: run_libvirt.rc == 0
+
+- name: Copy TLS files to the compute node
+  tags:
+    - configure
+    - libvirt
+  become: true
+  loop:
+    - {"src": "{{ edpm_libvirt_certs_src }}/{{ inventory_hostname }}-tls.crt", "dest": "/etc/pki/libvirt/server-cert.pem"}
+    - {"src": "{{ edpm_libvirt_certs_src }}/{{ inventory_hostname }}-tls.key", "dest": "{/etc/pki/libvirt/private/server-key.pem"}
+    - {"src": "{{ edpm_libvirt_cacerts_src }}/TLSCABundleFile", "dest": "/etc/pki/CA/cacert.pem"}
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+    owner: "root"
+    group: "root"
+  when: edpm_libvirt_tls_certs_enabled
