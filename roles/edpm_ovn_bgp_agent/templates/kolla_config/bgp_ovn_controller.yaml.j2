@@ -1,0 +1,8 @@
+command: "/usr/bin/ovn-controller -n bgp --pidfile=/var/run/openvswitch/bgp-ovn-controller.pid unix:/var/run/openvswitch/db.sock"
+permissions:
+  - path: /var/log/openvswitch
+    owner: root:root
+    recurse: true
+  - path: /var/log/ovn
+    owner: root:root
+    recurse: true

@@ -1,0 +1,8 @@
+command: "/usr/share/ovn/scripts/ovn-ctl --no-monitor run_nb_ovsdb --db-nb-create-insecure-remote=yes"
+permissions:
+  - path: /var/log/openvswitch
+    owner: root:root
+    recurse: true
+  - path: /var/log/ovn
+    owner: root:root
+    recurse: true
