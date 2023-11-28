@@ -9,7 +9,7 @@ network_config:
   name: nic1
   mtu: {{ ctlplane_mtu }}
   dns_servers: {{ ctlplane_dns_nameservers }}
-  domain: {{ dns_search_domains }}
+  domain: {{ edpm_dns_search_domains }}
   routes: {{ ctlplane_host_routes }}
   use_dhcp: false
   addresses:

@@ -10,7 +10,7 @@ network_config:
   mtu: {{ min_viable_mtu }}
   use_dhcp: false
   dns_servers: {{ ctlplane_dns_nameservers }}
-  domain: {{ dns_search_domains }}
+  domain: {{ edpm_dns_search_domains }}
   addresses:
   - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}
   routes: {{ ctlplane_host_routes }}

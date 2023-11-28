@@ -34,7 +34,7 @@ network_config:
   use_dhcp: false
   bonding_options: {{ edpm_bond_interface_ovs_options }}
   dns_servers: {{ ctlplane_dns_nameservers }}
-  domain: {{ dns_search_domains }}
+  domain: {{ edpm_dns_search_domains }}
   members:
   - type: interface
     name: nic2
