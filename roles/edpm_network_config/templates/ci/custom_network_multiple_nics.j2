@@ -15,7 +15,7 @@ network_config:
 - type: ovs_bridge
   name: br-ex
   dns_servers: {{ ctlplane_dns_nameservers }}
-  domain: {{ dns_search_domains }}
+  domain: {{ edpm_dns_search_domains }}
   use_dhcp: false
   members:
   - type: interface
