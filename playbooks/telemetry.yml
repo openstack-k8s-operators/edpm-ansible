@@ -15,9 +15,9 @@
 # under the License.
 
 
-- hosts: all
+- name: Deploy EDPM Ceilometer Agent Compute
+  hosts: all
   strategy: linear
-  name: Deploy EDPM Ceilometer Agent Compute
   gather_facts: true
   any_errors_fatal: true
   tasks:
