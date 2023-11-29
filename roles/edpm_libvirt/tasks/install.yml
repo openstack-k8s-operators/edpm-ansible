@@ -44,6 +44,7 @@
     - {"path": "/var/log/containers/stdouts"}
     - {"path": "/var/lib/openstack/config/ceph"}
 - name: Render libvirt container
+  become: true
   tags:
     - install
     - libvirt

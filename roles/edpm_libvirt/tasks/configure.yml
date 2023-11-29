@@ -34,6 +34,7 @@
   loop: "{{ edpm_libvirt_containers }}"
 
 - name: Render libvirt container config.json
+  become: true
   tags:
     - configure
     - libvirt
@@ -47,6 +48,7 @@
     - Restart libvirt
 
 - name: Render libvirt config files
+  become: true
   tags:
     - configure
     - libvirt
