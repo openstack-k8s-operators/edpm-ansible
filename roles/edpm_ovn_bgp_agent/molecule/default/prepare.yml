@@ -70,7 +70,9 @@
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         tasks_from: "download_cache.yml"
-    - ansible.builtin.include_role:
+
+    - name: "Running FRR"
+      ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         apply:
           become: true

@@ -10,22 +10,21 @@ driver:
     ansible_connection_options:
       ansible_connection: local
 platforms:
-  - name: instance
+  - name: compute-1
+    groups:
+      - compute
 provisioner:
   log: true
   name: ansible
   inventory:
     host_vars:
-      instance:
+      compute-1:
         ctlplane_ip: "10.0.0.1"
 
 scenario:
   test_sequence:
-  - dependency
-  - destroy
-  - create
   - prepare
   - converge
-  - destroy
+  - verify
 verifier:
   name: ansible

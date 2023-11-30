@@ -18,10 +18,7 @@
   hosts: all
   gather_facts: true
   become: true
-  tasks:
-    - name: "Download required role packages"
-      ansible.builtin.include_role:
-        name: "osp.edpm.edpm_ovn_bgp_agent"
-        tasks_from: "download_cache.yml"
-    - ansible.builtin.include_role:
-        name: "osp.edpm.edpm_ovn_bgp_agent"
+  roles:
+    - role: "edpm_ovn_bgp_agent"
+      vars:
+        edpm_ovn_bgp_agent_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
