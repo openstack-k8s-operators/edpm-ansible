@@ -28,3 +28,10 @@ edpm_nova_image_download_retries: 5
 edpm_nova_config_src: /var/lib/openstack/configs
 edpm_nova_config_dest: /var/lib/openstack/config/nova
 edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
+
+# certs
+edpm_nova_certs_src: /var/lib/openstack/certs
+edpm_nova_certs_dest: /var/lib/openstack/certs/nova
+edpm_nova_cacerts_src: /var/lib/openstack/cacerts
+edpm_nova_cacerts_dest: /var/lib/openstack/cacerts/nova
+edpm_nova_tls_certs_enabled: "{{ tls_certs_enabled | default(False) }}"
