@@ -1,39 +1,70 @@
+- name: libvirt rule source file exists
+  become: true
+  ansible.builtin.stat:
+    path: "/var/lib/edpm-config/firewall/libvirt.yaml"
+  register: libvirt_rule_source_exists
+- name: Assert libvirt rule source file exists
+  ansible.builtin.assert:
+    that:
+      - libvirt_rule_source_exists.stat.exists
+    fail_msg: "libvirt rule source file does not exist"
+
 - name: verify vnc nftables firewall rules
   block:
-    - name: Check if nftables rule exists in /etc/nftables/edpm-rules.nft
+    - name: Check if vnc nftables rule exists in /etc/nftables/edpm-rules.nft
       become: true
       ansible.builtin.shell: grep -q "005 Allow vnc access on all networks." /etc/nftables/edpm-rules.nft
-      register: rule_exists
-    - name: Assert nftables rule exists in /etc/nftables/edpm-rules.nft
+      register: vnc_rule_exists
+    - name: Assert vnc nftables rule exists in /etc/nftables/edpm-rules.nft
       ansible.builtin.assert:
         that:
-          - rule_exists.rc == 0
+          - vnc_rule_exists.rc == 0
         fail_msg: "vnc rule does not exist in /etc/nftables/edpm-rules.nft"
     - name: vnc rule port range and protocol
       become: true
       ansible.builtin.shell: grep -q "EDPM_INPUT tcp dport { 5900-6923 }" /etc/nftables/edpm-rules.nft
-      register: rule_content_exists
+      register: vnc_rule_content_exists
     - name: Assert vnc rule port range and protocol
       ansible.builtin.assert:
         that:
-          - rule_content_exists.rc == 0
+          - vnc_rule_content_exists.rc == 0
         fail_msg: "vnc rule port range and protocol incorrect in /etc/nftables/edpm-rules.nft"
-    - name: vnc rule source file exists
-      become: true
-      ansible.builtin.stat:
-        path: "/var/lib/edpm-config/firewall/vnc.yaml"
-      register: rule_source_exists
-    - name: Assert vnc rule source file exists
-      ansible.builtin.assert:
-        that:
-          - rule_source_exists.stat.exists
-        fail_msg: "vnc rule source file does not exist"
     - name: Run nft list command and grep for VNC rule in EDPM_INPUT chain
       become: true
       ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep vnc
-      register: chain_exists
+      register: vnc_chain_exists
     - name: Assert that output from greping for VNC contains the correct rule
       assert:
         that:
           - item | regex_search('\s+tcp dport 5900-6923 ct state new counter packets \d+ bytes \d+ accept comment\s+')
-      loop: "{{ chain_exists.stdout_lines }}"
+      loop: "{{ vnc_chain_exists.stdout_lines }}"
+
+- name: verify live migration nftables firewall rules
+  block:
+    - name: Check if migration nftables rule exists in /etc/nftables/edpm-rules.nft
+      become: true
+      ansible.builtin.shell: grep -q "006 Allow libvirt live migration traffic" /etc/nftables/edpm-rules.nft
+      register: migration_rule_exists
+    - name: Assert migration nftables rule exists in /etc/nftables/edpm-rules.nft
+      ansible.builtin.assert:
+        that:
+          - migration_rule_exists.rc == 0
+        fail_msg: "migration rule does not exist in /etc/nftables/edpm-rules.nft"
+    - name: migration rule port range and protocol
+      become: true
+      ansible.builtin.shell: grep -q "EDPM_INPUT tcp dport { 61152-61215 }" /etc/nftables/edpm-rules.nft
+      register: migration_rule_content_exists
+    - name: Assert migration rule port range and protocol
+      ansible.builtin.assert:
+        that:
+          - migration_rule_content_exists.rc == 0
+        fail_msg: "migration rule port range and protocol incorrect in /etc/nftables/edpm-rules.nft"
+    - name: Run nft list command and grep for migration rule in EDPM_INPUT chain
+      become: true
+      ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep migration
+      register: migration_chain_exists
+    - name: Assert that output from grepping for migration contains the correct rule
+      assert:
+        that:
+          - item | regex_search('\s+tcp dport 61152-61215 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+      loop: "{{ migration_chain_exists.stdout_lines }}"

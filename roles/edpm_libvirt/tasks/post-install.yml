@@ -90,23 +90,23 @@
         - found_confs.files is defined
         - found_confs.files | length > 0
 
-- name: Copy qemu vnc firewall config
+- name: Copy libvirt firewall config
   tags:
     - install
     - post-libvirt
   become: true
   ansible.builtin.template:
     src: "firewall.yaml"
-    dest: "/var/lib/edpm-config/firewall/vnc.yaml"
+    dest: "/var/lib/edpm-config/firewall/libvirt.yaml"
     mode: "0640"
-- name: Configure firewall for the vnc
+- name: Configure firewall for the libvirt
   tags:
     - install
     - post-libvirt
   ansible.builtin.include_role:
     name: osp.edpm.edpm_nftables
     tasks_from: "configure.yml"
-- name: Reload firewall for new vnc rule
+- name: Reload firewall for new libvirt rules
   tags:
     - install
     - post-libvirt
