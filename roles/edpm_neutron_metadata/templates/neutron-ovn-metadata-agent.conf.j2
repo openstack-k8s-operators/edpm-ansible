@@ -1,8 +1,18 @@
 [DEFAULT]
 debug = {{ edpm_neutron_metadata_agent_DEFAULT_debug }}
+
+{% if edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host is defined %}
 nova_metadata_host = {{ edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host }}
+{% endif %}
+
+{% if edpm_neutron_metadata_agent_DEFAULT_nova_metadata_protocol is defined %}
 nova_metadata_protocol = {{ edpm_neutron_metadata_agent_DEFAULT_nova_metadata_protocol }}
+{% endif %}
+
+{% if edpm_neutron_metadata_agent_DEFAULT_metadata_proxy_shared_secret is defined %}
 metadata_proxy_shared_secret = {{ edpm_neutron_metadata_agent_DEFAULT_metadata_proxy_shared_secret }}
+{% endif %}
+
 metadata_workers = {{ edpm_neutron_metadata_agent_DEFAULT_metadata_workers }}
 state_path = {{ edpm_neutron_metadata_agent_DEFAULT_state_path }}
 
@@ -15,4 +25,7 @@ ovsdb_connection_timeout = {{ edpm_neutron_metadata_agent_ovs_ovsdb_connection_t
 
 [ovn]
 ovsdb_probe_interval = {{ edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval }}
+
+{% if edpm_neutron_metadata_agent_ovn_ovn_sb_connection is defined %}
 ovn_sb_connection = {{ edpm_neutron_metadata_agent_ovn_ovn_sb_connection }}
+{% endif %}

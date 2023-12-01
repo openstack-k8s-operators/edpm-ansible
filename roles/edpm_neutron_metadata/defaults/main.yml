@@ -48,13 +48,9 @@ edpm_neutron_metadata_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
 
 # neutron-ovn-metadata-agent.conf
 edpm_neutron_metadata_agent_DEFAULT_debug: 'True'
-edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host: '{{ edpm_neutron_metadata_agent_DEFAULT_host }}'
-edpm_neutron_metadata_agent_DEFAULT_nova_metadata_protocol: 'http'
-edpm_neutron_metadata_agent_DEFAULT_metadata_proxy_shared_secret: ''
 edpm_neutron_metadata_agent_DEFAULT_metadata_workers: '2'
 edpm_neutron_metadata_agent_DEFAULT_state_path: '/var/lib/neutron'
 edpm_neutron_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
 edpm_neutron_metadata_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
 edpm_neutron_metadata_agent_ovs_ovsdb_connection_timeout: '180'
 edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval: '60000'
-edpm_neutron_metadata_agent_ovn_ovn_sb_connection: ''
