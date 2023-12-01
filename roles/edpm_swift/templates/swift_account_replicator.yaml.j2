@@ -1,0 +1,16 @@
+start_order: 1
+image: "{{ edpm_swift_account_image }}"
+net: host
+pid: host
+cgroupns: host
+privileged: true
+user: swift
+restart: always
+volumes:
+  {% set edpm_swift_volumes = [] %}
+  {%- set edpm_swift_volumes =
+          edpm_swift_account_replicator_volumes +
+          edpm_swift_storage_volumes %}
+  {{ edpm_swift_volumes }}
+environment:
+  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
