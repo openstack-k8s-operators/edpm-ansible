@@ -26,7 +26,7 @@ repos:
         # W503 - line break before binary operator, ignored by default
         entry: flake8 --ignore=E501,W503
   - repo: https://github.com/ansible/ansible-lint
-    rev: v6.20.3
+    rev: v6.22.1
     hooks:
       - id: ansible-lint
         additional_dependencies:
