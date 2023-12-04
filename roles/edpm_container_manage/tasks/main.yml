@@ -30,10 +30,10 @@
         config_path: "{{ edpm_container_manage_config }}"
         config_pattern: "{{ edpm_container_manage_config_patterns }}"
         config_overrides: "{{ edpm_container_manage_config_overrides }}"
-      register: container_config_data
+      register: container_configuration
     - name: Finalise hashes for all containers
       ansible.builtin.set_fact:
-        all_containers_hash: "{{ container_config_data.configs }}"
+        all_containers_hash: "{{ container_configuration.configs }}"
 
 - name: "Manage containers from {{ edpm_container_manage_config }}"
   when:
