@@ -34,4 +34,4 @@ edpm_nova_certs_src: /var/lib/openstack/certs
 edpm_nova_certs_dest: /var/lib/openstack/certs/nova
 edpm_nova_cacerts_src: /var/lib/openstack/cacerts
 edpm_nova_cacerts_dest: /var/lib/openstack/cacerts/nova
-edpm_nova_tls_certs_enabled: "{{ tls_certs_enabled | default(False) }}"
+edpm_nova_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
