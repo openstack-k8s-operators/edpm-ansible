@@ -11,16 +11,32 @@ argument_specs:
       edpm_libvirt_image_download_retries:
         type: int
         default: 5
-      edpm_libvirt_image:
-        type: str
-        description: The image to use for the libvirt_virt* containers.
-        default: "quay.io/podified-antelope-centos9/openstack-nova-libvirt:current-podified"
-      edpm_libvirt_containers:
+      edpm_libvirt_services:
         type: list
-        description: The list of containers to run.
+        description: The list of libvirt services to run.
         default:
-          - "libvirt_virtlogd"
-          - "libvirt_virtnodedevd"
-          - "libvirt_virtproxyd"
-          - "libvirt_virtqemud"
-          - "libvirt_virtsecretd"
+          - "virtlogd"
+          - "virtnodedevd"
+          - "virtproxyd"
+          - "virtqemud"
+          - "virtsecretd"
+      edpm_libvirt_packages:
+        type: list
+        description: The list of packages to install for libvirt.
+        default:
+          - libvirt
+          - libvirt-admin
+          - libvirt-client
+          - libvirt-daemon
+          - qemu-kvm
+          - qemu-img
+          - libguestfs
+          - libseccomp
+          - swtpm
+          - swtpm-tools
+          - edk2-ovmf
+          - ceph-common
+      edpm_libvirt_ceph_path:
+        type: str
+        description: The path to the ceph config files.
+        default: "/var/lib/openstack/config/ceph"

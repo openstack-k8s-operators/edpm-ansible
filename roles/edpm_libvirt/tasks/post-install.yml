@@ -1,5 +1,21 @@
 ---
 
+# NOTE: This should be done by bootstrap, or a prior role even when not using eph
+# however, that is not the case today. so we simply do it here to ensure that
+# the ceph config directory exists.
+# we do not adjust the selinux context here or set the owner/group as that should
+# be done by the edpm_ceph_client_files role.
+- name: Ensure ceph config directory exists
+  tags:
+    - install
+    - post-libvirt
+    - ceph
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_libvirt_ceph_path }}"
+    state: directory
+    mode: "0755"
+
 - name: Gather Ceph configuration files
   tags:
     - install
@@ -56,6 +72,23 @@
         fsid: "{{ cluster_fsid_map[item] }}"
         user: "{{ cluster_user_map[item] }}"
       loop: "{{ cluster_fsid_map.keys() | list }}"
+
+    # nova can pass alternate ceph.conf paths to libvirt for nova provisioned rbd volumes
+    # but not for cinder provisioned rbd volumes so we need to copy the ceph.conf files
+    # to /etc/ceph so qemu can find them
+    - name: Copy found_confs to /etc/ceph for qemu
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "/etc/ceph/{{ (item.path | basename) }}"
+        owner: root
+        group: root
+        mode: "0644"
+        remote_src: true
+      loop: "{{ found_confs.files }}"
+      when:
+        - found_confs.files is defined
+        - found_confs.files | length > 0
 
 - name: Copy qemu vnc firewall config
   tags:

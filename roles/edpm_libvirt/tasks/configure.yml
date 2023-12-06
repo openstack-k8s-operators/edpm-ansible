@@ -13,54 +13,84 @@
     group: "{{ item.group | default(ansible_user) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - {"path": "/var/lib/openstack/config/libvirt"}
-    - {"path": "/var/lib/openstack/config/containers"}
-    - {'path': "/var/lib/nova"}
     - {"path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
     - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
-
-- name: Create container config dirs
-  become: true
-  tags:
-    - configure
-    - libvirt
-  ansible.builtin.file:
-    path: "/var/lib/openstack/config/libvirt/{{ item }}"
-    state: directory
-    setype: "{{ item.setype | default('container_file_t') }}"
-    owner: "{{ item.owner | default(ansible_user) }}"
-    group: "{{ item.group | default(ansible_user) }}"
-    mode: "0755"
-  loop: "{{ edpm_libvirt_containers }}"
-
-- name: Render libvirt container config.json
-  tags:
-    - configure
-    - libvirt
-  ansible.builtin.template:
-    src: "{{ item }}/config.json.j2"
-    dest: "/var/lib/openstack/config/libvirt/{{ item }}/config.json"
-    setype: "container_file_t"
-    mode: "0644"
-  loop: "{{ edpm_libvirt_containers }}"
-  notify:
-    - Restart libvirt
 
 - name: Render libvirt config files
   tags:
     - configure
     - libvirt
+  become: true
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/var/lib/openstack/config/libvirt/{{ item.dest }}"
-    setype: "container_file_t"
-    mode: "0644"
+    dest: "/etc/libvirt/{{ item.dest }}"
+    mode: "0640"
+    # FIXME: update to libvirt user/group
+    owner: "root"
+    group: "root"
   loop:
-    - {"src": "libvirt_virtlogd/virtlogd.conf", "dest": "libvirt_virtlogd/virtlogd.conf"}
-    - {"src": "libvirt_virtnodedevd/virtnodedevd.conf", "dest": "libvirt_virtnodedevd/virtnodedevd.conf"}
-    - {"src": "libvirt_virtproxyd/virtproxyd.conf", "dest": "libvirt_virtproxyd/virtproxyd.conf"}
-    - {"src": "libvirt_virtqemud/virtqemud.conf", "dest": "libvirt_virtqemud/virtqemud.conf"}
-    - {"src": "libvirt_virtqemud/qemu.conf", "dest": "libvirt_virtqemud/qemu.conf"}
-    - {"src": "libvirt_virtsecretd/virtsecretd.conf", "dest": "libvirt_virtsecretd/virtsecretd.conf"}
+    - {"src": "virtlogd.conf", "dest": "virtlogd.conf"}
+    - {"src": "virtnodedevd.conf", "dest": "virtnodedevd.conf"}
+    - {"src": "virtproxyd.conf", "dest": "virtproxyd.conf"}
+    - {"src": "virtqemud.conf", "dest": "virtqemud.conf"}
+    - {"src": "qemu.conf", "dest": "qemu.conf"}
+    - {"src": "virtsecretd.conf", "dest": "virtsecretd.conf"}
   notify:
     - Restart libvirt
+
+- name: Create libvirt socket activation drop-in directories
+  tags:
+    - configure
+    - libvirt
+  become: true
+  vars:
+    socket_suffix: ".socket.d"
+    socket_types: ['', '-ro', '-admin']
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item.0 }}{{ item.1 }}{{ socket_suffix }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: not (item.0 == 'virtlogd' and item.1 == '-ro')
+  loop: "{{ edpm_libvirt_services | product(socket_types) | list }}"
+  notify:
+    - Restart libvirt
+
+- name: Render libvirt socket activation drop-in files
+  tags:
+    - configure
+    - libvirt
+  become: true
+  vars:
+    socket_suffix: ".socket.d"
+    socket_types: ['', '-ro', '-admin']
+  ansible.builtin.template:
+    src: "libvirt-socket.unit.j2"
+    dest: "/etc/systemd/system/{{ item.0 }}{{ item.1 }}{{ socket_suffix }}/override.conf"
+    mode: "0644"
+    owner: "root"
+    group: "root"
+  when: not (item.0 == 'virtlogd' and item.1 == '-ro')
+  loop: "{{ edpm_libvirt_services | product(socket_types) | list }}"
+  notify:
+    - Restart libvirt
+
+- name: Check if /run/libvirt has container_file_t selinux label
+  tags:
+    - configure
+    - libvirt
+  ansible.builtin.shell: |
+    set -o pipefail
+    ls -lZ /run/libvirt | grep container_file_t
+  register: run_libvirt
+  failed_when: run_libvirt.rc not in [0, 1]
+  changed_when: false
+- name: Restore selinux label for /run/libvirt to virt_var_run_t
+  tags:
+    - configure
+    - libvirt
+  become: true
+  ansible.builtin.command: "restorecon -R /run/libvirt"
+  changed_when: true
+  when: run_libvirt.rc == 0

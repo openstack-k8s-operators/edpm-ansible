@@ -13,15 +13,11 @@
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
-        - "/var/lib/openstack/config/containers"
-        - "/var/log/containers"
-        - "/var/log/containers/stdouts"
         # extrenal deps
         - "/var/lib/openstack/config/ceph"
         # libvirt directories
         - "/var/lib/libvirt"
-        - "/var/lib/openstack/config/libvirt"
-        - "/var/log/containers/libvirt"
+        - "/etc/libvirt"
     - name: ensure firewall is configured
       ansible.builtin.include_tasks: "test-helpers/verify_firewall.yaml"
     - name: ensure ceph secret is configured
@@ -29,32 +25,25 @@
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "edpm_libvirt_virtlogd.service" }
-        - { "name": "edpm_libvirt_virtnodedevd.service" }
-        - { "name": "edpm_libvirt_virtproxyd.service" }
-        - { "name": "edpm_libvirt_virtqemud.service" }
-        - { "name": "edpm_libvirt_virtsecretd.service" }
-    - name: ensure podman container exists and are running
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
-      loop:
-        - "libvirt_virtlogd"
-        - "libvirt_virtnodedevd"
-        - "libvirt_virtproxyd"
-        - "libvirt_virtqemud"
-        - "libvirt_virtsecretd"
+        # rhel installed services have service units defiend via rpm in
+        # /usr/lib/systemd/system so disable the check for them them in
+        # /etc/systemd/system
+        - { "name": "virtlogd.service", "osp_service": false, "enabled": "indirect" }
+        - { "name": "virtnodedevd.service" , "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
+        - { "name": "virtproxyd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
+        - { "name": "virtqemud.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
+        - { "name": "virtsecretd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
     - name: ensure libvirt.target exist and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - { "name": "edpm_libvirt.target", "enabled": "static"}
         - { "name": "edpm_libvirt_guests.service", "running":false }
         - { "name": "virt-guest-shutdown.target", "enabled": "static", "running":false }
-
     - name: Check if user exists
       ansible.builtin.getent:
         database: passwd
         key: libvirt
       register: libvirt_user
-
     - name: Assert that libvirt user is created with kolla uid and gid
       ansible.builtin.assert:
         that:
@@ -62,3 +51,44 @@
           - "libvirt_user.ansible_facts.getent_passwd.libvirt[1] == '42473'"
           # group
           - "libvirt_user.ansible_facts.getent_passwd.libvirt[2] == '42473'"
+    - name: ensure libvirt sockets are enabled
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "virtlogd-admin.socket", "osp_service": false }
+        - { "name": "virtlogd.socket", "osp_service": false }
+        - { "name": "virtnodedevd-admin.socket", "osp_service": false }
+        - { "name": "virtnodedevd-ro.socket", "osp_service": false }
+        - { "name": "virtnodedevd.socket", "osp_service": false }
+        - { "name": "virtproxyd-admin.socket", "osp_service": false }
+        - { "name": "virtproxyd-ro.socket", "osp_service": false }
+        - { "name": "virtproxyd.socket", "osp_service": false }
+        - { "name": "virtqemud-admin.socket", "osp_service": false }
+        - { "name": "virtqemud-ro.socket", "osp_service": false }
+        - { "name": "virtqemud.socket", "osp_service": false }
+        - { "name": "virtsecretd-admin.socket", "osp_service": false }
+        - { "name": "virtsecretd-ro.socket", "osp_service": false }
+        - { "name": "virtsecretd.socket", "osp_service": false }
+
+    - name: ensure libvirt socket activation drop-in directories exist
+      ansible.builtin.include_tasks: "test-helpers/verify_sockets_exits.yaml"
+      loop:
+        - /run/libvirt/virtlogd-admin-sock
+        - /run/libvirt/virtlogd-sock
+        - /run/libvirt/virtnodedevd-admin-sock
+        - /run/libvirt/virtnodedevd-sock
+        - /run/libvirt/virtnodedevd-sock-ro
+        - /run/libvirt/virtqemud-sock
+        - /run/libvirt/virtqemud-sock-ro
+        - /run/libvirt/virtqemud-admin-sock
+        - /run/libvirt/virtsecretd-admin-sock
+        - /run/libvirt/virtsecretd-sock
+        - /run/libvirt/virtsecretd-sock-ro
+
+    - name: ensure container_file_t selinux lable is not set on /run/libvirt
+      ansible.builtin.shell: "ls -lZ /run/libvirt | grep container_file_t"
+      register: run_libvirt
+      failed_when: run_libvirt.rc not in [0, 1]
+    - name: Assert that container_file_t selinux lable is not set on /run/libvirt
+      ansible.builtin.assert:
+        that:
+          - "run_libvirt.rc != 0"

@@ -1,10 +1,10 @@
 ---
-
-- name: Download needed container images
-  containers.podman.podman_image:
-    name: "{{ edpm_libvirt_image }}"
+- name: Install addditional packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_libvirt_packages }}"
+    download_only: true
   become: true
-  register: edpm_libvirt_image_download
-  until: edpm_libvirt_image_download.failed == false
-  retries: "{{ edpm_libvirt_image_download_retries }}"
-  delay: "{{ edpm_libvirt_image_download_delay }}"
+  register: _install_packages_result
+  until: _install_packages_result.rc == 0
+  retries: "{{ edpm_libvirt_download_retries }}"
+  delay: "{{ edpm_libvirt_download_delay }}"

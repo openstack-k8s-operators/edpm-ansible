@@ -6,11 +6,13 @@
       ansible.builtin.stat:
         path: "/etc/systemd/system/{{ item.name }}"
       register: unit_exists
+      when: item.osp_service | default(true)
     - name: Assert systemd unit exists {{ item.name }}
       ansible.builtin.assert:
         that:
           - unit_exists.stat.exists
         fail_msg: "Systemd unit file for {{ item.name }} does not exist"
+      when: item.osp_service | default(true)
     - name: Check if systemd unit is enabled {{ item.name }}
       when: item.enabled | default(true)
       ansible.builtin.command: systemctl is-enabled {{ item.name }}
@@ -34,5 +36,5 @@
       when: item.running | default(true)
       ansible.builtin.assert:
         that:
-          - unit_running.stdout == "active"
+          - unit_running.stdout in "{{ item.active | default(['active']) | list }}"
         fail_msg: "Systemd unit {{ item.name }} is not running"
