@@ -5,3 +5,8 @@
     proto: tcp
     dport:
      - "5900-6923"
+- rule_name: 006 Allow libvirt live migration traffic
+  rule:
+    proto: tcp
+    dport:
+     - "61152-61215"

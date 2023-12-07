@@ -92,3 +92,12 @@
       ansible.builtin.assert:
         that:
           - "run_libvirt.rc != 0"
+
+    - name: Load /etc/libvirt/qemu.conf
+      ansible.builtin.shell: "grep migration_port /etc/libvirt/qemu.conf | tr '\n' ' '"
+      register: qemu_conf_migration_ports
+    - name: Assert that qemu.conf has a proper migration port range
+      assert:
+        that:
+          - "item  == 'migration_port_min = 61152 migration_port_max = 61215 '"
+      loop: "{{ qemu_conf_migration_ports.stdout_lines }}"
