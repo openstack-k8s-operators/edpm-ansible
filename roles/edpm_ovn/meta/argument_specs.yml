@@ -16,6 +16,11 @@ argument_specs:
         default: false
         description: ''
         type: bool
+      edpm_enable_chassis_extport:
+        default: false
+        description: >
+          Mark Chassis as eligible for scheduling OVN's external ports
+        type: bool
       edpm_enable_hw_offload:
         default: false
         description: ''

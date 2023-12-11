@@ -11,3 +11,9 @@
         /usr/bin/ovs-vsctl get open_vswitch . other_config:hw-offload
       register: output
       failed_when: output.rc == 0
+
+    - name: Verify ovn-cms-options was not set by default
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open . external_ids
+      register: output
+      failed_when: "'ovn-cms-options' in output.stdout"
