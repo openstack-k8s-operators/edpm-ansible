@@ -87,6 +87,6 @@ edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_lease_max: 16777216
 edpm_neutron_dhcp_agent_DEFAULT_dnsmasq_enable_addr6_list: false
 edpm_neutron_dhcp_agent_DEFAULT_dhcp_broadcast_reply: false
 # AGENT
-edpm_neutron_dhcp_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
+edpm_neutron_dhcp_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
 edpm_neutron_dhcp_agent_AGENT_report_interval: 30
 edpm_neutron_dhcp_agent_AGENT_availability_zone: 'nova'
