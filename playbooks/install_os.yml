@@ -19,6 +19,9 @@
         tasks_from: install.yml
       tags:
         - edpm_sshd
+    # Depending on the environment we may have system roles under different name space
+    # However, code executed is the same. The difference is only
+    # in the mode of distribution.
     - name: Install and configure time service using timesync system role
       ansible.builtin.include_role:
         name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.timesync' }}"

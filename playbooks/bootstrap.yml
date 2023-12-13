@@ -12,6 +12,7 @@
         name: osp.edpm.edpm_growvols
       tags:
         - edpm_growvols
+    # Installs multiple packages, sets up selinux and openvswitch
     - name: Install edpm_bootstrap
       ansible.builtin.import_role:
         name: osp.edpm.edpm_bootstrap
@@ -27,6 +28,7 @@
         name: edpm_users
       tags:
         - edpm_users
+    # Install packages and set up modules, reboot as needed
     - name: Install edpm_kernel
       ansible.builtin.import_role:
         name: osp.edpm.edpm_kernel
