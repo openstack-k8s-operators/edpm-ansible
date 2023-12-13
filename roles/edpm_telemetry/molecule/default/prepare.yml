@@ -108,8 +108,7 @@
             },
             "volumes": [
                 "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
-                "/var/lib/openstack/config/ceilometer/ceilometer-agent-compute.json:/var/lib/kolla/config_files/config.json:z",
-                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z"
+                "/var/lib/openstack/config/ceilometer/ceilometer-agent-compute.json:/var/lib/kolla/config_files/config.json:z"
             ]
           }
 
@@ -121,7 +120,7 @@
         group: root
         content: |
           {
-            "command": "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /var/log/containers/ceilometer/compute.log",
+            "command": "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout",
             "config_files": [
               {
                 "source": "/var/lib/openstack/config/ceilometer.conf",
@@ -134,13 +133,6 @@
                 "dest": "/etc/ceilometer/polling.yaml",
                 "owner": "ceilometer",
                 "perm": "0600"
-              }
-            ],
-            "permissions": [
-              {
-                  "path": "/var/log/containers/ceilometer",
-                  "owner": "ceilometer:ceilometer",
-                  "recurse": true
               }
             ]
           }
@@ -164,8 +156,7 @@
             },
             "volumes": [
                 "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
-                "/var/lib/openstack/config/ceilometer/ceilometer-agent-ipmi.json:/var/lib/kolla/config_files/config.json:z",
-                "/var/log/containers/ceilometer:/var/log/containers/ceilometer:z"
+                "/var/lib/openstack/config/ceilometer/ceilometer-agent-ipmi.json:/var/lib/kolla/config_files/config.json:z"
             ]
           }
 
@@ -177,7 +168,7 @@
         group: root
         content: |
           {
-            "command": "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /var/log/containers/ceilometer/ipmi.log",
+            "command": "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout",
             "config_files": [
               {
                 "source": "/var/lib/openstack/config/ceilometer.conf",
@@ -190,13 +181,6 @@
                 "dest": "/etc/ceilometer/polling.yaml",
                 "owner": "ceilometer",
                 "perm": "0600"
-              }
-            ],
-            "permissions": [
-              {
-                  "path": "/var/log/containers/ceilometer",
-                  "owner": "ceilometer:ceilometer",
-                  "recurse": true
               }
             ]
           }
