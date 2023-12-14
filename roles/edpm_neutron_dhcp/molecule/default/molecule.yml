@@ -16,9 +16,6 @@ platforms:
   ulimits:
   - host
 provisioner:
-  config_options:
-    defaults:
-      remote_tmp: /tmp
   log: true
   name: ansible
 scenario:
