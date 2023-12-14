@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,11 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import download_cache tasks
-  ansible.builtin.import_tasks: download_cache.yml
-
-- name: Import bootstrap tasks
-  ansible.builtin.import_tasks: bootstrap.yml
-
-- name: Import Package update tasks
-  ansible.builtin.import_tasks: update_package.yml
+- name: Perform system update
+  become: true
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest  # noqa: package-latest
+    update_cache: true
+    update_only: true
+  register: edpm_bootstrap_system_update
+  until: edpm_bootstrap_system_update.rc == 0
+  retries: "{{ edpm_bootstrap_download_retries }}"
+  delay: "{{ edpm_bootstrap_download_delay }}"
