@@ -109,6 +109,19 @@ class TestNeutronMetadata(unittest.TestCase):
     def test_metadata_agent_container_is_running(self):
         assert self.host.podman(OVN_METADATA_AGENT_CONTAINER).is_running
 
+    def test_default_root_helper_works(self):
+        ansible_vars = self.host.ansible(
+            "include_vars",
+            os.path.join(
+                os.environ["MOLECULE_PROJECT_DIRECTORY"],
+                "defaults/main.yml"))["ansible_facts"]
+        root_helper = ansible_vars[
+            "edpm_neutron_metadata_agent_agent_root_helper"
+        ]
+        self.host.run_test(
+            "/usr/bin/podman exec %s %s sleep 0" %
+            (OVN_METADATA_AGENT_CONTAINER, root_helper))
+
     def test_sidecar_container(self):
         network_id = str(uuid.uuid4())
         namespace_name = "ovn-meta-%s" % network_id
