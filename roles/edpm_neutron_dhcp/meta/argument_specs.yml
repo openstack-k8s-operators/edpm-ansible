@@ -172,7 +172,7 @@ argument_specs:
         description: ''
         type: bool
       edpm_neutron_dhcp_agent_AGENT_root_helper:
-        default: 'sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf'
+        default: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
         description: ''
         type: str
       edpm_neutron_dhcp_agent_AGENT_report_interval:

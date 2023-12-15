@@ -129,6 +129,17 @@ class TestNeutronDHCP(unittest.TestCase):
     def test_neutron_dhcp_agent_container_is_running(self):
         assert self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
 
+    def test_default_root_helper_works(self):
+        ansible_vars = self.host.ansible(
+            "include_vars",
+            os.path.join(
+                os.environ["MOLECULE_PROJECT_DIRECTORY"],
+                "defaults/main.yml"))["ansible_facts"]
+        root_helper = ansible_vars["edpm_neutron_dhcp_agent_AGENT_root_helper"]
+        self.host.run_test(
+            "/usr/bin/podman exec %s %s sleep 0" %
+            (NEUTRON_DHCP_AGENT_CONTAINER, root_helper))
+
     def test_haproxy_sidecar_container(self):
         haproxy_config_file = "%s/%s.conf" % (HAPROXY_CONFIG_DIR,
                                               self.network_id)

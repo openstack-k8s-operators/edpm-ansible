@@ -1,4 +1,9 @@
 command: "/usr/bin/neutron-dhcp-agent"
+config_files:
+  - source: /etc/neutron.conf.d/01-rootwrap.conf
+    dest: /etc/neutron/rootwrap.conf
+    owner: root:root
+    perm: '0600'
 permissions:
   - owner: neutron:neutron
     path: /var/log/neutron

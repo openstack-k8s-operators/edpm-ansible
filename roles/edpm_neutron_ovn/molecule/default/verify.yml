@@ -2,6 +2,9 @@
 - name: Verify
   hosts: all
   tasks:
+    - name: Include defaults/main.yml
+      ansible.builtin.include_vars: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+
     - name: Ensure that 10-neutron-ovn.conf was copied into the container
       block:
         - name: ovn-agent config file exists
@@ -15,3 +18,7 @@
             that:
               - ovn_agent_config.stat.exists
             fail_msg: "ovn agent config file does not exist"
+
+    - name: Ensure that configured root helper works
+      ansible.builtin.shell: |
+        podman exec ovn_agent {{ edpm_neutron_ovn_agent_agent_root_helper }} sleep 0

@@ -5,6 +5,9 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
+    - name: Include defaults/main.yml
+      ansible.builtin.include_vars: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
@@ -51,3 +54,7 @@
             that:
               - sriov_config.stat.exists
             fail_msg: "sriov agent config file does not exist"
+
+    - name: Ensure that configured root helper works
+      ansible.builtin.shell: |
+        podman exec neutron_sriov_agent {{ edpm_neutron_sriov_agent_AGENT_root_helper }} sleep 0

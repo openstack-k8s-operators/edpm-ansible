@@ -25,7 +25,7 @@ argument_specs:
         description: Enable debug mode
         type: str
       edpm_neutron_ovn_agent_agent_root_helper:
-        default: sudo neutron-rootwrap /etc/neutron.conf.d/01-rootwrap.conf
+        default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
         description: Neutron OVN agent root_helper command
         type: str
       edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout:
