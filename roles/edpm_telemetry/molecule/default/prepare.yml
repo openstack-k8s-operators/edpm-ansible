@@ -23,16 +23,18 @@
   hosts: all
   roles:
     - role: osp.edpm.env_data
+  vars_files:
+    - ../../defaults/main.yml
   tasks:
-    - name: Create config-data merged directory
+    - name: Create config-data telemetry directory
       ansible.builtin.file:
-        path: /var/lib/openstack/config
+        path: "{{ edpm_telemetry_config_src }}"
         state: directory
         mode: "0775"
 
     - name: Create ceilometer.conf
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/ceilometer.conf
+        dest: "{{ edpm_telemetry_config_src }}/ceilometer.conf"
         mode: "0644"
         owner: root
         group: root
@@ -63,7 +65,7 @@
 
     - name: Create polling.yaml
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/polling.yaml
+        dest: "{{ edpm_telemetry_config_src }}/polling.yaml"
         mode: "0644"
         owner: root
         group: root
@@ -91,8 +93,8 @@
 
     - name: Create ceilometer_agent_compute.json
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/ceilometer_agent_compute.json
-        mode: '0644'
+        dest: "{{ edpm_telemetry_config_src }}/ceilometer_agent_compute.json"
+        mode: "0644"
         owner: root
         group: root
         content: |
@@ -115,7 +117,7 @@
 
     - name: Create ceilometer-agent-compute.json
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/ceilometer-agent-compute.json
+        dest: "{{ edpm_telemetry_config_src }}/ceilometer-agent-compute.json"
         mode: "0644"
         owner: root
         group: root
@@ -147,7 +149,7 @@
 
     - name: Create ceilometer_agent_ipmi.json
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/ceilometer_agent_ipmi.json
+        dest: "{{ edpm_telemetry_config_src }}/ceilometer_agent_ipmi.json"
         mode: "0644"
         owner: root
         group: root
@@ -171,7 +173,7 @@
 
     - name: Create ceilometer-agent-ipmi.json
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/ceilometer-agent-ipmi.json
+        dest: "{{ edpm_telemetry_config_src }}/ceilometer-agent-ipmi.json"
         mode: "0644"
         owner: root
         group: root
@@ -200,10 +202,17 @@
               }
             ]
           }
+
+    - name: Create config-data logging directory
+      ansible.builtin.file:
+        path: "{{ edpm_logging_config_src }}"
+        state: directory
+        mode: "0775"
+
     - name: Create 10-telemetry.conf
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/10-telemetry.conf
-        mode: '0644'
+        dest: "{{ edpm_logging_config_src }}/10-telemetry.conf"
+        mode: "0644"
         owner: root
         group: root
         content: |
