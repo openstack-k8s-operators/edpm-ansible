@@ -13,7 +13,7 @@
 {% if edpm_nova_tls_certs_enabled %}
 	"/var/lib/openstack/certs/nova/tls.crt:/etc/pki/nova/server-cert.pem:ro",
 	"/var/lib/openstack/certs/nova/tls.key:/etc/pki/nova/private/server-key.pem:ro",
-	"/var/lib/openstack/cacerts/nova/TLSCABundleFile:/etc/pki/CA/cacert.pem:ro",
+	"/var/lib/openstack/cacerts/nova/tls-ca-bundle.pem:/etc/pki/CA/cacert.pem:ro",
 {% endif %}
         "/etc/localtime:/etc/localtime:ro",
         "/lib/modules:/lib/modules:ro",
