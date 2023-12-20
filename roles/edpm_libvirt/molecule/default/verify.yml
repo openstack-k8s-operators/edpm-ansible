@@ -28,7 +28,7 @@
         # rhel installed services have service units defiend via rpm in
         # /usr/lib/systemd/system so disable the check for them them in
         # /etc/systemd/system
-        - { "name": "virtlogd.service", "osp_service": false, "enabled": "indirect" }
+        - { "name": "virtlogd.service", "osp_service": false, "enabled": "enabled" }
         - { "name": "virtnodedevd.service" , "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
         - { "name": "virtproxyd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
         - { "name": "virtqemud.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
