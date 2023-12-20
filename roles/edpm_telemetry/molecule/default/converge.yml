@@ -6,10 +6,6 @@
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_telemetry"
       vars:
-        telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
         telemetry_test: true
         ansible_user: root
         ansible_user_dir: /root
-        edpm_telemetry_config_src: /var/lib/openstack/config
-        edpm_ceilometer_config_dest: /var/lib/openstack/config
-        edpm_rsyslog_config_dest: /etc/rsyslog.d

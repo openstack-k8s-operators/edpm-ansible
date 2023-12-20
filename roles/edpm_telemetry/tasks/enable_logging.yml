@@ -30,7 +30,7 @@
     - name: Deploy rsyslog configuration
       become: true
       ansible.builtin.copy:
-        src: "{{ edpm_telemetry_config_src }}/10-telemetry.conf"
+        src: "{{ edpm_logging_config_src }}/10-telemetry.conf"
         dest: "{{ edpm_rsyslog_config_dest }}/10-telemetry.conf"
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
