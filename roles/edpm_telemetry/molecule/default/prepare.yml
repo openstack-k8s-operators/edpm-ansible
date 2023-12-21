@@ -216,9 +216,10 @@
         owner: root
         group: root
         content: |
-          module(load="imjournal" PersistStateInterval="10"
-                StateFile="journal_state")
-
           action(type="omfwd" target="172.17.0.80" port="10514" protocol="tcp"
                       action.resumeRetryCount="100"
-                      queue.type="linkedList" queue.size="10000")
+                      queue.type="linkedList" queue.size="10000"
+                      StreamDriver="ossl"
+                      StreamDriverMode="1"
+                      StreamDriverAuthMode="x509/certvalid"
+                      StreamDriver.CAFile="/etc/pki/rsyslog/ca-openshift.crt")

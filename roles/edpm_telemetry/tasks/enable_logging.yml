@@ -20,13 +20,30 @@
   become: true
   failed_when: false
   register: rsyslog_service_state
+  tags:
+    - edpm_logging
 
 - name: Configure rsyslog if present
   become: true
   when:
     - (rsyslog_service_state is success) and
       ((rsyslog_service_state.status['SubState'] | lower) == 'running')
+  tags:
+    - edpm_logging
   block:
+    - name: Install openssl module support for rsyslog
+      ansible.builtin.dnf:
+        name: rsyslog-openssl
+        state: present
+
+    - name: Copy Openshift CA to the node
+      become: true
+      ansible.builtin.copy:
+        src: "{{ edpm_telemetry_config_src }}/ca-openshift.crt"
+        dest: "/etc/pki/rsyslog/ca-openshift.crt"
+        mode: "0644"
+        remote_src: "{{ telemetry_test | default('false') }}"
+
     - name: Deploy rsyslog configuration
       become: true
       ansible.builtin.copy:
@@ -35,5 +52,3 @@
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
       notify: Restart rsyslog
-      tags:
-        - edpm_logging
