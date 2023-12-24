@@ -13,6 +13,7 @@ exclude_paths:
   - tests
   - plugins/tests/molecule
   - contribute
+  - .venv
 parseable: true
 quiet: false
 verbosity: 1

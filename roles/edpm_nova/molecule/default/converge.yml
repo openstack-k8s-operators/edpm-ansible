@@ -14,4 +14,4 @@
   roles:
     - role: osp.edpm.edpm_nova
       vars:
-      edpm_nova_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_nova_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"

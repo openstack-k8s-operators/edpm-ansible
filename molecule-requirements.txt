@@ -1,6 +1,6 @@
 ansible-core==2.14.6
 molecule>=5.1.0,<6.0.0
-molecule-plugins[podman]>=23.4.0
+molecule-plugins[podman,vagrant]>=23.5.0
 pytest-testinfra
 # this is required for the molecule jobs
 ansi2html
