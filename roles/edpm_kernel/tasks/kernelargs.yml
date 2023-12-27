@@ -133,7 +133,7 @@
   when:
     - cmdline is defined
     - edpm_kernel_args|string
-    - edpm_kernel_args not in cmdline
+    - not (cmdline | regex_search( '^.*' + edpm_kernel_args + '.*$' | string ))
   block:
     # Leapp does not recognise grun entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
