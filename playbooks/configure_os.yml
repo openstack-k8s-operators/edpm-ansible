@@ -13,6 +13,7 @@
         tasks_from: configure.yml
       tags:
         - edpm_podman
+    # Configures systemd services including `edpm-container-shutdown`
     - name: Manage edpm container services
       ansible.builtin.import_role:
         name: osp.edpm.edpm_container_manage
@@ -31,6 +32,7 @@
         tasks_from: configure.yml
       tags:
         - edpm_sshd
+    # Restart time services on change
     - name: Configure edpm_timezone
       ansible.builtin.import_role:
         name: osp.edpm.edpm_timezone

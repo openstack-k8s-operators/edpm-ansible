@@ -20,6 +20,7 @@
   strategy: linear
   gather_facts: true
   any_errors_fatal: true
+  # Only enables rsyslog
   tasks:
     - name: Enable logging
       ansible.builtin.import_role:
