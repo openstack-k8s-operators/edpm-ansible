@@ -38,3 +38,9 @@ tests/output/**
 
 # Dynamic antsibull-docs source
 docs/source/collections/**
+
+# ASCIIDOC
+.bundle
+docs_build
+Gemfile.lock
+.ruby
