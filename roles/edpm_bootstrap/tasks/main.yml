@@ -19,6 +19,3 @@
 
 - name: Import bootstrap tasks
   ansible.builtin.import_tasks: bootstrap.yml
-
-- name: Import Package update tasks
-  ansible.builtin.import_tasks: update_package.yml

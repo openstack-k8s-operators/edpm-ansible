@@ -63,6 +63,9 @@
 - name: Import packages tasks
   ansible.builtin.import_tasks: packages.yml
 
+- name: Import Package update tasks
+  ansible.builtin.import_tasks: update_package.yml
+
 - name: Set selinux state
   ansible.posix.selinux:
     policy: targeted
