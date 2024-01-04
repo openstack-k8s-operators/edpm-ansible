@@ -34,15 +34,3 @@
   until: edpm_bootstrap_release_version_package_download.rc == 0
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
-
-- name: Download updated packages
-  become: true
-  ansible.builtin.dnf:
-    name: "*"
-    state: latest  # noqa: package-latest
-    download_only: true
-    update_cache: true
-  register: edpm_bootstrap_system_updates_download
-  until: edpm_bootstrap_system_updates_download.rc == 0
-  retries: "{{ edpm_bootstrap_download_retries }}"
-  delay: "{{ edpm_bootstrap_download_delay }}"
