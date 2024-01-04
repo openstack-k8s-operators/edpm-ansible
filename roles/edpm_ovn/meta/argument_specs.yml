@@ -142,3 +142,7 @@ argument_specs:
         default: 6642
         description: ''
         type: int
+      tenant_ip:
+        description: Local IP address
+        type: str
+        required: true
