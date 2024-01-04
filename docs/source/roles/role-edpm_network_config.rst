@@ -3,7 +3,8 @@ Role - edpm_network_config
 =============================
 
 .. note::
-  The `ctlplane_gateway_ip` variable must be set on the host for role to function properly.
+  When the `edpm_network_config_tool` is set to `'os-net-config'`, the `ctlplane_gateway_ip` and `ctlplane_ip`
+  variables must be set on the host.
 
 .. include::
   ../collections/osp/edpm/edpm_network_config_role.rst
