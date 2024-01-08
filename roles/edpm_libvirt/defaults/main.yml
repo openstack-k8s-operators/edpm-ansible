@@ -51,3 +51,8 @@ edpm_libvirt_packages:
   # for qemu and the ceph udev rules
   - ceph-common
 edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph
+
+# certs
+edpm_libvirt_certs_src: /var/lib/openstack/certs
+edpm_libvirt_cacerts_src: /var/lib/openstack/cacerts
+edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"

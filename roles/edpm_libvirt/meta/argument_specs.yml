@@ -40,3 +40,21 @@ argument_specs:
         type: str
         description: The path to the ceph config files.
         default: "/var/lib/openstack/config/ceph"
+      edpm_libvirt_certs_src:
+        type: str
+        default: /var/lib/openstack/certs
+        description: |
+          The path to the directory containing the libvirt cert and key files
+          in the ansibleEE container. This is the directory
+          where all TLS certs and keys for the libvirt service are mounted.
+      edpm_libvirt_cacerts_src:
+        type: str
+        default: /var/lib/openstack/cacerts
+        description: |
+          The path to the directory containing the cacert files
+          in the ansibleEE container. This is the directory
+          where all cacert PEM files for the libvirt service are mounted.
+      edpm_libvirt_tls_certs_enabled:
+        type: bool
+        default: false
+        description: Boolean to specify whether TLS certs are enabled.
