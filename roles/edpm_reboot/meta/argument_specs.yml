@@ -1,0 +1,25 @@
+---
+argument_specs:
+  # ./roles/edpm_reboot/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_reboot role.
+    options:
+      edpm_reboot_force_reboot:
+        description: |
+          Force reboot of the node. Automated reboot for nodes is by defulat defered as it can impact running vms.
+          Only on initial run when nova related files are not yet created reboot is not defered.
+          When edpm_reboot_force_reboot is set to true, reboot is allowed and will be perfomed if required.
+        type: bool
+        default: false
+      edpm_reboot_nova_compute_config_dir:
+        type: path
+        default: /var/lib/openstack/config/nova
+        description: This should be synced with edpm_nova_compute role
+      edpm_reboot_timeout_reboot:
+        type: int
+        default: 3600
+        description: Reboot timeout in seconds
+      edpm_reboot_post_reboot_delay:
+        type: int
+        default: 60
+        description: Reboot delay in seconds

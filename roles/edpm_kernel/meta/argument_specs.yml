@@ -32,14 +32,6 @@ argument_specs:
         type: str
         default: ""
         description: Grub kernel args.
-      edpm_kernel_reboot_timeout:
-        type: int
-        default: 3600
-        description: Reboot timeout in seconds
-      edpm_kernel_post_reboot_delay:
-        type: int
-        default: 60
-        description: Reboot delay in seconds
       edpm_kernel_defer_reboot:
         type: bool
         default: false

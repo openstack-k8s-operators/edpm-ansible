@@ -1,0 +1,12 @@
+---
+
+- name: Reboot nodes if reboot is required
+  hosts: all
+  strategy: linear
+  become: true
+  tasks:
+    - name: Run edpm_reboot
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_reboot
+      tags:
+        - edpm_reboot
