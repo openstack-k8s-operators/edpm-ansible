@@ -17,7 +17,7 @@
     - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
     - {"path": "/etc/pki/libvirt", "owner": "root", "group": "root"}
     - {"path": "/etc/pki/libvirt/private", "owner": "root", "group": "root"}
-    - {"path": "/etc/pki/CA", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/CA/libvirt", "owner": "root", "group": "root"}
 
 - name: Render libvirt config files
   tags:
@@ -99,18 +99,19 @@
   changed_when: true
   when: run_libvirt.rc == 0
 
-- name: Copy TLS files to the compute node
+- name: Move TLS files to the right location on the compute node
   tags:
     - configure
     - libvirt
   become: true
   loop:
-    - {"src": "{{ edpm_libvirt_certs_src }}/{{ inventory_hostname }}-tls.crt", "dest": "/etc/pki/libvirt/server-cert.pem"}
-    - {"src": "{{ edpm_libvirt_certs_src }}/{{ inventory_hostname }}-tls.key", "dest": "{/etc/pki/libvirt/private/server-key.pem"}
-    - {"src": "{{ edpm_libvirt_cacerts_src }}/TLSCABundleFile", "dest": "/etc/pki/CA/cacert.pem"}
+    - {"src": "/var/lib/openstack/certs/libvirt/tls.crt", "dest": "/etc/pki/libvirt/tls.crt"}
+    - {"src": "/var/lib/openstack/certs/libvirt/tls.key", "dest": "/etc/pki/libvirt/private/tls.key"}
+    - {"src": "/var/lib/openstack/cacerts/libvirt/tls-ca-bundle.pem", "dest": "/etc/pki/CA/libvirt/tls-ca-bundle.pem"}
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    remote_src: true
     mode: '0600'
     owner: "root"
     group: "root"
