@@ -98,16 +98,5 @@
         name: NetworkManager
         state: reloaded
 
-- name: Enable openvswitch service if installed
-  ansible.builtin.systemd:
-    name: openvswitch
-    enabled: true
-    state: started
-  register: openvswitch_service_start
-  failed_when:
-    - not 'Could not find the requested service' in openvswitch_service_start.msg|default('')
-    - openvswitch_service_start is failed
-  become: true
-
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml

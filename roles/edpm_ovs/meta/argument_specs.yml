@@ -1,0 +1,23 @@
+---
+argument_specs:
+  # ./roles/edpm_ovs/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_ovs role.
+    options:
+      edpm_ovs_image_download_delay:
+        type: int
+        default: 5
+        description: The seconds between retries for failed download tasks
+      edpm_ovs_download_retries:
+        type: int
+        default: 5
+      edpm_ovs_services:
+        type: list
+        description: The list of ovs services to run.
+        default:
+          - "openvswitch"
+      edpm_ovs_packages:
+        type: list
+        description: The list of packages to install for ovs.
+        default:
+          - openvswitch

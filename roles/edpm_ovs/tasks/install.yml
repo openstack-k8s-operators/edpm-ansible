@@ -1,0 +1,22 @@
+---
+- name: Install ovs packages
+  tags:
+    - install
+    - ovs
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ edpm_ovs_packages }}"
+
+- name: Ensure ovs services are enabled and running
+  tags:
+    - install
+    - ovs
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}.service"
+    enabled: true
+    state: started
+    masked: false
+  loop: "{{ edpm_ovs_services }}"
