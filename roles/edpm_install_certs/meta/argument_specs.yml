@@ -1,0 +1,12 @@
+---
+argument_specs:
+  # ./roles/edpm_install_certs/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the osp.edpm.edpm_install_certs role.
+    description:
+      - Role installs the certs and keys for all services under
+        /var/lib/openstack/certs/{service} onto the compute nodes
+      - Role installs the cacert bundles for all services under
+        /var/lib/openstack/cacerts/{service} onto the compute nodes
+      - No arguments are expected or necessary.
+    options: {}

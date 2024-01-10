@@ -1,0 +1,49 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Copy over certs and keys
+  tags:
+    - certs
+  become: true
+  block:
+    - name: Set paths
+      ansible.builtin.set_fact:
+        cert_src_path: "/var/lib/openstack/certs/{{ service }}"
+        cert_dest_path: "/var/lib/openstack/certs/{{ service }}"
+        key_dest_path: "/var/lib/openstack/certs/{{ service }}"
+
+    - name: Ensure that the destination directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        setype: "container_file_t"
+        owner: "root"
+        group: "root"
+        mode: "0755"
+      loop:
+        - "{{ cert_dest_path }}"
+        - "{{ key_dest_path }}"
+
+    - name: Copy cert and key to the compute node
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: '0600'
+        owner: root
+        group: root
+      loop:
+        - {"src": "{{ cert_src_path }}/{{ inventory_hostname }}-tls.crt", "dest": "{{ cert_dest_path }}/tls.crt"}
+        - {"src": "{{ cert_src_path }}/{{ inventory_hostname }}-tls.key", "dest": "{{ key_dest_path }}/tls.key"}
