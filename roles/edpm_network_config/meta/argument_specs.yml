@@ -19,7 +19,8 @@ argument_specs:
         description: The number of retries for failed download tasks
       edpm_network_config_tool:
         type: str
-        description: Which network config tool should be used
+        description: >
+          Which network config tool should be used. The `nmstate` will call `systemroles.network`.
         default: os-net-config
         choices:
           - os-net-config
