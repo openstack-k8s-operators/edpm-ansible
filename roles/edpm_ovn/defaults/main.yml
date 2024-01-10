@@ -11,6 +11,7 @@ edpm_ovn_config_src: /var/lib/openstack/configs/ovn
 edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
 
+# Local unicast prefix
 edpm_ovn_chassis_mac_first_octets: ["0e", "1e", "2e", "3e"]
 # Automatically generate the first two octets for the MAC address pefixes.
 # Pick random from first octets and then a nested iteration over a range
@@ -47,6 +48,8 @@ edpm_ovn_ofctrl_wait_before_clear: 8000
 edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
 edpm_ovn_encap_ip: "{{ tenant_ip }}"
 edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% endif %}"
+ovn_match_northd_version: true
+ovn_monitor_all: true
 
 edpm_ovn_controller_common_volumes:
   - /lib/modules:/lib/modules:ro
@@ -73,8 +76,8 @@ edpm_ovn_ovs_external_ids:
     {{ chassis_mac_mappings | join(',') }}"
   ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
-  ovn-match-northd-version: true
-  ovn-monitor-all: true
+  ovn-match-northd-version: "{{ ovn_match_northd_version }}"
+  ovn-monitor-all: "{{ ovn_monitor_all }}"
   ovn-remote: >-
     "{%- set db_addresses = [] -%}{%- for host in edpm_ovn_dbs -%}
     {{ db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) }}{%- endfor -%}

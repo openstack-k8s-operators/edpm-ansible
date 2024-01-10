@@ -27,44 +27,20 @@ argument_specs:
         type: bool
       edpm_enable_internal_tls:
         default: false
-        description: ''
+        description: >
+          Should OVN use tls for default protocol?
+          If set to false, the OVN will default to tcp.
         type: bool
       edpm_ovn_bridge:
         default: br-int
-        description: ''
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-bridge`.
         type: str
       edpm_ovn_bridge_mappings:
         default:
           - datacentre:br-ex
         description: ''
         type: list
-      edpm_ovn_chassis_mac_first_octets:
-        default:
-          - 0e
-          - 1e
-          - 2e
-          - 3e
-        description: ''
-        type: list
-      edpm_ovn_chassis_mac_mapping_prefixes:
-        default: '{%- set mac_prefixes = {} -%} {%- set seen_prefixes = [] -%} {%- set seen_bridges
-          = [] -%} {%- for bridge_mapping in edpm_ovn_bridge_mappings -%} {%- for n in range(0,255)
-          if bridge_mapping not in seen_bridges -%} {%- set _seed = (bridge_mapping + n|string)
-          -%} {%- set prefix = edpm_ovn_chassis_mac_first_octets | random + '':'' + ''%02x''
-          % 255 | random(seed=_seed) -%} {%- if not prefix in seen_prefixes -%} {%- set
-          seen_prefixes = seen_prefixes.append(prefix) -%} {%- set seen_bridges = seen_bridges.append(bridge_mapping)
-          -%} {%- set mac_prefixes = mac_prefixes.update({(bridge_mapping | split('':'')
-          | first): prefix}) -%} {%- endif -%} {%- endfor -%} {%- endfor -%} {{ mac_prefixes
-          }}'
-        description: >
-          Automatically generate the first two octets for the MAC address pefixes.
-          Pick random from first octets and then a nested iteration over a range
-          of seeds. The inner loop breaks as soon as the bridge_mapping is in seen_bridges.
-        type: str
-      edpm_ovn_chassis_mac_mapping_seed:
-        default: '{{ ansible_machine_id }}'
-        description: ''
-        type: str
       edpm_ovn_controller_agent_image:
         default: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
         description: URL of the controller agent image.
@@ -91,11 +67,14 @@ argument_specs:
         type: list
       edpm_ovn_encap_ip:
         default: '{{ tenant_ip }}'
-        description: ''
+        description: >
+          Defaults to value of the host variable `tenant_ip`.
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-encap-ip`.
         type: str
       edpm_ovn_encap_type:
         default: geneve
-        description: ''
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-encap-type`.
         type: str
       edpm_ovn_multi_rhel:
         default: false
@@ -103,40 +82,27 @@ argument_specs:
         type: bool
       edpm_ovn_ofctrl_wait_before_clear:
         default: 8000
-        description: ''
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-ofctrl-wait-before-clear`.
         type: int
-      edpm_ovn_ovs_external_ids:
-        default:
-          hostname: '{{ ansible_nodename }}'
-          ovn-bridge: '{{ edpm_ovn_bridge }}'
-          ovn-bridge-mappings: '{{ edpm_ovn_bridge_mappings | join('','') }}'
-          ovn-chassis-mac-mappings: '{%- set chassis_mac_mappings = [] -%} {%- for physnet,
-            mac_prefix in edpm_ovn_chassis_mac_mapping_prefixes.items() -%} {{ chassis_mac_mappings.append([physnet,
-            mac_prefix | community.general.random_mac(seed=edpm_ovn_chassis_mac_mapping_seed)]
-            | join('':'')) }} {%- endfor -%} {{ chassis_mac_mappings | join('','') }}'
-          ovn-encap-ip: '{{ edpm_ovn_encap_ip }}'
-          ovn-encap-type: '{{ edpm_ovn_encap_type }}'
-          ovn-match-northd-version: true
-          ovn-monitor-all: true
-          ovn-ofctrl-wait-before-clear: '{{ edpm_ovn_ofctrl_wait_before_clear }}'
-          ovn-remote: '{% set db_addresses = [] %}{% for host in edpm_ovn_dbs %}{{ db_addresses.append([edpm_ovn_protocol,
-            host, edpm_ovn_sb_server_port] | join('':'')) }}{% endfor %}{{ db_addresses
-            | join('','') }}'
-          ovn-remote-probe-interval: '{{ edpm_ovn_remote_probe_interval }}'
-          rundir: /var/run/openvswitch
-        description: Sets external_id data from provided variables using Jinja templating
-        type: dict
+      ovn_match_northd_version:
+        default: true
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-match-northd-version`
+        type: bool
+      ovn_monitor_all:
+        default: true
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-monitor-all`.
+        type: bool
       edpm_ovn_ovs_other_config:
         default: {}
         description: Openvswitch other_config
         type: dict
-      edpm_ovn_protocol:
-        default: '{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% endif %}'
-        description: ''
-        type: str
       edpm_ovn_remote_probe_interval:
         default: 60000
-        description: ''
+        description: >
+          Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-remote-probe-interval`.
         type: int
       edpm_ovn_sb_server_port:
         default: 6642
