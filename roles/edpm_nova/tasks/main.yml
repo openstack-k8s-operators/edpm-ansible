@@ -18,6 +18,9 @@
 - name: Configure nova
   ansible.builtin.include_tasks: configure.yml
 
+- name: Configure compute parameters
+  ansible.builtin.include_tasks: configure_compute.yml
+
 - name: Install nova
   ansible.builtin.include_tasks: install.yml
 

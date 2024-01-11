@@ -37,3 +37,25 @@ argument_specs:
           This image is used to create the nova compute container
           on the compute node and generaly will be set via the container
           bundle by the dataplane operator.
+      edpm_nova_cpu_shared_set:
+        type: str
+        default: ""
+        description: |
+          Set to a comma-separated string or range of physical host
+          CPU numbers used to.
+      edpm_nova_cpu_dedicated_set:
+        type: str
+        default: ""
+        description: |
+          Set to a comma-separated string or range of host CPU cores to which
+          processes for pinned instance CPUs (PCPUs) can be scheduled.
+      edpm_nova_reserved_host_memory:
+        type: int
+        default: 4096
+        description: Reserved RAM for host processes
+      edpm_nova_pci_passthrough:
+        type: list
+        default: []
+        description: |
+          Set to list of SRIOV PCI passthrough dictinary with option's like
+          devname, physical network and trusted etc..
