@@ -17,3 +17,6 @@ All variables of the timesync role can used while using this playbook.
 
 .. _`system roles collection`: https://linux-system-roles.github.io/
 .. _`timesync`: https://github.com/linux-system-roles/timesync
+
+.. literalinclude:: ../../../playbooks/install_os.yml
+   :language: YAML
