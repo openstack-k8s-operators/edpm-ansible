@@ -101,3 +101,11 @@
         that:
           - "item  == 'migration_port_min = 61152 migration_port_max = 61215 '"
       loop: "{{ qemu_conf_migration_ports.stdout_lines }}"
+
+    - name: Load os_enabled_vtpm selinux boolean
+      ansible.builtin.shell: "getsebool os_enable_vtpm"
+      register: os_enabled_vtpm
+    - name: Assert that os_enabled_vtpm selinux boolean is enabled
+      assert:
+        that:
+          - "os_enabled_vtpm.stdout_lines[0] == 'os_enable_vtpm --> on'"

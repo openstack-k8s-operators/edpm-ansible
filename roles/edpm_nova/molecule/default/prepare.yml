@@ -47,6 +47,12 @@
         ./venv/bin/repo-setup current-podified -b antelope
         popd
         rm -rf repo-setup-main
+    # NOTE(gibi): this is done by the boostrap role in a real deployment
+    - name: Install openstack-selinux
+      become: true
+      ansible.builtin.dnf:
+        name: "openstack-selinux"
+        state: present
     - name: set /etc/localtime
       become: true
       ansible.builtin.file:

@@ -99,6 +99,16 @@
   changed_when: true
   when: run_libvirt.rc == 0
 
+- name: Enable os_enable_vtpm SELinux boolean for vTPM
+  tags:
+    - configure
+    - libvirt
+  become: true
+  ansible.posix.seboolean:
+    name: os_enable_vtpm
+    persistent: true
+    state: true
+
 - name: Move TLS files to the right location on the compute node
   tags:
     - configure
