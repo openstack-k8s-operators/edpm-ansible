@@ -25,20 +25,19 @@ edpm_neutron_sriov_images_download_retries: 5
 
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
 edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/neutron-sriov"
-edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
+edpm_neutron_sriov_agent_config_dir: "/var/lib/openstack/config/neutron-sriov-agent"
 edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
 
 edpm_neutron_sriov_common_volumes:
-  - /lib/modules:/lib/modules:ro
   - /dev:/dev
-  - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron.conf.d:z"
+  - /lib/modules:/lib/modules:ro
+  - "{{edpm_neutron_sriov_agent_config_dir}}:/var/lib/kolla/config_files:ro"
   - /var/lib/neutron:/var/lib/neutron:shared,z
-  - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
   - /var/log/containers/neutron:/var/log/neutron:z
 
 # neutron.conf
 # DEFAULT
-edpm_neutron_sriov_DEFAULT_debug: false
+edpm_neutron_sriov_DEFAULT_debug: true
 edpm_neutron_sriov_DEFAULT_rpc_response_timeout: 60
 edpm_neutron_sriov_DEFAULT_transport_url: ''
 edpm_neutron_sriov_DEFAULT_host: '{{ ansible_facts["nodename"] }}'

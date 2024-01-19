@@ -1,0 +1,39 @@
+{
+    "command": "neutron-sriov-nic-agent",
+    "config_files": [
+        {
+            "source": "/var/lib/kolla/config_files/01-rootwrap.conf",
+            "dest": "/etc/neutron/rootwrap.conf",
+            "owner": "neutron",
+            "perm": "0600"
+        },
+        {
+            "source": "/var/lib/kolla/config_files/*.conf",
+            "dest": "/etc/neutron/neutron.conf.d/",
+            "owner": "neutron:neutron",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/neutron",
+            "owner": "neutron:neutron",
+            "recurse": true
+        },
+        {
+            "path": "/var/lib/neutron",
+            "owner": "neutron:neutron",
+            "recurse": true
+        },
+        {
+            "path": "/etc/pki/tls/certs/neutron_sriov_agent.crt",
+            "owner": "neutron:neutron",
+            "perm:": "0640"
+        },
+        {
+            "path": "/etc/pki/tls/private/neutron_sriov_agent.key",
+            "owner": "neutron:neutron",
+            "perm:": "0640"
+        }
+    ]
+}

@@ -13,8 +13,6 @@
       loop:
         - "/var/lib/neutron"
         - "/var/lib/openstack/config/containers"
-        - "/var/lib/kolla/config_files/neutron_sriov_agent.json"
-        - "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
         - "/var/log/containers/neutron"
         - "/var/log/containers/stdouts"
 
@@ -46,7 +44,7 @@
         - name: sriov config file exists
           become: true
           ansible.builtin.stat:
-            path: "/var/lib/config-data/ansible-generated/neutron-sriov-agent/10-neutron-sriov.conf"
+            path: "/var/lib/openstack/config/neutron-sriov-agent/10-neutron-sriov.conf"
           register: sriov_config
 
         - name: assert that the config exists
@@ -56,5 +54,6 @@
             fail_msg: "sriov agent config file does not exist"
 
     - name: Ensure that configured root helper works
+      become: true
       ansible.builtin.shell: |
         podman exec neutron_sriov_agent {{ edpm_neutron_sriov_agent_AGENT_root_helper }} sleep 0

@@ -1,0 +1,16 @@
+{
+    "image": "{{ edpm_neutron_sriov_image }}",
+    "net": "host",
+    "privileged": true,
+    "user": "neutron",
+    "restart": "always",
+    "command": "kolla_start",
+    "environment": {
+        "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS"
+    },
+    {% set edpm_neutron_sriov_volumes = [] %}
+    {%- set edpm_neutron_sriov_volumes =
+      edpm_neutron_sriov_volumes +
+      edpm_neutron_sriov_common_volumes %}
+    "volumes": {{ edpm_neutron_sriov_volumes | to_json | indent(4) }}
+}

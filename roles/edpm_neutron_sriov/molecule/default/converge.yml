@@ -16,7 +16,24 @@
 
 - name: Converge
   hosts: all
+  pre_tasks:
+  - name: set basic user fact
+    set_fact:
+      ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER'))}}"
+    when:
+      - ansible_user is undefined
+  - name: print ansible_user
+    debug:
+      var: ansible_user
+  - name: set basic home fact
+    set_fact:
+      ansible_user_dir: "{{ lookup('env', 'HOME') }}"
+    when:
+      - ansible_user_dir is undefined
+  - name: print ansible_user_dir
+    debug:
+      var: ansible_user_dir
   roles:
     - role: "edpm_neutron_sriov"
       vars:
-        edpm_neutron_sriov_agent_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_neutron_sriov_agent_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"

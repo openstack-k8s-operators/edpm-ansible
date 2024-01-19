@@ -26,6 +26,7 @@
         - {"src": "neutron.conf.j2", "dest": "01-neutron.conf"}
         - {"src": "rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
         - {"src": "neutron-sriov-agent.conf.j2", "dest": "01-neutron-sriov-agent.conf"}
+        - {"src": "config.json.j2", "dest": "config.json"}
       tags:
         - configure
         - neutron

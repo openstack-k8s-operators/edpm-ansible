@@ -20,6 +20,7 @@
       test_deps_extra_packages:
         - iproute
         - podman
+        - acl
   tasks:
     # needed due to regression in 1.11.1
     # see https://github.com/containers/crun/issues/1338

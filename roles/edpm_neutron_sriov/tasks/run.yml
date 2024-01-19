@@ -19,14 +19,15 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
-- name: Run neutron-sriov-agent container
-  debugger: on_failed
+- name: Deploy neutron_sriov_agent container
+  tags:
+    - install
+    - neutron
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
+    name: osp.edpm.edpm_container_manage
   vars:
-    edpm_debug: true
-    edpm_container_standalone_service: neutron_sriov_agent
-    edpm_container_standalone_container_defs:
-      neutron_sriov_agent: "{{ lookup('template', 'neutron_sriov_agent.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      neutron_sriov_agent: "{{ lookup('template', 'kolla_config/neutron_sriov_agent.yaml.j2') | from_yaml }}"
+    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_debug: true
+    edpm_container_manage_config_patterns: 'neutron_sriov_agent.json'
+    edpm_container_manage_clean_orphans: false
