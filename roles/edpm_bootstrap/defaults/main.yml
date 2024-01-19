@@ -31,7 +31,6 @@ edpm_bootstrap_packages_bootstrap:
   - crudini
   - jq
   - nftables
-  - openvswitch
   - NetworkManager
   - openstack-selinux
   - python3-libselinux

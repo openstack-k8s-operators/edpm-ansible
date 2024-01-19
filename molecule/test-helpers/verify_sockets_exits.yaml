@@ -1,0 +1,19 @@
+- name: Verify sockets are created with correct permissions {{ item.path }}
+  block:
+    - name: Check that socket exist {{ item.path }}
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      register: socket_exists
+    - name: Assert that socket exist {{ item.path }}
+      ansible.builtin.assert:
+        that:
+          - socket_exists.stat.exists
+          - socket_exists.stat.issock
+        fail_msg: "libvirt socket {{ item.path }} does not exist"
+    - name: Assert that socket is owned by correct user and group {{ item.user }}:{{ item.group }}
+      ansible.builtin.assert:
+        that:
+          - socket_exists.stat.pw_name == '{{ item.user }}'
+          - socket_exists.stat.gr_name == '{{ item.group }}'
+        fail_msg: "socket {{ item.path }} is not owned by {{ item.user }}:{{ item.group }}"

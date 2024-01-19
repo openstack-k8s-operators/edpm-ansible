@@ -69,20 +69,21 @@
         - { "name": "virtsecretd-ro.socket", "osp_service": false }
         - { "name": "virtsecretd.socket", "osp_service": false }
 
+
     - name: ensure libvirt socket activation drop-in directories exist
-      ansible.builtin.include_tasks: "test-helpers/verify_sockets_exits.yaml"
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_sockets_exits.yaml"
       loop:
-        - /run/libvirt/virtlogd-admin-sock
-        - /run/libvirt/virtlogd-sock
-        - /run/libvirt/virtnodedevd-admin-sock
-        - /run/libvirt/virtnodedevd-sock
-        - /run/libvirt/virtnodedevd-sock-ro
-        - /run/libvirt/virtqemud-sock
-        - /run/libvirt/virtqemud-sock-ro
-        - /run/libvirt/virtqemud-admin-sock
-        - /run/libvirt/virtsecretd-admin-sock
-        - /run/libvirt/virtsecretd-sock
-        - /run/libvirt/virtsecretd-sock-ro
+        - {"path": "/run/libvirt/virtlogd-admin-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtlogd-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtnodedevd-admin-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtnodedevd-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtnodedevd-sock-ro", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtqemud-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtqemud-sock-ro", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtqemud-admin-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtsecretd-admin-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtsecretd-sock", "user": "root", "group": "libvirt" }
+        - {"path": "/run/libvirt/virtsecretd-sock-ro", "user": "root", "group": "libvirt" }
 
     - name: ensure container_file_t selinux lable is not set on /run/libvirt
       ansible.builtin.shell: "ls -lZ /run/libvirt | grep container_file_t"

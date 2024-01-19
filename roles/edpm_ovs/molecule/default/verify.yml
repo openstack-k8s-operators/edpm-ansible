@@ -1,0 +1,40 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: compute-1
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        # ovs directories
+        - "/var/lib/openvswitch"
+        - "/etc/openvswitch"
+        - "/run/openvswitch"
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        # rhel installed services have service units defiend via rpm in
+        # /usr/lib/systemd/system so disable the check for them them in
+        # /etc/systemd/system
+        - { "name": "openvswitch.service", "osp_service": false, "enabled": "enabled" }
+    - name: Check if user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: openvswitch
+      register: ovs_user
+    - name: Assert that ovs user is created with kolla uid and gid
+      #openvswitch 42476 42476
+      ansible.builtin.assert:
+        that:
+          # user
+          - "ovs_user.ansible_facts.getent_passwd.openvswitch[1] == '42476'"
+          # group
+          - "ovs_user.ansible_facts.getent_passwd.openvswitch[2] == '42476'"
+    - name: ensure ovs sockets exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_sockets_exits.yaml"
+      loop:
+        - {"path": "/run/openvswitch/db.sock", user: "openvswitch", group: "hugetlbfs" }

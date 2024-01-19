@@ -18,6 +18,11 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_users"
+
+# TODO: we should not be creating any users/groups in this role by default
+# we should move all user/group creation to the roles that need to create users/groups.
+# hugetlbfs is required  in the edpm_ovs and perhaps dpdk or libvirt role the qemu
+# user is required in the edpm_libvirt role. We should move those to the roles
 edpm_users_users:
   - {"name": "qemu", "uid": "107", "gid": "107", "shell": "/sbin/nologin", "comment": "qemu user"}
   - {"name": "hugetlbfs", "gid": "42477", "group_only": true}

@@ -1,0 +1,11 @@
+---
+- name: Configure openvswitch user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42476 is matching with the uid and gid created by kolla in the openstack containers
+      - {"name": "openvswitch", "uid": "42476", "gid": "42476", "shell": "/sbin/nologin", groups: "hugetlbfs", "comment": "openvswitch user"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
