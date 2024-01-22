@@ -18,3 +18,9 @@
         name: osp.edpm.edpm_multipathd
       tags:
         - edpm_multipathd
+
+    - name: Support NVMe-oF protocols
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nvmeof
+      tags:
+        - edpm_nvmeof
