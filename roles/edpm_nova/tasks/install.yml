@@ -1,7 +1,6 @@
 ---
 
 - name: Render nova container
-  become: true
   tags:
     - install
     - nova

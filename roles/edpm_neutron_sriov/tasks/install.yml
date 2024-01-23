@@ -15,15 +15,18 @@
 # under the License.
 
 - name: Create neutron-sriov-agent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     setype: "container_file_t"
     state: directory
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
-    - {'path': "/var/lib/openstack/config/containers", "mode": "0750"}
+    - {'path': "/var/lib/openstack/config/containers", "mode": "0755", "owner": "{{ ansible_user }}", "group": "{{ ansible_user }}"}
     - {'path': "/var/lib/neutron", "mode": "0750"}
-    - {'path': "{{ edpm_neutron_sriov_agent_config_dir }}", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_sriov_agent_config_dir }}", "mode": "0755", "owner": "{{ ansible_user }}", "group": "{{ ansible_user }}"}
     - {'path': "/var/log/containers/stdouts"}
     - {'path': "/var/log/containers/neutron"}
   tags:
@@ -31,7 +34,6 @@
     - neutron
 
 - name: Render neutron-sriov-agent container
-  become: true
   ansible.builtin.template:
     src: "neutron_sriov_agent.yaml.j2"
     dest: "/var/lib/openstack/config/containers/neutron_sriov_agent.yaml"

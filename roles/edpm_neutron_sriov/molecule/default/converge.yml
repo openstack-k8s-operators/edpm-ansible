@@ -17,6 +17,7 @@
 - name: Converge
   hosts: all
   roles:
-    - role: "edpm_neutron_sriov"
+    - role: osp.edpm.edpm_neutron_sriov
       vars:
         edpm_neutron_sriov_agent_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        ansible_user: root
