@@ -4,6 +4,14 @@
 # Expand the variables
 eval "echo \"$(cat /runner/env/settings)\"" > /runner/env/settings
 
+# Create symlinks to mounted inventories in the general inventory dir
+# This will treat all files in designated paths as if they were inventories
+if [ -n "$RUNNER_INVENTORY_PATHS" ]; then
+    for inv_path in $RUNNER_INVENTORY_PATHS; do
+        ln -s $inv_path/** /runner/inventory/
+    done
+fi
+
 if [ -n "$RUNNER_INVENTORY" ]; then
     echo "---" > /runner/inventory/inventory.yaml
     echo "$RUNNER_INVENTORY" >> /runner/inventory/inventory.yaml
