@@ -14,11 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Create host user and group
+- name: Create host user and group, if not exists
   become: true
   tags:
     - edpm_users
   block:
+    - name: Detect when user exists and cannot be created
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ item.name }}"
+  rescue:
     - name: Ensure group is present on the host [ {{ item.name }} ]
       ansible.builtin.group:
         name: "{{ item.name }}"
