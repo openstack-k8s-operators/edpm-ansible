@@ -39,6 +39,8 @@
   loop:
     - "src": "{{ edpm_telemetry_config_src }}/ceilometer.conf"
       "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
+    - "src": "{{ edpm_telemetry_config_src }}/custom.conf"
+      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/custom.conf"
     - "src": "{{ edpm_telemetry_config_src }}/polling.yaml"
       "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
     - "src": "{{ edpm_telemetry_config_src }}/ceilometer_agent_compute.json"
