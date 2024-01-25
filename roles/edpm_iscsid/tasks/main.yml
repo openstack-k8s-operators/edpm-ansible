@@ -14,20 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Install iscsid
+  ansible.builtin.include_tasks: install.yml
 
-# "iscsid" will search for and load any operating system variable file
+- name: Configure iscsid
+  ansible.builtin.include_tasks: configure.yml
 
-# found within the "vars/" path. If no OS files are found the task will skip.
-- name: Gather variables for each operating system
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - skip: true
-      files:
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_major_version'] | lower }}.yml"
-        - "{{ ansible_facts['distribution'] | lower }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}-{{ ansible_facts['distribution_version'].split('.')[0] }}.yml"
-        - "{{ ansible_facts['os_family'] | lower }}.yml"
-  tags:
-    - always
+- name: Run iscsid
+  ansible.builtin.include_tasks: run.yml

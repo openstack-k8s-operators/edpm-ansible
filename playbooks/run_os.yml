@@ -32,15 +32,3 @@
         tasks_from: run.yml
       tags:
         - edpm_logrotate_crond
-    - name: Run edpm_iscsid
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: run.yml
-      tags:
-        - edpm_iscsid
-    - name: Run edpm_multipathd
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_multipathd
-        tasks_from: run.yml
-      tags:
-        - edpm_multipathd
