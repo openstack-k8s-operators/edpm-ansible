@@ -292,7 +292,7 @@ class EdpmContainerManage:
             },
             'conmon_pidfile': f"/run/{name}.pid",
             'debug': self.debug,
-            'log_driver': 'k8s-file',
+            'log_driver': 'journald',
             'log_level': 'info',
             'log_opt': {"path": f"{self.log_base_path}/{name}.log"},
         }
