@@ -5,7 +5,6 @@
   vars:
     edpm_users_users:
       # 42476 is matching with the uid and gid created by kolla in the openstack containers
-      - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
       - {"name": "openvswitch", "uid": "42476", "gid": "42476", "shell": "/sbin/nologin", groups: "hugetlbfs", "comment": "openvswitch user"}
     edpm_users_extra_dirs: []
   tags:
