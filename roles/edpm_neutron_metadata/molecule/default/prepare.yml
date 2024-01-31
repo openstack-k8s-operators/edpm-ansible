@@ -39,17 +39,6 @@
     - ansible.builtin.include_role:
         name: osp.edpm.env_data
 
-    # needed due to regression in 1.11.1
-    # see https://github.com/containers/crun/issues/1338
-    # fixed with https://github.com/containers/crun/pull/1341
-    # we should wait to crun > 1.11.2
-    - name: Downgrade crun for 1.11.1 regression
-      become: true
-      ansible.builtin.dnf:
-        name: crun < 1.11
-        allow_downgrade: true
-        state: present
-
     # The openvswitch kernel module needs to be loaded on the host
     - name: install and modprobe openvswitch
       shell: |
