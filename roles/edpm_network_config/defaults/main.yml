@@ -30,6 +30,7 @@ edpm_network_config_tool: os-net-config
 # Packages needed by nmstate (via system-role)
 edpm_network_config_systemrole_nmstate_dependencies:
   - NetworkManager-ovs
+  - NetworkManager-wifi
 
 # seconds between retries for download tasks
 edpm_network_config_download_delay: 5
