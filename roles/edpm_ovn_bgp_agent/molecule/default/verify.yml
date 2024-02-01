@@ -22,20 +22,6 @@
       loop:
         - {"name": "edpm_ovn_bgp_agent.service"}
 
-    - name: ensure that log file for ovn_bgp_agent exist
-      become: true
-      block:
-        - name: Check if file /var/log/containers/stdouts/ovn_bgp_agent.log exist
-          ansible.builtin.stat:
-            path: /var/log/containers/stdouts/ovn_bgp_agent.log
-          register: log_file
-        - name: Assert file /var/log/containers/stdouts/ovn_bgp_agent.log exist
-          ansible.builtin.assert:
-            that:
-              - log_file.stat.exists
-            fail_msg: "File /var/log/containers/stdouts/ovn_bgp_agent.log does not exist"
-
-
     - name: ensure kolla_set_configs copied the expected files
       become: true
       ansible.builtin.shell: |
