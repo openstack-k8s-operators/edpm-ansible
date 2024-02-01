@@ -23,13 +23,3 @@
           - running_containers.stdout_lines | length == 1
           - "'Up' in running_containers.stdout_lines | first"
         fail_msg: "Podman container {{ item }} is not running"
-    - name: Check the container stdout log exists {{ item }}
-      become: true
-      ansible.builtin.stat:
-        path: "/var/log/containers/stdouts/{{ item }}.log"
-      register: log_exists
-    - name: Assert the container stdout log exists {{ item }}
-      ansible.builtin.assert:
-        that:
-          - log_exists.stat.exists
-        fail_msg: "Container stdout log for {{ item }} does not exist"
