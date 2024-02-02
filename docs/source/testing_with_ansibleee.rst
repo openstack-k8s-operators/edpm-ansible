@@ -69,7 +69,8 @@ Create an NFS PV, and a PVC that can be mounted on the ansibleee pods.
     apiVersion: v1
     kind: PersistentVolume
     metadata:
-      name: edpm-ansible
+      # Do not use just "edpm-ansible" for the metadata name!
+      name: edpm-ansible-dev
     spec:
       capacity:
         storage: 1Gi
@@ -89,7 +90,8 @@ Create an NFS PV, and a PVC that can be mounted on the ansibleee pods.
     apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
-      name: edpm-ansible
+      # Do not use just "edpm-ansible" for the metadata name!
+      name: edpm-ansible-dev
     spec:
       storageClassName: edpm-ansible
       accessModes:
@@ -122,5 +124,5 @@ OpenStackDataPlaneNodeSet CR should contain the following snippet:
         volumes:
         - name: edpm-ansible
           persistentVolumeClaim:
-            claimName: edpm-ansible
+            claimName: edpm-ansible-dev
             readOnly: true
