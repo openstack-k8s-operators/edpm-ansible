@@ -64,3 +64,7 @@ argument_specs:
         type: str
         default: ""
         description: OvS DPDK vhost postcopy ovs options
+      edpm_ovn_datapath_type:
+        type: str
+        default: "netdev"
+        description: OVN bridge datapath type

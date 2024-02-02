@@ -8,3 +8,6 @@ nbd_tls = 0
 # port usage conflicts. See https://review.openstack.org/#/c/561784
 migration_port_min = 61152
 migration_port_max = 61215
+{% if edpm_nova_libvirt_qemu_group is defined%}
+group = "{{ edpm_nova_libvirt_qemu_group }}"
+{% endif %}
