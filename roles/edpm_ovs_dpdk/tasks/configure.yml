@@ -196,9 +196,30 @@
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_rebal_interval) }}"
 
+- name: OVN bridge datapath type config
+  when: edpm_ovn_datapath_type|string
+  block:
+    - name: Apply PMD cores config
+      ansible.builtin.set_fact:
+        ovn_bridge_datapath_type:
+          ovn-bridge-datapath-type: "{{ edpm_ovn_datapath_type }}"
+
+    - name: Append external_ids with ovn datapath type
+      ansible.builtin.set_fact:
+        edpm_ovs_external_ids: "{{ {} | combine(ovn_bridge_datapath_type) }}"
+
 - name: Configure OVS other_config
   ansible.builtin.shell: >
     ovs-vsctl set open . {% for key, value in edpm_ovs_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
   register: ovs_other_config
   changed_when: ovs_other_config.rc == 0
   failed_when: ovs_other_config.rc != 0
+  when: edpm_ovs_other_config | length > 0
+
+- name: Configure OVS external_ids
+  ansible.builtin.shell: >
+    ovs-vsctl set open . {% for key, value in edpm_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
+  register: ovs_external_ids
+  changed_when: ovs_external_ids.rc == 0
+  failed_when: ovs_external_ids.rc != 0
+  when: edpm_ovs_external_ids | length > 0

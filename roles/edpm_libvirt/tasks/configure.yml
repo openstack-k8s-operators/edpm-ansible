@@ -36,7 +36,7 @@
     - {"src": "virtnodedevd.conf", "dest": "virtnodedevd.conf"}
     - {"src": "virtproxyd.conf", "dest": "virtproxyd.conf"}
     - {"src": "virtqemud.conf", "dest": "virtqemud.conf"}
-    - {"src": "qemu.conf", "dest": "qemu.conf"}
+    - {"src": "qemu.conf.j2", "dest": "qemu.conf"}
     - {"src": "virtsecretd.conf", "dest": "virtsecretd.conf"}
   notify:
     - Restart libvirt

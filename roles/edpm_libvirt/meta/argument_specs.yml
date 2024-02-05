@@ -44,3 +44,7 @@ argument_specs:
         type: bool
         default: false
         description: Boolean to specify whether TLS certs are enabled.
+      edpm_nova_libvirt_qemu_group:
+        type: str
+        description: The vhost user socket directory group name.
+        default: ''
