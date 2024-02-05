@@ -45,6 +45,8 @@
         "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
       - "src": "{{ edpm_telemetry_config_src }}/ceilometer-agent-ipmi.json"
         "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
+  tags:
+    - edpm_telemetry
 
 - name: Check for custom.conf existence
   ansible.builtin.stat:
@@ -60,6 +62,8 @@
       'src': edpm_telemetry_config_src + '/custom.conf',
       'dest': edpm_ceilometer_config_dest + '/ceilometer/custom.conf' }] }}"
   when: custom_ceilometer_conf.stat.exists
+  tags:
+    - edpm_telemetry
 
 - name: Copy generated ceilometer configs
   ansible.builtin.copy:
