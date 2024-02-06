@@ -130,3 +130,6 @@ argument_specs:
         default: "{{ edpm_neutron_metadata_agent_image }}"
         description: Image used to spawn haproxy sidecar containers.
         type: str
+      edpm_neutron_global_physnet_mtu:
+        description: Optional MTU size for the interfaces managed by neutron
+        type: int

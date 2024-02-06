@@ -1,6 +1,10 @@
 [DEFAULT]
 debug = {{ edpm_neutron_metadata_agent_DEFAULT_debug }}
 
+{% if edpm_neutron_global_physnet_mtu is defined %}
+global_physnet_mtu = {{ edpm_neutron_global_physnet_mtu }}
+{% endif %}
+
 {% if edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host is defined %}
 nova_metadata_host = {{ edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host }}
 {% endif %}
