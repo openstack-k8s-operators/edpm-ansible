@@ -25,6 +25,7 @@ check to avoid needless issues with style, such as indentation.
 
    contributing_roles
    contributing_plugins
+   contributing_playbooks
    testing_roles
    testing_with_ansibleee
 

@@ -1,7 +1,7 @@
 ---
 
 - name: Deploy EDPM Neutron SR-IOV agent
-  hosts: all
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
   become: true
   any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
