@@ -1,0 +1,90 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Configure swift user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42445 is matching with the uid and gid created by kolla in the swift containers
+      - {"name": "swift", "uid": "42445", "gid": "42445", "shell": "/bin/sh", "comment": "swift user"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
+
+- name: Create container config dirs
+  tags:
+    - configure
+    - swift
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    setype: "container_file_t"
+    owner: "{{ item.owner | default(ansible_user) }}"
+    group: "{{ item.group | default(ansible_user) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {"path": "{{ edpm_swift_config_dest }}", "mode": "0755"}
+
+- name: Create persistent config dirs
+  tags:
+    - configure
+    - swift
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    setype: "container_file_t"
+    owner: "{{ item.owner | default(ansible_user) }}"
+    group: "{{ item.group | default(ansible_user) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {"path": "/srv/node", "mode": "0750", "owner": "swift", "group": "swift"}
+    - {"path": "/var/cache/swift", "mode": "0700", "owner": "swift", "group": "swift"}
+    - {"path": "/var/log/containers/swift", "mode": "0700", "owner": "swift", "group": "swift"}
+
+- name: Discover configmaps in {{ edpm_swift_config_src }}
+  ansible.builtin.find:
+    paths: "{{ edpm_swift_config_src }}"
+    file_type: file
+    recurse: true
+  register: edpm_swift_configmaps
+  changed_when: false
+  check_mode: false
+  delegate_to: localhost
+  become: false
+
+- name: Flatten configmaps into {{ edpm_swift_config_dest }}
+  tags:
+    - configure
+    - swift
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ edpm_swift_config_dest }}/{{ item.path | basename }}"
+    setype: "container_file_t"
+    mode: "0644"
+  loop: "{{ edpm_swift_configmaps.files }}"
+
+- name: Extract swiftrings.tar.gz
+  become: true
+  tags:
+    - install
+    - swift
+  ansible.builtin.unarchive:
+    src: "{{ edpm_swift_config_dest }}/swiftrings.tar.gz"
+    dest: "{{ edpm_swift_config_dest }}/"
+    remote_src: true
