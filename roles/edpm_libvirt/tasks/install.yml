@@ -1,4 +1,11 @@
 ---
+# TODO(arxcruz): Remove this once libvirt 10 is available on centos stream
+- name: Add master repository containing libvirt 10
+  shell:
+    cmd: |
+      dnf config-manager --add-repo https://trunk.rdoproject.org/centos9-master/delorean-deps-test.repo && dnf update -y
+  become: true
+
 - name: Install libvirt packages
   tags:
     - install
