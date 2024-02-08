@@ -30,12 +30,14 @@ edpm_libvirt_services:
   - virtproxyd
   - virtqemud
   - virtsecretd
+# TODO: uncap libvirt once libvirt 10 is available
+edpm_libvirt_range: "<9.10.0"
 edpm_libvirt_packages:
   # main libvirt packages
-  - libvirt
-  - libvirt-admin
-  - libvirt-client
-  - libvirt-daemon
+  - libvirt {{edpm_libvirt_range}}
+  - libvirt-admin {{edpm_libvirt_range}}
+  - libvirt-client {{edpm_libvirt_range}}
+  - libvirt-daemon {{edpm_libvirt_range}}
   # qemu pakcages
   - qemu-kvm
   - qemu-img
