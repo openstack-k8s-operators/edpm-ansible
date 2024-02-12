@@ -39,7 +39,7 @@
     - name: Copy Openshift CA to the node
       become: true
       ansible.builtin.copy:
-        src: "{{ edpm_telemetry_config_src }}/ca-openshift.crt"
+        src: "{{ edpm_logging_config_src }}/ca-openshift.crt"
         dest: "/etc/pki/rsyslog/ca-openshift.crt"
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
