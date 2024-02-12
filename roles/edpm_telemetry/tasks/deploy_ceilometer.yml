@@ -30,25 +30,48 @@
   tags:
     - edpm_telemetry
 
+- name: Gather ceilometer config files
+  ansible.builtin.set_fact:
+    configs:
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer.conf"
+        "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
+      - "src": "{{ edpm_telemetry_config_src }}/polling.yaml"
+        "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer_agent_compute.json"
+        "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json"
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer-agent-compute.json"
+        "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json"
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer_agent_ipmi.json"
+        "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer-agent-ipmi.json"
+        "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
+  tags:
+    - edpm_telemetry
+
+- name: Check for custom.conf existence
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_config_src }}/custom.conf"
+  delegate_to: localhost
+  register: custom_ceilometer_conf
+  tags:
+    - edpm_telemetry
+
+- name: Append custom.conf to config files
+  ansible.builtin.set_fact:
+    configs: "{{ configs + [{
+      'src': edpm_telemetry_config_src + '/custom.conf',
+      'dest': edpm_ceilometer_config_dest + '/ceilometer/custom.conf' }] }}"
+  when: custom_ceilometer_conf.stat.exists
+  tags:
+    - edpm_telemetry
+
 - name: Copy generated ceilometer configs
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode | default('640') }}"
     remote_src: "{{ telemetry_test | default('false') }}"
-  loop:
-    - "src": "{{ edpm_telemetry_config_src }}/ceilometer.conf"
-      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
-    - "src": "{{ edpm_telemetry_config_src }}/polling.yaml"
-      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
-    - "src": "{{ edpm_telemetry_config_src }}/ceilometer_agent_compute.json"
-      "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json"
-    - "src": "{{ edpm_telemetry_config_src }}/ceilometer-agent-compute.json"
-      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json"
-    - "src": "{{ edpm_telemetry_config_src }}/ceilometer_agent_ipmi.json"
-      "dest": "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
-    - "src": "{{ edpm_telemetry_config_src }}/ceilometer-agent-ipmi.json"
-      "dest": "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
+  loop: "{{ configs }}"
   tags:
     - edpm_telemetry
 
