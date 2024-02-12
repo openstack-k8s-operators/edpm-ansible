@@ -30,6 +30,18 @@
   tags:
     - edpm_telemetry
 
+- name: Configure ceilometer user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42405 is matching with the uid and gid created by kolla in the ceilometer containers
+      - {"name": "ceilometer", "uid": "42405", "gid": "42405", "shell": "/sbin/nologin", "comment": "ceilometer user", "groups": "libvirt"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
+    - edpm_telemetry
+
 - name: Copy generated ceilometer configs
   ansible.builtin.copy:
     src: "{{ item.src }}"
