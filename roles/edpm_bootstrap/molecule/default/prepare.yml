@@ -23,26 +23,4 @@
       test_deps_setup_stream: true
       test_deps_edpm_packages:
           - openvswitch
-- name: Prepare container
-  hosts: instance
-  roles:
     - role: osp.edpm.env_data
-  tasks:
-    - name: Mock ovs-vswitchd service
-      community.general.ini_file:
-        path: /etc/systemd/system/ovs-vswitchd.service
-        section: Service
-        option: "{{ item.option }}"
-        value: "{{ item.value | default(omit) }}"
-        state: "{{ item.state | default(omit) }}"
-      loop:
-        - { option: 'Type', value: 'exec' }
-        - { option: 'ExecStartPre', state: 'absent' }
-        - { option: 'ExecStart', value: '/bin/true' }
-
-    - name: Mock swapon command
-      ansible.builtin.command: ln -sf /bin/echo /sbin/swapon
-
-    - name: Force systemd to reread configs
-      ansible.builtin.systemd:
-        daemon_reload: true

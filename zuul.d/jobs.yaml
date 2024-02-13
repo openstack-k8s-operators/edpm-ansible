@@ -12,6 +12,11 @@
 
 # non-containerized role jobs
 - job:
+    name: edpm-ansible-molecule-edpm_bootstrap
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_bootstrap
+- job:
     name: edpm-ansible-molecule-edpm_podman
     parent: edpm-ansible-molecule-base
     vars:

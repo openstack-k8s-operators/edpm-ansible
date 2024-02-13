@@ -3,8 +3,6 @@ dependency:
   name: galaxy
   options:
     role-file: collections.yml
-driver:
-  name: podman
 platforms:
 - command: /sbin/init
   dockerfile: ../../../../molecule/common/Containerfile.j2
@@ -18,18 +16,25 @@ platforms:
 provisioner:
   config_options:
     defaults:
-      callbacks_enabled: profile_tasks, timer, yaml
-      interpreter_python: auto_silent
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  env:
+    ANSIBLE_FILTER_PLUGINS: ${ANSIBLE_FILTER_PLUGINS:-/usr/share/ansible/plugins/filter}
+    ANSIBLE_LIBRARY: ${ANSIBLE_LIBRARY:-/usr/share/ansible/plugins/modules}
+    ANSIBLE_ROLES_PATH: ${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles
+    ANSIBLE_STDOUT_CALLBACK: yaml
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance:
+            ansible_host: localhost
   log: true
   name: ansible
 scenario:
   test_sequence:
-  - dependency
-  - destroy
-  - create
   - prepare
   - converge
-  - verify
-  - destroy
+  - check
 verifier:
-  name: ansible
+  name: testinfra

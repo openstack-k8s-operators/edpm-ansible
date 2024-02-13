@@ -31,6 +31,8 @@ argument_specs:
           - iproute-tc
           - ksmtuned
           - systemd-container
+          - crypto-policies-scripts
+          - grubby
         description: "List of packages that are requred to bootstrap EDPM."
 
       edpm_bootstrap_release_version_package:
@@ -101,3 +103,29 @@ argument_specs:
         description: |
           The path of the file that will be used as a marker when the edpm_bootstrap_command
           has been executed on the node.
+
+      edpm_bootstrap_fips_mode:
+        type: str
+        default: check
+        description: |
+          edpm_bootstrap_fips_mode is used to check fips status or enable/disable it
+          can take on the following values:
+          enabled: Enable FIPS
+          disabled: Disable FIPS
+          check: Check the FIPS status (this is the default)
+
+      edpm_bootstrap_fips_fms_status:
+        type: list
+        default:
+          - {exit_code: 0, message: 'FIPS is enabled'}
+          - {exit_code: 1, message: 'FIPS setup is inconsistent'}
+          - {exit_code: 2, message: 'FIPS is disabled'}
+        description: |
+          Map between `fips-mode-setup --is-enabled` exit status
+          and messages, as defined in man page fips-mode-setup(8)
+
+      edpm_bootstrap_reboot_dir:
+        type: path
+        default: /var/lib/openstack/reboot_required
+        description: |
+          Path of the reboot_required folder used by `edpm_reboot` role
