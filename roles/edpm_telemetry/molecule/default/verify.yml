@@ -1,0 +1,59 @@
+---
+- name: Verify ceilometer
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  vars_files:
+    - ../../defaults/main.yml
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        - "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json"
+        - "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
+        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json"
+        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
+        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
+        - "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
+        - "{{ edpm_rsyslog_config_dest }}/10-telemetry.conf"
+        - "/etc/pki/rsyslog/ca-openshift.crt"
+
+    - name: ensure podman container exists and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+      loop:
+        - "ceilometer_agent_compute"
+        - "ceilometer_agent_ipmi"
+        - "node_exporter"
+
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_ceilometer_agent_compute.service"}
+        - {"name": "edpm_ceilometer_agent_ipmi.service"}
+        - {"name": "edpm_node_exporter.service"}
+
+    - name: ensure kolla_set_configs copied the expected files and started the correct binary
+      become: true
+      ansible.builtin.shell: |
+        podman logs ceilometer_agent_compute 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
+        - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
+        - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
+
+    - name: ensure kolla_set_configs copied the expected files and started the correct binary
+      become: true
+      ansible.builtin.shell: |
+        podman logs ceilometer_agent_ipmi 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
+        - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
+        - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
+
+    - name: ensure that the correcty binary started without TLS
+      become: true
+      ansible.builtin.shell: |
+        podman logs node_exporter 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "Starting node_exporter"
+        - "TLS is disabled"

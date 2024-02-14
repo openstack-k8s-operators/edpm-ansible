@@ -25,6 +25,7 @@ scenario:
   - create
   - prepare
   - converge
+  - verify
   - destroy
 verifier:
   name: ansible

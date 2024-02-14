@@ -193,6 +193,25 @@
         state: directory
         mode: "0775"
 
+    - name: Install rsyslog
+      ansible.builtin.dnf:
+        name: rsyslog
+        state: present
+
+    - name: Restart rsyslog
+      ansible.builtin.systemd:
+        state: restarted
+        name: rsyslog.service
+
+    - name: Create ca-openshift.crt
+      ansible.builtin.copy:
+        dest: "{{ edpm_logging_config_src }}/ca-openshift.crt"
+        mode: "0644"
+        owner: root
+        group: root
+        content: |
+          pseudo-certificate
+
     - name: Create 10-telemetry.conf
       ansible.builtin.copy:
         dest: "{{ edpm_logging_config_src }}/10-telemetry.conf"

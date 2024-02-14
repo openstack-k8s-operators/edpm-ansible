@@ -55,6 +55,14 @@
   tags:
     - edpm_telemetry
 
+- name: Enable node_exporter
+  become: true
+  ansible.builtin.systemd:
+    enabled: true
+    name: edpm_node_exporter.service
+  tags:
+    - edpm_telemetry
+
 - name: Restart node_exporter
   become: true
   ansible.builtin.systemd:
