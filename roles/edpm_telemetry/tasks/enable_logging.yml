@@ -35,6 +35,7 @@
       ansible.builtin.dnf:
         name: rsyslog-openssl
         state: present
+      when: not telemetry_test
 
     - name: Copy Openshift CA to the node
       become: true
