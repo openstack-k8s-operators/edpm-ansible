@@ -50,18 +50,6 @@
         tasks_from: configure.yml
       tags:
         - edpm_logrotate_crond
-    - name: Configure edpm_iscsid
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: configure.yml
-      tags:
-        - edpm_iscsid
-    - name: Configure edpm_multipathd
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_multipathd
-        tasks_from: configure.yml
-      tags:
-        - edpm_multipathd
     - name: Configure nftables
       ansible.builtin.import_role:
         name: osp.edpm.edpm_nftables
