@@ -21,8 +21,14 @@
     name: node_exporter
     state: present
     recreate: true
+    privileged: true
     ports:
       - "9100:9100"
+    command:
+      - "--collector.systemd"
+      - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
+    volumes:
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z
   tags:
     - edpm_telemetry
 
