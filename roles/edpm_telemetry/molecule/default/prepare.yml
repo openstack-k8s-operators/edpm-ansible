@@ -226,3 +226,6 @@
                       StreamDriverMode="1"
                       StreamDriverAuthMode="x509/certvalid"
                       StreamDriver.CAFile="/etc/pki/rsyslog/ca-openshift.crt")
+
+    - name: Create libvirt user
+      command: groupadd libvirt
