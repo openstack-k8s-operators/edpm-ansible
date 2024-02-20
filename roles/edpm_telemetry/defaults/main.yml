@@ -26,3 +26,5 @@ telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
 edpm_logging_config_src: /var/lib/openstack/configs/logging
 # Directory of rsyslog config in the compute node
 edpm_rsyslog_config_dest: /etc/rsyslog.d
+# Control whether we are executing a test or not
+telemetry_test: false
