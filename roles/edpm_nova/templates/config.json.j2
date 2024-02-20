@@ -32,6 +32,13 @@
             "dest": "/var/lib/nova/.ssh/config",
             "owner": "nova",
             "perm": "0600"
+        },
+        {
+            "source": "/var/lib/kolla/config_files/provider*.yaml",
+            "dest": "/etc/nova/provider_config/",
+            "owner": "nova",
+            "perm": "0600",
+            "optional": true
         }
     ],
     "permissions": [

@@ -44,6 +44,7 @@
         - "Copying /var/lib/kolla/config_files/ssh-config to /var/lib/nova/.ssh/config"
         - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
         - "Copying /var/lib/kolla/config_files/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
+        - "Copying /var/lib/kolla/config_files/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
 
     - name: slurp host specific config
       ansible.builtin.slurp:

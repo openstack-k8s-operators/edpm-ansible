@@ -1,0 +1,8 @@
+meta:
+  schema_version: '1.0'
+providers:
+  - identification:
+      uuid: '$COMPUTE_NODE'
+    traits:
+      additional:
+        - 'CUSTOM_FOO'
