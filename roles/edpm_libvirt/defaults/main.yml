@@ -31,7 +31,7 @@ edpm_libvirt_services:
   - virtqemud
   - virtsecretd
 # TODO: uncap libvirt once libvirt 10 is available
-edpm_libvirt_range: "<9.10.0"
+edpm_libvirt_range: ""
 edpm_libvirt_packages:
   # main libvirt packages
   - libvirt {{edpm_libvirt_range}}

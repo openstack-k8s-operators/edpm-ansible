@@ -23,7 +23,7 @@ argument_specs:
       edpm_libvirt_range:
         type: str
         description: The version range for libvirt package.
-        default: "<9.10.0"
+        default: ""
       edpm_libvirt_packages:
         type: list
         description: The list of packages to install for libvirt.
