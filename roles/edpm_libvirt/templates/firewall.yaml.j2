@@ -10,3 +10,10 @@
     proto: tcp
     dport:
      - "61152-61215"
+{% if edpm_libvirt_tls_certs_enabled %}
+- rule_name: 007 Allow libvirt tls
+  rule:
+    proto: tcp
+    dport:
+     - "16514"
+{% endif %}

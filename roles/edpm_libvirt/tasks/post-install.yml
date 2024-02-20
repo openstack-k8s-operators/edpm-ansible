@@ -96,7 +96,7 @@
     - post-libvirt
   become: true
   ansible.builtin.template:
-    src: "firewall.yaml"
+    src: "firewall.yaml.j2"
     dest: "/var/lib/edpm-config/firewall/libvirt.yaml"
     mode: "0640"
 - name: Configure firewall for the libvirt
