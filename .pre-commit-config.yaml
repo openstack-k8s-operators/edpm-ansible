@@ -29,8 +29,6 @@ repos:
     rev: v6.22.1
     hooks:
       - id: ansible-lint
-        additional_dependencies:
-          - ansible-core>=2.14.0,<2.15.0
   - repo: https://github.com/openstack-dev/bashate.git
     rev: 2.1.1
     hooks:
