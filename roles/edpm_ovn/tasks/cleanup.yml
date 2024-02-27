@@ -43,6 +43,20 @@
     - not edpm_enable_chassis_extport | bool
     - cleanup_ovn_cms_options.rc == 0
 
+- name: Cleanup availability-zones
+  when:
+    - edpm_ovn_availability_zones | length == 0
+    - cleanup_ovn_cms_options.rc == 0
+  block:
+    - name: Filter out availability-zones from stdout when undefined
+      ansible.builtin.set_fact:
+        filtered_azs:
+          stdout: "{{ cleanup_ovn_cms_options.stdout | regex_replace('availability-zones=[^,]*' ~ ',?', '') }}"
+
+    - name: Update cleanup_ovn_cms_options with filtered azs
+      ansible.builtin.set_fact:
+        cleanup_ovn_cms_options: "{{ cleanup_ovn_cms_options | combine(filtered_azs | default({})) }}"
+
 - name: Set updated OVN CMS Options to the local OVSDB
   ansible.builtin.shell: >
     ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options={{ cleanup_ovn_cms_options.stdout }}
