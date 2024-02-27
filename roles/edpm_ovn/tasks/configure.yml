@@ -49,6 +49,11 @@
         chassis_options: "{{ chassis_options | default([]) + ['enable-chassis-as-extport-host'] }}"
       when: edpm_enable_chassis_extport | default(false)
 
+    - name: Configure availability zones for chassis if set
+      ansible.builtin.set_fact:
+        chassis_options: "{{ chassis_options | default([]) + ['availability-zones=' + edpm_ovn_availability_zones | join(':')] }}"
+      when: edpm_ovn_availability_zones | length > 0
+
     - name: Build OVN CMS Options
       ansible.builtin.set_fact:
         ovn_cms_options:
