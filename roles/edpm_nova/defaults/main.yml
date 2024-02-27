@@ -31,3 +31,21 @@ edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compu
 
 # certs
 edpm_nova_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+
+# Defaults for PCI derive script (nic-partitioning is enabled)
+edpm_nova_sriov_derive_pci_devicespec: false
+edpm_nova_default_sriov_conf_file: 04-sriov-nova.conf
+edpm_nova_save_conf_file: false
+edpm_nova_default_physmap_file: "{{ edpm_neutron_sriov_agent_SRIOV_NIC_physical_device_mappings | default('') }}"
+
+# list of services to stop during adoption
+edpm_old_tripleo_compute_sevices:
+  - tripleo_nova_compute.service
+  - tripleo_nova_libvirt.target
+  - tripleo_nova_migration_target.service
+  - tripleo_nova_virtlogd_wrapper.service
+  - tripleo_nova_virtnodedevd.service
+  - tripleo_nova_virtproxyd.service
+  - tripleo_nova_virtqemud.service
+  - tripleo_nova_virtsecretd.service
+  - tripleo_nova_virtstoraged.service

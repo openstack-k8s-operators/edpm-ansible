@@ -1,0 +1,37 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check if edpm node has the sriov nova conf
+  ansible.builtin.stat:
+    path: "{{ edpm_nova_config_dest }}/{{ edpm_nova_default_sriov_conf_file }}"
+  register: sriov_nova_conf_check
+
+- name: Identify the nova conf file used for derive pci
+  ansible.builtin.debug:
+    msg: |
+         User provided nova conf for pci device_spec is
+         "{{ edpm_nova_config_dest }}/{{ edpm_nova_default_sriov_conf_file }}"
+
+- name: Derive the sriov nic-partitioned pci device_spec addr
+  when:
+    - sriov_nova_conf_check.stat.exists
+  become: true
+  block:
+    - name: Run derive_pci_passthrough_devicespec
+      edpm_nova_derive_pci_passthrough_devicespec:
+        sriov_nova_conf_file: "{{ edpm_nova_config_dest }}/{{ edpm_nova_default_sriov_conf_file }}"
+      register: derive_pci_devicespec
+      changed_when: derive_pci_devicespec.rc == 0

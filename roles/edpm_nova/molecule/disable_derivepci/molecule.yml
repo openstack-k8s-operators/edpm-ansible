@@ -1,0 +1,31 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: compute-1
+    groups:
+      - compute
+provisioner:
+  name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          compute-1:
+            ctlplane_ip: 10.0.0.3
+
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+     - destroy
+     - create
+     - prepare
+     - converge
+     - verify
