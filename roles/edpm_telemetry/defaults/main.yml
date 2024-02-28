@@ -26,3 +26,7 @@ edpm_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
 edpm_logging_config_src: /var/lib/openstack/configs/logging
 # Directory of rsyslog config in the compute node
 edpm_rsyslog_config_dest: /etc/rsyslog.d
+# Certificates location for tls encryption
+edpm_telemetry_certs: /var/lib/openstack/certs/telemetry
+# CA certs location for tls encryption
+edpm_telemetry_cacerts: /var/lib/openstack/cacerts/telemetry

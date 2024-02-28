@@ -39,6 +39,7 @@ edpm_ovn_encap_type: geneve
 edpm_ovn_dbs: []
 edpm_enable_chassis_gw: false
 edpm_enable_chassis_extport: false
+edpm_ovn_availability_zones: []
 edpm_enable_hw_offload: false
 edpm_ovn_multi_rhel: false
 edpm_enable_internal_tls: false

@@ -31,6 +31,10 @@ argument_specs:
           Should OVN use tls for default protocol?
           If set to false, the OVN will default to tcp.
         type: bool
+      edpm_ovn_availability_zones:
+        default: []
+        description: Availability zones for the chassis
+        type: list
       edpm_ovn_bridge:
         default: br-int
         description: >
