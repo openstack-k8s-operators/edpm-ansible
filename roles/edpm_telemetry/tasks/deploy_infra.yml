@@ -17,7 +17,7 @@
 - name: Deploy node_exporter container
   become: true
   containers.podman.podman_container:
-    image: "{{ telemetry_node_exporter_image }}"
+    image: "{{ edpm_node_exporter_image }}"
     name: node_exporter
     state: present
     recreate: true
