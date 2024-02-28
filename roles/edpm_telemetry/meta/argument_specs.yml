@@ -19,7 +19,7 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_telemetry role.
     options:
-      edpm_node_exporter_image:
+      edpm_telemetry_node_exporter_image:
         type: "str"
         required: true
         description: "The name of the node_exporter podman image"
