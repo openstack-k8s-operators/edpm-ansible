@@ -21,7 +21,7 @@ edpm_telemetry_config_src: /var/lib/openstack/configs/telemetry
 # Directory in the compute node
 edpm_ceilometer_config_dest: /var/lib/openstack/config
 # Image to use for node_exporter
-telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
 # Directory in the ansibleEE container
 edpm_logging_config_src: /var/lib/openstack/configs/logging
 # Directory of rsyslog config in the compute node

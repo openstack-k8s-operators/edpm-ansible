@@ -52,7 +52,7 @@
 
     - name: Deploy node_exporter container with TLS enabled
       containers.podman.podman_container:
-        image: "{{ telemetry_node_exporter_image }}"
+        image: "{{ edpm_telemetry_node_exporter_image }}"
         name: node_exporter
         state: present
         recreate: true
@@ -71,7 +71,7 @@
 - name: Deploy node_exporter container with TLS disabled if there are no certs present
   become: true
   containers.podman.podman_container:
-    image: "{{ telemetry_node_exporter_image }}"
+    image: "{{ edpm_telemetry_node_exporter_image }}"
     name: node_exporter
     state: present
     recreate: true
