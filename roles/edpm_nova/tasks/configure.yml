@@ -120,23 +120,6 @@
     owner: nova
     group: nova
 
-- name: Copy TLS files to the compute node
-  tags:
-    - configure
-    - nova
-  become: true
-  loop:
-    - {"src": "{{ edpm_nova_certs_src }}/{{ inventory_hostname }}-tls.crt", "dest": "{{ edpm_nova_certs_dest }}/tls.crt"}
-    - {"src": "{{ edpm_nova_certs_src }}/{{ inventory_hostname }}-tls.key", "dest": "{{ edpm_nova_certs_dest }}/tls.key"}
-    - {"src": "{{ edpm_nova_cacerts_src }}/TLSCABundleFile", "dest": "{{ edpm_nova_cacerts_dest }}/TLSCABundleFile"}
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: '0600'
-    owner: nova
-    group: nova
-  when: edpm_nova_tls_certs_enabled
-
 - name: Check if compute_id exists in state_path
   tags:
     - configure
