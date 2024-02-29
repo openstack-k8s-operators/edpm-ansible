@@ -18,13 +18,13 @@
 # "edpm_swift" will search for and load any operating system variable file
 
 - name: Configure swift
-  ansible.builtin.include_tasks: configure.yml
+  ansible.builtin.import_tasks: configure.yml
 
 - name: Setup disks for swift
-  ansible.builtin.include_tasks: disks.yml
+  ansible.builtin.import_tasks: disks.yml
 
 - name: Configure firewall rules
-  ansible.builtin.include_tasks: firewall.yml
+  ansible.builtin.import_tasks: firewall.yml
 
 - name: Run swift
-  ansible.builtin.include_tasks: run.yml
+  ansible.builtin.import_tasks: run.yml
