@@ -19,19 +19,39 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_telemetry role.
     options:
-      telemetry_node_exporter_image:
+      edpm_telemetry_node_exporter_image:
         type: "str"
         required: true
         description: "The name of the node_exporter podman image"
+      edpm_telemetry_ceilometer_compute_image:
+        type: "str"
+        required: true
+        description: "The name of the ceilometer compute podman image"
+      edpm_telemetry_ceilometer_ipmi_image:
+        type: "str"
+        required: true
+        description: "The name of the ceilometer ipmi podman image"
       edpm_telemetry_config_src:
         type: "str"
         required: true
-        description: "The path on the ansibleEE container where the config files are stored"
-      edpm_ceilometer_config_dest:
+        description: "The path in the ansibleEE container where the config files are stored"
+      edpm_telemetry_config_dest:
         type: "str"
         required: true
         description: "The path in the compute node where the config files are copied to"
-      edpm_rsyslog_config_dest:
+      edpm_telemetry_logging_config_src:
+        type: "str"
+        required: true
+        description: "The path in the ansibleEE contaner where the logging config files are stored"
+      edpm_telemetry_rsyslog_config_dest:
         type: "str"
         required: true
         description: "The path in the compute node where the rsyslog config files are copied to"
+      edpm_telemetry_certs:
+        type: "str"
+        required: true
+        description: "The path in the compute node where the certs are stored"
+      edpm_telemetry_cacerts:
+        type: "str"
+        required: true
+        description: "The path in the compute node where the cacerts are stored"

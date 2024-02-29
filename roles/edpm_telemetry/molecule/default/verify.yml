@@ -9,12 +9,12 @@
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
-        - "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_compute.json"
-        - "{{ edpm_ceilometer_config_dest }}/containers/ceilometer_agent_ipmi.json"
-        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-compute.json"
-        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer-agent-ipmi.json"
-        - "{{ edpm_ceilometer_config_dest }}/ceilometer/ceilometer.conf"
-        - "{{ edpm_ceilometer_config_dest }}/ceilometer/polling.yaml"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_compute.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_ipmi.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-ipmi.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
+        - "{{ edpm_telemetry_config_dest }}/polling.yaml"
         - "{{ edpm_rsyslog_config_dest }}/10-telemetry.conf"
         - "/etc/pki/rsyslog/ca-openshift.crt"
 
