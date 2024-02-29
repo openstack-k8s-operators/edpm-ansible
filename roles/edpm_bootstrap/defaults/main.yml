@@ -44,6 +44,8 @@ edpm_bootstrap_packages_bootstrap:
   # instances without this libvirt falls back to a legacy cgroup
   # codepath that is no-longer tested or supported in rhel as of rhel 8...
   - systemd-container
+  - crypto-policies-scripts
+  - grubby
 
 edpm_bootstrap_release_version_package:
   - rhosp-release
@@ -80,3 +82,18 @@ edpm_bootstrap_command: ""
 # The path of the file that will be used as a marker when the edpm_bootstrap_command
 # has been executed on the node.
 edpm_bootstrap_command_done_file: /.bootstrap_command_done
+
+# edpm_bootstrap_fips_mode is used to check fips status or enable/disable it
+# can take on the following values:
+# enabled: Enable FIPS
+# disabled: Disable FIPS
+# check: Check the FIPS status
+# The default is `check` if the top level var `edpm_fips_mode` is not defined
+edpm_bootstrap_fips_mode: "{{ edpm_fips_mode | default('check', true) }}"
+
+# Map between `fips-mode-setup --is-enabled` exit status
+# and messages, as defined in man page fips-mode-setup(8)
+edpm_bootstrap_fips_fms_status:
+  - {exit_code: 0, state: 'enabled', message: 'FIPS is enabled'}
+  - {exit_code: 1, state: 'inconsistent', message: 'FIPS setup is inconsistent'}
+  - {exit_code: 2, state: 'disabled', message: 'FIPS is disabled'}
