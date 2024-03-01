@@ -68,3 +68,11 @@ argument_specs:
         type: str
         default: "netdev"
         description: OVN bridge datapath type
+      edpm_ovs_dpdk_shared_mem_pool:
+        type: str
+        default: ""
+        description: OvS DPDK shared memory pool
+      edpm_ovs_dpdk_pmd_sleep_max:
+        type: str
+        default: ""
+        description: PMD maximum sleep time

@@ -18,6 +18,9 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_ovs_dpdk"
+
+edpm_ovs_dpdk_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
+
 edpm_ovs_dpdk_pmd_core_list: ""
 edpm_ovs_dpdk_lcore_list: ""
 edpm_ovs_dpdk_memory_channels: 4
@@ -33,5 +36,8 @@ edpm_ovs_dpdk_pmd_improvement_threshold: ""
 edpm_ovs_dpdk_pmd_rebal_interval: ""
 edpm_ovs_dpdk_vhost_postcopy_support: false
 edpm_ovs_dpdk_vhost_postcopy_ovs_options: "--mlockall=no"
+edpm_ovs_dpdk_shared_mem_pool: ""
+edpm_ovs_dpdk_pmd_sleep_max: ""
+
 # OVN bridge datapath type
 edpm_ovn_datapath_type: "netdev"
