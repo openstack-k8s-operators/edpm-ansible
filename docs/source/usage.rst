@@ -41,7 +41,7 @@ but should be avoided, as they will remain accessible to following tasks in play
     - hosts: webservers
       roles:
         - role: osp.edpm.edpm_telemetry
-          telemetry_node_exporter_image: "wecollecttelemetrynow.img"
+          edpm_telemetry_node_exporter_image: "wecollecttelemetrynow.img"
 
 
 .. _`ansible CLI utilities`: https://galaxy.ansible.com/docs/using/installing.html

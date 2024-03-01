@@ -87,3 +87,19 @@ edpm_swift_object_updater_volumes:
 
 edpm_swift_rsync_volumes:
   - /var/lib/kolla/config_files/rsync.json:/var/lib/kolla/config_files/config.json:ro
+
+edpm_swift_services:
+  - edpm_rsync
+  - edpm_swift_account_auditor
+  - edpm_swift_account_reaper
+  - edpm_swift_account_replicator
+  - edpm_swift_account_server
+  - edpm_swift_container_auditor
+  - edpm_swift_container_replicator
+  - edpm_swift_container_server
+  - edpm_swift_container_updater
+  - edpm_swift_object_auditor
+  - edpm_swift_object_expirer
+  - edpm_swift_object_replicator
+  - edpm_swift_object_server
+  - edpm_swift_object_updater

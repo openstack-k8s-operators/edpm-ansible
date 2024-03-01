@@ -50,10 +50,10 @@
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
 
-    - name: ensure that the correcty binary started without TLS
+    - name: ensure that the correcty binary started with TLS
       become: true
       ansible.builtin.shell: |
         podman logs node_exporter 2>&1 | grep "{{item}}" > /dev/null
       loop:
         - "Starting node_exporter"
-        - "TLS is disabled"
+        - "TLS is enabled"

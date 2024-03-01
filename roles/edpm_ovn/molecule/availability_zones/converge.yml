@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,11 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Restart swift services
+- name: Converge
+  hosts: all
+  gather_facts: true
   become: true
-  ansible.builtin.systemd:
-    name: "{{ item }}.service"
-    state: restarted
-    daemon_reload: true
-  loop: "{{ edpm_swift_services }}"
-  listen: "Restart swift"
+  tasks:
+    - include_role:
+        name: "osp.edpm.edpm_ovn"
+      vars:
+        tenant_ip: "{{ ansible_host }}"
+        edpm_ovn_dbs:
+          - "{{ ansible_host }}"
+        edpm_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_ovn_availability_zones: ["az0", "az2"]

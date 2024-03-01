@@ -67,11 +67,14 @@
   check_mode: false
   delegate_to: localhost
   become: false
+  tags:
+    - swiftrings
 
 - name: Flatten configmaps into {{ edpm_swift_config_dest }}
   tags:
     - configure
     - swift
+    - swiftrings
   ansible.builtin.copy:
     src: "{{ item.path }}"
     dest: "{{ edpm_swift_config_dest }}/{{ item.path | basename }}"
@@ -84,7 +87,10 @@
   tags:
     - install
     - swift
+    - swiftrings
   ansible.builtin.unarchive:
     src: "{{ edpm_swift_config_dest }}/swiftrings.tar.gz"
     dest: "{{ edpm_swift_config_dest }}/"
     remote_src: true
+  notify:
+    - Restart swift
