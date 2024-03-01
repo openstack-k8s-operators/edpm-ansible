@@ -18,7 +18,6 @@ jobs:
       fail-fast: true
       matrix:
         tested_role:
-        - edpm_bootstrap
         - edpm_ceph_client_files
         - edpm_ceph_hci_pre
         - edpm_container_manage

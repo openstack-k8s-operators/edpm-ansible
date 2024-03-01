@@ -13,3 +13,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+- name: Restart swift services
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}.service"
+    state: restarted
+    daemon_reload: true
+  loop: "{{ edpm_swift_services }}"
+  listen: "Restart swift"

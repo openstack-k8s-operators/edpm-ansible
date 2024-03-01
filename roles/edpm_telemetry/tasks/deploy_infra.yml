@@ -40,20 +40,20 @@
     - name: Change the owner of the crt
       ansible.builtin.file:
         path: "{{ edpm_telemetry_certs }}/tls.crt"
-        mode: "0600"
+        mode: "0644"
         owner: ceilometer
         group: ceilometer
 
     - name: Change the owner of the key
       ansible.builtin.file:
         path: "{{ edpm_telemetry_certs }}/tls.key"
-        mode: "0600"
+        mode: "0644"
         owner: ceilometer
         group: ceilometer
 
     - name: Deploy node_exporter container with TLS enabled
       containers.podman.podman_container:
-        image: "{{ edpm_node_exporter_image }}"
+        image: "{{ edpm_telemetry_node_exporter_image }}"
         name: node_exporter
         state: present
         recreate: true
@@ -72,7 +72,7 @@
 - name: Deploy node_exporter container with TLS disabled if there are no certs present
   become: true
   containers.podman.podman_container:
-    image: "{{ edpm_node_exporter_image }}"
+    image: "{{ edpm_telemetry_node_exporter_image }}"
     name: node_exporter
     state: present
     recreate: true

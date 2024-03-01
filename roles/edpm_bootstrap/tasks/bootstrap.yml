@@ -100,3 +100,7 @@
 
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
+
+- name: FIPS tasks
+  ansible.builtin.import_tasks: fips.yml
+  when: edpm_bootstrap_fips_mode != 'check'

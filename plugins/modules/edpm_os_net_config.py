@@ -126,10 +126,11 @@ def _run_os_net_config(config_file, cleanup=False, debug=False,
     return cmd, run
 
 
-def _apply_safe_defaults(debug=False):
+def _apply_safe_defaults(debug=False, noop=False, use_nmstate=False):
     _generate_default_cfg()
     cmd, run = _run_os_net_config(config_file=DEFAULT_CFG, cleanup=True,
-                                  debug=debug, detailed_exit_codes=True)
+                                  debug=debug, detailed_exit_codes=True,
+                                  noop=noop, use_nmstate=use_nmstate)
     return cmd, run
 
 
@@ -213,7 +214,8 @@ def main():
     # Apply the provided network configuration
     cmd, run = _run_os_net_config(config_file, cleanup, debug,
                                   detailed_exit_codes,
-                                  module.check_mode, use_nmsate)
+                                  module.check_mode,
+                                  use_nmstate=use_nmsate)
     results['stderr'] = run.stderr
     results['stdout'] = run.stdout
     if run.returncode not in return_codes and not module.check_mode:
@@ -226,7 +228,8 @@ def main():
                         "safe defaults will be applied in best effort.")
             # Best effort to restore safe networking defaults to allow
             # an operator to ssh the node and debug if needed.
-            _apply_safe_defaults(debug)
+            _apply_safe_defaults(debug, module.check_mode,
+                                 use_nmstate=use_nmsate)
     else:
         results['rc'] = 0
         results['msg'] = ("Successfully run %s." % cmd)
