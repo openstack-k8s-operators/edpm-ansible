@@ -18,6 +18,12 @@ platforms:
 provisioner:
   log: true
   name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance-noconfig:
+            canonical_hostname: edpm-0.localdomain
 scenario:
   test_sequence:
   - dependency

@@ -18,6 +18,12 @@ platforms:
 provisioner:
   log: true
   name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          fake-sriov-compute-1:
+            canonical_hostname: edpm-0.localdomain
 scenario:
   test_sequence:
   - dependency
