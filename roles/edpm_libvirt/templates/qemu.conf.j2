@@ -11,3 +11,7 @@ migration_port_max = 61215
 {% if edpm_nova_libvirt_qemu_group is defined%}
 group = "{{ edpm_nova_libvirt_qemu_group }}"
 {% endif %}
+{% if edpm_libvirt_tls_certs_enabled | bool %}
+default_tls_x509_cert_dir = "/etc/pki/libvirt"
+default_tls_x509_verify = 1
+{% endif %}

@@ -16,6 +16,8 @@
 
 - name: Setup DUT
   hosts: all
+  vars:
+    edpm_libvirt_tls_cert_src_dir: /tmp/pki
   pre_tasks:
     - name: set basic user fact
       set_fact:
@@ -41,12 +43,16 @@
         popd
         rm -rf repo-setup-main
 
-    # NOTE(gibi): this is done by the boostrap role in a real deployment
-    - name: Install openstack-selinux
+    - name: Install host packages
       become: true
       ansible.builtin.dnf:
-        name: "openstack-selinux"
+        name: "{{ item }}"
         state: present
+      loop:
+        # NOTE(gibi): this is done by the boostrap role in a real deployment
+        - openstack-selinux
+        # NOTE(sean-k-mooney): this is needed to generate certs for tls testing
+        - python3-cryptography
 
     - name: set /etc/localtime
       become: true
@@ -125,3 +131,74 @@
                                     'allow rwx pool=\1') | join(', ') }}
       vars:
         pools: ['vms', 'volumes', 'images']
+
+    - name: create pki temp directory
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+
+    - name: Create private key (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
+
+    - name: Create a certificate signing request for ca
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
+        organization_name: fake-corp
+        basic_constraints:
+          - 'CA:TRUE'
+        subject_alt_name:
+          - "DNS:compute-1.example.com"
+          - "DNS:compute-1"
+          - "DNS:{{ inventory_hostname }}"
+        key_usage:
+          - keyCertSign
+      register: csr
+
+
+    - name: Create a certificate athority
+      community.crypto.x509_certificate:
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls-ca-bundle.pem"
+        privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
+        csr_content: "{{ csr.csr }}"
+        provider: selfsigned
+
+    - name: Create private key (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key"
+
+    - name: Create a certificate signing request for libvirt server and client cert
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key"
+        organization_name: fake-corp
+        subject_alt_name:
+          - "DNS:compute-1.example.com"
+          - "DNS:compute-1"
+          - "DNS:{{ inventory_hostname }}"
+        extended_key_usage:
+          - serverAuth
+          - clientAuth
+      register: csr
+
+    - name: Sign the certificate signing request
+      community.crypto.x509_certificate:
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt"
+        ownca_path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls-ca-bundle.pem"
+        ownca_privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
+        csr_content: "{{ csr.csr }}"
+        provider: ownca
+
+    # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
+    # currently manage the hostname on the DUT via boostrap or a dedicated role
+    # in the molecule test. This is needed to ensure the hostname is resolvable
+    # when executing virsh commands. remove this when we have a proper solution
+    - name: Ensure hostname is resolvable in /etc/hosts
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "{{ ansible_default_ipv4.address | default('127.0.0.1') }} {{ ansible_fqdn }} {{ inventory_hostname }}"
+        state: present

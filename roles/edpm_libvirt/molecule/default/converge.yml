@@ -15,3 +15,7 @@
         - ansible_user_dir is undefined
   roles:
     - role: osp.edpm.edpm_libvirt
+      vars:
+        edpm_libvirt_tls_cert_src_dir: /tmp/pki
+        edpm_libvirt_tls_ca_src_dir: /tmp/pki
+        edpm_libvirt_tls_certs_enabled: true
