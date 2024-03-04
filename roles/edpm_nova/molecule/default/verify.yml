@@ -6,6 +6,7 @@
   gather_facts: false
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
+    edpm_nova_tls_ca_src_dir: /tmp/pki
   tasks:
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
@@ -25,6 +26,9 @@
         - "/var/lib/_nova_secontext"
         - "/var/lib/nova/instances"
         - "/var/log/containers/nova"
+        # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
+        # in molecule we create it in prepare so lets just assert it exists
+        - "{{ edpm_nova_tls_ca_src_dir }}"
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
@@ -55,6 +59,12 @@
       ansible.builtin.assert:
         that:
           - "'10.0.0.3' in host_specific_config.content | b64decode"
+
+    - name: Assert libvirt is configured to use tls for live migration
+      ansible.builtin.assert:
+        that:
+          - "'live_migration_with_native_tls = true' in host_specific_config.content | b64decode"
+          - "'live_migration_scheme = tls' in host_specific_config.content | b64decode"
 
     - name: Check if user exists
       ansible.builtin.getent:

@@ -31,6 +31,11 @@ edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compu
 
 # certs
 edpm_nova_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+# NOTE(sean-k-mooney): nova will use unix sockets for libvirt and communicate with ovs via tcp
+# so we will not need the libvirt or ovs client certs or ca. nova will communicate other services
+# via there api endpoints and will connect to rabbitmq. To support this we will need to trust
+# the general ca root cert.
+edpm_nova_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_service_name | default('nova') }}"
 
 # list of services to stop during adoption
 edpm_old_tripleo_compute_sevices:
