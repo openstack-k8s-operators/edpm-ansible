@@ -68,3 +68,33 @@
         that:
           - item | regex_search('\s+tcp dport 61152-61215 ct state new counter packets \d+ bytes \d+ accept comment\s+')
       loop: "{{ migration_chain_exists.stdout_lines }}"
+
+- name: Verify libvirt tls nftables firewall rules
+  block:
+    - name: Check if libvirt tls nftables rule exists in /etc/nftables/edpm-rules.nft
+      become: true
+      ansible.builtin.shell: grep -q "007 Allow libvirt tls" /etc/nftables/edpm-rules.nft
+      register: libvirt_tls_rule_exists
+    - name: Assert libvirt tls nftables rule exists in /etc/nftables/edpm-rules.nft
+      ansible.builtin.assert:
+        that:
+          - libvirt_tls_rule_exists.rc == 0
+        fail_msg: "libvirt tls rule does not exist in /etc/nftables/edpm-rules.nft"
+    - name: libvirt tls rule port range and protocol
+      become: true
+      ansible.builtin.shell: grep -q "EDPM_INPUT tcp dport { 16514 }" /etc/nftables/edpm-rules.nft
+      register: libvirt_tls_rule_content_exists
+    - name: Assert libvirt tls rule port range and protocol
+      ansible.builtin.assert:
+        that:
+          - libvirt_tls_rule_content_exists.rc == 0
+        fail_msg: "libvirt tls rule port range and protocol incorrect in /etc/nftables/edpm-rules.nft"
+    - name: Run nft list command and grep for libvirt tls rule in EDPM_INPUT chain
+      become: true
+      ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep "libvirt tls"
+      register: libvirt_tls_chain_exists
+    - name: Assert that output from grepping for libvirt tls contains the correct rule
+      assert:
+        that:
+          - item | regex_search('\s+tcp dport 16514 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+      loop: "{{ libvirt_tls_chain_exists.stdout_lines }}"

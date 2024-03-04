@@ -11,16 +11,21 @@
   notify:
     - Restart libvirt
 
-- name: Ensure monolithic libvirt is not enabled or running
+- name: Ensure monolithic libvirt and tcp socket activation is not enabled or running
   tags:
     - install
     - libvirt
   become: true
   ansible.builtin.systemd:
-    name: "libvirtd"
+    name: "{{ item }}"
     enabled: false
     masked: true
     state: stopped
+  loop:
+    - "libvirtd"
+    - "libvirtd-tcp.socket"
+    - "libvirtd-tls.socket"
+    - "virtproxyd-tcp.socket"
 
 - name: Ensure libvirt services are enabled and running
   tags:
@@ -32,6 +37,17 @@
     enabled: true
     masked: false
   loop: "{{ edpm_libvirt_services }}"
+
+- name: Configure virtproxyd-tls.socket
+  tags:
+    - install
+    - libvirt
+  become: true
+  ansible.builtin.systemd:
+    name: "virtproxyd-tls.socket"
+    enabled: "{{ edpm_libvirt_tls_certs_enabled | default(False) | bool }}"
+    masked: "{{ edpm_libvirt_tls_certs_enabled | ternary(False, True) }}"
+    state: "{{ edpm_libvirt_tls_certs_enabled | default(False) | ternary('started', 'stopped') }}"
 
 - name: Configure socket activation for libvirt services
   tags:
