@@ -38,6 +38,8 @@
         - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
+        - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
+
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
@@ -47,6 +49,7 @@
         - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
+        - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
 
     - name: ensure that the correcty binary started with TLS
       become: true
@@ -55,3 +58,13 @@
       loop:
         - "Starting node_exporter"
         - "TLS is enabled"
+
+    - name: Slurp host specific config
+      ansible.builtin.slurp:
+        src: "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf"
+      register: host_specific_config
+
+    - name: Assert that host is rendered into the host specific config
+      ansible.builtin.assert:
+        that:
+          - "'edpm-0.localdomain' in host_specific_config.content | b64decode"

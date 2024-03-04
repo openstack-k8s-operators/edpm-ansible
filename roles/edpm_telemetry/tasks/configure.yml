@@ -27,6 +27,17 @@
   loop:
     - {"path": "{{ edpm_telemetry_config_dest }}"}
 
+- name: Render ceilometer config files
+  tags:
+    - edpm_telemetry
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0644"
+  loop:
+    - {"src": "ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
+
 - name: Configure ceilometer user and group on the host
   ansible.builtin.import_role:
     name: edpm_users

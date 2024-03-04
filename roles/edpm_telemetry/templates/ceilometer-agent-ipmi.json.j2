@@ -19,6 +19,13 @@
         "owner": "ceilometer",
         "perm": "0600",
         "optional": true
+      },
+      {
+        "source": "/var/lib/openstack/config/ceilometer-host-specific.conf",
+        "dest": "/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf",
+        "owner": "ceilometer",
+        "perm": "0600",
+        "optional": true
       }
     ]
   }
