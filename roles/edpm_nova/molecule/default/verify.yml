@@ -66,6 +66,11 @@
           - "'live_migration_with_native_tls = true' in host_specific_config.content | b64decode"
           - "'live_migration_scheme = tls' in host_specific_config.content | b64decode"
 
+    - name: Assert that host is rendered into the host specific config
+      ansible.builtin.assert:
+        that:
+          - "'edpm-0.localdomain' in host_specific_config.content | b64decode"
+
     - name: Check if user exists
       ansible.builtin.getent:
         database: passwd
