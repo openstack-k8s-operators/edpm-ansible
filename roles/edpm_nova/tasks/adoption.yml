@@ -9,9 +9,11 @@
     - name: Check if nova_virtlogd container exists
       ansible.builtin.command: podman ps -a --filter name=nova_virtlogd --format \{\{.Names\}\}
       register: nova_virtlogd_status
+      failed_when: false
       changed_when: false
     - name: Stop nova_virtlogd containers not managed by service units
-      ansible.builtin.shell: "podman stop nova_virtlogd '||' true"
+      ansible.builtin.command: podman stop nova_virtlogd
+      failed_when: false
       changed_when: false
       when: nova_virtlogd_status.stdout_lines | length == 1
 
@@ -23,8 +25,9 @@
   ansible.builtin.shell: |
     if systemctl is-active {{ item }}; then
       systemctl disable --now {{ item }}
-      test -f /etc/systemd/system/{{ item }} || sudo systemctl mask {{ item }}
+      test -f /etc/systemd/system/{{ item }} || systemctl mask {{ item }}
     fi
   loop: "{{ edpm_old_tripleo_compute_sevices }}"
+  failed_when: false
   changed_when: false
   when: edpm_old_tripleo_compute_sevices | default([]) | length > 0
