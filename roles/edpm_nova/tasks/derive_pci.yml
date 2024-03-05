@@ -1,0 +1,48 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check if edpm node has the sriov nova conf
+  ansible.builtin.stat:
+    path: "{{ edpm_nova_config_dest }}/{{ edpm_nova_default_sriov_conf_file }}"
+  register: sriov_nova_conf_check
+
+- name: Identify the nova conf file used for derive pci
+  ansible.builtin.debug:
+    msg: |
+         Nova conf file used for pci whitelist is
+         "{{ edpm_nova_config_dest }}/{{ edpm_nova_default_sriov_conf_file }}"
+
+- name: Derive the sriov nic-partitioned pci whitelist addr
+  when:
+    - sriov_nova_conf_check.stat.exists
+  become: true
+  block:
+    - name: Create folder for the derive_whitelist script
+      ansible.builtin.file:
+        state: directory
+        path: "{{ edpm_nova_dst_pciwl_dir }}"
+        owner: root
+        group: root
+        mode: '0750'
+    - name: Copy the Derive pci passthrough whitelist script
+      ansible.builtin.copy:
+        src: "{{ role_path }}/scripts/derive_pci_passthrough_whitelist.py"
+        dest: "{{ edpm_nova_dst_pciwl_dir }}/{{ edpm_nova_dst_pciwl_file }}"
+        mode: '0700'
+    - name: Run derive_pci_passthrough_whitelist.py
+      ansible.builtin.command: "{{ edpm_nova_dst_pciwl_dir }}/{{ edpm_nova_dst_pciwl_file }}"
+      register: derive_pci_whitelist
+      changed_when: derive_pci_whitelist.rc == 0

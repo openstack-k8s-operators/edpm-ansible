@@ -157,3 +157,10 @@
     mode: "0400"
     attributes: "+i"
   when: compute_id.stat.exists
+
+- name: Derive nova pci whitelist
+  tags:
+    - configure
+    - nova
+  ansible.builtin.include_tasks: derive_pci.yml
+  when: edpm_nova_sriov_derive_pci_whitelist | bool
