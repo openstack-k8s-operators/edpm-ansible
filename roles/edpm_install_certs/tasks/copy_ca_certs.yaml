@@ -37,6 +37,6 @@
       ansible.builtin.copy:
         src: "{{ cacert_src_path }}/tls-ca-bundle.pem"
         dest: "{{ cacert_dest_path }}/tls-ca-bundle.pem"
-        mode: '0600'
+        mode: '0644'
         owner: root
         group: root

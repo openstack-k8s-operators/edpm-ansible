@@ -6,7 +6,7 @@ user: root
 restart: always
 depends_on:
   - openvswitch.service
-{% if edpm_ovn_cpu_set|default(false) %}
+{% if edpm_ovn_cpu_set | default(false) %}
 cpuset_cpus: "{{ edpm_ovn_cpu_set }}"
 {% endif -%}
 volumes:
@@ -14,7 +14,7 @@ volumes:
   {%- set edpm_ovn_controller_volumes =
           edpm_ovn_controller_volumes +
           edpm_ovn_controller_common_volumes %}
-  {%- if edpm_enable_internal_tls|bool -%}
+  {%- if edpm_ovn_tls_enabled | bool -%}
   {%- set edpm_ovn_controller_volumes =
          edpm_ovn_controller_volumes +
          edpm_ovn_controller_common_volumes +
