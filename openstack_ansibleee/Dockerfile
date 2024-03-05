@@ -4,7 +4,7 @@ ARG REMOTE_SOURCE=.
 ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
 
 COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
-RUN cd /var/tmp/edpm-ansible && \
+RUN cd $REMOTE_SOURCE_DIR && \
     ansible-galaxy collection install -U --timeout 120 -r requirements.yml --collections-path "/usr/share/ansible/collections" && \
     ansible-galaxy collection install -U $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
 
