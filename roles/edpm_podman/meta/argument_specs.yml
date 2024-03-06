@@ -132,3 +132,20 @@ argument_specs:
       edpm_podman_socket_path:
         type: path
         default: /var/lib/edpm-podman/podman.sock
+      edpm_podman_login_kube_registry:
+        type: bool
+        default: false
+        description: >
+          Enable or disable logging into a kubernetes registry using service
+          account credentials on the ansible controller node.
+      edpm_podman_kube_sa_path:
+        type: str
+        default: /run/secrets/kubernetes.io/serviceaccount
+        description: >
+          The path to the serviceaccount directory on the ansible controller node.
+      edpm_podman_kube_registry_url:
+        type: str
+        default: default-route-openshift-image-registry.apps-crc.testing
+        description: >
+          The kubernetes registry URL that will be used for login when
+          edpm_podman_login_kube_registry is true.
