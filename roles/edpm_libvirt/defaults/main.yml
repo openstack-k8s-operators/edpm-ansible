@@ -57,4 +57,4 @@ edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph
 # certs
 edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/libvirt
-edpm_libvirt_tls_ca_src_dir: /var/lib/openstack/cacerts/libvirt
+edpm_libvirt_tls_ca_src_dir: /var/lib/openstack/certs/libvirt

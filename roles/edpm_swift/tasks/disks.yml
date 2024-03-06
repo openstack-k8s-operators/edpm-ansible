@@ -25,13 +25,10 @@
         number: 1
       loop: "{{ hostvars[inventory_hostname]['edpm_swift_disks'] }}"
 
-    - name: Create Swift mountpoints
-      ansible.builtin.file:
-        path: "{{ item.path }}"
-        state: directory
-        owner: swift
-        group: swift
-        mode: 0700
+    - name: Create XFS filesystem for Swift
+      community.general.filesystem:
+        fstype: xfs
+        dev: "{{ item.device }}1"
       loop: "{{ hostvars[inventory_hostname]['edpm_swift_disks'] }}"
 
     - name: Mount Swift filesystems
@@ -40,4 +37,13 @@
         path: "{{ item.path }}"
         state: mounted
         fstype: xfs
+      loop: "{{ hostvars[inventory_hostname]['edpm_swift_disks'] }}"
+
+    - name: Set Swift mountpoint permissions
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: swift
+        group: swift
+        mode: 0700
       loop: "{{ hostvars[inventory_hostname]['edpm_swift_disks'] }}"

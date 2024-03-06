@@ -4,7 +4,7 @@ argument_specs:
   main:
     short_description: The main entry point for the osp.edpm.edpm_install_certs role.
     description:
-      - Role installs the certs and keys for all services under
+      - Role installs the certs, keys, and cacert for all services under
         /var/lib/openstack/certs/{service} onto the compute nodes
       - Role installs the cacert bundles for all services under
         /var/lib/openstack/cacerts/{service} onto the compute nodes
