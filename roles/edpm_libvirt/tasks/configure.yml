@@ -85,7 +85,7 @@
     - libvirt
   ansible.builtin.shell: |
     set -o pipefail
-    ls -lZ /run/libvirt | grep container_file_t
+    ls -lRZ /run/libvirt | grep container_*_t
   register: run_libvirt
   failed_when: run_libvirt.rc not in [0, 1]
   changed_when: false
