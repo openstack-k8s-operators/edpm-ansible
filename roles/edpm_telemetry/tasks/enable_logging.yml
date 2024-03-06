@@ -40,7 +40,7 @@
     - name: Copy Openshift CA to the node
       become: true
       ansible.builtin.copy:
-        src: "{{ edpm_logging_config_src }}/ca-openshift.crt"
+        src: "{{ edpm_telemetry_logging_config_src }}/ca-openshift.crt"
         dest: "/etc/pki/rsyslog/ca-openshift.crt"
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
@@ -48,8 +48,8 @@
     - name: Deploy rsyslog configuration
       become: true
       ansible.builtin.copy:
-        src: "{{ edpm_logging_config_src }}/10-telemetry.conf"
-        dest: "{{ edpm_rsyslog_config_dest }}/10-telemetry.conf"
+        src: "{{ edpm_telemetry_logging_config_src }}/10-telemetry.conf"
+        dest: "{{ edpm_telemetry_rsyslog_config_dest }}/10-telemetry.conf"
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
       notify: Restart rsyslog

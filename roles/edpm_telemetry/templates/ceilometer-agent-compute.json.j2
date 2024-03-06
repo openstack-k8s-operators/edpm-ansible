@@ -1,0 +1,24 @@
+{
+    "command": "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout",
+    "config_files": [
+      {
+        "source": "/var/lib/openstack/config/ceilometer.conf",
+        "dest": "/etc/ceilometer/ceilometer.conf",
+        "owner": "ceilometer",
+        "perm": "0600"
+      },
+      {
+        "source": "/var/lib/openstack/config/polling.yaml",
+        "dest": "/etc/ceilometer/polling.yaml",
+        "owner": "ceilometer",
+        "perm": "0600"
+      },
+      {
+        "source": "/var/lib/openstack/config/custom.conf",
+        "dest": "/etc/ceilometer/ceilometer.conf.d/01-ceilometer-custom.conf",
+        "owner": "ceilometer",
+        "perm": "0600",
+        "optional": true
+      }
+    ]
+  }

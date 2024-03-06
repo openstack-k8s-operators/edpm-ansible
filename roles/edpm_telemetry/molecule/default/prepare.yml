@@ -32,6 +32,12 @@
         state: directory
         mode: "0775"
 
+    - name: Create /run/libvirt directory
+      ansible.builtin.file:
+        path: "/run/libvirt"
+        state: directory
+        mode: "0775"
+
     - name: Create ceilometer.conf
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_config_src }}/ceilometer.conf"
@@ -109,8 +115,8 @@
                 "OS_ENDPOINT_TYPE":"internal"
             },
             "volumes": [
-                "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
-                "/var/lib/openstack/config/ceilometer/ceilometer-agent-compute.json:/var/lib/kolla/config_files/config.json:z"
+                "{{ edpm_telemetry_config_dest }}:/var/lib/openstack/config/:z",
+                "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json:/var/lib/kolla/config_files/config.json:z"
             ]
           }
 
@@ -157,8 +163,8 @@
                 "OS_ENDPOINT_TYPE":"internal"
             },
             "volumes": [
-                "/var/lib/openstack/config/ceilometer:/var/lib/openstack/config/:z",
-                "/var/lib/openstack/config/ceilometer/ceilometer-agent-ipmi.json:/var/lib/kolla/config_files/config.json:z"
+                "{{ edpm_telemetry_config_dest }}:/var/lib/openstack/config/:z",
+                "{{ edpm_telemetry_config_dest }}/ceilometer-agent-ipmi.json:/var/lib/kolla/config_files/config.json:z"
             ]
           }
 
@@ -254,7 +260,7 @@
 
     - name: Create config-data logging directory
       ansible.builtin.file:
-        path: "{{ edpm_logging_config_src }}"
+        path: "{{ edpm_telemetry_logging_config_src }}"
         state: directory
         mode: "0775"
 
@@ -270,7 +276,7 @@
 
     - name: Create ca-openshift.crt
       ansible.builtin.copy:
-        dest: "{{ edpm_logging_config_src }}/ca-openshift.crt"
+        dest: "{{ edpm_telemetry_logging_config_src }}/ca-openshift.crt"
         mode: "0644"
         owner: root
         group: root
@@ -279,7 +285,7 @@
 
     - name: Create 10-telemetry.conf
       ansible.builtin.copy:
-        dest: "{{ edpm_logging_config_src }}/10-telemetry.conf"
+        dest: "{{ edpm_telemetry_logging_config_src }}/10-telemetry.conf"
         mode: "0644"
         owner: root
         group: root
