@@ -119,7 +119,7 @@
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/libvirt/private/serverkey.pem"}
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt", "dest": "/etc/pki/libvirt/clientcert.pem"}
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/libvirt/private/clientkey.pem"}
-    - {"src": "{{ edpm_libvirt_tls_ca_src_dir }}/tls-ca-bundle.pem", "dest": "/etc/pki/CA/cacert.pem"}
+    - {"src": "{{ edpm_libvirt_tls_ca_src_dir }}/ca.crt", "dest": "/etc/pki/CA/cacert.pem"}
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
