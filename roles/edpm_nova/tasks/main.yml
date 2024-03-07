@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Adoption nova from tripleo
+- name: Adopt nova from tripleo
   ansible.builtin.include_tasks: adoption.yml
 
 - name: Configure nova

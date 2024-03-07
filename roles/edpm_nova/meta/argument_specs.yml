@@ -37,3 +37,16 @@ argument_specs:
           This image is used to create the nova compute container
           on the compute node and generaly will be set via the container
           bundle by the dataplane operator.
+      edpm_nova_old_tripleo_compute_sevices:
+        type: list
+        default:
+          - tripleo_nova_compute.service
+          - tripleo_nova_migration_target.service
+          - tripleo_nova_api_cron.service
+          - tripleo_nova_api.service
+          - tripleo_nova_conductor.service
+          - tripleo_nova_metadata.service
+          - tripleo_nova_scheduler.service
+          - tripleo_nova_vnc_proxy.service
+        description: |
+          List of tripleo nova services to stop during EDPM adoption
