@@ -162,7 +162,7 @@
 
     - name: Create a certificate athority
       community.crypto.x509_certificate:
-        path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls-ca-bundle.pem"
+        path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.crt"
         privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
         csr_content: "{{ csr.csr }}"
         provider: selfsigned
@@ -187,7 +187,7 @@
     - name: Sign the certificate signing request
       community.crypto.x509_certificate:
         path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt"
-        ownca_path: "{{ edpm_libvirt_tls_cert_src_dir }}/tls-ca-bundle.pem"
+        ownca_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.crt"
         ownca_privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
         csr_content: "{{ csr.csr }}"
         provider: ownca

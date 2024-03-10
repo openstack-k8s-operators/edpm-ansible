@@ -94,3 +94,7 @@ edpm_podman_systemd_drop_in_dependencies: true
 edpm_podman_service_unit_name: "edpm_podman.service"
 edpm_podman_service_unit_description: "Podman API service for EDPM purposes"
 edpm_podman_socket_path: /var/lib/edpm-podman/podman.sock
+
+edpm_podman_login_kube_registry: false
+edpm_podman_kube_sa_path: /run/secrets/kubernetes.io/serviceaccount
+edpm_podman_kube_registry_url: default-route-openshift-image-registry.apps-crc.testing

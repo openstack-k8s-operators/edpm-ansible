@@ -16,6 +16,9 @@
 
 - name: Import login.yml tasks
   ansible.builtin.import_tasks: login.yml
+- name: Import login-kube-registry.yml tasks
+  ansible.builtin.import_tasks: login-kube-registry.yml
+  when: edpm_podman_login_kube_registry|bool
 - name: Configure edpm_container_manage to generate systemd drop-in dependencies
   ansible.builtin.copy:
     dest: /etc/sysconfig/podman_drop_in

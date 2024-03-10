@@ -19,13 +19,17 @@
 # Directory in the ansibleEE container
 edpm_telemetry_config_src: /var/lib/openstack/configs/telemetry
 # Directory in the compute node
-edpm_ceilometer_config_dest: /var/lib/openstack/config
+edpm_telemetry_config_dest: /var/lib/openstack/config/telemetry
 # Image to use for node_exporter
 edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+# Image to use for Ceilometer
+edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+# Image to use for Ceilometer Ipmi
+edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
 # Directory in the ansibleEE container
-edpm_logging_config_src: /var/lib/openstack/configs/logging
+edpm_telemetry_logging_config_src: /var/lib/openstack/configs/logging
 # Directory of rsyslog config in the compute node
-edpm_rsyslog_config_dest: /etc/rsyslog.d
+edpm_telemetry_rsyslog_config_dest: /etc/rsyslog.d
 # Certificates location for tls encryption
 edpm_telemetry_certs: /var/lib/openstack/certs/telemetry
 # CA certs location for tls encryption
