@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Verify derive pci device spec file exists
+      become: true
+      ansible.builtin.stat:
+        path: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data/20-sriov-nova.conf"
+      register: derive_pci_device_spec_exists
+    - name: Assert derive pci device spec file exists
+      ansible.builtin.assert:
+        that:
+          - derive_pci_device_spec_exists.stat.exists
+        fail_msg: "PCI device spec file does not exist!"
