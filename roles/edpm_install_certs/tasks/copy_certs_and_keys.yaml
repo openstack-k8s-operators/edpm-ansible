@@ -39,6 +39,8 @@
         - "{{ key_dest_path }}"
 
     - name: Copy cert and key to the compute node
+      vars:
+        basename: "{{ hostvars[inventory_hostname]['canonical_hostname'] }}"
       ansible.builtin.copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
@@ -46,6 +48,6 @@
         owner: root
         group: root
       loop:
-        - {"src": "{{ cert_src_path }}/{{ inventory_hostname }}-tls.crt", "dest": "{{ cert_dest_path }}/tls.crt"}
-        - {"src": "{{ cert_src_path }}/{{ inventory_hostname }}-ca.crt", "dest": "{{ cacert_dest_path }}/ca.crt"}
-        - {"src": "{{ cert_src_path }}/{{ inventory_hostname }}-tls.key", "dest": "{{ key_dest_path }}/tls.key"}
+        - {"src": "{{ cert_src_path }}/{{ basename }}-tls.crt", "dest": "{{ cert_dest_path }}/tls.crt"}
+        - {"src": "{{ cert_src_path }}/{{ basename }}-ca.crt", "dest": "{{ cacert_dest_path }}/ca.crt"}
+        - {"src": "{{ cert_src_path }}/{{ basename }}-tls.key", "dest": "{{ key_dest_path }}/tls.key"}
