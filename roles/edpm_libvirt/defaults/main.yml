@@ -30,6 +30,16 @@ edpm_libvirt_services:
   - virtproxyd
   - virtqemud
   - virtsecretd
+# List of services to stop during adoption
+# (container nova_virtlod is handled separetly)
+edpm_libvirt_old_tripleo_compute_sevices:
+  - tripleo_nova_libvirt.target
+  - tripleo_nova_virtlogd_wrapper.service
+  - tripleo_nova_virtnodedevd.service
+  - tripleo_nova_virtproxyd.service
+  - tripleo_nova_virtqemud.service
+  - tripleo_nova_virtsecretd.service
+  - tripleo_nova_virtstoraged.service
 # TODO: uncap libvirt once libvirt 10 is available
 edpm_libvirt_range: ""
 edpm_libvirt_packages:
