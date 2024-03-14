@@ -14,9 +14,41 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Converge
   become: true
   hosts: all
+  vars:
+    edpm_ddp_package_path: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+    ddp_packages:
+      - "ddp"
+      - "ddp-comm"
+    ddp_package_files:
+      - "ddp/ice.pkg"
+      - "ddp/ice-1.pkg"
+      - "ddp-comm/ice-2.pkg"
+
+  pre_tasks:
+    - name: Create ddp packages directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_ddp_package_path }}/{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
+      loop: "{{ ddp_packages }}"
+    - name: Ensure DDP package files exist
+      become: true
+      ansible.builtin.copy:
+        dest: "{{ edpm_ddp_package_path }}/{{ item }}"
+        content: "{{ item }}"
+        mode: '0655'
+      loop: "{{ ddp_package_files }}"
+
   roles:
     - role: "osp.edpm.edpm_ddp_package"
+      vars:
+        edpm_ddp_package_path: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_ddp_package: "ddp-comm"
+        edpm_rebuild_initramfs_command: "echo 'test'"
+        edpm_ddp_module: ""

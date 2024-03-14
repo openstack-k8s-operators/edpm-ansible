@@ -8,3 +8,15 @@ argument_specs:
         type: str
         default: "ddp"
         description: Required DDP package.
+      edpm_ddp_package_path:
+        type: str
+        default: "/lib/firmware/intel/ice"
+        description: DDP package path.
+      edpm_rebuild_initramfs_command:
+        type: str
+        default: "dracut -f"
+        description: Rebuild initramfs command.
+      edpm_ddp_module:
+        type: str
+        default: "ice"
+        description: DDP module name.

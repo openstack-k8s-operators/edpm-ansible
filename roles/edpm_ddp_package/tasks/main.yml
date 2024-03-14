@@ -19,33 +19,36 @@
   block:
     - name: List DDP packages
       ansible.builtin.find:
-        path: "/lib/firmware/intel/ice/{{ edpm_ddp_package }}"
+        path: "{{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}"
         patterns: "ice[_-]?*.pkg*"
-      register: _find_ddp_package_files
+      register: find_ddp_package_files
 
     - name: Get latest version of specified Ddp package(s)
       ansible.builtin.set_fact:
-        ddp_last_package_file: "{{ _find_ddp_package_files.files | map(attribute='path') | list | community.general.version_sort | last }}"
+        ddp_last_package_file: "{{ find_ddp_package_files.files | map(attribute='path') | list | community.general.version_sort | last }}"
 
     - name: Remove existing DDP package
       become: true
       block:
         - name: Check if previous ddp/ice.pkg exists
           ansible.builtin.stat:
-            path: "/lib/firmware/intel/ice/ddp/ice.pkg"
+            path: "{{ edpm_ddp_package_path }}/ddp/ice.pkg"
           register: ice_pkg
+
         - name: Remove ddp/ice.pkg if it exists
           ansible.builtin.file:
-            path: "/lib/firmware/intel/ice/ddp/ice.pkg"
+            path: "{{ edpm_ddp_package_path }}/ddp/ice.pkg"
             state: absent
           when: ice_pkg.stat.exists
+
         - name: Check if ddp/ice.pkg.xz exists(rhel9)
           ansible.builtin.stat:
-            path: "/lib/firmware/intel/ice/ddp/ice.pkg.xz"
+            path: "{{ edpm_ddp_package_path }}/ddp/ice.pkg.xz"
           register: ice_pkg_xz
+
         - name: Remove ddp/ice.pkg.xz if it exists
           ansible.builtin.file:
-            path: "/lib/firmware/intel/ice/ddp/ice.pkg.xz"
+            path: "{{ edpm_ddp_package_path }}/ddp/ice.pkg.xz"
             state: absent
           when: ice_pkg_xz.stat.exists
 
@@ -66,22 +69,25 @@
         - name: Confiure ddp/ice.pkg
           ansible.builtin.file:
             src: '{{ ddp_last_package_file }}'
-            dest: "/lib/firmware/intel/ice/ddp/{{ package_filename }}"
+            dest: "{{ edpm_ddp_package_path }}/ddp/{{ package_filename }}"
             state: link
-          when: edpm_ddp_package | string != ''
+          when: edpm_ddp_package | string != ""
 
         - name: Rebuild initramfs image
-          ansible.builtin.command: dracut -f
-          register: _dracut_command_output
-          changed_when: _dracut_command_output.rc == 0
-          failed_when: _dracut_command_output.rc != 0
+          ansible.builtin.command: "{{ edpm_rebuild_initramfs_command }}"
+          register: dracut_command_output
+          changed_when: dracut_command_output.rc == 0
+          failed_when: dracut_command_output.rc != 0
 
-        - name: Unload ice module
-          community.general.modprobe:
-            name: ice
-            state: absent
+        - name: Reload DDP module
+          when: edpm_ddp_module | string != ""
+          block:
+            - name: Unload ice module
+              community.general.modprobe:
+                name: "{{ edpm_ddp_module }}"
+                state: absent
 
-        - name: Looad new ice module
-          community.general.modprobe:
-            name: ice
-            state: present
+            - name: Looad new ice module
+              community.general.modprobe:
+                name: "{{ edpm_ddp_module }}"
+                state: present
