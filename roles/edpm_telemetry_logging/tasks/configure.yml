@@ -20,16 +20,12 @@
   become: true
   failed_when: false
   register: rsyslog_service_state
-  tags:
-    - edpm_logging
 
 - name: Configure rsyslog if present
   become: true
   when:
     - (rsyslog_service_state is success) and
       ((rsyslog_service_state.status['SubState'] | lower) == 'running')
-  tags:
-    - edpm_logging
   block:
     - name: Install openssl module support for rsyslog
       ansible.builtin.dnf:

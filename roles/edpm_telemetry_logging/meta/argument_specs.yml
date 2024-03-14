@@ -14,14 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Configure EDPM telemetry logging
-  hosts: "{{ edpm_override_hosts | default('all', true) }}"
-  strategy: linear
-  gather_facts: true
-  any_errors_fatal: true
-  # Only enables rsyslog
-  tasks:
-    - name: Deploy logging
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_telemetry_logging
+argument_specs:
+  # roles/edpm_telemetry/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_telemetry role.
+    options:
+      edpm_telemetry_logging_config_src:
+        type: "str"
+        required: true
+        description: "The path in the ansibleEE contaner where the logging config files are stored"
+      edpm_telemetry_rsyslog_config_dest:
+        type: "str"
+        required: true
+        description: "The path in the compute node where the rsyslog config files are copied to"

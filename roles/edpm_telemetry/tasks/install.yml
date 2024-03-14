@@ -14,60 +14,44 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Check that tls.crt exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.crt"
-  register: tls_crt_stat
+- name: Deploy ceilometer compute container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: ceilometer_agent_compute.json
+    edpm_container_manage_clean_orphans: false
 
-- name: Check that tls.key exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.key"
-  register: tls_key_stat
+- name: Deploy ceilometer ipmi container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_debug: true
+    edpm_container_manage_config_patterns: ceilometer_agent_ipmi.json
+    edpm_container_manage_clean_orphans: false
 
-- name: Configure tls if present
-  become: true
+- name: Deploy node_exporter container with TLS enabled if certs are present
+  containers.podman.podman_container:
+    image: "{{ edpm_telemetry_node_exporter_image }}"
+    name: node_exporter
+    state: present
+    recreate: true
+    privileged: true
+    ports:
+      - "9100:9100"
+    command:
+      - "--web.config.file=/etc/node_exporter/node_exporter.yaml"
+      - "--collector.systemd"
+      - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
+    volumes:
+      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
+      - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
+      - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
   when:
-    - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
-  tags:
-    - edpm_logging
-  block:
-    - name: Create config file for node_exporter
-      ansible.builtin.template:
-        dest: "{{ edpm_telemetry_config_dest }}/node_exporter.yaml"
-        mode: "0644"
-        src: node_exporter.yaml.j2
-
-    - name: Change the owner of the crt
-      ansible.builtin.file:
-        path: "{{ edpm_telemetry_certs }}/tls.crt"
-        mode: "0644"
-        owner: ceilometer
-        group: ceilometer
-
-    - name: Change the owner of the key
-      ansible.builtin.file:
-        path: "{{ edpm_telemetry_certs }}/tls.key"
-        mode: "0644"
-        owner: ceilometer
-        group: ceilometer
-
-    - name: Deploy node_exporter container with TLS enabled
-      containers.podman.podman_container:
-        image: "{{ edpm_telemetry_node_exporter_image }}"
-        name: node_exporter
-        state: present
-        recreate: true
-        privileged: true
-        ports:
-          - "9100:9100"
-        command:
-          - "--web.config.file=/etc/node_exporter/node_exporter.yaml"
-          - "--collector.systemd"
-          - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
-        volumes:
-          - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
-          - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
-          - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
+    - tls_key_stat.stat.exists and tls_crt_stat.stat.exists
 
 - name: Deploy node_exporter container with TLS disabled if there are no certs present
   become: true
@@ -84,8 +68,6 @@
       - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
     volumes:
       - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
-  tags:
-    - edpm_telemetry
   when:
     - not tls_key_stat.stat.exists or not tls_crt_stat.stat.exists
 
@@ -115,8 +97,6 @@
 
       [Install]
       WantedBy=multi-user.target
-  tags:
-    - edpm_telemetry
 
 - name: Enable node_exporter
   become: true
@@ -129,3 +109,15 @@
   ansible.builtin.systemd:
     state: restarted
     name: edpm_node_exporter.service
+
+- name: Restart ceilometer compute
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_ceilometer_agent_compute.service
+
+- name: Restart ceilometer ipmi
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_ceilometer_agent_ipmi.service

@@ -1,0 +1,20 @@
+---
+- name: Verify ceilometer
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  vars_files:
+    - ../../defaults/main.yml
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        - "{{ edpm_telemetry_rsyslog_config_dest }}/10-telemetry.conf"
+        - "/etc/pki/rsyslog/ca-openshift.crt"
+
+    - name: ensure that rsyslog is started with the new configuration
+      become: true
+      ansible.builtin.shell: |
+         journalctl --no-pager -u rsyslog 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "imjournal: journal files changed, reloading..."
