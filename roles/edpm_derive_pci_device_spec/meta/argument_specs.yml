@@ -1,0 +1,18 @@
+---
+argument_specs:
+  # ./roles/edpm_derive_pci_device_spec/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_derive_pci_device_spec role.
+    options:
+      edpm_derive_sriov_device_spec_list:
+        type: list
+        default: []
+        description: Sriov device spec list.
+      edpm_derive_pci_device_spec_conf_file:
+        type: str
+        default: 20-sriov-device-spec.conf
+        description: Generated file with derived device_spec config
+      edpm_derive_pci_device_spec_physmap_file:
+        type: str
+        default: ''
+        description: Optional string phys_dev_mapping

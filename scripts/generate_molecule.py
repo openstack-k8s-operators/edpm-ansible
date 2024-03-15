@@ -28,7 +28,8 @@ PODMAN_EXCLUDED_ROLES = [
     'env_data',
     'edpm_ddp_package',
     'edpm_module_load',
-    'edpm_podman'
+    'edpm_podman',
+    'edpm_derive_pci_device_spec'
 ]
 
 
