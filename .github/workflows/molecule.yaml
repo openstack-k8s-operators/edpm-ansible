@@ -45,6 +45,7 @@ jobs:
         - edpm_telemetry
         - edpm_users
         - env_data
+        - edpm_pre_adoption_validation
 
     runs-on: ubuntu-22.04
     steps:
