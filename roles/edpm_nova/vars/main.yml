@@ -20,3 +20,5 @@
 # intended to be modified.
 
 # All variables within this role should have a prefix of "edpm_nova"
+
+# this is const path where nova custom configs will land

@@ -120,3 +120,13 @@
           - "compute_id.stat.size == 37"
           - "compute_id.stat.mode == '0400'"
           - "compute_id.stat.attr_flags == 'i'"
+
+    - name: Check if after sync old file is removed
+      ansible.builtin.stat:
+        path: '/var/lib/openstack/config/nova/test.conf'
+      register: nova_host_specific_conf
+
+    - name: Assert that /var/lib/openstack/config/nova/test.conf file does not exist
+      ansible.builtin.assert:
+        that:
+          - "not nova_host_specific_conf.stat.exists"
