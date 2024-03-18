@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Converge
+      block:
+        - name: "Include role"
+          ansible.builtin.include_role:
+            name: "osp.edpm.edpm_pre_adoption_validation"
+      rescue:
+        - name: Assert that validation is skipped
+          ansible.builtin.fail:
+            msg: "validation should be skipped on greenfield as no old config files exist"
