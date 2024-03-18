@@ -14,14 +14,5 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Configure EDPM telemetry logging
-  hosts: "{{ edpm_override_hosts | default('all', true) }}"
-  strategy: linear
-  gather_facts: true
-  any_errors_fatal: true
-  # Only enables rsyslog
-  tasks:
-    - name: Deploy logging
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_telemetry_logging
+- name: Configure logging
+  ansible.builtin.import_tasks: configure.yml

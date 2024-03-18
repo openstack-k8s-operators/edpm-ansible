@@ -39,14 +39,6 @@ argument_specs:
         type: "str"
         required: true
         description: "The path in the compute node where the config files are copied to"
-      edpm_telemetry_logging_config_src:
-        type: "str"
-        required: true
-        description: "The path in the ansibleEE contaner where the logging config files are stored"
-      edpm_telemetry_rsyslog_config_dest:
-        type: "str"
-        required: true
-        description: "The path in the compute node where the rsyslog config files are copied to"
       edpm_telemetry_certs:
         type: "str"
         required: true

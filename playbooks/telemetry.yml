@@ -15,7 +15,7 @@
 # under the License.
 
 
-- name: Deploy EDPM Ceilometer Agent Compute
+- name: Deploy EDPM telemetry metrics
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
   gather_facts: true
@@ -23,15 +23,6 @@
   max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
   # Doesn't handle rsyslog
   tasks:
-    - name: Deploy ceilometer
+    - name: Deploy telemetry metrics
       ansible.builtin.import_role:
         name: osp.edpm.edpm_telemetry
-        tasks_from: deploy_ceilometer.yml
-      tags:
-        - edpm_telemetry
-    - name: Deploy infra telemetry
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_telemetry
-        tasks_from: deploy_infra.yml
-      tags:
-        - edpm_telemetry

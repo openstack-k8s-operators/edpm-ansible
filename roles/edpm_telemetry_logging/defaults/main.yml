@@ -15,13 +15,8 @@
 # under the License.
 
 
-- name: Configure EDPM telemetry logging
-  hosts: "{{ edpm_override_hosts | default('all', true) }}"
-  strategy: linear
-  gather_facts: true
-  any_errors_fatal: true
-  # Only enables rsyslog
-  tasks:
-    - name: Deploy logging
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_telemetry_logging
+# All variables intended for modification should be placed in this file.
+# Directory in the ansibleEE container
+edpm_telemetry_logging_config_src: /var/lib/openstack/configs/logging
+# Directory of rsyslog config in the compute node
+edpm_telemetry_rsyslog_config_dest: /etc/rsyslog.d

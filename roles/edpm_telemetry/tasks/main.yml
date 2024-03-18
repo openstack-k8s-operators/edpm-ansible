@@ -15,11 +15,8 @@
 # under the License.
 
 
-- name: Import deploy_ceilometer telemetry tasks
-  ansible.builtin.import_tasks: deploy_ceilometer.yml
+- name: Configure telemetry metrics
+  ansible.builtin.import_tasks: configure.yml
 
-- name: Import deploy_infra telemetry tasks
-  ansible.builtin.import_tasks: deploy_infra.yml
-
-- name: Configure logging
-  ansible.builtin.import_tasks: enable_logging.yml
+- name: Install telemetry metrics
+  ansible.builtin.import_tasks: install.yml
