@@ -50,10 +50,6 @@ argument_specs:
         default: ''
         description: ''
         type: str
-      edpm_neutron_sriov_DEFAULT_host:
-        default: '{{ ansible_facts["nodename"] }}'
-        description: ''
-        type: str
       edpm_neutron_sriov_oslo_concurrency_lock_patch:
         default: '$state_path/lock'
         description: ''
