@@ -17,5 +17,8 @@
 
 - name: Converge
   hosts: all
+  pre_tasks:
+    - name: Importing test_vars
+      include_vars: test_vars.yml
   roles:
     - role: "osp.edpm.edpm_nodes_validation"
