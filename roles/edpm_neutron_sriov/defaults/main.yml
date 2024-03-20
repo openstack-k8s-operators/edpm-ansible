@@ -41,7 +41,6 @@ edpm_neutron_sriov_common_volumes:
 edpm_neutron_sriov_DEFAULT_debug: false
 edpm_neutron_sriov_DEFAULT_rpc_response_timeout: 60
 edpm_neutron_sriov_DEFAULT_transport_url: ''
-edpm_neutron_sriov_DEFAULT_host: '{{ ansible_facts["nodename"] }}'
 # oslo_concurrency
 edpm_neutron_sriov_oslo_concurrency_lock_patch: '$state_path/lock'
 # oslo_messaging_rabbit

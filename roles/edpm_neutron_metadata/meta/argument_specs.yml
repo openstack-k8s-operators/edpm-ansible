@@ -43,7 +43,6 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host:
-        default: '{{ edpm_neutron_metadata_agent_DEFAULT_host }}'
         description: 'Nova Metadata host to forward metadata requests to.'
         type: str
       edpm_neutron_metadata_agent_DEFAULT_nova_metadata_protocol:
