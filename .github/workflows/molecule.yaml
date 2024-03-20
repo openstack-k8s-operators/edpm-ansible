@@ -60,6 +60,10 @@ jobs:
     - name: Install molecule deps
       run: pip install -r molecule-requirements.txt
     - name: Run molecule test
-      run: ansible-playbook .github/playbooks/molecule-run.yml -vvvv --connection=local -i localhost
+      run: |
+        cd $GITHUB_WORKSPACE/roles/${{ matrix.tested_role }}
+        molecule test --all
       env:
-        ROLE_NAME: ${{ matrix.tested_role }}
+        PY_COLORS: '1'
+        ANSIBLE_FORCE_COLOR: '1'
+        ANSIBLE_VERBOSITY: 4
