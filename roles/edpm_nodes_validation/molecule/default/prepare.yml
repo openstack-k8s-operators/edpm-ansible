@@ -21,5 +21,10 @@
         - iputils
 - name: Prepare
   hosts: all
+  tasks:
+    - name: Install hostname
+      ansible.builtin.dnf:
+        name: hostname
+        state: present
   roles:
     - role: osp.edpm.env_data
