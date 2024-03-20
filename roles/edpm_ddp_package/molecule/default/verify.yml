@@ -1,0 +1,28 @@
+---
+- name: Verify
+  hosts: all
+  vars:
+    ddp_module_file: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/test-data/ddp/ice.pkg"
+  tasks:
+    - name: Verify ddp module file exists
+      become: true
+      ansible.builtin.stat:
+        path: "{{ ddp_module_file }}"
+      register: ddp_module_ice_file_exists
+    - name: Assert ddp module ice file exists
+      ansible.builtin.assert:
+        that:
+          - ddp_module_ice_file_exists.stat.exists
+        fail_msg: "DDP module ice file does not exist!"
+
+    - name: Check if updated ddp module file content exists
+      become: true
+      ansible.builtin.shell: "grep -q 'ice-2.pkg' {{ ddp_module_file }}"
+      register: ddp_file_content_exists
+
+    - name: Assert updated ddp module file content exists
+      ansible.builtin.assert:
+        that:
+          - ddp_file_content_exists is defined
+          - ddp_file_content_exists.rc == 0
+        fail_msg: "DDP module updated file content does not exist!"
