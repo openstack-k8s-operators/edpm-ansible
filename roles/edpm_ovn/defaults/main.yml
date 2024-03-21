@@ -70,7 +70,7 @@ edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
 # Set external_id data from provided variables
 edpm_ovn_ovs_external_ids:
-  hostname: "{{ ansible_nodename }}"
+  hostname: "{{ canonical_hostname }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
   ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(',') }}"
   ovn-chassis-mac-mappings: >-

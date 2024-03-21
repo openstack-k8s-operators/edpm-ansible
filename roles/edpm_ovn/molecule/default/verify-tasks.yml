@@ -94,3 +94,9 @@
           - item.rc == 0
         fail_msg: "rule {{ item.item }} not loaded"
       loop: "{{ notrack_rules_loaded.results }}"
+
+- name: Verify canonical_hostname is in external_id
+  ansible.builtin.shell: >
+    /usr/bin/ovs-vsctl get open_vswitch . external_ids:hostname
+  register: output
+  failed_when: output.stdout != 'edpm-0.localdomain'

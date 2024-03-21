@@ -22,3 +22,13 @@
     - name: Ensure that configured root helper works
       ansible.builtin.shell: |
         podman exec ovn_agent {{ edpm_neutron_ovn_agent_agent_root_helper }} sleep 0
+
+    - name: Slurp host specific config
+      ansible.builtin.slurp:
+        src: /var/lib/config-data/ansible-generated/neutron-ovn-agent/01-neutron-ovn-agent.conf
+      register: host_specific_config
+
+    - name: Assert that host is rendered into the host specific config
+      ansible.builtin.assert:
+        that:
+          - "'edpm-0.localdomain' in host_specific_config.content | b64decode"

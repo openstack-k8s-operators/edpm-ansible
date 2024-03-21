@@ -1,5 +1,7 @@
 [DEFAULT]
 my_ip = {{ ctlplane_ip }}
+host = {{ canonical_hostname }}
+
 {% if edpm_nova_tls_certs_enabled | bool %}
 [libvirt]
 live_migration_with_native_tls = true

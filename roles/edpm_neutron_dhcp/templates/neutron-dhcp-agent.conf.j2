@@ -2,6 +2,7 @@
 interface_driver = openvswitch
 ovs_use_veth = False
 state_path = {{ edpm_neutron_dhcp_agent_DEFAULT_state_path }}
+host = {{ canonical_hostname }}
 resync_interval = {{ edpm_neutron_dhcp_agent_DEFAULT_resync_interval }}
 resync_throttle = {{ edpm_neutron_dhcp_agent_DEFAULT_resync_throttle }}
 dhcp_driver = {{ edpm_neutron_dhcp_agent_DEFAULT_dhcp_driver }}

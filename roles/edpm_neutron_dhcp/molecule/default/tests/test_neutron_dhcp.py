@@ -233,3 +233,9 @@ class TestNeutronDHCP(unittest.TestCase):
             "/usr/bin/podman ps --all --format '{{ '{{' }}.Names{{ '}}' }}'"
         ).stdout
         assert dnsmasq_container_name not in all_containers
+
+    def test_service_host_is_fqdn(self):
+        assert "edpm-0.localdomain" in self.host.run(
+            "cat /var/lib/config-data/ansible-generated/"
+            "neutron-dhcp-agent/01-neutron-dhcp-agent.conf"
+        ).stdout

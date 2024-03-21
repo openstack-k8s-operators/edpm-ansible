@@ -18,6 +18,12 @@ platforms:
 provisioner:
   log: true
   name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          fake-networker-1:
+            canonical_hostname: edpm-0.localdomain
 scenario:
   test_sequence:
   - dependency
@@ -29,3 +35,5 @@ scenario:
   - destroy
 verifier:
   name: testinfra
+  options:
+    s: true
