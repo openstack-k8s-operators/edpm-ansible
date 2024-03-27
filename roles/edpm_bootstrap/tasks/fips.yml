@@ -45,11 +45,25 @@
       when: edpm_bootstrap_fips_mode == 'disabled'
 
     - name: Enforce a reboot to ensure the change of FIPS status
-      vars:
-        edpm_reboot_force_reboot: true
-      ansible.builtin.include_role:
-        name: edpm_reboot
       when: _fms_enable.rc == 0 or _fms_disable.rc == 0
+      block:
+        - name: Create directory required by edpm-reboot role
+          become: true
+          ansible.builtin.file:
+            path: /var/lib/openstack/reboot_required/
+            state: directory
+            mode: "0755"
+        - name: Create required file to enforce a reboot
+          become: true
+          ansible.builtin.file:
+            path: /var/lib/openstack/reboot_required/fips_reboot
+            state: touch
+            mode: "0600"
+        - name: Call edpm_reboot role
+          vars:
+            edpm_reboot_force_reboot: true
+          ansible.builtin.include_role:
+            name: edpm_reboot
 
     - name: Ensure that the proper FIPS status is enabled
       ansible.builtin.include_tasks: fips_status.yml
