@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Converge
+      block:
+        - name: "Include role"
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_pre_adoption_validation
+      rescue:
+        - name: Assert that the validaton passed
+          ansible.builtin.fail:
+            msg: "validation should pass as the old and new configs are matching"

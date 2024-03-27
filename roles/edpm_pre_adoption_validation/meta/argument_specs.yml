@@ -1,0 +1,14 @@
+---
+argument_specs:
+  # ./roles/edpm_pre_adoption_validation/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_pre_adoption_validation role.
+    options:
+      edpm_pre_adoption_validation_old_nova_config:
+        type: str
+        default: /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf
+        description: The path of the pre-adoption version of the nova.conf file on the node
+      edpm_pre_adoption_validation_old_neutron_config:
+        type: str
+        default: /var/lib/config-data/puppet-generated/neutron/etc/neutron/nova.conf
+        description: The path of the pre-adoption version of the neutron.conf file on the node
