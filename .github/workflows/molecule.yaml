@@ -67,3 +67,4 @@ jobs:
         PY_COLORS: '1'
         ANSIBLE_FORCE_COLOR: '1'
         ANSIBLE_VERBOSITY: 4
+        ANSIBLE_CALLBACKS_ENABLED: profile_tasks
