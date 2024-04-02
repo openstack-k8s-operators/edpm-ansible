@@ -34,6 +34,7 @@
     edpm_container_manage_clean_orphans: false
 
 - name: Deploy node_exporter container with TLS enabled if certs are present
+  become: true
   containers.podman.podman_container:
     image: "{{ edpm_telemetry_node_exporter_image }}"
     name: node_exporter
