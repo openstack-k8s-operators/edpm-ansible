@@ -64,7 +64,7 @@
       ansible.builtin.assert:
         that:
           - "'live_migration_with_native_tls = True' in host_specific_config.content | b64decode"
-          - "'live_migration_scheme = tls' in host_specific_config.content | b64decode"
+          - "'live_migration_uri = qemu+tls://%s/system' in host_specific_config.content | b64decode"
 
     - name: Assert that host is rendered into the host specific config
       ansible.builtin.assert:

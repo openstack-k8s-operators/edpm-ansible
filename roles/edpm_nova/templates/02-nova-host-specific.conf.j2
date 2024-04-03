@@ -4,6 +4,12 @@ host = {{ canonical_hostname }}
 
 [libvirt]
 live_migration_with_native_tls = {{ edpm_nova_live_migration_native_tls|bool }}
+
 {% if edpm_nova_live_migration_tls|bool %}
-live_migration_scheme = tls
+live_migration_uri = qemu+tls://%s/system
+{% endif %}
+
+{% if edpm_nova_live_migration_native_tls|bool %}
+# FIXME(owalsh): workaround https://issues.redhat.com/browse/LIBVIRT-1113
+live_migration_permit_post_copy = False
 {% endif %}

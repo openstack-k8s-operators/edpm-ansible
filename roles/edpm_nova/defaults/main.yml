@@ -31,9 +31,7 @@ edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compu
 
 # Libvirt TLS
 edpm_nova_live_migration_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
-# FIXME: (owalsh) disable until QEMU hostname validation is resolved
-# edpm_nova_live_migration_native_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_nova_live_migration_native_tls: false
+edpm_nova_live_migration_native_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
 
 # NOTE(sean-k-mooney): nova will use unix sockets for libvirt and communicate with ovs via tcp
 # so we will not need the libvirt or ovs client certs or ca. nova will communicate other services
