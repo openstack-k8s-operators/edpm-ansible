@@ -29,8 +29,13 @@ edpm_nova_config_src: /var/lib/openstack/configs
 edpm_nova_config_dest: /var/lib/openstack/config/nova
 edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
 
-# certs
-edpm_nova_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+# Libvirt TLS
+# FIXME: (owalsh) Disable until certs are correct https://libvirt.org/kbase/tlscerts.html
+# edpm_nova_live_migration_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
+# edpm_nova_live_migration_native_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
+edpm_nova_live_migration_tls: false
+edpm_nova_live_migration_native_tls: false
+
 # NOTE(sean-k-mooney): nova will use unix sockets for libvirt and communicate with ovs via tcp
 # so we will not need the libvirt or ovs client certs or ca. nova will communicate other services
 # via there api endpoints and will connect to rabbitmq. To support this we will need to trust
