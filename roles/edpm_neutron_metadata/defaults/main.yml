@@ -52,3 +52,13 @@ edpm_neutron_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutr
 edpm_neutron_metadata_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
 edpm_neutron_metadata_agent_ovs_ovsdb_connection_timeout: '180'
 edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval: '60000'
+
+# tls
+edpm_neutron_metadata_agent_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+
+edpm_neutron_metadata_tls_volumes:
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron_metadata') }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron_metadata') }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron_metadata') }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron_metadata') }}/tls-ca-bundle.pem:\
+    /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"

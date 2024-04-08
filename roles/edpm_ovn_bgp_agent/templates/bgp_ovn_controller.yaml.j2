@@ -1,3 +1,13 @@
+{%- set edpm_ovn_bgp_agent_local_ovn_cluster_volumes = [] %}
+{%- set edpm_ovn_bgp_agent_local_ovn_cluster_volumes =
+        edpm_ovn_bgp_agent_local_ovn_cluster_volumes +
+        edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes +
+        edpm_ovn_bgp_agent_local_ovn_controller_volumes %}
+{%- if edpm_enable_internal_tls|bool %}
+{%- set edpm_ovn_bgp_agent_local_ovn_cluster_volumes =
+        edpm_ovn_bgp_agent_local_ovn_cluster_volumes +
+        edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes %}
+{%- endif -%}
 start_order: 1
 image: "{{ edpm_ovn_bgp_agent_local_ovn_controller_image }}"
 net: host
@@ -8,20 +18,7 @@ depends_on:
   - openvswitch.service
 {% if edpm_ovn_cpu_set|default(false) %}
 cpuset_cpus: "{{ edpm_ovn_cpu_set }}"
-{% endif -%}
-volumes:
-  {% set edpm_ovn_bgp_agent_local_ovn_cluster_volumes = [] %}
-  {%- set edpm_ovn_bgp_agent_local_ovn_cluster_volumes =
-          edpm_ovn_bgp_agent_local_ovn_cluster_volumes +
-          edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes +
-          edpm_ovn_bgp_agent_local_ovn_controller_volumes %}
-  {%- if edpm_enable_internal_tls|bool -%}
-  {%- set edpm_ovn_bgp_agent_local_ovn_cluster_volumes =
-         edpm_ovn_bgp_agent_local_ovn_cluster_volumes +
-         edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes +
-         edpm_ovn_bgp_agent_local_ovn_controller_volumes +
-         edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes -%}
-  {% endif %}
-  {{ edpm_ovn_bgp_agent_local_ovn_cluster_volumes }}
+{% endif %}
+volumes: {{ edpm_ovn_bgp_agent_local_ovn_cluster_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
