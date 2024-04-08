@@ -15,10 +15,10 @@
         "/etc/hosts:/etc/hosts:ro",
         "/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro",
         "/etc/localtime:/etc/localtime:ro",
-        "/etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro",
         "/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro",
-        "/dev/log:/dev/log",
-        "/etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro",
-        "/etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro"
+{% if edpm_telemetry_tls_certs_enabled %}
+        "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
+{% endif %}
+        "/dev/log:/dev/log"
     ]
 }

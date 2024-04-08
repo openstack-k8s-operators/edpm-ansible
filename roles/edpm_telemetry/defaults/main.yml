@@ -30,3 +30,5 @@ edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstac
 edpm_telemetry_certs: /var/lib/openstack/certs/telemetry
 # CA certs location for tls encryption
 edpm_telemetry_cacerts: /var/lib/openstack/cacerts/telemetry
+# If TLS should be enabled for telemetry
+edpm_telemetry_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
