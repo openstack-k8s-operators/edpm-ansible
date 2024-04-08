@@ -1,3 +1,22 @@
+{%- set edpm_ovn_bgp_agent_volumes = [] %}
+{%- set edpm_ovn_bgp_agent_volumes =
+        edpm_ovn_bgp_agent_volumes +
+        edpm_ovn_bgp_agent_common_volumes %}
+{%- if edpm_ovn_bgp_agent_local_ovn_routing|bool %}
+{%- set edpm_ovn_bgp_agent_volumes =
+        edpm_ovn_bgp_agent_volumes +
+        edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes %}
+{%- endif %}
+{%- if edpm_ovn_bgp_agent_internal_tls_enable|bool %}
+{%- set edpm_ovn_bgp_agent_volumes =
+        edpm_ovn_bgp_agent_volumes +
+        edpm_ovn_bgp_agent_tls_volumes %}
+{%- if edpm_ovn_bgp_agent_local_ovn_routing|bool %}
+{%- set edpm_ovn_bgp_agent_volumes =
+        edpm_ovn_bgp_agent_volumes +
+        edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes %}
+{%- endif %}
+{%- endif -%}
 start_order: 0
 image: "{{ edpm_ovn_bgp_agent_image }}"
 net: host
@@ -6,30 +25,6 @@ user: root
 restart: always
 depends_on:
   - openvswitch.service
-volumes:
-  {% set edpm_ovn_bgp_agent_volumes = [] %}
-  {%- set edpm_ovn_bgp_agent_volumes =
-          edpm_ovn_bgp_agent_volumes +
-          edpm_ovn_bgp_agent_common_volumes %}
-  {% if edpm_ovn_bgp_agent_local_ovn_routing|bool %}
-  {%- set edpm_ovn_bgp_agent_volumes =
-          edpm_ovn_bgp_agent_volumes +
-          edpm_ovn_bgp_agent_common_volumes +
-          edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes -%}
-  {% endif %}
-  {% if edpm_ovn_bgp_agent_internal_tls_enable|bool %}
-  {%- set edpm_ovn_bgp_agent_volumes =
-         edpm_ovn_bgp_agent_volumes +
-         edpm_ovn_bgp_agent_common_volumes +
-         edpm_ovn_bgp_agent_tls_volumes -%}
-  {% if edpm_ovn_bgp_agent_local_ovn_routing|bool %}
-  {%- set edpm_ovn_bgp_agent_volumes =
-          edpm_ovn_bgp_agent_volumes +
-          edpm_ovn_bgp_agent_common_volumes +
-          edpm_ovn_bgp_agent_tls_volumes +
-          edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes -%}
-  {% endif %}
-  {% endif %}
-  {{ edpm_ovn_bgp_agent_volumes }}
+volumes: {{ edpm_ovn_bgp_agent_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
