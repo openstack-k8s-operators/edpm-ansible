@@ -2,7 +2,7 @@ max_files = 32768
 max_processes = 131072
 vnc_tls = 0
 vnc_tls_x509_verify = 0
-default_tls_x509_verify = 1
+default_tls_x509_verify = 0
 nbd_tls = 0
 # NOTE(gibi): In tripleo the default range was intentionally changed to avoid
 # port usage conflicts. See https://review.openstack.org/#/c/561784
@@ -12,6 +12,7 @@ migration_port_max = 61215
 group = "{{ edpm_nova_libvirt_qemu_group }}"
 {% endif %}
 {% if edpm_libvirt_tls_certs_enabled | bool %}
-default_tls_x509_cert_dir = "/etc/pki/libvirt"
-default_tls_x509_verify = 1
+# FIXME(owalsh): disable until QEMU hostname validation issue is resolved
+# default_tls_x509_cert_dir = "/etc/pki/libvirt"
+# default_tls_x509_verify = 1
 {% endif %}

@@ -63,7 +63,7 @@
     - name: Assert libvirt is configured to use tls for live migration
       ansible.builtin.assert:
         that:
-          - "'live_migration_with_native_tls = true' in host_specific_config.content | b64decode"
+          - "'live_migration_with_native_tls = True' in host_specific_config.content | b64decode"
           - "'live_migration_scheme = tls' in host_specific_config.content | b64decode"
 
     - name: Assert that host is rendered into the host specific config
