@@ -1,5 +1,10 @@
 ---
 
+- name: Check if ca bundle exists
+  ansible.builtin.stat:
+    path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
+  register: ca_bundle_stat_res
+
 - name: Render nova container
   tags:
     - install
@@ -9,6 +14,8 @@
     dest: "/var/lib/openstack/config/containers/nova_compute.json"
     setype: "container_file_t"
     mode: "0644"
+  vars:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
   notify:
     - Restart nova
 - name: Deploy nova container

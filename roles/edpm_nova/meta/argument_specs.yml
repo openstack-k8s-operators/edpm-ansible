@@ -25,10 +25,14 @@ argument_specs:
         description: |
           The path to the directory where the nova config files
           will be rendered on the compute node.
-      edpm_nova_tls_certs_enabled:
+      edpm_nova_live_migration_tls:
         type: bool
         default: false
-        description: Boolean to specify whether TLS certs are enabled.
+        description: Boolean to specify whether live migration TLS is enabled.
+      edpm_nova_live_migration_native_tls:
+        type: bool
+        default: false
+        description: Boolean to specify whether live migration NBD TLS is enabled.
       edpm_nova_compute_image:
         type: str
         default: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"

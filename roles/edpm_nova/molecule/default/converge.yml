@@ -16,4 +16,5 @@
       vars:
         edpm_nova_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"
         edpm_nova_tls_ca_src_dir: /tmp/pki
-        edpm_nova_tls_certs_enabled: true
+        edpm_nova_live_migration_tls: true
+        edpm_nova_live_migration_native_tls: true

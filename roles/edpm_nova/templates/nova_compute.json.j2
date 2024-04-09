@@ -10,8 +10,8 @@
     },
     "volumes": [
         "/var/lib/openstack/config/nova:/var/lib/kolla/config_files:ro",
-{% if edpm_nova_tls_certs_enabled %}
-	"{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro",
+{% if ca_bundle_exists|bool %}
+        "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
 {% endif %}
         "/etc/localtime:/etc/localtime:ro",
         "/lib/modules:/lib/modules:ro",
