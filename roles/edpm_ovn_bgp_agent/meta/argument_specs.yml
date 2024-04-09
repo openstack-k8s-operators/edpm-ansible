@@ -133,11 +133,6 @@ argument_specs:
           - /etc/localtime:/etc/localtime:ro
           - /dev/log:/dev/log
           - /etc/iproute2:/etc/iproute2
-          - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
-          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
-          - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
-          - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
           - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
           - /var/lib/config-data/ansible-generated/ovn-bgp-agent:/var/lib/kolla/config_files/src:ro
           - /run/frr:/run/frr:shared,z
@@ -147,5 +142,7 @@ argument_specs:
         type: list
         description: list of mounted TLS certificate volumes
         default:
-          - /etc/pki/tls/certs/ovn_bgp_agent.crt:/etc/pki/tls/certs/ovn_bgp_agent.crt
-          - /etc/pki/tls/private/ovn_bgp_agent.key:/etc/pki/tls/private/ovn_bgp_agent.key
+          - "/var/lib/openstack/certs/ovn-bgp-agent/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+          - "/var/lib/openstack/certs/ovn-bgp-agent/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+          - "/var/lib/openstack/certs/ovn-bgp-agent/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+          - "/var/lib/openstack/cacerts/ovn-bgp-agent/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
