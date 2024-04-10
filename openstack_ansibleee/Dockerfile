@@ -3,11 +3,6 @@ FROM quay.io/ansible/creator-ee:v0.14.1 as builder
 ARG REMOTE_SOURCE=.
 ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
 
-RUN \
-microdnf install -y \
-# we are installing ansible.posix with rsync, but we aren't installing rsync itself
-rsync
-
 COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
 RUN cd $REMOTE_SOURCE_DIR && \
     ansible-galaxy collection install -U --timeout 120 -r requirements.yml --collections-path "/usr/share/ansible/collections" && \
@@ -15,6 +10,10 @@ RUN cd $REMOTE_SOURCE_DIR && \
 
 FROM quay.io/ansible/creator-ee:v0.14.1 as runner
 
+RUN \
+microdnf install -y \
+# we are installing ansible.posix with rsync, but we aren't installing rsync itself
+rsync
 COPY --from=builder /usr/share/ansible /usr/share/ansible
 
 COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
