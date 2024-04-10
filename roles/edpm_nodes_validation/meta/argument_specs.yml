@@ -16,10 +16,18 @@ argument_specs:
         description: Attempt to reach controllers with ping.
         type: bool
         default: true
+      edpm_nodes_validation_check_for_fqdn:
+        description: Verify if an FQDN is set. Typically required for TLS-e.
+        type: bool
+        default: true
       edpm_nodes_validation_validate_fqdn:
         description: Verify if hostname matches FQDN from /etc/hosts
         type: bool
         default: false
+      edpm_nodes_validation_validate_fqdn_hosts_file:
+        description: Hosts file to check for verifying that hostname matches FQDN
+        type: str
+        default: /etc/hosts
       edpm_nodes_validation_validate_gateway_icmp:
         description: Attempt to reach gateway with ping.
         type: bool

@@ -26,5 +26,12 @@
       ansible.builtin.dnf:
         name: hostname
         state: present
+    - name: Set a FQDN
+      command: hostname instance.localdomain
+    - name: Add FQDN to /tmp/hosts
+      lineinfile:
+        path: /tmp/hosts
+        line: 127.0.0.1 instance.localdomain instance
+        create: true
   roles:
     - role: osp.edpm.env_data
