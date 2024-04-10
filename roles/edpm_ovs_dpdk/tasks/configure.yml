@@ -71,7 +71,7 @@
         dpdk_socket_limit:
           dpdk-socket-limit: "{{ edpm_ovs_dpdk_socket_memory }}"
 
-    - name: Append other_config with ocket-mem and socket-limit config
+    - name: Append other_config with socket-mem and socket-limit
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_socket_mem) | combine(dpdk_socket_limit) }}"
 
@@ -119,7 +119,7 @@
         userspace_tso_enable:
           userspace-tso-enable: "{{ edpm_ovs_dpdk_enable_tso }}"
 
-    - name: Append other_config with enable TSO in datapath
+    - name: Append other_config with TSO flag
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(userspace_tso_enable) }}"
 
@@ -131,7 +131,7 @@
         vhost_postcopy_support:
           vhost-postcopy-support: "{{ edpm_ovs_dpdk_vhost_postcopy_support }}"
 
-    - name: Append other_config with enable postcopy support
+    - name: Append other_config with postcopy support flag
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(vhost_postcopy_support) }}"
 
@@ -148,15 +148,15 @@
     regexp: '^OPTIONS.*'
     replace: 'OPTIONS=""'
 
-- name: Enable DPDK OVN PMD Auto Load Balance
+- name: Enable DPDK OVS PMD Auto Load Balance
   when: edpm_ovs_dpdk_pmd_auto_lb|bool
   block:
-    - name: Enable DPDK OVN PMD Auto Load Balance
+    - name: Enable DPDK OVS PMD Auto Load Balance
       ansible.builtin.set_fact:
         pmd_auto_lb:
           pmd-auto-lb: "{{ edpm_ovs_dpdk_pmd_auto_lb }}"
 
-    - name: Append other_config with enable DPDK OVN PMD Auto Load Balance
+    - name: Append other_config with PMD Auto Load Balance
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb) }}"
 
@@ -207,6 +207,30 @@
     - name: Append external_ids with ovn datapath type
       ansible.builtin.set_fact:
         edpm_ovs_external_ids: "{{ {} | combine(ovn_bridge_datapath_type) }}"
+
+- name: Set shared memory pool config
+  when: edpm_ovs_dpdk_shared_mem_pool|string
+  block:
+    - name: Apply shared memory pool config
+      ansible.builtin.set_fact:
+        dpdk_shared_mem_pool:
+          shared-mempool-config: "{{ edpm_ovs_dpdk_shared_mem_pool }}"
+
+    - name: Append other_config with shared memory pool
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_shared_mem_pool) }}"
+
+- name: Set PMD maximum sleep time
+  when: edpm_ovs_dpdk_pmd_sleep_max|string
+  block:
+    - name: Apply PMD maximum sleep time
+      ansible.builtin.set_fact:
+        dpdk_pmd_sleep_max:
+          pmd-maxsleep: "{{ edpm_ovs_dpdk_pmd_sleep_max }}"
+
+    - name: Append other_config with max sleep time
+      ansible.builtin.set_fact:
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_pmd_sleep_max) }}"
 
 - name: Configure OVS other_config
   ansible.builtin.shell: >

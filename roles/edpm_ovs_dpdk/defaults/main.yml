@@ -33,5 +33,8 @@ edpm_ovs_dpdk_pmd_improvement_threshold: ""
 edpm_ovs_dpdk_pmd_rebal_interval: ""
 edpm_ovs_dpdk_vhost_postcopy_support: false
 edpm_ovs_dpdk_vhost_postcopy_ovs_options: "--mlockall=no"
+edpm_ovs_dpdk_shared_mem_pool: ""
+edpm_ovs_dpdk_pmd_sleep_max: ""
+
 # OVN bridge datapath type
 edpm_ovn_datapath_type: "netdev"
