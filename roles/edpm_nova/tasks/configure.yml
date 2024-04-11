@@ -1,5 +1,16 @@
 ---
 
+- name: Create sync config dirs
+  tags:
+    - configure
+    - nova
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'HOME') }}/staging"
+    state: "directory"
+    mode: "0766"
+  delegate_to: localhost
+  run_once: true
+
 - name: Create container config dirs
   tags:
     - configure
@@ -39,6 +50,52 @@
     - {"path": "/var/lib/iscsi"}
     - {"path": "/etc/nvme"}
     - {"path": "/run/openvswitch"}
+
+- name: Discover configmaps in {{ edpm_nova_config_src }}
+  ansible.builtin.find:
+    paths: "{{ edpm_nova_config_src }}"
+    file_type: file
+    recurse: true
+  register: edpm_nova_configmaps
+  changed_when: false
+  check_mode: false
+  delegate_to: localhost
+
+- name: Flatten configmaps
+  tags:
+    - configure
+    - nova
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ lookup('env', 'HOME') }}/staging/{{ item.path | basename }}"
+    mode: "0644"
+  loop: "{{ edpm_nova_configmaps.files }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Configure nova user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42436 is matching with the uid and gid created by kolla in the nova containers
+      - {"name": "nova", "uid": "42436", "gid": "42436", "shell": "/bin/sh", "comment": "nova user", "groups": "libvirt"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
+
+- name: Sync nova config files
+  tags:
+    - configure
+    - nova
+  ansible.posix.synchronize:
+    src: "{{ lookup('env', 'HOME') }}/staging/"
+    dest: "{{ edpm_nova_config_dest }}"
+    recursive: true
+    delete: true
+  notify:
+    - Restart nova
+
 - name: Render nova config files
   tags:
     - configure
@@ -66,40 +123,6 @@
     - {"src": "02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
   notify:
     - Restart nova
-
-- name: Discover configmaps in {{ edpm_nova_config_src }}
-  ansible.builtin.find:
-    paths: "{{ edpm_nova_config_src }}"
-    file_type: file
-    recurse: true
-  register: edpm_nova_configmaps
-  changed_when: false
-  check_mode: false
-  delegate_to: localhost
-
-- name: Flatten configmaps into {{ edpm_nova_config_dest }}
-  tags:
-    - configure
-    - nova
-  ansible.builtin.copy:
-    src: "{{ item.path }}"
-    dest: "{{ edpm_nova_config_dest }}/{{ item.path | basename }}"
-    setype: "container_file_t"
-    mode: "0644"
-  loop: "{{ edpm_nova_configmaps.files }}"
-  notify:
-    - Restart nova
-
-- name: Configure nova user and group on the host
-  ansible.builtin.import_role:
-    name: edpm_users
-  vars:
-    edpm_users_users:
-      # 42436 is matching with the uid and gid created by kolla in the nova containers
-      - {"name": "nova", "uid": "42436", "gid": "42436", "shell": "/bin/sh", "comment": "nova user", "groups": "libvirt"}
-    edpm_users_extra_dirs: []
-  tags:
-    - edpm_users
 
 - name: Create .ssh directory for the nova user on the host
   become: true

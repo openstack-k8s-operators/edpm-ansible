@@ -154,3 +154,22 @@
         path: /etc/hosts
         line: "{{ ansible_default_ipv4.address | default('127.0.0.1') }} {{ ansible_fqdn }} {{ inventory_hostname }}"
         state: present
+
+    - name: Create container config dirs for test
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: "directory"
+        setype: "container_file_t"
+        owner: "{{ item.owner | default(ansible_user) }}"
+        group: "{{ item.group | default(ansible_user) }}"
+        mode: "{{ item.mode | default(omit) }}"
+      loop:
+        - {"path": "/var/lib/openstack/config/nova", "mode": "0755"}
+
+    - name: Create a test file to be deleted
+      become: true
+      ansible.builtin.file:
+        path: '/var/lib/openstack/config/nova/test.conf'
+        state: touch
+        mode: 0644
