@@ -66,7 +66,6 @@ edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph
 
 # certs
 # FIXME: (owalsh) Disable until certs are correct https://libvirt.org/kbase/tlscerts.html
-# edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_libvirt_tls_certs_enabled: false
+edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/libvirt
 edpm_libvirt_tls_ca_src_dir: /var/lib/openstack/certs/libvirt
