@@ -1,0 +1,9 @@
+---
+
+- name: Apply packages updates
+  ansible.builtin.dnf:  # noqa: package-latest
+    name: "*"
+    state: latest
+    update_cache: true
+  tags:
+    - edpm_update
