@@ -18,3 +18,4 @@
       vars:
         edpm_libvirt_tls_cert_src_dir: /tmp/pki
         edpm_libvirt_tls_certs_enabled: true
+        edpm_libvirt_password_path: /tmp/libvirtpw

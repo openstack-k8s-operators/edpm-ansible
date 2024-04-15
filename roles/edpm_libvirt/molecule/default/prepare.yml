@@ -18,6 +18,7 @@
   hosts: all
   vars:
     edpm_libvirt_tls_cert_src_dir: /tmp/pki
+    edpm_libvirt_password_path: /tmp/libvirtpw
   pre_tasks:
     - name: set basic user fact
       set_fact:
@@ -191,6 +192,11 @@
         ownca_privatekey_path: "{{ edpm_libvirt_tls_cert_src_dir }}/ca.key"
         csr_content: "{{ csr.csr }}"
         provider: ownca
+
+    - name: Create password secret
+      ansible.builtin.copy:
+        dest: "{{ edpm_libvirt_password_path }}"
+        content: "correct horse battery staple"
 
     # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
     # currently manage the hostname on the DUT via boostrap or a dedicated role

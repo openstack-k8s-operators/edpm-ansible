@@ -62,8 +62,11 @@ edpm_libvirt_packages:
   # ceph-common is needed for ceph support to provide the ceph client lib
   # for qemu and the ceph udev rules
   - ceph-common
+  # for SASL auth
+  - cyrus-sasl-scram
 edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph
+edpm_libvirt_password_path: /var/lib/openstack/configs/{{ edpm_service_name | default('libvirt') }}/LibvirtPassword
 
 # certs
 edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/libvirt
+edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/{{ edpm_service_name | default('libvirt') }}

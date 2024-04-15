@@ -130,3 +130,33 @@
 
     - name: ensure ceph secret is configured
       ansible.builtin.include_tasks: "test-helpers/verify_ceph_secret.yaml"
+
+    - name: Load /etc/libvirt/auth.conf
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/libvirt/auth.conf
+      register: libvirt_auth_conf
+    - name: Assert that libvirt auth password is set
+      assert:
+        that:
+          - "'password=correct horse battery staple' in libvirt_auth_conf.content | b64decode | split('\n')"
+
+    - name: Get sasl users
+      become: true
+      ansible.builtin.command:
+        cmd: sasldblistusers2 -f /etc/libvirt/passwd.db
+      register: saslusers
+    - name: Assert that libvirt sasl user exists
+      assert:
+        that:
+          - "'migration@openstack: userPassword' in saslusers.stdout_lines"
+
+    - name: Load /etc/libvirt/virtproxyd.conf
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/libvirt/virtproxyd.conf
+      register: virtproxyd_conf
+    - name: Assert that sasl auth is configured
+      assert:
+        that:
+          - "'auth_tls=\"sasl\"' in virtproxyd_conf.content | b64decode | split('\n')"

@@ -1,5 +1,11 @@
 ---
 
+- name: Get libvirt password
+  ansible.builtin.set_fact:
+    sasl_password: "{{ lookup('file', edpm_libvirt_password_path, lstrip=false, rstrip=false) }}"
+  no_log: true
+  when: edpm_libvirt_tls_certs_enabled|bool
+
 - name: Create libvirt config dir
   tags:
     - configure
@@ -27,20 +33,40 @@
   become: true
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "/etc/libvirt/{{ item.dest }}"
-    mode: "0640"
+    dest: "/etc/{{ item.dest }}"
+    mode: "{{ item.mode | default('0640') }}"
     # FIXME: update to libvirt user/group
     owner: "root"
     group: "root"
   loop:
-    - {"src": "virtlogd.conf", "dest": "virtlogd.conf"}
-    - {"src": "virtnodedevd.conf", "dest": "virtnodedevd.conf"}
-    - {"src": "virtproxyd.conf", "dest": "virtproxyd.conf"}
-    - {"src": "virtqemud.conf", "dest": "virtqemud.conf"}
-    - {"src": "qemu.conf.j2", "dest": "qemu.conf"}
-    - {"src": "virtsecretd.conf", "dest": "virtsecretd.conf"}
+    - {"src": "virtlogd.conf", "dest": "libvirt/virtlogd.conf"}
+    - {"src": "virtnodedevd.conf", "dest": "libvirt/virtnodedevd.conf"}
+    - {"src": "virtproxyd.conf", "dest": "libvirt/virtproxyd.conf"}
+    - {"src": "virtqemud.conf", "dest": "libvirt/virtqemud.conf"}
+    - {"src": "qemu.conf.j2", "dest": "libvirt/qemu.conf"}
+    - {"src": "virtsecretd.conf", "dest": "libvirt/virtsecretd.conf"}
+    - {"src": "auth.conf", "dest": "libvirt/auth.conf", "mode": "0600"}
+    - {"src": "sasl_libvirt.conf", "dest": "sasl2/libvirt.conf"}
   notify:
     - Restart libvirt
+
+- name: Configure libvirt sasl credentials
+  tags:
+    - configure
+    - libvirt
+  become: true
+  block:
+    - name: Add libvirt password to sasl db
+      ansible.builtin.command:
+        cmd: saslpasswd2 -f /etc/libvirt/passwd.db -p -a libvirt -u openstack migration
+        stdin: "{{ sasl_password }}"
+      changed_when: true
+      when: edpm_libvirt_tls_certs_enabled|bool
+    - name: Remove libvirt sasl db
+      ansible.builtin.file:
+        path: /etc/libvirt/passwd.db
+        state: absent
+      when: not edpm_libvirt_tls_certs_enabled|bool
 
 - name: Create libvirt socket activation drop-in directories
   tags:
