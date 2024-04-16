@@ -17,7 +17,8 @@
     - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
     - {"path": "/etc/pki/libvirt", "owner": "root", "group": "root"}
     - {"path": "/etc/pki/libvirt/private", "owner": "root", "group": "root"}
-    - {"path": "/etc/pki/CA/libvirt", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/CA", "owner": "root", "group": "root"}
+    - {"path": "/etc/pki/qemu", "owner": "root", "group": "qemu"}
 
 - name: Render libvirt config files
   tags:
@@ -109,7 +110,7 @@
     persistent: true
     state: true
 
-- name: Move TLS files to the right location on the compute node
+- name: Move libvirt TLS files to the right location on the compute node
   tags:
     - configure
     - libvirt
@@ -119,7 +120,7 @@
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/libvirt/private/serverkey.pem"}
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt", "dest": "/etc/pki/libvirt/clientcert.pem"}
     - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/libvirt/private/clientkey.pem"}
-    - {"src": "{{ edpm_libvirt_tls_ca_src_dir }}/ca.crt", "dest": "/etc/pki/CA/cacert.pem"}
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/ca.crt", "dest": "/etc/pki/CA/cacert.pem"}
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -127,4 +128,24 @@
     mode: "0600"
     owner: "root"
     group: "root"
+  when: edpm_libvirt_tls_certs_enabled
+
+- name: Move qemu TLS files to the right location on the compute node
+  tags:
+    - configure
+    - libvirt
+  become: true
+  loop:
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt", "dest": "/etc/pki/qemu/server-cert.pem"}
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/qemu/server-key.pem"}
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.crt", "dest": "/etc/pki/qemu/client-cert.pem"}
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/tls.key", "dest": "/etc/pki/qemu/client-key.pem"}
+    - {"src": "{{ edpm_libvirt_tls_cert_src_dir }}/ca.crt", "dest": "/etc/pki/qemu/ca-cert.pem"}
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: true
+    mode: "0640"
+    owner: "root"
+    group: "qemu"
   when: edpm_libvirt_tls_certs_enabled
