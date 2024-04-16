@@ -98,6 +98,15 @@
         name: NetworkManager
         state: reloaded
 
+- name: Stop dhclient from updating resolv.conf
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/dhcp/dhclient-enter-hooks
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      make_resolv_conf() { : ; }
+
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
 
