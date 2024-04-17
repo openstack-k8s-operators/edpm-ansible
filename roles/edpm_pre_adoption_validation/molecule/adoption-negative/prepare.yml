@@ -29,7 +29,7 @@
         state: "directory"
         mode: "0777"
       loop:
-        - {"path": "/var/lib/config-data/puppet-generated/nova/etc/nova/"}
+        - {"path": "/var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/"}
         - {"path": "/var/lib/config-data/puppet-generated/neutron/etc/neutron/"}
 
     - name: Copy old configs to simulate a tripleo deployment
@@ -41,6 +41,6 @@
         dest: "{{ item.dest }}"
         mode: preserve
       loop:
-        - {"src": "{{ test_data }}/old_nova.conf", "dest": "/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf"}
+        - {"src": "{{ test_data }}/old_nova.conf", "dest": "/var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf"}
         - {"src": "{{ test_data }}/old_neutron.conf", "dest": "/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf"}
   tasks: []
