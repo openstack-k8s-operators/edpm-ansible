@@ -4,8 +4,6 @@ net: host
 privileged: false
 user: frr
 restart: always
-healthcheck:
-  test: '/openstack/healthcheck'
 cap_add:
   - NET_BIND_SERVICE
   - NET_RAW
