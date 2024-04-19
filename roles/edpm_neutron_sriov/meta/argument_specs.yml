@@ -38,6 +38,11 @@ argument_specs:
           - /var/log/containers/neutron:/var/log/neutron:z
         description: List of volumes in a mount point form.
         type: list
+      edpm_neutron_sriov_tls_enabled:
+        default: false
+        description: >
+          Should TLS cacerts be configured for neutron sriov
+        type: bool
       edpm_neutron_sriov_DEFAULT_debug:
         default: false
         description: "Enable or disable DEBUG mode in the Neutron agent"
