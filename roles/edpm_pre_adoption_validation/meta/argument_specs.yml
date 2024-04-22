@@ -12,3 +12,7 @@ argument_specs:
         type: str
         default: /var/lib/config-data/puppet-generated/neutron/etc/neutron/nova.conf
         description: The path of the pre-adoption version of the neutron.conf file on the node
+      edpm_pre_adoption_validation_hostname_enabled:
+        type: bool
+        default: true
+        description: Whether the hostname checks are executed.

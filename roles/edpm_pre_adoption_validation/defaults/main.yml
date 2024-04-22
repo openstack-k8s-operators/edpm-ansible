@@ -18,3 +18,5 @@
 # All variables intended for modification should be placed in this file.
 edpm_pre_adoption_validation_old_nova_config: /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf
 edpm_pre_adoption_validation_old_neutron_config: /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf
+
+edpm_pre_adoption_validation_hostname_enabled: true
