@@ -11,6 +11,11 @@ volumes:
   {%- set edpm_neutron_dhcp_volumes =
           edpm_neutron_dhcp_volumes +
           edpm_neutron_dhcp_common_volumes %}
+{%- if edpm_neutron_dhcp_tls_enabled | bool %}
+  {%- set edpm_neutron_dhcp_volumes =
+          edpm_neutron_dhcp_volumes +
+          edpm_neutron_dhcp_tls_volumes %}
+{%- endif -%}
   {{ edpm_neutron_dhcp_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

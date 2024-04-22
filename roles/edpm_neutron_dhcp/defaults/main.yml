@@ -40,6 +40,11 @@ edpm_neutron_dhcp_common_volumes:
   - "{{ edpm_neutron_dhcp_agent_lib_dir }}/dhcp_agent_dnsmasq_wrapper:/usr/local/bin/dnsmasq:ro"
   - "{{ edpm_neutron_dhcp_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
 
+edpm_neutron_dhcp_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+edpm_neutron_dhcp_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-dhcp') }}"
+edpm_neutron_dhcp_tls_volumes:
+  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-dhcp') }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+
 # Sidecar containers settings
 edpm_neutron_dhcp_sidecar_debug: false
 edpm_neutron_dhcp_sidecar_haproxy_image_name: "{{ edpm_neutron_dhcp_image }}"
