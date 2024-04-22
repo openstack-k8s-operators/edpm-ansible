@@ -11,6 +11,11 @@ volumes:
   {%- set edpm_neutron_ovn_volumes =
           edpm_neutron_ovn_volumes +
           edpm_neutron_ovn_common_volumes %}
+{%- if edpm_neutron_ovn_tls_enabled | bool %}
+{%- set edpm_neutron_ovn_volumes =
+        edpm_neutron_ovn_volumes +
+        edpm_neutron_ovn_tls_volumes %}
+{%- endif -%}
   {{ edpm_neutron_ovn_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
