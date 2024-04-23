@@ -1,0 +1,37 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Get the command line args of the node
+  ansible.builtin.slurp:
+    src: "/proc/cmdline"
+  register: cmdline_encoded
+
+- name: Save the decoded cmdline
+  ansible.builtin.set_fact:
+    cmdline: "{{ cmdline_encoded['content'] | b64decode }}"
+
+- name: Validate that kernel args do not change
+  ansible.builtin.debug:
+    msg: "Validating that '{{ edpm_kernel_args | default('') }}' in '{{ cmdline }}'"
+  # NOTE(gibi): This is the logic how the epdm_kernel role decides if a
+  # host reboot is needed due to changed kernel args. It might be too strict
+  # but if the deployment logic is this strict then the validation logic needs
+  # to be strict as well to avoid any changes during adoption that later would
+  # lead to reboot.
+  # In the other hand neither the edpm_kernel role during deployment and
+  # adoption nor this adoption check enforces to list the existing kernel args
+  # in edpm_kernel_args ansible variable.
+  failed_when: not (cmdline | regex_search( '^.*' + edpm_kernel_args | default('') + '.*$' | string ))

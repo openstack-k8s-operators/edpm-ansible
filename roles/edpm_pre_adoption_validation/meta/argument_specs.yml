@@ -16,3 +16,7 @@ argument_specs:
         type: bool
         default: true
         description: Whether the hostname checks are executed.
+      edpm_pre_adoption_validation_kernel_args_enabled:
+        type: bool
+        default: true
+        description: Whether the kernel argument checks are executed.
