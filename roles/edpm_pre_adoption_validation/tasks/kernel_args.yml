@@ -23,6 +23,13 @@
   ansible.builtin.set_fact:
     cmdline: "{{ cmdline_encoded['content'] | b64decode }}"
 
+- name: Calculate hugepages into edpm_kernel_args
+  # these tasks modify the edpm_kernel_args value based on the
+  # edpm_kernel_hugepages value so we can cleanly reuse them
+  ansible.builtin.include_role:
+    name: edpm_kernel
+    tasks_from: hugepages
+
 - name: Validate that kernel args do not change
   ansible.builtin.debug:
     msg: "Validating that '{{ edpm_kernel_args | default('') }}' in '{{ cmdline }}'"
