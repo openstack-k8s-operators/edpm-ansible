@@ -178,5 +178,8 @@
     owner: nova
     group: nova
     mode: "0400"
-    attributes: "+i"
+    # NOTE(gibi): podman 4.6.0 (OSP 17.1) has a race condition that leads to
+    # container startup failure if a mounted file has the attribute set
+    # while podman 4.9.4 (OSP 18) does not show this issue
+    # attributes: "+i"
   when: compute_id.stat.exists
