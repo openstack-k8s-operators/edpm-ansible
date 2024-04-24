@@ -26,10 +26,10 @@ edpm_ovn_bgp_agent_expose_tenant_networks: false
 edpm_ovn_bgp_agent_expose_ipv6_gua_tenant_networks: false
 edpm_ovn_bgp_agent_driver: nb_ovn_bgp_driver
 edpm_ovn_bgp_agent_exposing_method: ''  # default is 'underlay'
-edpm_ovn_bgp_agent_private_key: /etc/pki/tls/private/ovn_bgp_agent.key
-edpm_ovn_bgp_agent_certificate: /etc/pki/tls/certs/ovn_bgp_agent.crt
-edpm_ovn_bgp_agent_ca_cert: /etc/ipa/ca.crt
-edpm_ovn_bgp_agent_internal_tls_enable: false
+edpm_ovn_bgp_agent_private_key: /etc/pki/tls/private/ovndb.key
+edpm_ovn_bgp_agent_certificate: /etc/pki/tls/certs/ovndb.crt
+edpm_ovn_bgp_agent_ca_cert: /etc/pki/tls/certs/ovndbca.crt
+edpm_ovn_bgp_agent_internal_tls_enable: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_ovn_bgp_agent_config_basedir: "/var/lib/config-data/ansible-generated/ovn-bgp-agent"
 edpm_ovn_bgp_agent_config_src: /var/lib/openstack/configs/ovn-bgp-agent
 edpm_ovn_bgp_agent_bgp_as: 64999
@@ -58,19 +58,16 @@ edpm_ovn_bgp_agent_common_volumes:
   - /etc/localtime:/etc/localtime:ro
   - /dev/log:/dev/log
   - /etc/iproute2:/etc/iproute2
-  - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
-  - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
-  - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-  - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
-  - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
   - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
   - /var/lib/config-data/ansible-generated/ovn-bgp-agent:/var/lib/kolla/config_files/src:ro
   - /run/frr:/run/frr:shared,z
   - /run/openvswitch:/run/openvswitch:shared,z
 
 edpm_ovn_bgp_agent_tls_volumes:
-  - /etc/pki/tls/certs/ovn_bgp_agent.crt:/etc/pki/tls/certs/ovn_bgp_agent.crt
-  - /etc/pki/tls/private/ovn_bgp_agent.key:/etc/pki/tls/private/ovn_bgp_agent.key
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn-bgp-agent') }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn-bgp-agent') }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn-bgp-agent') }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('ovn-bgp-agent') }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
   # we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
 
@@ -128,6 +125,4 @@ edpm_ovn_bgp_agent_local_ovn_sb_volumes:
 edpm_ovn_bgp_agent_local_ovn_northd_volumes:
   - /var/lib/kolla/config_files/northd.json:/var/lib/kolla/config_files/config.json:ro
 
-edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes:
-  - /etc/pki/tls/certs/:/etc/pki/tls/certs/
-  - /etc/pki/tls/private/:/etc/pki/tls/private/
+edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes: "{{ edpm_ovn_bgp_agent_tls_volumes }}"

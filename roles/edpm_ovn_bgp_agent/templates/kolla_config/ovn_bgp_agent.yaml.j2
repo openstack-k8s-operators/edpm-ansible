@@ -14,13 +14,3 @@ permissions:
   - path: /var/log/ovn
     owner: root:root
     recurse: true
-{% if edpm_ovn_bgp_agent_internal_tls_enable == true %}
-  - path: /etc/pki/tls/certs/ovn_bgp_agent.crt
-    owner: ovn-bgp:ovn-bgp
-    optional: true
-    perm: '0644'
-  - path: /etc/pki/tls/private/ovn_bgp_agent.key
-    owner: ovn-bgp:ovn-bgp
-    optional: true
-    perm: '0640'
-{% endif %}
