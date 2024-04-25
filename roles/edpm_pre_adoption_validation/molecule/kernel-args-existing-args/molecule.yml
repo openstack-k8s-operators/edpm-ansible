@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+platforms:
+- name: edpm-0
+  command: /sbin/init
+  dockerfile: ../../../../molecule/common/Containerfile.j2
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  registry:
+    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+  ulimits:
+  - host
+provisioner:
+  name: ansible
+  inventory:
+    hosts:
+      all:
+        vars:
+          edpm_pre_adoption_validation_hostname_enabled: false
+          # this is a kernel arg that by default defined in the test env
+          # we use this to simulate that what is requested during adoption
+          # is already configured
+          edpm_kernel_args: "console=ttyS0"
+        hosts:
+          edpm-0:
+            canonical_hostname: edpm-0.localdomain
+
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+     - destroy
+     - create
+     - prepare
+     - converge

@@ -47,77 +47,8 @@
           ansible.builtin.set_fact:
             _workload_protection: true
 
-- name: EDPM Hugepages configuration
-  vars:
-    _converted_hugepages: {}
-    _nonconfig_hugepages: {}
-    _hugepages_modification: false
-  when: edpm_kernel_hugepages | length
-  block:
-    - name: Rewrite edpm_kernel_hugepages to use integers as keys
-      ansible.builtin.set_fact:
-        _edpm_kernel_hugepages: "{{ _edpm_kernel_hugepages | default({}) | combine({hp.key | int: hp.value}) }}"
-      loop: "{{ edpm_kernel_hugepages | dict2items }}"
-      loop_control:
-        loop_var: hp
-
-    - name: Parsing running hugepage configuration from /proc/cmdline
-      when: >
-        "default_hugepagesz" in cmdline
-      ansible.builtin.import_tasks: hugepages_parsing.yaml
-      vars:
-        cmdline_text: "{{ cmdline }}"
-
-    - name: Validating hugepage config from /proc/cmdline against EDPM parameter
-      ansible.builtin.import_tasks: hugepages_validations.yaml
-
-    - name: Rewrite kernel args
-      when: _hugepages_modification
-      block:
-        - name: Warn about possible modifications
-          ansible.builtin.debug:
-            msg: |
-              EDPM hugepage modification differs from how the host is actually having.
-              Current default pagesize: {{ _configured_default_size | default("None configured") }}
-              EDPM default pagesize: {{ _edpm_default_hugepages }}
-              Desired default pagesize: {{ _desired_default_hugepages }}
-
-              From EDPM Hugepages configuration:
-              {% for pagesize, config in _edpm_kernel_hugepages.items() %}
-              - {{ pagesize }}
-                expected: {{ config.count }} pages
-                default: {{ config.default | default(false) }}
-                current: {{ _converted_hugepages.get(pagesize | int, 0) }}
-              {% endfor %}
-              {% if _nonconfig_hugepages | length %}
-              There's also some hugepages on the host that are not part of the EDPM configuration
-              {% for pagesize, config in _nonconfig_hugepages.items() %}
-              - {{ pagesize }}: {{ config }} pages
-              {% endfor %}
-              {% endif %}
-
-        - name: Remove hugepage settings from kernelargs
-          ansible.builtin.set_fact:
-            _kernel_args: >-
-              {{ edpm_kernel_args | regex_replace('[\s]*(default_)*hugepages[z]*=[\S]+[\s]*', ' ') }}
-              default_hugepagesz={{ _desired_default_hugepages }}
-              {% for hp, values in _edpm_kernel_hugepages.items() -%}
-              hugepagesz={{ hp }} hugepages={{ values.count }}
-              {% endfor -%}
-              {% if not edpm_kernel_hugepages_remove | bool -%}
-              {% for hp, values in _nonconfig_hugepages.items() -%}
-              hugepagesz={{ hp }} hugepages={{ values }}
-              {% endfor -%}
-              {% endif -%}
-
-        - name: Cleaning up whitespaces
-          ansible.builtin.set_fact:
-            edpm_kernel_args: >-
-              {{ _kernel_args |
-                regex_replace('[\s]+default_hugepagesz=', ' default_hugepagesz=') |
-                regex_replace('[\s]+', ' ') |
-                regex_replace('[\s]+$', '')
-              }}
+- name: Handle hugepages
+  ansible.builtin.include_tasks: hugepages.yml
 
 - name: Check if the kernelargs entry is already present in the file
   ansible.builtin.replace:
