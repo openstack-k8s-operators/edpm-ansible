@@ -1,0 +1,49 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# NOTE(gibi): We need this trick as these tasks depend on the
+# edpm_tuned_profile variable. If that var is not provided in the inventory
+# then it is defaulted by the edpm_tuned role to a non trivial default value.
+- name: Include defaults from edpm_tuned
+  when: edpm_tuned_profile is undefined
+  ansible.builtin.include_vars: "{{ role_path }}/../edpm_tuned/defaults/main.yml"
+
+- name: Check if an active profile file exists
+  ansible.builtin.stat:
+    path: "/etc/tuned/active_profile"
+  register: edpm_tuned_active_profile_file
+
+- name: Load tuned active profile
+  ansible.builtin.slurp:
+    src: "/etc/tuned/active_profile"
+  register: edpm_tuned_active_profile
+  when: edpm_tuned_active_profile_file.stat.exists
+
+- name: Validate that there is active tuned profile
+  when: not edpm_tuned_active_profile_file.stat.exists
+  ansible.builtin.fail:
+    msg: >-
+      There is no active tuned profile. During adoption this would cause a
+      new profile configured but that would require a reboot.
+
+- name: Validate that current active tuned profile won't change
+  when: edpm_tuned_active_profile_file.stat.exists
+  ansible.builtin.debug:
+    msg: >-
+     Validating that the current profile
+     '{{ (edpm_tuned_active_profile['content'] | b64decode).strip() }}' is the
+     same as the new profile '{{ edpm_tuned_profile }}'
+  failed_when: edpm_tuned_profile != (edpm_tuned_active_profile['content'] | b64decode).strip()

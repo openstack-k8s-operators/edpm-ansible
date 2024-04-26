@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Converge
+      block:
+        - name: "Include role"
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_pre_adoption_validation
+
+        - name: "Check execution halted"
+          ansible.builtin.fail:
+            msg: "Execution should stop before this task"
+          register: should_not_run
+      rescue:
+        - name: Asset that role failed
+          ansible.builtin.assert:
+            that:
+              - should_not_run is not defined
