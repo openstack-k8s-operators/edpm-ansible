@@ -1,7 +1,11 @@
 max_files = 32768
 max_processes = 131072
+{% if edpm_libvirt_tls_certs_enabled|bool %}
+vnc_tls = 1
+vnc_tls_x509_verify = 1
+{% else -%}
 vnc_tls = 0
-vnc_tls_x509_verify = 0
+{% endif %}
 # NOTE(gibi): In tripleo the default range was intentionally changed to avoid
 # port usage conflicts. See https://review.openstack.org/#/c/561784
 migration_port_min = 61152
