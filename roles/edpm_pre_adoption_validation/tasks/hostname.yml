@@ -64,5 +64,5 @@
       ansible.builtin.debug:
         msg:
           - "canonical_hostname: {{ canonical_hostname }}"
-          - "old nova service host config: {{ nova_old_config_output.stdout | default('not found')}}"
-          - "old neutron service host config: {{ neutron_old_config_output.stdout | default('not found')}}"
+          - "old nova service host config: {{ nova_old_config_output.stdout | default('not found') }}"
+          - "old neutron service host config: {{ neutron_old_config_output.stdout | default('not found') }}"

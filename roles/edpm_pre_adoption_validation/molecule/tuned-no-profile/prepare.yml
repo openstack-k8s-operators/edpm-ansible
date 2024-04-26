@@ -1,5 +1,5 @@
 ---
-# Copyright 2024 Red Hat, Inc.
+# Copyright 2023 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,14 +15,17 @@
 # under the License.
 
 
-- name: Validate hostname
-  when: edpm_pre_adoption_validation_hostname_enabled
-  ansible.builtin.include_tasks: hostname.yml
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps  # noqa: role-name[path]
+    - role: osp.edpm.env_data
+- name: Setup DUT
+  hosts: all
+  # NOTE(gibi): we intentionally not configure any tuned profile for this test
+  # to simulate the that there is no tuned configure in the node before
+  # adoption. We expect that the pre-adoption check fails as during adoption
+  # tuned would be configured.
 
-- name: Validate kernel_args
-  when: edpm_pre_adoption_validation_kernel_args_enabled
-  ansible.builtin.include_tasks: kernel_args.yml
-
-- name: Validate tuned profile
-  when: edpm_pre_adoption_validation_tuned_enabled
-  ansible.builtin.include_tasks: tuned.yml
+  pre_tasks: []
+  tasks: []
