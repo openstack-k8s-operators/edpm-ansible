@@ -17,7 +17,8 @@
 
 # All variables intended for modification should be placed in this file.
 
-edpm_reboot_force_reboot: false
-edpm_reboot_nova_compute_config_dir: /var/lib/openstack/config/nova
+edpm_reboot_strategy: auto
+edpm_reboot_old_tripleo_node_config_dir: /var/lib/config-data
+edpm_reboot_edpm_node_config_dir: /var/lib/openstack/config
 edpm_reboot_timeout_reboot: 3600
 edpm_reboot_post_reboot_delay: 60
