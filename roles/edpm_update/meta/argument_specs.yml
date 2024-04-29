@@ -13,3 +13,8 @@ argument_specs:
         type: bool
         default: true
         description: Toggle to enable/disable containers updates
+      edpm_update_exclude_packages:
+        type: list
+        default:
+          - opensvswitch
+        description: List of packages to exclude from the update
