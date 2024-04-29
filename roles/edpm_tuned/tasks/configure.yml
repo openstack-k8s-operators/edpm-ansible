@@ -66,6 +66,19 @@
     - (edpm_tuned_isolated_cores | length) > 0
     - (edpm_tuned_conf_stat_result.stat.exists | bool)
 
+- name: "Configure c-state if profile is powersave: {{ edpm_tuned_profile }}"
+  ansible.builtin.lineinfile:
+    dest: "/etc/tuned/{{ edpm_tuned_profile }}-variables.conf"
+    mode: '0644'
+    regexp: '^max_power_state=cstate.name.*'
+    line: 'max_power_state=cstate.name:{{ edpm_tuned_max_power_cstate }}'
+  become: true
+  when:
+    - edpm_tuned_max_power_cstate is defined
+    - (edpm_tuned_max_power_cstate | length) > 0
+    - (edpm_tuned_conf_stat_result.stat.exists | bool)
+    - (edpm_tuned_profile == 'cpu-partitioning-powersave')
+
 - name: Enable tuned profile
   ansible.builtin.command: >-
     /usr/sbin/tuned-adm profile {{ edpm_tuned_profile }}
