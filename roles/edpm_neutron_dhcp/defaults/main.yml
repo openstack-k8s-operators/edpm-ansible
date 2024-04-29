@@ -24,7 +24,7 @@ edpm_neutron_dhcp_images_download_delay: 5
 # number of retries for download tasks
 edpm_neutron_dhcp_images_download_retries: 5
 
-edpm_neutron_dhcp_agent_config_src: "/var/lib/openstack/configs/neutron-dhcp"
+edpm_neutron_dhcp_agent_config_src: "/var/lib/openstack/configs/{{ edpm_service_name | default('neutron-dhcp') }}"
 edpm_neutron_dhcp_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"
 edpm_neutron_dhcp_agent_lib_dir: "/var/lib/neutron"
 edpm_neutron_dhcp_image: "quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified"
@@ -43,7 +43,7 @@ edpm_neutron_dhcp_common_volumes:
 edpm_neutron_dhcp_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_neutron_dhcp_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-dhcp') }}"
 edpm_neutron_dhcp_tls_volumes:
-  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-dhcp') }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+  - "{{ edpm_neutron_dhcp_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
 # Sidecar containers settings
 edpm_neutron_dhcp_sidecar_debug: false
