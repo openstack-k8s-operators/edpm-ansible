@@ -17,6 +17,6 @@
 
 # All variables intended for modification should be placed in this file.
 # Directory in the ansibleEE container
-edpm_telemetry_logging_config_src: /var/lib/openstack/configs/logging
+edpm_telemetry_logging_config_src: "/var/lib/openstack/configs/{{ edpm_service_name | default('logging') }}"
 # Directory of rsyslog config in the compute node
 edpm_telemetry_rsyslog_config_dest: /etc/rsyslog.d
