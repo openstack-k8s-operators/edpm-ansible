@@ -131,6 +131,7 @@ argument_specs:
         description: Image used to spawn haproxy sidecar containers.
         type: str
       edpm_neutron_metadata_agent_tls_enabled:
+        type: bool
         default: false
         description: >
           Enable TLS for ovnsb connection
