@@ -155,16 +155,13 @@
 - name: Reboot block
   when:
     - reboot_required is defined and reboot_required
+    - grub_file_entry_check is changed
     - not edpm_kernel_defer_reboot|bool
     - not _workload_protection|default(false)|bool
   block:
     - name: Reboot tasks
       ansible.builtin.include_tasks: reboot.yaml
-      when:
-        - grub_file_entry_check is not changed
 
-    - name: Skipping reboot for deployed node
+    - name: Skipping automated reboot for deployed node
       ansible.builtin.debug:  # noqa: no-handler
-        msg: "Reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
-      when:
-        - grub_file_entry_check is changed
+        msg: "Automatic reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
