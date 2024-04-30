@@ -33,6 +33,12 @@ argument_specs:
           for example: 2,4-7 .
           Please note that the value may be rendered in a different .conf
           file, depending on your local setup.
+      edpm_tuned_max_power_cstate:
+        type: str
+        default: ""
+        description: >
+          String which specifies maximum powerstate for idling cores
+          for example, C6|140.
       edpm_tuned_system_packages_default:
         type: list
         description: >
