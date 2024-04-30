@@ -1,0 +1,21 @@
+---
+- name: Update openvswitch packages
+  tags:
+    - update
+    - ovs
+  become: true
+  ansible.builtin.shell: >
+    dnf update -y openvswitch --setopt=tsflags=noscripts
+  register: update_ovs_result
+  failed_when: update_ovs_result.rc != 0
+
+- name: Ensure openvswitch service is reloaded
+  become: true
+  tags: 
+    - reload
+    - ovs
+  ansible.builtin.systemd_service:
+    name: openvswitch.service
+    daemon_reload: true
+    state: reloaded
+    masked: false
