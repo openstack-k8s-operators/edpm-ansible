@@ -1,0 +1,9 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check if unit file exists and fail if it does
+      ansible.builtin.file:
+        path: /usr/lib/systemd/system/fake-tripleo-service.service
+        state: absent
+      check_mode: true

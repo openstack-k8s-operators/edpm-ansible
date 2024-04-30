@@ -1,0 +1,35 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+argument_specs:
+  # roles/edpm_tripleo_cleanup/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_tripleo_cleanup role.
+    options:
+      edpm_old_tripleo_services:
+        type: "list"
+        description: |
+          List of tripleo services to be disabled and stopped.
+          If the list is empty, all services containing string 'tripleo'
+          in their names will be disabled, stopped and masked.
+        default: []
+      edpm_remove_tripleo_unit_files:
+        type: "bool"
+        description: |
+          Remove unit files after disabling services.
+          This operation is irreversible. Furthermore, issues may occur,
+          if the unit files are managed by package manager.
+        default: true
