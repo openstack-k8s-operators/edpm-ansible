@@ -116,6 +116,7 @@ argument_specs:
           - "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn_metadata_haproxy_wrapper:/usr/local/bin/haproxy:ro"
           - "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
         description: ''
+        elements: str
         type: list
       edpm_neutron_metadata_agent_config_dir:
         default: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
@@ -130,10 +131,13 @@ argument_specs:
         description: Image used to spawn haproxy sidecar containers.
         type: str
       edpm_neutron_metadata_agent_tls_enabled:
+        type: bool
         default: false
         description: >
           Enable TLS for ovnsb connection
       edpm_neutron_metadata_tls_volumes:
+        type: list
+        elements: str
         default:
           - /var/lib/openstack/certs/neutron_metadata_agent/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z

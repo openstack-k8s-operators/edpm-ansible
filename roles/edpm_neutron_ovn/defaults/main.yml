@@ -7,7 +7,7 @@ edpm_neutron_ovn_images_download_delay: 5
 # number of retries for download tasks
 edpm_neutron_ovn_images_download_retries: 5
 
-edpm_neutron_ovn_config_src: /var/lib/openstack/configs/neutron-ovn
+edpm_neutron_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_service_name | default('neutron-ovn') }}"
 edpm_neutron_ovn_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-agent
 edpm_neutron_ovn_agent_log_dir: "/var/log/neutron"
 

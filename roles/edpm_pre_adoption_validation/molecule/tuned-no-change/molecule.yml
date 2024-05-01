@@ -19,10 +19,8 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
-          edpm_pre_adoption_validation_tuned_enabled: false
-          # this is a kernel arg isn't defined in the test env therefore
-          # we can use it for a negative scenario where the check fails
-          edpm_kernel_args: "test=1"
+          # NOTE(gibi): edpm_tuned_profile defaulted by the edpm_tuned_role
+          # edpm_tuned_profile: throughput-performance
         hosts:
           edpm-0:
             canonical_hostname: edpm-0.localdomain
