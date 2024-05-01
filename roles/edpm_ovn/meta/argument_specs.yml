@@ -92,7 +92,7 @@ argument_specs:
           Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-ofctrl-wait-before-clear`.
         type: int
       ovn_match_northd_version:
-        default: true
+        default: false
         description: >
           Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-match-northd-version`
         type: bool
