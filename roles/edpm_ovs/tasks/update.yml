@@ -1,15 +1,15 @@
 ---
-- name: Update openvswitch packages
+- name: Update openvswitch packages without stopping the service
+  become: true
   tags:
     - update
     - ovs
-  become: true
   ansible.builtin.shell: >
     dnf update -y openvswitch --setopt=tsflags=noscripts
   register: update_ovs_result
   failed_when: update_ovs_result.rc != 0
 
-- name: Ensure openvswitch service is reloaded
+- name: Reload openvswitch service
   become: true
   tags: 
     - reload
@@ -19,3 +19,4 @@
     daemon_reload: true
     state: reloaded
     masked: false
+  when: '"Nothing to do." not in update_ovs_result.stdout_lines'

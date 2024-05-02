@@ -1,4 +1,14 @@
 ---
+- name: Import edpm_ovs role for independent openvswitch update
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_ovs
+    tasks_from: update
+
+- name: Ensure openvswitch is excluded from bulk update
+  ansible.builtin.set_fact:
+    edpm_update_exclude_packages: "{{ edpm_update_exclude_packages + ['openvswitch'] }}"
+  when:
+    "'openvswitch' not in edpm_update_exclude_packages"
 
 - name: Apply packages updates
   ansible.builtin.dnf:  # noqa: package-latest
@@ -8,3 +18,7 @@
     exclude: "{{ edpm_update_exclude_packages }}"
   tags:
     - edpm_update
+    # FIXME: investigate why this update fails with:
+    # file /usr/lib64/ossl-modules/fips.so from install of openssl-libs-1:3.2.1-1.el9.x86_64
+    # conflicts with file from package openssl-fips-provider-3.0.7-2.el9.x86_64
+    - notest

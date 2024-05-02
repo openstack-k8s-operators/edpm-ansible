@@ -18,4 +18,12 @@
 - name: Prepare
   hosts: all
   roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      # FIXME: call edpm_ovs role instead using test_deps. openvswitch
+      # has special ways of getting enabled and started
+      test_deps_edpm_packages:
+          #FIXME, version should be picked programmatically
+          - rdo-openvswitch-3.2
     - role: osp.edpm.env_data

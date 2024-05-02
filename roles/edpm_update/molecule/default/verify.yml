@@ -1,0 +1,14 @@
+- name: Verify OVS update
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Ensure openvswitch services are active and enabled
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "openvswitch.service",
+            "enabled": "enabled" }
+        - { "name": "ovs-vswitchd.service",
+            "enabled": "enabled" }
+        - { "name": "ovsdb-server.service",
+            "enabled": "enabled" }
