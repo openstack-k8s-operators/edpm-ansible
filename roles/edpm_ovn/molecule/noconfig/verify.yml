@@ -16,3 +16,9 @@
         /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-encap-type
       register: output
       failed_when: output.stdout != 'vxlan'
+
+    - name: Verify ovn-encap-tos
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-encap-tos
+      register: output
+      failed_when: output.stdout != '"0"'
