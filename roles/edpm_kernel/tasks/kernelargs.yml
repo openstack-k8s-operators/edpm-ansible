@@ -99,14 +99,29 @@
         - /boot/efi/EFI/centos
         - /boot/efi/EFI/fedora
 
+    - name: Check if grub2-mkconfig has --update-bls-cmdline option
+      ansible.builtin.shell:
+        cmd: grub2-mkconfig --help | grep '\-\-update-bls-cmdline'
+      ignore_errors: true
+      register: check_update_bls_cmdline
+      changed_when: false
+
     - name: Generate grub config
-      ansible.builtin.command: "grub2-mkconfig -o /boot/grub2/grub.cfg"
+      ansible.builtin.command: >-
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+        {{ '--update-bls-cmdline'
+        if check_update_bls_cmdline.rc == 0
+        else '' }}
       register: _grub2_mkconfig
       changed_when: _grub2_mkconfig.rc == 0
       failed_when: _grub2_mkconfig.rc != 0
 
     - name: Generate EFI grub config
-      ansible.builtin.command: "grub2-mkconfig -o {{ item.stat.path }}/grub.cfg"
+      ansible.builtin.command: >-
+        grub2-mkconfig -o {{ item.stat.path }}/grub.cfg
+        {{ '--update-bls-cmdline'
+        if check_update_bls_cmdline.rc == 0
+        else '' }}
       when: item.stat.exists | bool
       loop: "{{ grub_stat.results }}"
       register: _grub2_mkconfig_efi
