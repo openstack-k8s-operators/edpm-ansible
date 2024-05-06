@@ -1,6 +1,7 @@
 ---
 
 - name: Apply packages updates
+  become: true
   ansible.builtin.dnf:  # noqa: package-latest
     name: "*"
     state: latest

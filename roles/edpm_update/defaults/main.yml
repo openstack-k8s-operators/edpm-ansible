@@ -26,3 +26,5 @@ edpm_update_enable_containers_update: true
 # List of packages to exclude from the update
 edpm_update_exclude_packages:
   - openvswitch
+
+edpm_update_running_services: "{{ edpm_services_override | default(edpm_services) }}"
