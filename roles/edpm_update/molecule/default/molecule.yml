@@ -7,7 +7,7 @@ driver:
   name: podman
 platforms:
 - command: /sbin/init
-  dockerfile: ../../../../molecule/common/Containerfile.j2
+  dockerfile: Containerfile.j2
   image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
   name: instance
   privileged: true

@@ -1,0 +1,13 @@
+
+{% if item.registry is defined %}
+FROM {{ item.registry.url }}/{{ item.image }}
+{% else %}
+FROM {{ item.image }}
+{% endif %}
+
+RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-wallaby/current/delorean.repo && \
+    dnf -y install sudo python3-libselinux selinux-policy {{ item.pkg_extras | default('') }} && \
+    dnf install -y python*tripleo-repos && \
+    dnf clean all -y
+
+CMD [ '/sbin/init' ]
