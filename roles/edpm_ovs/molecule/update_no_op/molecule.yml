@@ -12,13 +12,17 @@ platforms:
     groups:
       - compute
 provisioner:
+  log: true
   name: ansible
+  env:
+    # Non versioned package name will result in latest available
+    ovs_pre_update_version: rdo-openvswitch
   playbooks:
-    prepare: ../common/default/prepare.yml
-    cleanup: ../common/default/cleanup.yml
-verifier:
-  name: ansible
+    prepare: "../common/update/prepare.yml"
+    verify: "../common/update/verify.yml"
+    cleanup: ../common/update/cleanup.yml
 scenario:
+  name: update_no_op
   test_sequence:
     - dependency
     - destroy
@@ -28,3 +32,5 @@ scenario:
     - verify
     - cleanup
     - destroy
+verifier:
+  name: ansible

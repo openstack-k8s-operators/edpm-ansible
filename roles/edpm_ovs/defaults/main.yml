@@ -31,3 +31,5 @@ edpm_ovs_packages:
   # NOTE: pin ovs version here in the future if
   # we want to use a specific version i.e. for adoption.
   - openvswitch
+# whether to reload the openvswitch service after an update is complete
+edpm_ovs_reload_after_update: false

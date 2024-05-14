@@ -1,5 +1,20 @@
 ---
 
+- name: Import edpm_ovs role for independent openvswitch update
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_ovs
+    tasks_from: update
+  tags:
+    - edpm_update
+
+- name: Ensure openvswitch is excluded from bulk update
+  ansible.builtin.set_fact:
+    edpm_update_exclude_packages: "{{ edpm_update_exclude_packages + ['openvswitch'] }}"
+  when:
+    "'openvswitch' not in edpm_update_exclude_packages"
+  tags:
+    - edpm_update
+
 - name: Apply packages updates
   become: true
   ansible.builtin.dnf:  # noqa: package-latest

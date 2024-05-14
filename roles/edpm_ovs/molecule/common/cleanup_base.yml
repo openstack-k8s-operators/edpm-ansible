@@ -1,0 +1,23 @@
+- name: Include test_vars
+  ansible.builtin.include_vars:
+    file: ./test_vars.yml
+
+- name: Delete test directory with its content
+  become: true
+  ansible.builtin.file:
+    path: "{{working_directory}}"
+    state: absent
+
+- name: Uninstall openvswitch from the test instance
+  become: true
+  ansible.builtin.dnf:
+    name: openvswitch
+    autoremove: true
+    state: absent
+
+- name: Clean dnf cache
+  become: true
+  ansible.builtin.command:  dnf clean all
+  register: dnf_clean_result
+  changed_when: dnf_clean_result.rc == 0
+  failed_when: dnf_clean_result.rc != 0
