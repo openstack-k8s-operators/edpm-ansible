@@ -1,5 +1,6 @@
 ---
-
+# TODO(sean-k-mooney): This should be refactored to not use a lookup plugin
+# to read the password from a file on the controller.
 - name: Get libvirt password
   ansible.builtin.set_fact:
     sasl_password: "{{ lookup('file', edpm_libvirt_password_path, lstrip=false, rstrip=false) }}"

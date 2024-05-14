@@ -193,10 +193,16 @@
         csr_content: "{{ csr.csr }}"
         provider: ownca
 
+
     - name: Create password secret
       ansible.builtin.copy:
         dest: "{{ edpm_libvirt_password_path }}"
         content: "correct horse battery staple"
+      # FIXME(sean-k-mooney): this is a hack to work around
+      # the fact that the playbook uses a lookup plugin which always
+      # executes on the ansible contoller. This is needed to ensure
+      # the password is available locally when runing under vagrant.
+      delegate_to: localhost
 
     # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
     # currently manage the hostname on the DUT via boostrap or a dedicated role
