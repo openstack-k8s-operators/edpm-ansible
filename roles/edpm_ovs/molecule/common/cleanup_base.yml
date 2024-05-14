@@ -1,0 +1,16 @@
+- name: Include test_vars
+  ansible.builtin.include_vars:
+    file: ./test_vars.yml
+
+- name: Delete test directory with its content
+  become: true
+  ansible.builtin.file:
+    path: "{{working_directory}}"
+    state: absent
+
+- name: Uninstall openvswitch from the test instance
+  become: true
+  ansible.builtin.dnf:
+    name: rdo-openvswitch
+    autoremove: true
+    state: absent
