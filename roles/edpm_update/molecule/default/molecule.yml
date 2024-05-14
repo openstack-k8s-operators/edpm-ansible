@@ -19,6 +19,12 @@ provisioner:
   log: true
   name: ansible
   inventory:
+    host_vars:
+      test_vars:
+        working_directory: /tmp/molecule_test_dir
+        ovs_pid_file: ovs_pids.txt
+        ovs_flows_file: ovs_flows.txt
+        test_bridge: br-test
     hosts:
       all:
         hosts:

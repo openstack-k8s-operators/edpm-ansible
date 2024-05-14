@@ -1,0 +1,54 @@
+- name: Verify OVS update
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+    test_vars: "{{molecule_yml['provisioner']['inventory']['host_vars']['test_vars']}}"
+  tasks:
+    - name: Ensure openvswitch systemd services are in appropriate states after the update
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        # "osp_service": false, disable check for unit files in /etc/systemd/system
+        # OVS systemd unit files are located in /usr/lib/systemd/system
+        - { "name": "openvswitch.service",
+            "osp_service": false,
+            "enabled": "enabled",
+            "active":  ["active"] }
+        - { "name": "ovs-vswitchd.service",
+            "osp_service": false,
+            "enabled": "static",
+            "active":  ["active"] }
+        - { "name": "ovsdb-server.service",
+            "osp_service": false,
+            "enabled": "static",
+            "active": ["active"] }
+
+    - name: Read stored openvswitch service pids
+      ansible.builtin.slurp:
+        src: "{{test_vars['working_directory']}}/{{test_vars['ovs_pid_file']}}"
+      register: pids_before_update
+
+    - name: Collect openvswitch service pids after update
+      ansible.builtin.shell:
+        pgrep "ovs(db-server|-vswitch)"
+      register: pids_after_update
+
+    - name: Assert openvswitch service pids did not change after the update
+      ansible.builtin.assert:
+        that: pids_before_update.content | b64decode | split('\n') ==
+              pids_after_update.stdout_lines
+
+    - name: Read stored OpenFlows
+      ansible.builtin.slurp:
+        src: "{{test_vars['working_directory']}}/{{test_vars['ovs_flows_file']}}"
+      register: ovs_flows_before_update
+
+    - name: Read OpenFlows after the update
+      ansible.builtin.shell: |
+        ovs-ofctl dump-flows --no-stats "{{test_vars['test_bridge']}}"
+      register: ovs_flows_after_update
+      failed_when: ovs_flows_after_update.rc != 0
+
+    - name: Assert openvswitch flows remained unchanged after the update
+      ansible.builtin.assert:
+        that: ovs_flows_before_update.content | b64decode | split('\n') | select() ==
+              ovs_flows_after_update.stdout_lines

@@ -17,5 +17,54 @@
 
 - name: Prepare
   hosts: all
-  roles:
-    - role: osp.edpm.env_data
+  vars:
+    test_vars: "{{molecule_yml['provisioner']['inventory']['host_vars']['test_vars']}}"
+  tasks:
+    - name: "Include edpm_users with non default config for ovs"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_users"
+      vars:
+        edpm_users_users:
+          - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
+        edpm_users_extra_dirs: []
+
+    - name: Install older openvswitch version
+      ansible.builtin.import_role:
+        name:  osp.edpm.edpm_ovs
+      vars:
+        edpm_ovs_packages: [rdo-openvswitch-3.2]
+
+    - name: Create working directory for storing test facts
+      ansible.builtin.file:
+        path: "{{test_vars['working_directory']}}"
+        state: directory
+
+    - name: Collect openvswitch service pids for later validation
+      ansible.builtin.shell: |
+        pgrep "ovs(db-server|-vswitch)"
+      register: pids_before_update
+      failed_when: (pids_before_update.rc != 0) or
+                   (pids_before_update.stdout_lines | length == 0)
+
+    - name: Save openvswitch service pids for later validation
+      ansible.builtin.copy:
+        content: "{{pids_before_update.stdout}}"
+        dest: "{{test_vars['working_directory']}}/{{test_vars['ovs_pid_file']}}"
+
+    - name: Add dummy OpenFlows
+      ansible.builtin.shell: |
+        set -eo pipefail
+        ovs-vsctl add-br "{{test_vars['test_bridge']}}"
+        ovs-ofctl add-flow "{{test_vars['test_bridge']}}" arp,nw_dst=192.168.0.1,actions=drop
+        ovs-ofctl add-flow "{{test_vars['test_bridge']}}" dl_vlan=123,actions=output:1,mod_vlan_vid:456
+        ovs-ofctl add-flow "{{test_vars['test_bridge']}}" tcp,tcp_dst=123,actions=mod_tp_dst:321
+      register: dummy_flows_result
+      failed_when: dummy_flows_result.rc != 0
+
+    - name: Save flows for later validation
+      ansible.builtin.shell: |
+        set -eo pipefail
+        ovs-ofctl dump-flows --no-stats "{{test_vars['test_bridge']}}" > \
+        "{{test_vars['working_directory']}}/{{test_vars['ovs_flows_file']}}"
+      register: ovs_flow_save
+      failed_when: ovs_flow_save.rc != 0
