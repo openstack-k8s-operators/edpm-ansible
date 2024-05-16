@@ -25,7 +25,7 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_debug: true
-    edpm_container_standalone_service: neutron_dhcp_agent
+    edpm_container_standalone_service: neutron_dhcp
     edpm_container_standalone_container_defs:
       neutron_dhcp_agent: "{{ lookup('template', 'neutron_dhcp_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
