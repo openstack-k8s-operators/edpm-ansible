@@ -1,13 +1,16 @@
 ---
 # defaults file for edpm_ovn
 
+# service name this role manages
+edpm_neutron_metadata_service_name: neutron-metadata
+
 # seconds between retries for download tasks
 edpm_neutron_metadata_images_download_delay: 5
 
 # number of retries for download tasks
 edpm_neutron_metadata_images_download_retries: 5
 
-edpm_neutron_metadata_config_src: "/var/lib/openstack/configs/{{ edpm_service_name | default('neutron-metadata') }}"
+edpm_neutron_metadata_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_metadata_service_name }}"
 edpm_neutron_metadata_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
 edpm_neutron_metadata_agent_log_dir: "/var/log/neutron"
 edpm_neutron_metadata_agent_lib_dir: "/var/lib/neutron"
@@ -57,8 +60,8 @@ edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval: '60000'
 edpm_neutron_metadata_agent_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
 edpm_neutron_metadata_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron-metadata') }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron-metadata') }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('neutron-metadata') }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
-  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-metadata') }}/tls-ca-bundle.pem:\
+  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/cacerts/{{ edpm_neutron_metadata_service_name }}/tls-ca-bundle.pem:\
     /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"

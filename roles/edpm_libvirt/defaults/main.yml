@@ -19,6 +19,8 @@
 
 # All variables within this role should have a prefix of "edpm_libvirt"
 
+# service name this role manages
+edpm_libvirt_service_name: libvirt
 # seconds between retries for download tasks
 edpm_libvirt_download_delay: 5
 # number of retries for download tasks
@@ -65,8 +67,8 @@ edpm_libvirt_packages:
   # for SASL auth
   - cyrus-sasl-scram
 edpm_libvirt_ceph_path: /var/lib/openstack/config/ceph
-edpm_libvirt_password_path: /var/lib/openstack/configs/{{ edpm_service_name | default('libvirt') }}/LibvirtPassword
+edpm_libvirt_password_path: /var/lib/openstack/configs/{{ edpm_libvirt_service_name }}/LibvirtPassword
 
 # certs
 edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/{{ edpm_service_name | default('libvirt') }}
+edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/{{ edpm_libvirt_service_name }}

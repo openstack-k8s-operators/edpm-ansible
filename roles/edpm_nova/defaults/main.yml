@@ -17,6 +17,9 @@
 
 # All variables intended for modification should be placed in this file.
 
+# service name this role manages
+edpm_nova_service_name: nova
+
 # seconds between retries for download tasks
 edpm_nova_image_download_delay: 5
 
@@ -40,7 +43,7 @@ edpm_nova_live_migration_native_tls: false
 # so we will not need the libvirt or ovs client certs or ca. nova will communicate other services
 # via there api endpoints and will connect to rabbitmq. To support this we will need to trust
 # the general ca root cert.
-edpm_nova_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_service_name | default('nova') }}"
+edpm_nova_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_nova_service_name }}"
 
 # list of tripleo nova services to stop during EDPM adoption
 edpm_nova_old_tripleo_compute_sevices:

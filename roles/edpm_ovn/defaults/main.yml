@@ -1,13 +1,16 @@
 ---
 # defaults file for edpm_ovn
 
+# service name this role manages
+edpm_ovn_service_name: "ovn"
+
 # seconds between retries for download tasks
 edpm_ovn_images_download_delay: 5
 
 # number of retries for download tasks
 edpm_ovn_images_download_retries: 5
 
-edpm_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_service_name | default('ovn') }}"
+edpm_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_ovn_service_name }}"
 edpm_ovn_bridge: br-int
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
 
@@ -61,10 +64,10 @@ edpm_ovn_controller_common_volumes:
   - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
 
 edpm_ovn_controller_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn') }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn') }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_service_name | default('ovn') }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
-  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('ovn') }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/cacerts/{{ edpm_ovn_service_name }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
 edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
