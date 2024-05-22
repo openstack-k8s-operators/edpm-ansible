@@ -1,14 +1,18 @@
 ---
 
 - name: Download packages for edpm_bootstrap role
+  when: '"bootstrap" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_bootstrap
     tasks_from: download_cache.yml
   tags:
-    - edpm_kernel
+    - edpm_bootstrap
     - download_cache
 
 - name: Download packages for edpm_podman role
+  when: ("install-os" in edpm_download_cache_running_services) or
+        ("configure-os" in edpm_download_cache_running_services) or
+        ("run-os" in edpm_download_cache_running_services)
   ansible.builtin.include_role:
     name: osp.edpm.edpm_podman
     tasks_from: download_cache.yml
@@ -17,6 +21,7 @@
     - download_cache
 
 - name: Download packages for edpm_tuned role
+  when: '"bootstrap" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_tuned
     tasks_from: download_cache.yml
@@ -25,6 +30,7 @@
     - download_cache
 
 - name: Download packages for edpm_kernel role
+  when: '"bootstrap" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_kernel
     tasks_from: download_cache.yml
@@ -33,6 +39,7 @@
     - download_cache
 
 - name: Download packages for edpm_network_config role
+  when: '"configure-network" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_network_config
     tasks_from: download_cache.yml
@@ -41,6 +48,9 @@
     - download_cache
 
 - name: Download packages for edpm_logrotate_crond role
+  when: ("install-os" in edpm_download_cache_running_services) or
+        ("configure-os" in edpm_download_cache_running_services) or
+        ("run-os" in edpm_download_cache_running_services)
   ansible.builtin.include_role:
     name: osp.edpm.edpm_logrotate_crond
     tasks_from: download_cache_packages.yml
@@ -49,6 +59,9 @@
     - download_cache
 
 - name: Download packages for edpm_sshd role
+  when: ("install-os" in edpm_download_cache_running_services) or
+        ("configure-os" in edpm_download_cache_running_services) or
+        ("run-os" in edpm_download_cache_running_services)
   ansible.builtin.include_role:
     name: osp.edpm.edpm_sshd
     tasks_from: download_cache.yml
@@ -56,7 +69,8 @@
     - edpm_sshd
     - download_cache
 
-- name: Download images for edpm_libvirt role
+- name: Download packages for edpm_libvirt role
+  when: '"libvirt" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_libvirt
     tasks_from: download_cache.yml
