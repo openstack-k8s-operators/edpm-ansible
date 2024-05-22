@@ -1,0 +1,11 @@
+---
+
+- name: Apply packages updates
+  become: true
+  ansible.builtin.dnf:  # noqa: package-latest
+    name: "*"
+    state: latest
+    update_cache: true
+    exclude: "{{ edpm_update_exclude_packages }}"
+  tags:
+    - edpm_update
