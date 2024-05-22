@@ -12,6 +12,8 @@
         "/var/lib/openstack/config/nova:/var/lib/kolla/config_files:ro",
 {% if ca_bundle_exists|bool %}
         "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
+{% elif nova_custom_ca_bundle_exists|bool %}
+        "/var/lib/openstack/cacerts/nova-custom/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
 {% endif %}
         "/etc/localtime:/etc/localtime:ro",
         "/lib/modules:/lib/modules:ro",
