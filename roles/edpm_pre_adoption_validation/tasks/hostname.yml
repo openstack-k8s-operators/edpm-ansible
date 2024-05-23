@@ -64,5 +64,17 @@
       ansible.builtin.debug:
         msg:
           - "canonical_hostname: {{ canonical_hostname }}"
-          - "old nova service host config: {{ nova_old_config_output.stdout | default('not found')}}"
-          - "old neutron service host config: {{ neutron_old_config_output.stdout | default('not found')}}"
+          - "old nova service host config: {{ nova_old_config_output.stdout | default('not found') }}"
+          - "old neutron service host config: {{ neutron_old_config_output.stdout | default('not found') }}"
+
+- name: Check if hostname -f is consistent with the hostname in nova.conf {{ nova_old_config_output.stdout }}
+  become: true
+  tags:
+    - adoption
+    - validation
+  when: nova_old_config_file.stat.exists
+  ansible.builtin.command:
+    cmd: /usr/bin/hostname -f
+  register: hypervisor_hostname
+  changed_when: false
+  failed_when: hypervisor_hostname.stdout != nova_old_config_output.stdout

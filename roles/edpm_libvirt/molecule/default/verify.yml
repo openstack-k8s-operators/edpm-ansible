@@ -112,13 +112,19 @@
           - "run_libvirt.rc != 0"
 
     - name: Load /etc/libvirt/qemu.conf
-      ansible.builtin.shell: "grep migration_port /etc/libvirt/qemu.conf | tr '\n' ' '"
-      register: qemu_conf_migration_ports
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/libvirt/qemu.conf
+      register: qemu_conf
     - name: Assert that qemu.conf has a proper migration port range
       assert:
         that:
-          - "item  == 'migration_port_min = 61152 migration_port_max = 61215 '"
-      loop: "{{ qemu_conf_migration_ports.stdout_lines }}"
+          - "'migration_port_min = 61152' in qemu_conf.content | b64decode"
+          - "'migration_port_max = 61215' in qemu_conf.content | b64decode"
+    - name: Assert that nbt_tls is disabled in qemu.conf
+      assert:
+        that:
+          - "'nbd_tls = 0' in qemu_conf.content | b64decode"
 
     - name: Load os_enabled_vtpm selinux boolean
       ansible.builtin.shell: "getsebool os_enable_vtpm"

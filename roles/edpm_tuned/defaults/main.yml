@@ -26,6 +26,7 @@ edpm_tuned_download_retries: 5
 edpm_tuned_profile: "throughput-performance"
 edpm_tuned_custom_profile: ""
 edpm_tuned_isolated_cores: ""
+edpm_tuned_max_power_cstate: ""
 
 # Default tuned packages to install
 edpm_tuned_system_packages_default:

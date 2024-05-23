@@ -16,8 +16,10 @@
 
 
 # All variables intended for modification should be placed in this file.
+# Service name this role manages
+edpm_telemetry_service_name: telemetry
 # Directory in the ansibleEE container
-edpm_telemetry_config_src: /var/lib/openstack/configs/telemetry
+edpm_telemetry_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_service_name }}"
 # Directory in the compute node
 edpm_telemetry_config_dest: /var/lib/openstack/config/telemetry
 # Image to use for node_exporter
@@ -27,8 +29,8 @@ edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/opens
 # Image to use for Ceilometer Ipmi
 edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
 # Certificates location for tls encryption
-edpm_telemetry_certs: /var/lib/openstack/certs/telemetry
+edpm_telemetry_certs: "/var/lib/openstack/certs/{{ edpm_telemetry_service_name }}"
 # CA certs location for tls encryption
-edpm_telemetry_cacerts: /var/lib/openstack/cacerts/telemetry
+edpm_telemetry_cacerts: "/var/lib/openstack/cacerts/{{ edpm_telemetry_service_name }}"
 # If TLS should be enabled for telemetry
 edpm_telemetry_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"

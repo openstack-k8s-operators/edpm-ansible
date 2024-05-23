@@ -1,0 +1,129 @@
+---
+
+- name: Login to container registries if needed
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: login.yml
+    apply:
+      become: true
+  tags:
+    - edpm_podman
+    - edpm_update
+
+- name: Updates containers for edpm_iscsid role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_iscsid
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_iscsid
+    - edpm_update
+  when: '"nova-storage" in edpm_update_running_services'
+
+- name: Updates containers for edpm_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovn
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_ovn
+    - edpm_update
+  when: '"ovn" in edpm_update_running_services'
+
+- name: Updates containers for edpm_frr role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_frr
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_frr
+    - edpm_update
+  when: '"frr" in edpm_update_running_services'
+
+- name: Updates containers for edpm_ovn_bgp_agent role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovn_bgp_agent
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_ovn_bgp_agent
+    - edpm_update
+  when: '"ovn-bgp-agent" in edpm_update_running_services'
+
+- name: Updates containers for edpm_neutron_metadata role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_metadata
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_metadata
+    - edpm_update
+  when: '"neutron-metadata" in edpm_update_running_services'
+
+- name: Updates containers for edpm_neutron_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_ovn
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_ovn
+    - edpm_update
+  when: '"neutron-ovn" in edpm_update_running_services'
+
+- name: Updates containers for edpm_multipathd role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_multipathd
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_multipathd
+    - edpm_update
+  when: '"nova-storage" in edpm_update_running_services'
+
+- name: Updates containers for edpm_nova role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nova
+    tasks_from: install.yml
+    apply:
+      become: true
+  tags:
+    - edpm_nova
+    - edpm_update
+  when: '"nova" in edpm_update_running_services'
+
+- name: Updates containers for edpm_neutron_sriov role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_sriov
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_sriov
+    - edpm_update
+  when: '"neutron-sriov" in edpm_update_running_services'
+
+- name: Updates containers for edpm_neutron_dhcp role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_dhcp
+    tasks_from: run.yml
+    apply:
+      become: true
+  when: '"neutron-dhcp" in edpm_update_running_services'
+
+- name: Updates containers for edpm_logrotate_crond role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_logrotate_crond
+    tasks_from: run.yml
+    apply:
+      become: true
+  tags:
+    - edpm_logrotate_crond
+    - edpm_update
+  when: '"run-os" in edpm_update_running_services'

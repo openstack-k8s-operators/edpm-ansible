@@ -22,3 +22,7 @@
 - name: Validate kernel_args
   when: edpm_pre_adoption_validation_kernel_args_enabled
   ansible.builtin.include_tasks: kernel_args.yml
+
+- name: Validate tuned profile
+  when: edpm_pre_adoption_validation_tuned_enabled
+  ansible.builtin.include_tasks: tuned.yml

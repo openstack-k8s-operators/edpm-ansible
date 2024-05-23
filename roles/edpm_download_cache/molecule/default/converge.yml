@@ -17,5 +17,16 @@
 
 - name: Converge
   hosts: all
+  vars:
+    edpm_services:
+      - bootstrap
+      - configure-network
+      - validate-network
+      - install-os
+      - ceph-hci-pre
+      - configure-os
+      - ssh-known-hosts
+      - run-os
+      - reboot-os
   roles:
     - role: "edpm_download_cache"

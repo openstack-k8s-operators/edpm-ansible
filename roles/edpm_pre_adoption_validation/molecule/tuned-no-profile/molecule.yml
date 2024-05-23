@@ -1,0 +1,33 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+platforms:
+- name: edpm-0
+  command: /sbin/init
+  dockerfile: ../../../../molecule/common/Containerfile.j2
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  registry:
+    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+  ulimits:
+  - host
+provisioner:
+  name: ansible
+  inventory:
+    hosts:
+      all:
+        vars:
+          edpm_pre_adoption_validation_hostname_enabled: false
+        hosts:
+          edpm-0:
+            canonical_hostname: edpm-0.localdomain
+
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+     - destroy
+     - create
+     - prepare
+     - converge

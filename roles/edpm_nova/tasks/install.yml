@@ -5,6 +5,15 @@
     path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
+# TODO(slagle) This is a temporary backwards compatible task so this can merge
+# independently of the dataplane-operator change. This can be removed when
+# https://github.com/openstack-k8s-operators/dataplane-operator/pull/885
+# merges. Remove the check in templates/nova_compute.json.j2 as well.
+- name: Check if nova-custom ca bundle exists
+  ansible.builtin.stat:
+    path: "/var/lib/openstack/cacerts/nova-custom/tls-ca-bundle.pem"
+  register: nova_custom_ca_bundle_stat_res
+
 - name: Render nova container
   tags:
     - install
@@ -16,6 +25,7 @@
     mode: "0644"
   vars:
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    nova_custom_ca_bundle_exists: "{{ nova_custom_ca_bundle_stat_res.stat.exists }}"
   notify:
     - Restart nova
 - name: Deploy nova container

@@ -18,13 +18,6 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-      test_deps_extra_packages:
-        - podman
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
-      test_deps_edpm_packages:
-          - openvswitch
-- name: Prepare container
-  hosts: instance
-  roles:
     - role: osp.edpm.env_data

@@ -16,3 +16,9 @@ argument_specs:
         type: bool
         default: true
         description: Enable caching of container images
+      edpm_download_cache_running_services:
+        type: list
+        default: edpm_services
+        description: >
+          Used to select which list of services are running
+          on the machine. The list is provided by dataplane-operator.

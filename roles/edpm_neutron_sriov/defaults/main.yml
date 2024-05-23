@@ -17,6 +17,9 @@
 
 # All variables intended for modification should be placed in this file.
 
+# service name this role manages
+edpm_neutron_sriov_service_name: neutron-sriov
+
 # seconds between retries for download tasks
 edpm_neutron_sriov_images_download_delay: 5
 
@@ -24,7 +27,7 @@ edpm_neutron_sriov_images_download_delay: 5
 edpm_neutron_sriov_images_download_retries: 5
 
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
-edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/neutron-sriov"
+edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_sriov_service_name }}"
 edpm_neutron_sriov_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
 edpm_neutron_sriov_image: "quay.io/podified-antelope-centos9/openstack-neutron-sriov-agent:current-podified"
 
@@ -37,9 +40,9 @@ edpm_neutron_sriov_common_volumes:
   - /var/log/containers/neutron:/var/log/neutron:z
 
 edpm_neutron_sriov_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_neutron_sriov_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-sriov') }}"
+edpm_neutron_sriov_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_neutron_sriov_service_name }}"
 edpm_neutron_sriov_tls_volumes:
-  - "/var/lib/openstack/cacerts/{{ edpm_service_name | default('neutron-sriov') }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+  - "{{ edpm_neutron_sriov_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
 # neutron.conf
 # DEFAULT

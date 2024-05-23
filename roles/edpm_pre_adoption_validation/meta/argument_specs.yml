@@ -20,3 +20,7 @@ argument_specs:
         type: bool
         default: true
         description: Whether the kernel argument checks are executed.
+      edpm_pre_adoption_validation_tuned_enabled:
+        type: bool
+        default: true
+        description: Whether the tuned profile checks are executed.

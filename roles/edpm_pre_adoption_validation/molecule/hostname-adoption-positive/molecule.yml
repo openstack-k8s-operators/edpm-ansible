@@ -4,7 +4,10 @@ dependency:
 driver:
   name: podman
 platforms:
-- name: edpm-0
+# NOTE(gibi): we are forcing FQDN as hostname here. This is not super realistic
+# but works for our testing purposes to simulate that hostname -f returns
+# FQDN
+- name: edpm-0.localdomain
   command: /sbin/init
   dockerfile: ../../../../molecule/common/Containerfile.j2
   image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
@@ -17,8 +20,10 @@ provisioner:
   inventory:
     hosts:
       all:
+        vars:
+          edpm_pre_adoption_validation_tuned_enabled: false
         hosts:
-          edpm-0:
+          edpm-0.localdomain:
             canonical_hostname: edpm-0.localdomain
 
 verifier:
