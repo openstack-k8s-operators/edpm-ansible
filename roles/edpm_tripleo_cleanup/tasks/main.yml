@@ -1,0 +1,60 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Reload units to check for new changes
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Set list of tripleo services
+  tags:
+    - adoption
+  ansible.builtin.set_fact:
+    tripleo_services: "{{ edpm_old_tripleo_services }}"
+
+- name: Discover tripleo services
+  tags:
+    - adoption
+  when: tripleo_services | length == 0
+  block:
+    - name: Get all services
+      ansible.builtin.service_facts:
+    - name: Filter for tripleo services
+      ansible.builtin.set_fact:
+        tripleo_services: "{{ ansible_facts.services.keys() | select('contains', 'tripleo') }}"
+
+- name: Stop and disable tripleo services
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+    masked: true
+  loop: "{{ tripleo_services }}"
+
+- name: Remove unit files
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.file:
+    path: /usr/lib/systemd/system/{{ item }}.service
+    state: absent
+  loop: "{{ tripleo_services }}"
+  when: edpm_remove_tripleo_unit_files

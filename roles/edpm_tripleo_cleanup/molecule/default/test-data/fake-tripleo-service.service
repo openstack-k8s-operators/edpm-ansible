@@ -1,0 +1,8 @@
+[Unit]
+Description=Fake tripleo service
+
+[Service]
+ExecStart=/usr/bin/true
+
+[Install]
+WantedBy=multi-user.target
