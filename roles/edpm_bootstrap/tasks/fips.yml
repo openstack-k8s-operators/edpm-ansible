@@ -61,7 +61,7 @@
             mode: "0600"
         - name: Call edpm_reboot role
           vars:
-            edpm_reboot_force_reboot: true
+            edpm_reboot_strategy: force
           ansible.builtin.include_role:
             name: edpm_reboot
 

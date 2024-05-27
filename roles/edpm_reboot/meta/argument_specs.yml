@@ -4,17 +4,21 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_reboot role.
     options:
-      edpm_reboot_force_reboot:
+      edpm_reboot_strategy:
         description: |
-          Force reboot of the node. Automated reboot for nodes is by defulat defered as it can impact running vms.
-          Only on initial run when nova related files are not yet created reboot is not defered.
-          When edpm_reboot_force_reboot is set to true, reboot is allowed and will be perfomed if required.
-        type: bool
-        default: false
-      edpm_reboot_nova_compute_config_dir:
+          Default strategy is auto. In auto mode reboot for deployed nodes is by default defered as it can
+          impact running vms or openstack services. Only on initial run when nova related files are not yet created reboot is not defered.
+          When edpm_reboot_force_reboot is set to force, reboot is allowed and will be perfomed always.
+        type: str
+        default: auto
+      edpm_reboot_old_tripleo_node_config_dir:
         type: path
-        default: /var/lib/openstack/config/nova
-        description: This should be synced with edpm_nova_compute role
+        default: /var/lib/config-data
+        description: Path to check for tripleo pre-adopted nodes
+      edpm_reboot_edpm_node_config_dir:
+        type: path
+        default: /var/lib/openstack/config
+        description: Path for storing configuration of edpm nodes. This should be synced with edpm-ansible roles.
       edpm_reboot_timeout_reboot:
         type: int
         default: 3600
