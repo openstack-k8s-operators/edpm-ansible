@@ -39,6 +39,7 @@ edpm_ovn_chassis_mac_mapping_prefixes:
 
 edpm_ovn_chassis_mac_mapping_seed: "{{ ansible_machine_id }}"
 edpm_ovn_encap_type: geneve
+edpm_ovn_encap_tos: "0"
 edpm_ovn_dbs: []
 edpm_enable_chassis_gw: false
 edpm_enable_chassis_extport: false
@@ -84,6 +85,7 @@ edpm_ovn_ovs_external_ids:
     {{ chassis_mac_mappings | join(',') }}"
   ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
+  ovn-encap-tos: "{{ edpm_ovn_encap_tos }}"
   ovn-match-northd-version: "{{ ovn_match_northd_version }}"
   ovn-monitor-all: "{{ ovn_monitor_all }}"
   ovn-remote: >-

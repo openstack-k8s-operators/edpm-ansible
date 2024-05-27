@@ -13,6 +13,12 @@
   register: output
   failed_when: output.stdout != 'geneve'
 
+- name: Verify ovn-encap-tos
+  ansible.builtin.shell: >
+    /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-encap-tos
+  register: output
+  failed_when: output.stdout != '"0"'
+
 - name: Verify ovn firewall rules are applied
   block:
     - name: Rule source file exists
