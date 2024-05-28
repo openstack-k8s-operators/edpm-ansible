@@ -3,13 +3,8 @@
   tags:
     - adoption
     - nova
-  become: true
-  ansible.builtin.shell: |
-    if systemctl is-active {{ item }}; then
-      systemctl disable --now {{ item }}
-      test -f /etc/systemd/system/{{ item }} || systemctl mask {{ item }}
-    fi
-  loop: "{{ edpm_nova_old_tripleo_compute_sevices }}"
-  failed_when: false
-  changed_when: false
+  ansible.builtin.include_role:
+    role: osp.edpm.edpm_tripleo_cleanup
+  vars:
+    edpm_old_tripleo_services: "{{ edpm_nova_old_tripleo_compute_sevices }}"
   when: edpm_nova_old_tripleo_compute_sevices | default([]) | length > 0
