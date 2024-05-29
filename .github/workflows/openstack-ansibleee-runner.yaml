@@ -53,7 +53,7 @@ jobs:
       uses: redhat-actions/buildah-build@v2
       with:
         image: openstack-ansibleee-runner
-        tags: ${{ env.latesttag }} ${{ github.sha }}
+        tags: ${{ env.latesttag }} ${{ github.sha }} current-podified
         containerfiles: |
           ./openstack_ansibleee/Dockerfile
 
