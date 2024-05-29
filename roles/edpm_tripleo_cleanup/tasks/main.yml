@@ -58,3 +58,10 @@
     state: absent
   loop: "{{ tripleo_services }}"
   when: edpm_remove_tripleo_unit_files
+
+- name: Adopt (stop tracking) certs from tripleo
+  tags:
+    - adoption
+  ansible.builtin.include_role:
+    name: edpm_install_certs
+    tasks_from: adoption
