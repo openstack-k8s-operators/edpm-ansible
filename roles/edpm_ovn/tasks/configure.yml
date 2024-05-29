@@ -94,21 +94,3 @@
   changed_when: ovs_other_config.rc == 0
   failed_when: ovs_other_config.rc != 0
   when: edpm_ovn_ovs_other_config | length > 0
-
-- name: Add OVS Manager
-  block:
-    - name: Check if OVS Manager already exists
-      ansible.builtin.shell: |
-        set -o pipefail
-        ovs-vsctl show | grep -q "Manager"
-      register: ovs_manager_configured
-      changed_when: true
-      failed_when: false
-
-    - name: Add OVS Manager if not exists
-      ansible.builtin.shell: >
-        ovs-vsctl --timeout=5 --id=@manager -- create Manager target=\"ptcp:6640:127.0.0.1\" -- add Open_vSwitch . manager_options @manager
-      when: ovs_manager_configured.rc == 1
-      register: ovs_manager_if_not_exists
-      changed_when: ovs_manager_if_not_exists.rc == 0
-      failed_when: ovs_manager_if_not_exists.rc != 0

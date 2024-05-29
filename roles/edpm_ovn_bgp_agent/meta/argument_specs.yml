@@ -79,11 +79,7 @@ argument_specs:
       edpm_ovn_bgp_agent_ovsdb_connection:
         description: Connection to the OVS database, including port and protocol.
         type: str
-        default: "tcp:127.0.0.1:6640"
-      edpm_ovn_bgp_agent_ovs_manager:
-        type: str
-        default: "ptcp:6640:127.0.0.1"
-        description: OVSDB connection method.
+        default: "unix:TODO"
       edpm_ovn_bgp_agent_image:
         type: str
         default: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"

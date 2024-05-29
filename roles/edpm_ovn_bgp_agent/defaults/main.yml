@@ -40,8 +40,7 @@ edpm_ovn_bgp_agent_bgp_vrf: bgp-vrf
 edpm_ovn_bgp_agent_bgp_vrf_table_id: 10
 edpm_ovn_bgp_agent_root_helper: "sudo ovn-bgp-agent-rootwrap /etc/ovn-bgp-agent/rootwrap.conf"
 edpm_ovn_bgp_agent_root_helper_daemon: "sudo ovn-bgp-agent-rootwrap-daemon /etc/ovn-bgp-agent/rootwrap.conf"
-edpm_ovn_bgp_agent_ovsdb_connection: "tcp:127.0.0.1:6640"
-edpm_ovn_bgp_agent_ovs_manager: "ptcp:6640:127.0.0.1"
+edpm_ovn_bgp_agent_ovsdb_connection: "unix:TODO"
 edpm_ovn_bgp_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent:current-podified"
 edpm_ovn_protocol: "{% if edpm_ovn_bgp_agent_internal_tls_enable | bool %}ssl{% else %}tcp{% endif %}"
 

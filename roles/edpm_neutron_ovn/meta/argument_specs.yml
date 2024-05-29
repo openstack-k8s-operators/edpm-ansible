@@ -45,7 +45,7 @@ argument_specs:
         description: The probe interval for the OVSDB session in milliseconds
         type: str
       edpm_neutron_ovn_agent_ovs_ovsdb_connection:
-        default: tcp:127.0.0.1:6640
+        default: unix:TODO
         description: The connection string for the OVSDB backend
         type: str
       edpm_neutron_ovn_agent_ovs_ovsdb_connection_timeout:

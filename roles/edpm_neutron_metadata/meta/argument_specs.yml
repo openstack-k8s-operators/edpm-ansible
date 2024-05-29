@@ -66,7 +66,7 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_metadata_agent_ovs_ovsdb_connection:
-        default: tcp:127.0.0.1:6640
+        default: unix:TODO
         description: ''
         type: str
       edpm_neutron_metadata_agent_ovs_ovsdb_connection_timeout:
