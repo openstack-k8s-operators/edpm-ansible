@@ -25,49 +25,52 @@
         path: "{{ edpm_pre_adoption_validation_old_nova_config }}"
       register: nova_old_config_file
 
-    # NOTE(gibi): we intentionally using python configparser to extract
-    # the config value. Grep is not enough as multiple sections have 'host'
-    # key. Also we cannot rely on crudini as it is not available on the
-    # node being adopted.
-    - name: Compare old nova service host to {{ canonical_hostname }}
+    - name: Retrieve original hostname
       when: nova_old_config_file.stat.exists
-      ansible.builtin.command:
-        cmd: >
-          python3 -c
-          "import configparser as c;
-          p = c.ConfigParser(strict=False);
-          p.read('{{ edpm_pre_adoption_validation_old_nova_config }}');
-          print(p['DEFAULT']['host'])"
-      register: nova_old_config_output
-      changed_when: false
-      failed_when: nova_old_config_output.stdout != canonical_hostname
+      osp.edpm.edpm_get_ini_file:
+        section: 'DEFAULT'
+        key: 'host'
+        path: "{{ edpm_pre_adoption_validation_old_nova_config }}"
+      register: nova_old_hostname
+      failed_when: false
+
+    - name: Compare old nova service host to {{ canonical_hostname }}
+      when:
+        - nova_old_config_file.stat.exists
+        - nova_old_hostname.value != canonical_hostname
+      ansible.builtin.fail:
+        msg: "{{ canonical_hostname }} doesn't match original nova hostname {{ nova_old_hostname.value }}"
 
     - name: Check if old neutron.conf exists
       ansible.builtin.stat:
         path: "{{ edpm_pre_adoption_validation_old_neutron_config }}"
       register: neutron_old_config_file
 
-    - name: Compare old neutron service host to {{ canonical_hostname }}
+    - name: Retrieve original hostname
       when: neutron_old_config_file.stat.exists
-      ansible.builtin.command:
-        cmd: >
-          python3 -c
-          "import configparser as c;
-          p = c.ConfigParser(strict=False);
-          p.read('{{ edpm_pre_adoption_validation_old_neutron_config }}');
-          print(p['DEFAULT']['host'])"
-      register: neutron_old_config_output
-      changed_when: false
-      failed_when: neutron_old_config_output.stdout != canonical_hostname
+      osp.edpm.edpm_get_ini_file:
+        section: 'DEFAULT'
+        key: 'host'
+        path: "{{ edpm_pre_adoption_validation_old_neutron_config }}"
+      register: neutron_old_hostname
+      failed_when: false
+
+    - name: Compare old neutron service host to {{ canonical_hostname }}
+      when:
+        - neutron_old_config_file.stat.exists
+        - neutron_old_hostname.value != canonical_hostname
+      ansible.builtin.fail:
+        msg: "{{ canonical_hostname }} doesn't match original neutron hostname {{ neutron_old_hostname.value }}"
+
 
     - name: Print validated information
       ansible.builtin.debug:
         msg:
           - "canonical_hostname: {{ canonical_hostname }}"
-          - "old nova service host config: {{ nova_old_config_output.stdout | default('not found') }}"
-          - "old neutron service host config: {{ neutron_old_config_output.stdout | default('not found') }}"
+          - "old nova service host config: {{ nova_old_hostname.value | default('not found') }}"
+          - "old neutron service host config: {{ neutron_old_hostname.value | default('not found') }}"
 
-- name: Check if hostname -f is consistent with the hostname in nova.conf {{ nova_old_config_output.stdout }}
+- name: Check if hostname -f is consistent with the hostname in nova.conf {{ nova_old_hostname.value }}
   become: true
   tags:
     - adoption
@@ -77,4 +80,4 @@
     cmd: /usr/bin/hostname -f
   register: hypervisor_hostname
   changed_when: false
-  failed_when: hypervisor_hostname.stdout != nova_old_config_output.stdout
+  failed_when: hypervisor_hostname.stdout != nova_old_hostname.value
