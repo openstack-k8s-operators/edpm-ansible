@@ -1,6 +1,6 @@
 ## {{ ansible_managed }}
 
-{% for k, v in edpm_sshd_server_options.items() %}
+{% for k, v in _edpm_sshd_server_options.items() %}
 {%   if (v is iterable) and (v is not string) %}
 {%     set vars = (v | unique) %}
 {%     for var in vars %}
