@@ -25,9 +25,9 @@ edpm_neutron_ovn_common_volumes:
 edpm_neutron_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_neutron_ovn_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_neutron_ovn_service_name }}"
 edpm_neutron_ovn_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
   - "{{ edpm_neutron_ovn_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
 # Neutron conf

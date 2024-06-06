@@ -17,17 +17,18 @@
 - name: Find certs and keys
   ansible.builtin.find:
     paths: /var/lib/openstack/certs
-    recurse: false
+    depth: 3
+    recurse: true
     file_type: directory
-  register: found_certs_services
+  register: found_cert_paths
   delegate_to: localhost
 
 - name: Copy certs and keys to the correct location
   ansible.builtin.include_tasks: copy_certs_and_keys.yaml
   loop:
-    "{{ found_certs_services['files'] | map(attribute='path') | map('basename') | list }}"
+    "{{ found_cert_paths['files'] | selectattr('path', 'match', '/var/lib/openstack/certs/.+/.+') | map(attribute='path') |list }}"
   loop_control:
-    loop_var: service
+    loop_var: service_cert_path
 
 - name: Find cacerts
   ansible.builtin.find:

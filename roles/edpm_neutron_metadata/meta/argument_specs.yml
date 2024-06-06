@@ -139,7 +139,7 @@ argument_specs:
         type: list
         elements: str
         default:
-          - /var/lib/openstack/certs/neutron_metadata_agent/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
-          - /var/lib/openstack/certs/neutron_metadata_agent/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
-          - /var/lib/openstack/certs/neutron_metadata_agent/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
+          - /var/lib/openstack/certs/neutron_metadata_agent/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
+          - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
+          - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
           - /var/lib/openstack/cacerts/neutron_metadata_agent/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z

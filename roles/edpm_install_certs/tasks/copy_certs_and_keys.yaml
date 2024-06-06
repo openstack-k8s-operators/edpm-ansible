@@ -21,10 +21,10 @@
   block:
     - name: Set paths
       ansible.builtin.set_fact:
-        cert_src_path: "/var/lib/openstack/certs/{{ service }}"
-        cacert_dest_path: "/var/lib/openstack/certs/{{ service }}"
-        cert_dest_path: "/var/lib/openstack/certs/{{ service }}"
-        key_dest_path: "/var/lib/openstack/certs/{{ service }}"
+        cert_src_path: "{{ service_cert_path }}"
+        cacert_dest_path: "{{ service_cert_path }}"
+        cert_dest_path: "{{ service_cert_path }}"
+        key_dest_path: "{{ service_cert_path }}"
 
     - name: Ensure that the destination directories exist
       ansible.builtin.file:

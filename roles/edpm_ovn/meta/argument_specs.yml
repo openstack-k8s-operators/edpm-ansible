@@ -61,9 +61,9 @@ argument_specs:
         type: list
       edpm_ovn_controller_tls_volumes:
         default:
-          - /var/lib/openstack/certs/ovn/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
-          - /var/lib/openstack/certs/ovn/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
-          - /var/lib/openstack/certs/ovn/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
+          - /var/lib/openstack/certs/ovn/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
+          - /var/lib/openstack/certs/ovn/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
+          - /var/lib/openstack/certs/ovn/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
           - /var/lib/openstack/cacerts/ovn/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z
         description: List of TLS volumes in a mount point form.
         type: list
