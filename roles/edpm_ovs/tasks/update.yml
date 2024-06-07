@@ -4,14 +4,22 @@
   tags:
     - update
     - ovs
+  # Call dnf via the shell module as the ansible dnf module does not
+  # support passing --setopt options. This is required in order to disable any
+  # OVS rpm scriptlets which would stop and disable OVS services during
+  # a standard update. Further info:
+  # https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md#rpm-packaging
   ansible.builtin.shell: >
     dnf update -y openvswitch --setopt=tsflags=noscripts
   register: update_ovs_result
   failed_when: update_ovs_result.rc != 0
 
+  # Reload of openvswitch service will reload OVS systemd services with an automatic
+  # restore of already set OpenFlows. Further info:
+  # https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md#proposal
 - name: Reload openvswitch service
   become: true
-  tags: 
+  tags:
     - reload
     - ovs
   ansible.builtin.systemd_service:

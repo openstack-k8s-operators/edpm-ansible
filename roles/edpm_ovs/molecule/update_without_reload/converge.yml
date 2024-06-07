@@ -15,7 +15,10 @@
 # under the License.
 
 
-- name: Prepare
+- name: Converge
   hosts: all
-  roles:
-    - role: osp.edpm.env_data
+  tasks:
+    - name: Call openvswitch update role
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovs
+        tasks_from: update

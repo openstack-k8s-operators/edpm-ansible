@@ -37,6 +37,7 @@ jobs:
         - edpm_nftables
         - edpm_nodes_validation
         - edpm_ovn
+        - edpm_ovs
         - edpm_reboot
         - edpm_sshd
         - edpm_ssh_known_hosts

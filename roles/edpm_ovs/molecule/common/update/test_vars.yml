@@ -1,0 +1,12 @@
+# Constants shared between test stages
+
+# The working_directory is used as a shared location on the
+# test instance to store data collected during the prepare
+# stage. The data is later read in the verify stage. This
+# is done because the molecule stage playbooks are run
+# independently from each other. Thus, using things like
+# set_fact is not possible.
+working_directory: /tmp/molecule_test_dir
+ovs_pid_file: ovs_pids.txt
+ovs_flows_file: ovs_flows.txt
+test_bridge: br-test

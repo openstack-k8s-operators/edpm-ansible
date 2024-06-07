@@ -1,0 +1,71 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Prepare
+  hosts: all
+  pre_tasks:
+    - name: Importing test_vars
+      ansible.builtin.include_vars:
+        file: ./test_vars.yml
+  tasks:
+    - name: "Include edpm_users with non default config for ovs"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_users"
+      vars:
+        edpm_users_users:
+          - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
+        edpm_users_extra_dirs: []
+
+    - name: Install older openvswitch version
+      ansible.builtin.import_role:
+        name:  osp.edpm.edpm_ovs
+      vars:
+        edpm_ovs_packages: [rdo-openvswitch-3.2]
+
+    - name: Create a working directory for storing test variables
+      ansible.builtin.file:
+        path: "{{working_directory}}"
+        state: directory
+
+    - name: Collect openvswitch service pids for later validation
+      ansible.builtin.shell: |
+        pgrep "ovs(db-server|-vswitch)"
+      register: pids_before_update
+      failed_when: (pids_before_update.rc != 0) or
+                   (pids_before_update.stdout_lines | length == 0)
+
+    - name: Save openvswitch service pids for later validation
+      ansible.builtin.copy:
+        content: "{{pids_before_update.stdout}}"
+        dest: "{{working_directory}}/{{ovs_pid_file}}"
+
+    - name: Add dummy OpenFlows
+      ansible.builtin.shell: |
+        set -eo pipefail
+        ovs-vsctl add-br "{{test_bridge}}"
+        ovs-ofctl add-flow "{{test_bridge}}" arp,nw_dst=192.168.0.1,actions=drop
+        ovs-ofctl add-flow "{{test_bridge}}" dl_vlan=123,actions=output:1,mod_vlan_vid:456
+        ovs-ofctl add-flow "{{test_bridge}}" tcp,tcp_dst=123,actions=mod_tp_dst:321
+      register: dummy_flows_result
+      failed_when: dummy_flows_result.rc != 0
+
+    - name: Save OpenFlows for later validation
+      ansible.builtin.shell: |
+        set -eo pipefail
+        ovs-ofctl dump-flows --no-stats --sort "{{test_bridge}}" > \
+        "{{working_directory}}/{{ovs_flows_file}}"
+      register: ovs_flow_save
+      failed_when: ovs_flow_save.rc != 0
