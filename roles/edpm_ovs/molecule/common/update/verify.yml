@@ -61,8 +61,8 @@
                   pids_after_update.stdout_lines | sort()
           when: scenario_name == "update_with_reload"
 
-        - name: Assert openvswitch did not reloaded services
+        - name: Assert openvswitch did not reload services
           ansible.builtin.assert:
             that: pids_before_update.content | b64decode | split('\n') | sort() ==
                   pids_after_update.stdout_lines | sort()
-          when: scenario_name == "update_without_reload"
+          when: scenario_name in ("update_without_reload", "update_no_op")

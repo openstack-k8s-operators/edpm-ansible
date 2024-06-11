@@ -16,6 +16,8 @@
 
 - name: Prepare
   hosts: all
+  vars:
+    scenario_name: "{{molecule_yml['scenario']['name']}}"
   pre_tasks:
     - name: Importing test_vars
       ansible.builtin.include_vars:
@@ -29,11 +31,18 @@
           - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
         edpm_users_extra_dirs: []
 
-    - name: Install older openvswitch version
+    - name: Select openvswitch test version to install
+      ansible.builtin.set_fact:
+        # Unversioned name will install the latest available version
+        ovs_test_version:
+          "{{'rdo-openvswitch' if scenario_name == 'update_no_op'
+              else 'rdo-openvswitch-3.2'}}"
+
+    - name: Install {{ovs_test_version}} for testing
       ansible.builtin.import_role:
         name:  osp.edpm.edpm_ovs
       vars:
-        edpm_ovs_packages: [rdo-openvswitch-3.2]
+        edpm_ovs_packages: ["{{ovs_test_version}}"]
 
     - name: Create a working directory for storing test variables
       ansible.builtin.file:
