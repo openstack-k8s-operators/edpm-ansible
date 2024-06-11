@@ -19,8 +19,8 @@
     path: "{{ item.path }}"
     state: directory
     setype: "container_file_t"
-    owner: "{{ item.owner | default(lookup('pipe', 'whoami')) }}"
-    group: "{{ item.group | default(lookup('pipe', 'whoami')) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {'path': "{{ edpm_neutron_metadata_agent_config_dir }}"}
