@@ -68,7 +68,7 @@
 
     - name: Update sshd configuration options from vars
       ansible.builtin.set_fact:
-        edpm_sshd_server_options: |-
+        _edpm_sshd_server_options: |-
          {% set _ = edpm_sshd_server_options.__setitem__('PasswordAuthentication', edpm_sshd_password_authentication) %}
          {% if edpm_sshd_banner_enabled %}
          {% set _ = edpm_sshd_server_options.__setitem__('Banner', '/etc/issue') %}

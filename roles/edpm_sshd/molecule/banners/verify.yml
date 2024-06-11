@@ -1,0 +1,12 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure banner is set correctly
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        line: "Banner /etc/issue"
+        state: present
+      register: banner
+      failed_when:
+        - banner is changed
