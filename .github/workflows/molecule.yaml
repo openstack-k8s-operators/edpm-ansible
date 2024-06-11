@@ -9,7 +9,7 @@ on:
     paths:
     - '.github/**'
     - 'roles/**'
-    - 'plugings/**'
+    - 'plugins/**'
     - 'molecule-requirements.txt'
     - 'requirements.yml'
 jobs:
