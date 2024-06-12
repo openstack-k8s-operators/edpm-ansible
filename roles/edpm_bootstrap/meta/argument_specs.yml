@@ -37,7 +37,7 @@ argument_specs:
       edpm_bootstrap_release_version_package:
         type: list
         default:
-          - rhoso-release
+          - rhosp-release
 
       edpm_bootstrap_legacy_network_packages:
         type: list

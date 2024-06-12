@@ -48,7 +48,7 @@ edpm_bootstrap_packages_bootstrap:
   - grubby
 
 edpm_bootstrap_release_version_package:
-  - rhoso-release
+  - rhosp-release
 
 # List of packages that are required for legacy networking to function.
 # NOTE: We are using 'network' service provided by 'network-scripts' (initscripts)
