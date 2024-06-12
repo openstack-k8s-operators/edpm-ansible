@@ -22,11 +22,7 @@ provisioner:
         hosts:
           instance:
             canonical_hostname: edpm-0.localdomain
-  playbooks:
-    prepare: "../common/update/prepare.yml"
-    verify: "../common/update/verify.yml"
 scenario:
-  name: update_no_op
   test_sequence:
   - dependency
   - destroy
