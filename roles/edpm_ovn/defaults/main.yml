@@ -53,7 +53,7 @@ edpm_ovn_ofctrl_wait_before_clear: 8000
 edpm_ovn_controller_agent_image: "quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified"
 edpm_ovn_encap_ip: "{{ tenant_ip }}"
 edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% endif %}"
-ovn_match_northd_version: true
+ovn_match_northd_version: false
 ovn_monitor_all: true
 
 edpm_ovn_controller_common_volumes:
