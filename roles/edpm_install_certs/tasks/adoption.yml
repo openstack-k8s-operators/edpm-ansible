@@ -1,0 +1,40 @@
+---
+
+- name: Stop and disable certmonger
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.shell: |
+    if systemctl is-active certmonger.service; then
+      systemctl disable --now certmonger.service
+      test -f /etc/systemd/system/certmonger.service || systemctl mask certmonger.service
+    fi
+  failed_when: false
+  changed_when: false
+
+- name: Find certmonger requests
+  tags:
+    - adoption
+  ansible.builtin.find:
+    paths: /var/lib/certmonger/requests
+    file_type: any
+    hidden: true
+  register: requests
+
+- name: Backup certificate requests
+  tags:
+    - adoption
+  ansible.builtin.copy:
+    src: /var/lib/certmonger/requests
+    dest: /var/lib/certmonger/requests.backup
+    mode: preserve
+  when: requests.matched != 0
+
+- name: Remove certificate requests
+  tags:
+    - adoption
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ requests.files }}"
+  when: requests.matched != 0
