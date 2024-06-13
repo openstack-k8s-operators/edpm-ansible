@@ -1,0 +1,14 @@
+- name: verify dir exists
+  become: true
+  block:
+      - name: "Collect container mounts for: {{ item }}"
+        ansible.builtin.shell: |
+          podman inspect {{ item.name }} | jq '.[0].HostConfig.Binds[]'
+        changed_when: false
+        register:
+          container_mounts
+      - name: Assert mount exists {{ item }}
+        ansible.builtin.assert:
+          that:
+            - "'{{ item.src }}:{{ item.dest }}:{{item.options | default('ro')}}' in container_mounts.stdout"
+          fail_msg: "Bind mount not found in {{ item.name }}"

@@ -56,3 +56,6 @@ edpm_nova_old_tripleo_compute_sevices:
   - tripleo_nova_metadata.service
   - tripleo_nova_scheduler.service
   - tripleo_nova_vnc_proxy.service
+
+# a list of addtional host mounts
+edpm_nova_extra_bind_mounts: []

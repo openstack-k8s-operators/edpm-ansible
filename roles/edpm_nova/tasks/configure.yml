@@ -1,4 +1,57 @@
 ---
+- name: Validate extra bind mounts if specified
+  when: edpm_nova_extra_bind_mounts | length > 0
+  tags:
+    - configure
+    - nova
+  block:
+    - name: Get source directory details
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item.src }}"
+      register: source_dir_results
+      loop: "{{ edpm_nova_extra_bind_mounts }}"
+      tags:
+        - configure
+        - nova
+
+    - name: Assert edpm_nova_extra_bind_mounts source directories exist
+      become: true
+      ansible.builtin.assert:
+        that:
+          - "source_dir_results.results | map(attribute='stat.exists') | list"
+      tags:
+        - configure
+        - nova
+
+    - name: Assert edpm_nova_extra_bind_mounts src paths are valid
+      ansible.builtin.assert:
+        that:
+          - "'{{ item }}' not in  {{ edpm_nova_extra_bind_mounts }} | map(attribute='src') | list"
+      loop:
+        - /var/lib/nova
+        - /var/lib/openstack
+      tags:
+        - configure
+        - nova
+
+    - name: Assert edpm_nova_extra_bind_mounts dest paths do not collide with standard mounts
+      ansible.builtin.assert:
+        that:
+          - "'{{ item }}' not in {{ edpm_nova_extra_bind_mounts }} | map(attribute='dest') | list "
+      loop:
+        - /var/lib/nova
+        - /var/lib/openstack
+        - /etc/nova
+      tags:
+        - configure
+        - nova
+
+    - name: Assert edpm_nova_extra_bind_mounts dest paths are subdirectory of valid paths
+      ansible.builtin.assert:
+        that:
+          - "'{{ item.dest | regex_search('^(/etc|/opt|/var/lib)') }}' is not none"
+      loop: "{{ edpm_nova_extra_bind_mounts }}"
 
 - name: Create sync config dirs
   tags:
