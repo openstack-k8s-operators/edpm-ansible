@@ -18,7 +18,7 @@
 growvols_args: >
   /=8GB
   /tmp=1GB
-  /var/log=10GB
+  /var/log=25GB
   /var/log/audit=2GB
   /home=1GB
   /var=100%
