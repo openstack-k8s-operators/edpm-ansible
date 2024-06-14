@@ -9,31 +9,14 @@
     state: present
   loop: "{{ edpm_ovs_packages }}"
 
-- name: Start OVS service
-  block:
-    - name: Ensure ovs services are enabled and running
-      tags:
-        - install
-        - ovs
-      become: true
-      ansible.builtin.systemd:
-        name: "{{ item }}.service"
-        enabled: true
-        state: started
-        masked: false
-      loop: "{{ edpm_ovs_services }}"
-  rescue:
-    - name: Get journal output
-      become: true
-      ansible.builtin.shell: >
-        journalctl -xe
-      register: journal_result
-      changed_when: journal_result.rc == 0
-      failed_when: journal_result.rc != 0
-
-    - name: Journal_result debug
-      ansible.builtin.debug:
-        msg: "{{journal_result.stdout_lines}}"
-
-    - name: Finally fail
-      ansible.builtin.command: /bin/false  # noqa: no-changed-when
+- name: Ensure ovs services are enabled and running
+  tags:
+    - install
+    - ovs
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}.service"
+    enabled: true
+    state: started
+    masked: false
+  loop: "{{ edpm_ovs_services }}"
