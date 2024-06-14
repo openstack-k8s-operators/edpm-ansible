@@ -14,9 +14,62 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Prepare DUT
+- name: Setup DUT
   hosts: all
+  pre_tasks:
+    - name: set basic user fact
+      set_fact:
+        ansible_user: "{{ lookup('env', 'USER') }}"
+      when:
+        - ansible_user is undefined
+    - name: set basic home fact
+      set_fact:
+        ansible_user_dir: "{{ lookup('env', 'HOME') }}"
+      when:
+        - ansible_user_dir is undefined
   tasks:
+    - name: Enable package repos
+      become: true
+      ansible.builtin.shell: |
+        set -euxo pipefail
+        pushd /var/tmp
+        curl -sL https://github.com/openstack-k8s-operators/repo-setup/archive/refs/heads/main.tar.gz | tar -xz
+        pushd repo-setup-main
+        python3 -m venv ./venv
+        PBR_VERSION=0.0.0 ./venv/bin/pip install ./
+        ./venv/bin/repo-setup current-podified -b antelope
+        popd
+        rm -rf repo-setup-main
+
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+
+    - name: set timezone
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_timezone
+
+    - name: Create firewall directory
+      become: true
+      ansible.builtin.file:
+        path: '/var/lib/edpm-config/firewall'
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
+
+    - name: open port 22 (edpm_nftables will active this later)
+      become: true
+      ansible.builtin.copy:
+        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
+        content: |
+          - rule_name: 003 Allow SSH
+            rule:
+              proto: tcp
+              dport: 22
     - name: "Include edpm_users with non default config"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_users"
