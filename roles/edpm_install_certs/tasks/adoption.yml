@@ -27,6 +27,7 @@
   ansible.builtin.copy:
     src: /var/lib/certmonger/requests
     dest: /var/lib/certmonger/requests.backup
+    remote_src: true
     mode: preserve
   when: requests.matched != 0
 
