@@ -2,26 +2,18 @@
 dependency:
   name: galaxy
 driver:
-  name: podman
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
-- command: /sbin/init
-  dockerfile: "../common/Containerfile.j2"
-  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-  name: instance
-  privileged: true
-  registry:
-    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
-  ulimits:
-  - host
+  - name: compute-1
+    groups:
+      - compute
 provisioner:
   log: true
   name: ansible
-  inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            canonical_hostname: edpm-0.localdomain
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"

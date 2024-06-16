@@ -1,4 +1,5 @@
 - name: Verify OVS update
+  become: true
   hosts: all
   vars:
     scenario_name: "{{molecule_yml['scenario']['name']}}"

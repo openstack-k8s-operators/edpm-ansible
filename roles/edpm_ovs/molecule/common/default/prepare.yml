@@ -14,13 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Prepare DUT
+- name: Prepare
   hosts: all
+  pre_tasks:
+    - name: Include base pre_tasks
+      ansible.builtin.include_tasks:
+        file: ../prepare_pre_tasks.yml
   tasks:
-    - name: "Include edpm_users with non default config"
-      ansible.builtin.include_role:
-        name: "osp.edpm.edpm_users"
-      vars:
-        edpm_users_users:
-          - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
-        edpm_users_extra_dirs: []
+    - name: Include base prepare tasks
+      ansible.builtin.include_tasks:
+        file: ../prepare_base.yml

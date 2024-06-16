@@ -12,7 +12,6 @@
   ansible.builtin.shell: >
     dnf update -y openvswitch --setopt=tsflags=noscripts
   register: update_ovs_result
-  changed_when: update_ovs_result.rc == 0
   failed_when: update_ovs_result.rc != 0
 
   # Reload of openvswitch service will reload OVS systemd services with an automatic
