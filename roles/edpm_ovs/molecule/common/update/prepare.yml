@@ -16,20 +16,21 @@
 
 - name: Prepare
   hosts: all
+  become: true
   vars:
     scenario_name: "{{molecule_yml['scenario']['name']}}"
   pre_tasks:
-    - name: Importing test_vars
+    - name: Include base pre_tasks
+      ansible.builtin.include_tasks:
+        file: ../prepare_pre_tasks.yml
+
+    - name: Include test_vars
       ansible.builtin.include_vars:
         file: ./test_vars.yml
   tasks:
-    - name: "Include edpm_users with non default config for ovs"
-      ansible.builtin.include_role:
-        name: "osp.edpm.edpm_users"
-      vars:
-        edpm_users_users:
-          - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
-        edpm_users_extra_dirs: []
+    - name: Include base prepare tasks
+      ansible.builtin.include_tasks:
+        file: ../prepare_base.yml
 
     - name: Select openvswitch test version to install
       ansible.builtin.set_fact:

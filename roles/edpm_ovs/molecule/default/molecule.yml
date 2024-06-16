@@ -12,21 +12,15 @@ platforms:
     groups:
       - compute
 provisioner:
-  log: true
   name: ansible
   playbooks:
-    prepare: "../common/update/prepare.yml"
-    verify: "../common/update/verify.yml"
-scenario:
-  name: update_with_reload
-  test_sequence:
-  - dependency
-  - destroy
-  - create
-  - prepare
-  - converge
-  - verify
-  - cleanup
-  - destroy
+    prepare: ../common/default/prepare.yml
 verifier:
   name: ansible
+scenario:
+  test_sequence:
+     - destroy
+     - create
+     - prepare
+     - converge
+     - verify
