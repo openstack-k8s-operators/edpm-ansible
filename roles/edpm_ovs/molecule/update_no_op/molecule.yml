@@ -20,6 +20,7 @@ provisioner:
 scenario:
   name: update_no_op
   test_sequence:
+    - dependency
     - destroy
     - create
     - prepare

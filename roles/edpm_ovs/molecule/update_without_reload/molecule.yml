@@ -20,13 +20,13 @@ provisioner:
 scenario:
   name: update_without_reload
   test_sequence:
-  - dependency
-  - destroy
-  - create
-  - prepare
-  - converge
-  - verify
-  - cleanup
-  - destroy
+    - dependency
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
 verifier:
   name: ansible

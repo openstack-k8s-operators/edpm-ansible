@@ -19,8 +19,11 @@ verifier:
   name: ansible
 scenario:
   test_sequence:
-     - destroy
-     - create
-     - prepare
-     - converge
-     - verify
+    - dependency
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
