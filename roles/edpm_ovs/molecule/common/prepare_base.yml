@@ -10,8 +10,6 @@
     ./venv/bin/repo-setup current-podified -b antelope
     popd
     rm -rf repo-setup-main
-  args:
-    executable: /bin/bash
 - name: set /etc/localtime
   become: true
   ansible.builtin.file:
