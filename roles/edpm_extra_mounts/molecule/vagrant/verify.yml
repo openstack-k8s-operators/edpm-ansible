@@ -1,0 +1,4 @@
+---
+
+- name: run default scenario verify playbooks
+  ansible.builtin.import_playbook: ../default/verify.yml

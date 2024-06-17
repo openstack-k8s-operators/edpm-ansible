@@ -1,0 +1,34 @@
+---
+argument_specs:
+  # ./roles/edpm_extra_mounts/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_extra_mounts role.
+    options:
+      edpm_extra_mounts:
+        type: list
+        default: []
+        description: |
+          A list of additional mounts (e.g. for nfs) to be added to the edpm compute node.
+          The list should be in the form of a list of dictionaries with the
+          following keys:
+          - name: The name of the mount by default /var/lib/nova/instances
+          - path: The path to the mount
+          - opts: The options to set for the mount
+          - fstype: The filesystem type by default nfs4
+      edpm_default_mounts:
+        type: list
+        default: [
+          {name: 'hugepages1G', path: '/dev/hugepages1g', opts: 'pagesize=1G', fstype: 'hugetlbfs'},
+          {name: 'hugepages2M', path: /dev/hugepages2M, opts: 'pagesize=2M', fstype: 'hugetlbfs'}]
+        description: |
+          A list of mounts by default it is used to create hugepage mounts to be added to the edpm compute node.
+          The list should be in the form of a list of dictionaries with the
+          following keys:
+          - name: The name of the hugepage mount
+          - path: The path to the hugepage mount, this will be crated
+          - opts: The options to set for the hugepage mount
+          - fstype: The filesystem type by default hugetlbfs
+          Optional keys:
+          - owner: The owner of the mount
+          - group: The group of the mount
+          - mode: The mode of the mount
