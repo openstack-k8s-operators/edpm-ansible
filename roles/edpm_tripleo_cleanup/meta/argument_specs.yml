@@ -33,3 +33,22 @@ argument_specs:
           This operation is irreversible. Furthermore, issues may occur,
           if the unit files are managed by package manager.
         default: true
+      edpm_service_removal_skip_list:
+        type: "list"
+        description: |
+          List of services to be kept during cleanup.
+          By default these are services related to Swift storag.
+        default:
+          - tripleo_swift_account_auditor
+          - tripleo_swift_account_reaper
+          - tripleo_swift_account_replicator
+          - tripleo_swift_account_server
+          - tripleo_swift_container_auditor
+          - tripleo_swift_container_replicator
+          - tripleo_swift_container_server
+          - tripleo_swift_container_updater
+          - tripleo_swift_object_auditor
+          - tripleo_swift_object_expirer
+          - tripleo_swift_object_replicator
+          - tripleo_swift_object_server
+          - tripleo_swift_object_updater
