@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+    type: libvirt
+    options:
+      memory: 8192
+      cpus: 8
+  provision: no
+  parallel: true
+  # default_box: 'generic/rocky9'
+  default_box: 'generic/centos9s'
+platforms:
+- name: compute
+  provider_options:
+    cpu_mode: 'host-passthrough'
+    nested: true
+    machine_type: 'q35'
+  groups:
+    - compute-1
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../default/converge.yml
+    prepare: ../default/prepare.yml
+  inventory:
+    hosts:
+      all:
+        hosts:
+          compute:
+            ctlplane_ip: 10.0.0.3
+            canonical_hostname: edpm-0.localdomain
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+     - destroy
+     - create
+     - prepare
+     - converge
+     - verify

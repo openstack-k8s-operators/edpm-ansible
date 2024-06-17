@@ -1,0 +1,16 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: compute-1
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        # common directories
+        - "/dev/hugepages1G"
+        - "/dev/hugepages2MB"
+

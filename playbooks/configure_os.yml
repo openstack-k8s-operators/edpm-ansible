@@ -51,3 +51,9 @@
         tasks_from: configure.yml
       tags:
         - edpm_firewall
+    - name: Configure default and extra mounts (for hugepages and nfs)
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_extra_mounts
+        tasks_from: extra_mounts.yml
+      tags:
+        - edpm_extra_mounts
