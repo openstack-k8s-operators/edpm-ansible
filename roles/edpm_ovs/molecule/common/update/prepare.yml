@@ -19,6 +19,7 @@
   become: true
   vars:
     scenario_name: "{{molecule_yml['scenario']['name']}}"
+    ovs_prepare_version: "{{molecule_yml['scenario']['ovs_prepare_version']}}"
   pre_tasks:
     - name: Include base pre_tasks
       ansible.builtin.include_tasks:
@@ -32,18 +33,11 @@
       ansible.builtin.include_tasks:
         file: ../prepare_base.yml
 
-    - name: Select openvswitch test version to install
-      ansible.builtin.set_fact:
-        # Unversioned name will install the latest available version
-        ovs_test_version:
-          "{{'rdo-openvswitch' if scenario_name == 'update_no_op'
-              else 'rdo-openvswitch-3.2'}}"
-
-    - name: Install {{ovs_test_version}} for testing
+    - name: Install {{ovs_prepare_version}} for testing
       ansible.builtin.import_role:
         name:  osp.edpm.edpm_ovs
       vars:
-        edpm_ovs_packages: ["{{ovs_test_version}}"]
+        edpm_ovs_packages: ["{{ovs_prepare_version}}"]
 
     - name: Create a working directory for storing test variables
       ansible.builtin.file:

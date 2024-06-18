@@ -20,6 +20,7 @@ provisioner:
     cleanup: ../common/update/cleanup.yml
 scenario:
   name: update_with_reload
+  ovs_prepare_version: rdo-openvswitch-3.2
   test_sequence:
     - dependency
     - destroy

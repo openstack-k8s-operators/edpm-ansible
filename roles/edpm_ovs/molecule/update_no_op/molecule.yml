@@ -20,6 +20,8 @@ provisioner:
     cleanup: ../common/update/cleanup.yml
 scenario:
   name: update_no_op
+  # Unversioned name will install the latest available version
+  ovs_prepare_version: rdo-openvswitch
   test_sequence:
     - dependency
     - destroy
