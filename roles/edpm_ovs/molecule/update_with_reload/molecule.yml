@@ -17,7 +17,7 @@ provisioner:
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"
-    cleanup: ../common/cleanup.yml
+    cleanup: ../common/update/cleanup.yml
 scenario:
   name: update_with_reload
   test_sequence:

@@ -14,13 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Cleanup
+- name: Cleanup after update test
   hosts: all
   become: true
   pre_tasks:
     - name: Include test_vars
       ansible.builtin.include_vars:
-        file: ./test_vars.yml
+        file: ../test_vars.yml
   tasks:
     - name: Delete test bridge
       ansible.builtin.shell: |
@@ -29,13 +29,6 @@
       changed_when: del_br_result.rc == 0
       failed_when: del_br_result.rc != 0
 
-    - name: Uninstall openvswitch from the test instance
-      ansible.builtin.dnf:
-        name: rdo-openvswitch
-        autoremove: true
-        state: absent
-
-    - name: Delete test directory with its content
-      ansible.builtin.file:
-        path: "{{working_directory}}"
-        state: absent
+    - name: Include base cleanup tasks
+      ansible.builtin.include_tasks:
+        file: ../cleanup_base.yml
