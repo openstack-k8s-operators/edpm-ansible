@@ -22,6 +22,13 @@
       ansible.builtin.include_vars:
         file: ./test_vars.yml
   tasks:
+    - name: Delete test bridge
+      ansible.builtin.shell: |
+        ovs-vsctl del-br "{{test_bridge}}"
+      register: del_br_result
+      changed_when: del_br_result.rc == 0
+      failed_when: del_br_result.rc != 0
+
     - name: Uninstall openvswitch from the test instance
       ansible.builtin.dnf:
         name: rdo-openvswitch
