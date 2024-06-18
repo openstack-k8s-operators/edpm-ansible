@@ -173,3 +173,13 @@
         path: '/var/lib/openstack/config/nova/test.conf'
         state: touch
         mode: 0644
+
+    - name: Create vendor integration directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: "directory"
+        mode: "0755"
+      loop:
+        - {"path": "/var/lib/vendor_integration"}
+        - {"path": "/opt/vendor_integration_2"}

@@ -29,5 +29,8 @@
         "/etc/nvme:/etc/nvme",
         "/var/lib/openstack/config/ceph:/var/lib/kolla/config_files/ceph:ro",
         "/etc/ssh/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro"
+{%- for bind_mount in edpm_nova_extra_bind_mounts %}
+        ,"{{ bind_mount.src }}:{{ bind_mount.dest }}:{{ bind_mount.options | default('ro') }}"
+{% endfor -%}
     ]
 }

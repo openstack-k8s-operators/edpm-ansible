@@ -54,3 +54,26 @@ argument_specs:
           - tripleo_nova_vnc_proxy.service
         description: |
           List of tripleo nova services to stop during EDPM adoption
+      edpm_nova_extra_bind_mounts:
+        type: list
+        default: []
+        description: |
+          A list of additional host mounts to be added to the nova compute container
+          This enabled vendor integration to pass addtional data files to the nova compute
+          container. The list should be in the form of a list of dictionaries with the
+          following keys:
+          - src: The path to the file or directory on the host
+          - dest: The path to the file or directory in the container
+          - options: The options to set for the bind mount in podman format (optional)
+          src should not be a subdirectory of the following paths:
+          - /var/lib/openstack
+          - /var/lib/nova
+          dest must not be a subdirectory of the following paths:
+          - /var/lib/openstack
+          - /var/lib/nova
+          - /etc/nova
+          and must be a subdirectory of:
+          - /var/lib
+          - /etc
+          - /opt
+          options defaults to "ro" if not specified

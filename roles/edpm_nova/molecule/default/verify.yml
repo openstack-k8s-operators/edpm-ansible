@@ -29,6 +29,15 @@
         # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
         # in molecule we create it in prepare so lets just assert it exists
         - "{{ edpm_nova_tls_ca_src_dir }}"
+
+    - name: ensure extra mounts are present
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
+      loop:
+        - { "name": "nova_compute", "src": "/var/lib/vendor_integration",
+            "dest": "/var/lib/vendor_integration" }
+        - { "name": "nova_compute", "src": "/opt/vendor_integration_2",
+            "dest": "/opt/vendor_integration_2", "options": "shared" }
+
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
