@@ -15,6 +15,7 @@ provisioner:
   name: ansible
   playbooks:
     prepare: ../common/default/prepare.yml
+    cleanup: ../common/cleanup.yml
 verifier:
   name: ansible
 scenario:

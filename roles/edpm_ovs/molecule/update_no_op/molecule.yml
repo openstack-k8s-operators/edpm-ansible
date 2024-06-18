@@ -17,6 +17,7 @@ provisioner:
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"
+    cleanup: ../common/cleanup.yml
 scenario:
   name: update_no_op
   test_sequence:

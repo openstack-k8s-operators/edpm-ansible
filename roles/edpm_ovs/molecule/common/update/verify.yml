@@ -6,7 +6,7 @@
   pre_tasks:
     - name: Importing test_vars
       ansible.builtin.include_vars:
-        file: "./test_vars.yml"
+        file: "../test_vars.yml"
   tasks:
     - name: Ensure openvswitch systemd services are in expected states
       ansible.builtin.include_tasks: ../../../../../molecule/test-helpers/verify_systemd_unit.yaml
