@@ -57,3 +57,8 @@
               proto: tcp
               dport: 1211
               action: drop
+          - rule_name: '020 string port-range check'
+            rule:
+              proto: tcp
+              dport: 5555-5558
+              action: accept

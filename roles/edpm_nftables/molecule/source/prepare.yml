@@ -55,3 +55,9 @@
               proto: tcp
               source: "fd00:fd00:fd00:2000::/64"
               dport: 1211
+          - rule_name: '020 string port-range check'
+            rule:
+              proto: tcp
+              source: 1.1.1.1/32
+              dport: 5555-5558
+              action: accept
