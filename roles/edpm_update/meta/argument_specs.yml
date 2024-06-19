@@ -22,4 +22,4 @@ argument_specs:
         default: edpm_services
         description: >
           Used to select which list of services are running
-          on the machine. The list is provided by dataplane-operator.
+          on the machine. The list is provided by openstack-operator.
