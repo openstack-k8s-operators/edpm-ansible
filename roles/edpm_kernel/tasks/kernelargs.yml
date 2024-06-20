@@ -89,16 +89,6 @@
         line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${GRUB_EDPM_KERNEL_ARGS}"'
         insertafter: '^GRUB_EDPM_KERNEL_ARGS.*'
 
-    - name: Check grub config paths
-      ansible.builtin.stat:
-        path: "{{ item }}"
-      register: grub_stat
-      loop:
-        - /boot/efi/EFI/BOOT
-        - /boot/efi/EFI/redhat
-        - /boot/efi/EFI/centos
-        - /boot/efi/EFI/fedora
-
     - name: Check if grub2-mkconfig has --update-bls-cmdline option
       ansible.builtin.shell:
         cmd: grub2-mkconfig --help | grep '\-\-update-bls-cmdline'
@@ -115,27 +105,6 @@
       register: _grub2_mkconfig
       changed_when: _grub2_mkconfig.rc == 0
       failed_when: _grub2_mkconfig.rc != 0
-
-    - name: Generate EFI grub config
-      ansible.builtin.command: >-
-        grub2-mkconfig -o {{ item.stat.path }}/grub.cfg
-        {{ '--update-bls-cmdline'
-        if check_update_bls_cmdline.rc == 0
-        else '' }}
-      when: item.stat.exists | bool
-      loop: "{{ grub_stat.results }}"
-      register: _grub2_mkconfig_efi
-      changed_when: _grub2_mkconfig_efi.rc == 0
-      failed_when: _grub2_mkconfig_efi.rc != 0
-
-    - name: Copy grubenv to EFI directory
-      ansible.builtin.copy:
-        remote_src: true
-        src: /boot/grub2/grubenv
-        dest: "{{ item.stat.path }}/grubenv"
-        mode: "0644"
-      when: item.stat.exists|bool
-      loop: "{{ grub_stat.results }}"
 
     - name: Check for active tuned profile
       ansible.builtin.stat:
