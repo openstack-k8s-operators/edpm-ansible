@@ -5,8 +5,8 @@ Testing with ansibleee
 ======================
 
 edpm-ansible is included in the openstack-ansibleee-runner container image,
-which is a key component used by the dataplane-operator that deploys EDPM nodes.
-The dataplane-operator's CRD includes support for specifying additional
+which is a key component used by the openstack-operator that deploys EDPM nodes.
+The openstack-operator's CRD includes support for specifying additional
 volume mounts for the ansibleee pods, which provides a mechanism for accessing
 a local copy of edpm-ansible. This makes it possible to develop and test local
 changes to edpm-ansible without having to build and deploy a new
@@ -18,7 +18,7 @@ Provide NFS access to your edpm-ansible directory
 The technique described here uses NFS to access the edpm-ansible directory on
 your development system, so you'll need to install an NFS server and create
 an appropriate export on your development system. Of course, this implies
-your OpenShift deployment that runs the dataplane-operator has access to
+your OpenShift deployment that runs the openstack-operator has access to
 the NFS server, including any required firewall rules.
 
 * `EL 8 instructions <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/deploying_different_types_of_servers/exporting-nfs-shares_deploying-different-types-of-servers#assembly_configuring-the-nfs-server-to-run-behind-a-firewall_exporting-nfs-shares>`_
