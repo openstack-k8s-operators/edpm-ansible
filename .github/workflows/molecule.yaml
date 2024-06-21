@@ -43,6 +43,7 @@ jobs:
         - edpm_timezone
         - edpm_tuned
         - edpm_telemetry
+        - edpm_telemetry_logging
         - edpm_update
         - edpm_users
         - env_data

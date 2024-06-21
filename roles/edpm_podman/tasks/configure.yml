@@ -20,6 +20,7 @@
   ansible.builtin.import_tasks: login-kube-registry.yml
   when: edpm_podman_login_kube_registry|bool
 - name: Configure edpm_container_manage to generate systemd drop-in dependencies
+  become: true
   ansible.builtin.copy:
     dest: /etc/sysconfig/podman_drop_in
     mode: "0644"
@@ -30,6 +31,7 @@
       those constraints are enforced on reboot/shutdown.
   when: edpm_podman_systemd_drop_in_dependencies|bool
 - name: Configure edpm_container_manage to not generate drop-in dependencies
+  become: true
   ansible.builtin.file:
     path: /etc/sysconfig/podman_drop_in
     state: absent

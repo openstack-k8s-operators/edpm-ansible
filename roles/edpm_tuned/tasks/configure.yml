@@ -15,9 +15,12 @@
 # under the License.
 
 - name: Ensure profile directory exists
+  become: true
   ansible.builtin.file:
     path: "/etc/tuned/{{ edpm_tuned_profile }}"
     state: directory
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: '0755'
   when:
     - (edpm_tuned_custom_profile is defined) and ((edpm_tuned_custom_profile | length) > 0)

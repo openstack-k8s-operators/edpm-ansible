@@ -16,7 +16,6 @@
         - nova
 
     - name: Assert edpm_nova_extra_bind_mounts source directories exist
-      become: true
       ansible.builtin.assert:
         that:
           - "source_dir_results.results | map(attribute='stat.exists') | list"

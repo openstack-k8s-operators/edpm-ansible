@@ -16,7 +16,6 @@
 
 
 - name: Run sshd tasks as root
-  become: true
   block:
     - name: PasswordAuthentication notice
       ansible.builtin.debug:
@@ -51,6 +50,7 @@
         - ('Banner' in edpm_sshd_server_options or 'PrintMotd' in edpm_sshd_server_options)
 
     - name: Configure the banner text
+      become: true
       ansible.builtin.copy:
         content: "{{ edpm_sshd_banner_text }}"
         dest: /etc/issue
@@ -59,6 +59,7 @@
         - edpm_sshd_banner_enabled | bool
 
     - name: Configure the motd banner
+      become: true
       ansible.builtin.copy:
         content: "{{ edpm_sshd_message_of_the_day }}"
         dest: /etc/motd
@@ -79,6 +80,7 @@
          {{ edpm_sshd_server_options }}
 
     - name: Adjust ssh server configuration
+      become: true
       ansible.builtin.template:
         dest: /etc/ssh/sshd_config
         src: sshd_config_block.j2
@@ -91,6 +93,7 @@
         _sshd_config_result_changed: _sshd_config_result.changed
 
     - name: Configure firewall for the service
+      become: true
       when:
         - edpm_sshd_configure_firewall|bool
       block:

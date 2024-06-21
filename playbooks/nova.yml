@@ -2,7 +2,6 @@
 
 - name: Deploy EDPM Nova storage infrastructure
   ansible.builtin.import_playbook: nova_storage.yml
-
 - name: Deploy EDPM Nova
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
