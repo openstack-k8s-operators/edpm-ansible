@@ -16,6 +16,7 @@
 
 
 - name: Set timezone
+  become: true
   community.general.timezone:
     name: "{{ edpm_timezone }}"
   register: _timezone_result

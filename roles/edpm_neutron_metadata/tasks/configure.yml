@@ -17,6 +17,7 @@
 - name: Configure neutron configuration files
   block:
     - name: Render neutron config files
+      become: true
       ansible.builtin.template:
         src: "{{ item.src }}"
         dest: "{{ edpm_neutron_metadata_agent_config_dir }}/{{ item.dest }}"
@@ -38,6 +39,7 @@
       become: false
 
     - name: Flatten secrets into {{ edpm_neutron_metadata_agent_config_dir }}
+      become: true
       ansible.builtin.copy:
         src: "{{ item.path }}"
         dest: "{{ edpm_neutron_metadata_agent_config_dir }}/{{ item.path | basename }}"

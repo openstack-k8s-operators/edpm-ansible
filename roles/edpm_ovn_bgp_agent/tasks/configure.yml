@@ -22,6 +22,7 @@
 - name: Configure OVN BGP agent
   block:
     - name: Render OVN BGP agent config files
+      become: true
       ansible.builtin.template:
         src: ovn-bgp-agent.conf.j2
         dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/bgp-agent.conf"
@@ -42,6 +43,7 @@
       become: false
 
     - name: Flatten secrets into /etc/ovn-bgp-agent at {{ edpm_ovn_bgp_agent_config_basedir }}
+      become: true
       ansible.builtin.copy:
         src: "{{ item.path }}"
         dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/{{ item.path | basename }}"

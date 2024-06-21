@@ -3,7 +3,6 @@
 - name: Deploy EDPM Swift
   hosts: all
   strategy: linear
-  become: true
   any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
   max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
   tasks:

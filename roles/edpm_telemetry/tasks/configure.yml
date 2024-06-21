@@ -30,6 +30,7 @@
 - name: Render ceilometer config files
   tags:
     - edpm_telemetry
+  become: true
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
@@ -67,6 +68,7 @@
   when: custom_ceilometer_conf.stat.exists
 
 - name: Copy generated ceilometer configs
+  become: true
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -75,6 +77,7 @@
   loop: "{{ configs }}"
 
 - name: Add the config templates
+  become: true
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
