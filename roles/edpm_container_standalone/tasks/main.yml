@@ -18,6 +18,7 @@
 # "edpm_container_standalone" will search for and load any operating system variable file
 
 - name: "Ensure directory exists: {{ edpm_container_standalone_kolla_config_dir }}"
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_kolla_config_dir }}"
     state: directory
@@ -25,6 +26,7 @@
     setype: container_file_t
 
 - name: Create kolla config files
+  become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
@@ -32,12 +34,14 @@
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
 - name: "Create config file {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
     mode: "0755"
 
 - name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
+  become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"

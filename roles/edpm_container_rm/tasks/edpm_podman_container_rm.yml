@@ -21,6 +21,7 @@
   register: systemd_healthcheck_exists
 
 - name: "Tear-down healthcheck: [ {{ container }} ]"
+  become: true
   when:
     - systemd_healthcheck_exists.stat.exists
   block:
@@ -46,6 +47,7 @@
   register: systemd_exists
 
 - name: "Tear-down container: [ {{ container }} ]"
+  become: true
   when:
     - systemd_exists.stat.exists
   block:
@@ -66,6 +68,7 @@
   register: systemd_requires_exists
 
 - name: "Remove systemd requires: [ {{ container }} ]"
+  become: true
   ansible.builtin.file:
     path: "/etc/systemd/system/edpm_{{ container }}.service.requires"
     state: absent
@@ -73,12 +76,14 @@
     - systemd_requires_exists.stat.exists
 
 - name: Reload systemd services if needed
+  become: true
   when:
     - systemd_healthcheck_exists.stat.exists or systemd_exists.stat.exists or systemd_requires_exists.stat.exists
   ansible.builtin.systemd:
     daemon_reload: true
 
 - name: Stop and remove container if exists
+  become: true
   containers.podman.podman_container:
     name: "{{ container }}"
     state: absent

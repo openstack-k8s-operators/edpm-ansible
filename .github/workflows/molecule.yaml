@@ -42,6 +42,7 @@ jobs:
         - edpm_ssh_known_hosts
         - edpm_timezone
         - edpm_telemetry
+        - edpm_telemetry_logging
         - edpm_update
         - edpm_users
         - env_data

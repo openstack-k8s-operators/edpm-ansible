@@ -24,6 +24,7 @@
   become: true
 
 - name: Generate containers configs data
+  become: true
   block:
     - name: "Find all matching configs configs for in {{ edpm_container_manage_config }}"
       container_config_data:

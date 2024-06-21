@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Cleanup hw-offload when no longer required
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl remove open . other_config hw-offload
   register: cleanup_hw_offload
@@ -23,6 +24,7 @@
   when: not edpm_enable_hw_offload | bool
 
 - name: Get OVN CMS Options from the local OVSDB
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl get Open_vSwitch . external_ids:ovn-cms-options | sed 's/\"//g'
   register: cleanup_ovn_cms_options
@@ -58,6 +60,7 @@
         cleanup_ovn_cms_options: "{{ cleanup_ovn_cms_options | combine(filtered_azs | default({})) }}"
 
 - name: Set updated OVN CMS Options to the local OVSDB
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options={{ cleanup_ovn_cms_options.stdout }}
   register: cleanup_ovn_cms_options_set
@@ -68,6 +71,7 @@
     - cleanup_ovn_cms_options.stdout != ""
 
 - name: Clear OVN CMS Options if updated string is empty
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl remove Open_vSwitch . external_ids ovn-cms-options
   register: cleanup_ovn_cms_options_remove
