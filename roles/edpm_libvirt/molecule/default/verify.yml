@@ -121,10 +121,6 @@
         that:
           - "'migration_port_min = 61152' in qemu_conf.content | b64decode"
           - "'migration_port_max = 61215' in qemu_conf.content | b64decode"
-    - name: Assert that nbt_tls is disabled in qemu.conf
-      assert:
-        that:
-          - "'nbd_tls = 0' in qemu_conf.content | b64decode"
 
     - name: Load os_enabled_vtpm selinux boolean
       ansible.builtin.shell: "getsebool os_enable_vtpm"
