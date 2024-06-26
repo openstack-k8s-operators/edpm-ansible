@@ -41,7 +41,7 @@ edpm_kernel_sysctl_settings:
   net.ipv4.conf.all.arp_notify:
     value: 1
   net.ipv4.conf.all.log_martians:
-    value: 1
+    value: 0
   net.ipv4.conf.all.rp_filter:
     value: 1
   net.ipv4.conf.all.secure_redirects:
@@ -51,7 +51,7 @@ edpm_kernel_sysctl_settings:
   net.ipv4.conf.default.accept_redirects:
     value: 0
   net.ipv4.conf.default.log_martians:
-    value: 1
+    value: 0
   net.ipv4.conf.default.secure_redirects:
     value: 0
   net.ipv4.conf.default.send_redirects:
