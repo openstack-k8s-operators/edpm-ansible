@@ -26,9 +26,9 @@
         mode: "0750"
 
     - name: Push default ruleset snipet
-      ansible.builtin.copy:
+      ansible.builtin.template:
         dest: "{{ edpm_nftables_src }}/edpm-nftables-base.yaml"
-        src: 00-base-rules.yaml
+        src: base-rules.yaml.j2
         mode: "0644"
 
 - name: IPtables compatibility layout
