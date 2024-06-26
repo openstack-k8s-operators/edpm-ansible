@@ -30,4 +30,8 @@ edpm_ovs_packages:
   # main ovs packages
   # NOTE: pin ovs version here in the future if
   # we want to use a specific version i.e. for adoption.
+  # NOTE: pin the wrapper package (rdo-openvswitch or rhoso-openvswitch), not
+  # openvswitchVER, e.g.:
+  # - rdo-openvswitch-3.1
+  # Otherwise, we will always get the latest version.
   - openvswitch
