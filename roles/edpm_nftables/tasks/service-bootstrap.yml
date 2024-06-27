@@ -36,6 +36,13 @@
         - ansible_facts.services[item] is defined
         - ansible_facts.services[item]["status"] != "not-found"
 
+    - name: Ensure firewalld service is disabled
+      ansible.builtin.systemd:
+        name: firewalld
+        enabled: false
+        state: stopped
+        masked: true
+
     - name: Ensure nftables service is enabled and running
       ansible.builtin.systemd:
         name: nftables
