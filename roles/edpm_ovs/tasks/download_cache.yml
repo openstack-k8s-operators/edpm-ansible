@@ -3,6 +3,7 @@
   ansible.builtin.dnf:
     name: "{{ edpm_ovs_packages }}"
     download_only: true
+    state: "{{ dnf_state | default(omit) }}"
   become: true
   register: _install_packages_result
   until: _install_packages_result.rc == 0

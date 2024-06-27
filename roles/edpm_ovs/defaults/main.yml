@@ -35,3 +35,5 @@ edpm_ovs_packages:
   # - rdo-openvswitch-3.1
   # Otherwise, we will always get the latest version.
   - openvswitch
+# whether to reload the openvswitch service after an update is complete
+edpm_ovs_reload_after_update: false

@@ -1,0 +1,50 @@
+---
+- name: Check if ovs update is available
+  become: true
+  ansible.builtin.dnf:  # noqa: package-latest
+    name: "{{ edpm_ovs_packages }}"
+    state: latest
+  check_mode: true
+  register: ovs_update_check
+
+- name: Perform ovs update
+  when:
+    - ovs_update_check.rc == 0
+    - ovs_update_check.results | length > 0
+    # Extra guard to not run the update in case the package list is empty
+    - edpm_ovs_packages | length > 0
+  become: true
+  block:
+    - name: Cache set ovs packages
+      ansible.builtin.include_tasks: download_cache.yml
+      vars:
+        dnf_state: latest
+
+    - name: Update openvswitch packages without stopping the service
+      tags:
+        - update
+        - ovs
+      # Call dnf via the shell module as the ansible dnf module does not
+      # support passing --setopt options. This is required in order to disable any
+      # OVS rpm scriptlets which would stop and disable OVS services during
+      # a standard update. Further info:
+      # https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md#rpm-packaging
+      ansible.builtin.shell: >
+        dnf update -y {{ " ".join(edpm_ovs_packages) }} --cacheonly --setopt=tsflags=noscripts
+      register: update_ovs_result
+      changed_when: update_ovs_result.rc == 0
+      failed_when: update_ovs_result.rc != 0
+
+      # Reload of openvswitch service will reload OVS systemd services with an automatic
+      # restore of already set OpenFlows. Further info:
+      # https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md#proposal
+    - name: Reload openvswitch service
+      tags:
+        - reload
+        - ovs
+      ansible.builtin.systemd_service:
+        name: openvswitch.service
+        daemon_reload: true
+        state: reloaded
+        masked: false
+      when: edpm_ovs_reload_after_update | bool

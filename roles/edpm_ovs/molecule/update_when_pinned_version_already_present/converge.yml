@@ -1,0 +1,33 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Converge
+  hosts: all
+  vars:
+      ovs_pre_update_version: "{{molecule_yml['provisioner']['env']['ovs_pre_update_version']}}"
+  tasks:
+    - name: OVS update when specified version already set to a specific version
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovs
+        tasks_from: update
+      vars:
+        # Setting an explicit reload, but expecting no-op since no update should occur
+        edpm_ovs_reload_after_update: true
+        # ovs_pre_update_version will prepare the test instance with the specified
+        # version of ovs. Setting the same version to update to during converge should
+        # result in no-op since the specific version is already installed.
+        edpm_ovs_packages: ["{{ ovs_pre_update_version }}"]
