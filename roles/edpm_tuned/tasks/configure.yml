@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Ensure profile directory exists
+  become: true
   ansible.builtin.file:
     path: "/etc/tuned/{{ edpm_tuned_profile }}"
     state: directory
@@ -23,6 +24,7 @@
     - (edpm_tuned_custom_profile is defined) and ((edpm_tuned_custom_profile | length) > 0)
 
 - name: Create custom tuned profile
+  become: true
   ansible.builtin.copy:
     content: "{{ edpm_tuned_custom_profile }}"
     dest: "/etc/tuned/{{ edpm_tuned_profile }}/tuned.conf"

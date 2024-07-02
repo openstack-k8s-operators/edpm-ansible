@@ -69,12 +69,14 @@
     msg: "Creating edpm_kernel file under reboot_required for applying kernel args settings"
 
 - name: Create a reboot_required directory if it does not exist
+  become: true
   ansible.builtin.file:
     path: /var/lib/openstack/reboot_required
     state: directory
     mode: '0755'
 
 - name: Create file for reboot required
+  become: true
   ansible.builtin.file:
     path: /var/lib/openstack/reboot_required/edpm_kernel
     state: touch

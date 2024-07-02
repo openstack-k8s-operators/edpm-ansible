@@ -15,11 +15,13 @@
 # under the License.
 
 - name: Reboot nodes
+  become: true
   ansible.builtin.reboot:
     post_reboot_delay: "{{ edpm_reboot_post_reboot_delay }}"
     reboot_timeout: "{{ edpm_reboot_timeout_reboot }}"
 
 - name: Remove reboot_required directory
+  become: true
   ansible.builtin.file:
     path: /var/lib/openstack/reboot_required
     state: absent

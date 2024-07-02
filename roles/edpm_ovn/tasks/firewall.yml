@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Inject firewall rules for OVN
+  become: true
   osp.edpm.edpm_nftables_snippet:
     dest: /var/lib/edpm-config/firewall/ovn.yaml
     content: |

@@ -22,6 +22,7 @@
   register: requests
 
 - name: Backup certificate requests
+  become: true
   tags:
     - adoption
   ansible.builtin.copy:
@@ -32,6 +33,7 @@
   when: requests.matched != 0
 
 - name: Remove certificate requests
+  become: true
   tags:
     - adoption
   ansible.builtin.file:

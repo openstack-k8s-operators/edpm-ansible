@@ -80,6 +80,7 @@
         edpm_ovn_ovs_other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
 
 - name: Configure OVS external_ids
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
   register: ovs_external_ids
@@ -88,6 +89,7 @@
   when: edpm_ovn_ovs_external_ids | length > 0
 
 - name: Configure OVS other_config
+  become: true
   ansible.builtin.shell: >
     ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
   register: ovs_other_config
@@ -96,6 +98,7 @@
   when: edpm_ovn_ovs_other_config | length > 0
 
 - name: Add OVS Manager
+  become: true
   block:
     - name: Check if OVS Manager already exists
       ansible.builtin.shell: |

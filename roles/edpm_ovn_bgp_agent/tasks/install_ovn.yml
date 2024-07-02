@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Create persistent directories for in-node ovn cluster
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -25,6 +26,7 @@
     - {'path': /var/lib/openvswitch/ovn, 'setype': container_file_t}
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
+  become: true
   ansible.posix.seboolean:
     name: virt_sandbox_use_netlink
     persistent: true
@@ -34,6 +36,7 @@
     - ansible_facts.selinux.status == "enabled"
 
 - name: Copy in cleanup script
+  become: true
   ansible.builtin.copy:
     src: ovn-bgp-agent-cleanup
     dest: '/usr/libexec/ovn-bgp-agent-cleanup'
@@ -41,6 +44,7 @@
     mode: '0755'
 
 - name: Copy in cleanup service
+  become: true
   ansible.builtin.copy:
     src: ovn-bgp-agent-cleanup.service
     dest: '/usr/lib/systemd/system/ovn-bgp-agent-cleanup.service'
@@ -48,6 +52,7 @@
     mode: '0644'
 
 - name: Enabling the cleanup service
+  become: true
   ansible.builtin.service:
     name: ovn-bgp-agent-cleanup
     enabled: true
