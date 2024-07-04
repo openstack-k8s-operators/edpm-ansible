@@ -44,6 +44,7 @@
         masked: true
       when:
         - ansible_facts.services["firewalld.service"] is defined
+        - ansible_facts.services["firewalld.service"]["status"] != "not-found"
 
     - name: Ensure nftables service is enabled and running
       ansible.builtin.systemd:
