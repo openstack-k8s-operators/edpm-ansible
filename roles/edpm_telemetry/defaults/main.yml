@@ -34,3 +34,7 @@ edpm_telemetry_certs: "/var/lib/openstack/certs/{{ edpm_telemetry_service_name }
 edpm_telemetry_cacerts: "/var/lib/openstack/cacerts/{{ edpm_telemetry_service_name }}"
 # If TLS should be enabled for telemetry
 edpm_telemetry_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
+# seconds between retries for download tasks
+edpm_telemetry_image_download_delay: 5
+# number of retries for download tasks
+edpm_telemetry_image_download_retries: 5
