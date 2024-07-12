@@ -34,12 +34,9 @@
   block:
     - name: Get all services
       ansible.builtin.service_facts:
-    - name: Filter for tripleo services
+    - name: Filter for tripleo services and skip the ones in skip list
       ansible.builtin.set_fact:
-        tripleo_services: "{{ ansible_facts.services.keys() | select('contains', 'tripleo') }}"
-    - name: Filter services in skip list
-      ansible.builtin.set_fact:
-        tripleo_services: "{{ tripleo_services | reject('in', edpm_service_removal_skip_list ) }}"
+        tripleo_services: "{{ ansible_facts.services.keys() | select('contains', 'tripleo') | reject('in', edpm_service_removal_skip_list ) }}"
 
 - name: Stop and disable tripleo services
   tags:
