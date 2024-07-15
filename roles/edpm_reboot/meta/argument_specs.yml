@@ -13,7 +13,7 @@ argument_specs:
         default: auto
       edpm_reboot_old_tripleo_node_config_dir:
         type: path
-        default: /var/lib/config-data
+        default: /var/lib/config-data/puppet-generated
         description: Path to check for tripleo pre-adopted nodes
       edpm_reboot_edpm_node_config_dir:
         type: path
