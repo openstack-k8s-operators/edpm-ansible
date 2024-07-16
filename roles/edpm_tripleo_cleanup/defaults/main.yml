@@ -24,16 +24,16 @@ edpm_remove_tripleo_unit_files: true
 
 # Keep services listed
 edpm_service_removal_skip_list:
-  - tripleo_swift_account_auditor
-  - tripleo_swift_account_reaper
-  - tripleo_swift_account_replicator
-  - tripleo_swift_account_server
-  - tripleo_swift_container_auditor
-  - tripleo_swift_container_replicator
-  - tripleo_swift_container_server
-  - tripleo_swift_container_updater
-  - tripleo_swift_object_auditor
-  - tripleo_swift_object_expirer
-  - tripleo_swift_object_replicator
-  - tripleo_swift_object_server
-  - tripleo_swift_object_updater
+  - tripleo_swift_account_auditor.service
+  - tripleo_swift_account_reaper.service
+  - tripleo_swift_account_replicator.service
+  - tripleo_swift_account_server.service
+  - tripleo_swift_container_auditor.service
+  - tripleo_swift_container_replicator.service
+  - tripleo_swift_container_server.service
+  - tripleo_swift_container_updater.service
+  - tripleo_swift_object_auditor.service
+  - tripleo_swift_object_expirer.service
+  - tripleo_swift_object_replicator.service
+  - tripleo_swift_object_server.service
+  - tripleo_swift_object_updater.service

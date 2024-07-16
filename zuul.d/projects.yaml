@@ -50,3 +50,4 @@
               - ^roles/edpm_ovn/*
               - ^roles/edpm_neutron_metadata/*
               - ^roles/edpm_pre_adoption_validation/*
+              - ^roles/edpm_tripleo_cleanup/*
