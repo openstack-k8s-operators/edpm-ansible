@@ -141,7 +141,7 @@ def get_pciaddr_dict_from_usraddr(pci_addr):
         dbs_all.extend(dbs_fields)
         dbs_checked = [s.strip() or ANY for s in dbs_all]
 
-        ''' domain, bus, slot = dbs_checked '''
+        # domain, bus, slot = dbs_checked
         pci_dict['domain'], pci_dict['bus'], pci_dict['slot'] = dbs_checked
 
     pci_dict['domain'] = get_pci_field_val(pci_dict['domain'], MAX_DOMAIN, '%04x')
@@ -334,9 +334,8 @@ def match_pf_details(user_config, pf_name, is_non_nic_pf):
             # If NON NIC Part PF matches, then add the complete device
             return ADD_PF_PCI_ADDRESS
         else:
-            """ In case of NIC Partitioning PF, add the VFs only (excluding NIC Part VFs)
-                when the product id is not given or product_id matches that of VF
-            """
+            # In case of NIC Partitioning PF, add the VFs only (excluding NIC Part VFs)
+            # when the product id is not given or product_id matches that of VF
             return ADD_VF_PCI_ADDRESS
     elif ('product_id' not in user_config
           or pf_product[-4:] == user_config['product_id'][-4:]):
@@ -344,15 +343,13 @@ def match_pf_details(user_config, pf_name, is_non_nic_pf):
             # If product id of NON NIC Part VF matches, then add the complete device
             return ADD_PF_PCI_ADDRESS
         else:
-            """ When the user_config address matches that of the NIC Partitioned PF,
-                the PF must be removed from the user_config. So return the status such
-                that the caller ignores this user_config if this user_config is very
-                specific to the NIC Partitioned PF
-            """
+            # When the user_config address matches that of the NIC Partitioned PF,
+            # the PF must be removed from the user_config. So return the status such
+            # that the caller ignores this user_config if this user_config is very
+            # specific to the NIC Partitioned PF
             return DEL_USER_CONFIG
     else:
-        """ The Product ID neither belongs to VF nor PF, simply ignore matching
-        """
+        # The Product ID neither belongs to VF nor PF, simply ignore matching
         return KEEP_USER_CONFIG
 
 
@@ -405,7 +402,7 @@ def get_passthrough_config(user_config, pf_name,
     pci_passthrough = []
     del_user_config = False
 
-    """ Get the regex of the address fields """
+    # Get the regex of the address fields.
     if 'address' in user_config:
         if isinstance(user_config['address'], dict):
             addr_dict = user_config['address']
@@ -416,8 +413,8 @@ def get_passthrough_config(user_config, pf_name,
         user_address_pattern = ("[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:"
                                 "[0-9a-fA-F]{2}.[0-7]")
 
-    """ If address mentioned in user_config is PF, then get all VFs belonging to that PF
-    """
+    # If address mentioned in user_config is PF, then get all VFs belonging to that PF
+
     available_vfs = get_available_vf_pci_addresses_by_ifname(pf_name, allocated_pci)
 
     # get the pci address of the PF
@@ -427,10 +424,10 @@ def get_passthrough_config(user_config, pf_name,
     # Match the user_config address with the PF's address
     if user_address_regex.match(parent_pci_address):
         match_id = match_pf_details(user_config, pf_name, is_non_nic_pf)
-        """ if the address matches and there is no mismatch in
-        product id's of PF, then add the PF's provided its not a
-        NIC Partitioning PF
-        """
+        # if the address matches and there is no mismatch in
+        # product id's of PF, then add the PF's provided its not a
+        # NIC Partitioning PF
+
         if match_id == ADD_PF_PCI_ADDRESS:
             sel_addr.append(parent_pci_address)
         elif match_id == ADD_VF_PCI_ADDRESS:
@@ -442,16 +439,16 @@ def get_passthrough_config(user_config, pf_name,
         elif match_id == DEL_USER_CONFIG:
             del_user_config = True
 
-        """ Match the user_config address with the VF's address
-        A Regex of addresses could match both the VF and PF's.
-        If it matches the PF, all available VFs would be included anyway,
-        so it will be inclusive even if the address matches the VFs of the same PF
-        Also if product id is specified, it must match that of the VF's.
-        If product id is not mentioned in user_config, its assumed to have
-        matched and is left to address matching for derived configuration.
-        If Address is not mentioned, then all available VF's (excluding NIC partitioned VFs)
-        with the matching product id shall be added to the derived configuration.
-        """
+        # Match the user_config address with the VF's address
+        # A Regex of addresses could match both the VF and PF's.
+        # If it matches the PF, all available VFs would be included anyway,
+        # so it will be inclusive even if the address matches the VFs of the same PF
+        # Also if product id is specified, it must match that of the VF's.
+        # If product id is not mentioned in user_config, its assumed to have
+        # matched and is left to address matching for derived configuration.
+        # If Address is not mentioned, then all available VF's (excluding NIC partitioned VFs)
+        # with the matching product id shall be added to the derived configuration.
+
     else:
         pf_path = os.path.join(SYS_CLASS_NET_PATH, pf_name, "device")
         vendor, vf_product = get_pci_device_info_by_ifname(pf_path, 'virtfn0')
@@ -464,13 +461,13 @@ def get_passthrough_config(user_config, pf_name,
             if not sel_addr:
                 for vf_addr in allocated_pci:
                     if user_address_regex.match(str(vf_addr)):
-                        """ When the user_config address matches that of the NIC Partitioned VF,
-                        the VF must be removed from the user_config. So return the status such
-                        that the caller ignores this user_config if this user_config is very
-                        specific to the NIC Partitioned VF. If the user_config resulted in the
-                        derivations of other configurations, the derived configuration shall
-                        replace the original user_config.
-                        """
+                        # When the user_config address matches that of the NIC Partitioned VF,
+                        # the VF must be removed from the user_config. So return the status such
+                        # that the caller ignores this user_config if this user_config is very
+                        # specific to the NIC Partitioned VF. If the user_config resulted in the
+                        # derivations of other configurations, the derived configuration shall
+                        # replace the original user_config.
+
                         del_user_config = True
 
     if sel_addr:
@@ -497,10 +494,9 @@ def get_passthrough_config_for_all_pf(user_config,
         if passthrough_tmp:
             derived_config.extend(passthrough_tmp)
 
-    """
-    If there is no config added from NIC Part nics, then skip parsing the
-    NON NIC Partitioned PFs.
-    """
+    # If there is no config added from NIC Part nics, then skip parsing the
+    # NON NIC Partitioned PFs.
+
     if (derived_config or del_user_config):
         for pf in non_nic_partition_pfs:
             passthrough_tmp, status = get_passthrough_config(
@@ -570,9 +566,9 @@ def generate_combined_configuration(user_configs, system_configs,
             passthrough_tmp, del_user_config = get_passthrough_config_for_all_pf(
                 user_config, system_configs, allocated_pci)
 
-            """ If del_user_config is set, do not add to derived_config or
-                user_config_copy
-            """
+            # If del_user_config is set, do not add to derived_config or
+            # user_config_copy
+
             if not del_user_config:
                 if passthrough_tmp:
                     derived_config.extend(passthrough_tmp)
@@ -597,10 +593,9 @@ def _run_derive_pci(user_configs,
     user_config_copy, derived = generate_combined_configuration(
         user_configs, system_configs, sriov_phydev_map)
 
-    """ If the derivation does not bring in any changes, the user_config_copy list
-        and user_configs shall be same. The pci_passthrough_devspec
-        shall be updated only when there is a change needed due to NIC Partition
-    """
+    # If the derivation does not bring in any changes, the user_config_copy list
+    # and user_configs shall be same. The pci_passthrough_devspec
+    # shall be updated only when there is a change needed due to NIC Partition
     if user_config_copy != user_configs:
         print("NOTE: user_configs is updated, use this as nova confgmap")
         pci_passthrough['device_spec'] = (user_config_copy + derived)
