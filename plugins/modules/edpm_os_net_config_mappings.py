@@ -152,8 +152,8 @@ def run(module):
     data = module.params['net_config_data_lookup']
     if isinstance(data, dict) and data:
         results['mapping'] = _get_mappings(data)
-
-    results['changed'] = True if results['mapping'] else False
+    # Check if mapping contains anything
+    results['changed'] = bool(results['mapping'])
 
     module.exit_json(**results)
 
