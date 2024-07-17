@@ -165,12 +165,6 @@ class EdpmContainerManage:
                             configs[override_config][mk] = mv
         return configs
 
-    def _get_version(self):
-        rc, out, err = self.module.run_command(['podman', b'--version'])
-        if rc != 0 or not out or 'version' not in out:
-            self.module.fail_json(msg=f"Can not determine podman version. Captured error: {err} ")
-        return out.split('version')[1].strip()
-
     def _container_opts_defaults(self):
         default = {}
         opts = ARGUMENTS_SPEC_CONTAINER
