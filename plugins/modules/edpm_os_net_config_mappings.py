@@ -19,9 +19,9 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 
 import copy
-import os
 import subprocess
 import yaml
+from glob import glob
 
 
 ANSIBLE_METADATA = {
@@ -95,19 +95,18 @@ mapping:
 
 
 def _get_interfaces():
+    """Retrieve list of network interface addresses
+    """
     eth_addr = []
+    excluded_ints = ['lo', 'vnet']
 
-    for x in os.listdir('/sys/class/net/'):
-        excluded_ints = ['lo', 'vnet']
-        int_subdir = '/sys/class/net/{}/'.format(x)
-
-        if x in excluded_ints or not os.path.isdir(int_subdir):
+    for path in glob("/sys/class/net/*/address"):
+        # Condition on the second last part of path
+        # the one we glob on
+        if path.split('/')[-2] in excluded_ints:
             continue
-        # cast to lower case for MAC address match
-        with open('/sys/class/net/{}/address'.format(x)) as f:
-            mac_addr = f.read().strip().lower()
-        eth_addr.append(mac_addr)
-
+        with open(path, encoding='utf-8') as file:
+            eth_addr.append(file.read().strip().lower())
     eth_addr = list(filter(None, eth_addr))
 
     return eth_addr
