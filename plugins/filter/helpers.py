@@ -123,7 +123,7 @@ class FilterModule:
         """Return dict data with a specific key.
 
         This filter will take a list of dictionaries (data)
-        and will return the dictionnaries which have a certain key given
+        and will return the dictionaries which have a certain key given
         in parameter with 'attribute'.
         If reverse is set to True, the returned list won't contain dictionaries
         which have the attribute.
