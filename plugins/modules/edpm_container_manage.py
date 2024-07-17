@@ -335,10 +335,10 @@ class EdpmContainerManage:
 
             if success or retries <= 0:
                 break
-            else:
-                self.module.warn(f'Remaining retries for {name}: {retries}')
-                retries -= 1
-                time.sleep(retry_sleep)
+
+            self.module.warn(f'Remaining retries for {name}: {retries}')
+            retries -= 1
+            time.sleep(retry_sleep)
 
         return (name, success)
 
