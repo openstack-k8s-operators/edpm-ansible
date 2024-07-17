@@ -184,9 +184,8 @@ def _has_link(interface):
         with open('/sys/class/net/{}/carrier'.format(interface)) as f:
             has_link = int(f.read().strip())
     except FileNotFoundError:
-        has_link = 0
-    if has_link == 1:
-        return True
+        return False
+    return has_link == 1
 
 
 def main():
