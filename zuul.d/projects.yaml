@@ -17,7 +17,7 @@
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - openstack-k8s-operators-content-provider
-        - cifmw-data-plane-adoption-osp-17-to-extracted-crc:
+        - adoption-standalone-to-crc-ceph-provider:
             dependencies:
               - openstack-k8s-operators-content-provider
             # files based on https://github.com/marios/data-plane-adoption/blob/ec0f395a8321dc4c3ced71b777102ad7dc9de1b2/tests/roles/dataplane_adoption/tasks/main.yaml#L256
