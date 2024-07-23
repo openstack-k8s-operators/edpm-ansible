@@ -20,6 +20,6 @@
     name: "{{ edpm_tuned_system_packages }}"
     state: present
   register: edpm_tuned_system_packages_download
-  until: edpm_tuned_system_packages_download.rc == 0
+  until: "{{ edpm_tuned_system_packages_download.rc  | default(1) == 0 }}"
   retries: "{{ edpm_tuned_download_retries }}"
   delay: "{{ edpm_tuned_download_delay }}"

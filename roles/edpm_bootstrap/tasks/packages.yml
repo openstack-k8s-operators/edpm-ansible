@@ -32,7 +32,7 @@
     - (edpm_bootstrap_release_version_package | list | length) > 0
   become: true
   register: edpm_bootstrap_release_version_package_install
-  until: edpm_bootstrap_release_version_package_install.rc == 0
+  until: "{{ edpm_bootstrap_release_version_package_install.rc | default(1) == 0 }}"
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
 
@@ -45,7 +45,7 @@
     - not ansible_check_mode | bool
     - (edpm_bootstrap_packages_bootstrap_result.rc | int) == 1
   register: edpm_bootstrap_packages_bootstrap_result
-  until: edpm_bootstrap_packages_bootstrap_result.rc == 0
+  until: "{{ edpm_bootstrap_packages_bootstrap_result.rc | default(1) == 0 }}"
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
   become: true
@@ -68,7 +68,7 @@
         name: "{{ edpm_bootstrap_legacy_network_packages }}"
         state: present
       register: edpm_bootstrap_legacy_network_packages_result
-      until: edpm_bootstrap_legacy_network_packages_result.rc == 0
+      until: "{{ edpm_bootstrap_legacy_network_packages_result.rc | default(1) == 0 }}"
       retries: "{{ edpm_bootstrap_download_retries }}"
       delay: "{{ edpm_bootstrap_download_delay }}"
     - name: Ensure network service is enabled

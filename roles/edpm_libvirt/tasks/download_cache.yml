@@ -5,6 +5,6 @@
     download_only: true
   become: true
   register: _install_packages_result
-  until: _install_packages_result.rc == 0
+  until: "{{ _install_packages_result.rc | default(1) == 0 }}"
   retries: "{{ edpm_libvirt_download_retries }}"
   delay: "{{ edpm_libvirt_download_delay }}"

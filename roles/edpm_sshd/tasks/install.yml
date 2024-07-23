@@ -23,7 +23,7 @@
         name: "{{ edpm_sshd_packages }}"
         state: present
       register: _sshd_install_result
-      until: _sshd_install_result.rc == 0
+      until: "{{ _sshd_install_result.rc | default(1) == 0 }}"
       retries: "{{ edpm_sshd_download_retries }}"
       delay: "{{ edpm_sshd_download_delay }}"
 

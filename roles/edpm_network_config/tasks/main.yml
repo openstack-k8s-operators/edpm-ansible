@@ -22,7 +22,7 @@
         name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
         state: present
       register: nm_ovs_status
-      until: nm_ovs_status.rc == 0
+      until: "{{ nm_ovs_status.rc | default(1) == 0 }}"
       retries: "{{ edpm_network_config_download_retries }}"
       delay: "{{ edpm_network_config_download_delay }}"
     - name: Restart NetworkManager after plugin installation [nmstate]

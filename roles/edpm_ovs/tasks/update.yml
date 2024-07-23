@@ -9,7 +9,7 @@
 
 - name: Perform ovs update
   when:
-    - ovs_update_check.rc == 0
+    - ovs_update_check.rc | default(1) == 0
     - ovs_update_check.results | length > 0
     # Extra guard to not run the update in case the package list is empty
     - edpm_ovs_packages | length > 0

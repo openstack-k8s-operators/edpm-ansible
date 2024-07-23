@@ -44,7 +44,7 @@
     name: os-net-config
     state: present
   register: edpm_network_config_onc_download
-  until: edpm_network_config_onc_download.rc == 0
+  until: "{{ edpm_network_config_onc_download.rc | default(1) == 0 }}"
   retries: "{{ edpm_network_config_download_retries }}"
   delay: "{{ edpm_network_config_download_delay }}"
 

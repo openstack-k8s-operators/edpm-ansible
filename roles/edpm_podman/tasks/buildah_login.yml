@@ -20,7 +20,7 @@
     name: "{{ edpm_buildah_package }}"
     state: present
   register: edpm_buildah_package_download
-  until: edpm_buildah_package_download.rc == 0
+  until: "{{ edpm_buildah_package_download.rc | default(1) == 0 }}"
   retries: "{{ edpm_podman_download_retries }}"
   delay: "{{ edpm_podman_download_delay }}"
 
