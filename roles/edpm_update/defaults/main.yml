@@ -27,4 +27,4 @@ edpm_update_enable_containers_update: true
 edpm_update_exclude_packages:
   - openvswitch
 
-edpm_update_running_services: "{{ edpm_services }}"
+edpm_update_running_services: "{{ edpm_service_types }}"
