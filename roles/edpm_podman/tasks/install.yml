@@ -22,7 +22,7 @@
         name: "{{ edpm_podman_package }}"
         state: present
       register: edpm_podman_package_download
-      until: edpm_podman_package_download.rc == 0
+      until: edpm_podman_package_download is succeeded
       retries: "{{ edpm_podman_download_retries }}"
       delay: "{{ edpm_podman_download_delay }}"
 

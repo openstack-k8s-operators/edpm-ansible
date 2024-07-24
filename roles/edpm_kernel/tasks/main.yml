@@ -26,7 +26,7 @@
         state: present
       register: _install_packages_result
       when: edpm_kernel_extra_packages | length > 0
-      until: _install_packages_result.rc == 0
+      until: _install_packages_result is succeeded
       retries: "{{ edpm_kernel_download_retries }}"
       delay: "{{ edpm_kernel_download_delay }}"
 
