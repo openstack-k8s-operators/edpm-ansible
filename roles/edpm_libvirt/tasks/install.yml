@@ -11,6 +11,7 @@
   notify:
     - Restart libvirt
 
+# DNM: This doesn't do anything. Just triggers the molecule
 - name: Ensure monolithic libvirt and tcp socket activation is not enabled or running
   tags:
     - install
