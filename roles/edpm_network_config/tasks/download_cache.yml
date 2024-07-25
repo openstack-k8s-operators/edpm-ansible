@@ -18,6 +18,6 @@
     download_only: true
   become: true
   register: edpm_network_config_onc_download
-  until: edpm_network_config_onc_download.rc == 0
+  until: edpm_network_config_onc_download is succeeded
   retries: "{{ edpm_network_config_download_retries }}"
   delay: "{{ edpm_network_config_download_delay }}"

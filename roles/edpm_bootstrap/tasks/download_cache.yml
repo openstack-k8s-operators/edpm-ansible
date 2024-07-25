@@ -6,7 +6,7 @@
     download_only: true
   become: true
   register: edpm_bootstrap_packages_bootstrap_download
-  until: edpm_bootstrap_packages_bootstrap_download.rc == 0
+  until: edpm_bootstrap_packages_bootstrap_download is succeeded
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
 
@@ -18,7 +18,7 @@
     download_only: true
   become: true
   register: edpm_bootstrap_legacy_network_packages_download
-  until: edpm_bootstrap_legacy_network_packages_download.rc == 0
+  until: edpm_bootstrap_legacy_network_packages_download is succeeded
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
 
@@ -31,6 +31,6 @@
     download_only: true
   become: true
   register: edpm_bootstrap_release_version_package_download
-  until: edpm_bootstrap_release_version_package_download.rc == 0
+  until: edpm_bootstrap_release_version_package_download is succeeded
   retries: "{{ edpm_bootstrap_download_retries }}"
   delay: "{{ edpm_bootstrap_download_delay }}"
