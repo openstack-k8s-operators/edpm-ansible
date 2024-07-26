@@ -15,11 +15,14 @@
 # under the License.
 
 - name: Create persistent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     setype: "container_file_t"
     mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
   loop:
     - {'path': "{{ edpm_neutron_ovn_agent_config_dir }}"}
     - {'path': "/var/log/containers/neutron"}

@@ -43,6 +43,7 @@
 # the manage_iscsid_stat changed.
 
 - name: Restart iscsid container to refresh /etcd/iscsid.conf
+  become: true
   when:
     - not manage_iscsid_stat.changed|bool
     - iscsi_restart_stat.stat.exists|bool
@@ -51,6 +52,7 @@
     state: restarted
 
 - name: Remove iscsid container restart sentinel file
+  become: true
   ansible.builtin.file:
     path: /etc/iscsi/.iscsid_restart_required
     state: absent

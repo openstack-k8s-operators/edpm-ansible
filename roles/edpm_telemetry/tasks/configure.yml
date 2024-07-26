@@ -20,9 +20,9 @@
     path: "{{ item.path }}"
     state: directory
     setype: "{{ item.setype | default('container_file_t') }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "{{ item.mode | default('750') }}"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "{{ item.mode | default('0750') }}"
     recurse: true
   loop:
     - {"path": "{{ edpm_telemetry_config_dest }}"}
@@ -93,7 +93,6 @@
   register: tls_key_stat
 
 - name: Configure tls if present
-  become: true
   when:
     - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
   block:
@@ -104,6 +103,7 @@
         src: node_exporter.yaml.j2
 
     - name: Change the owner of the crt
+      become: true
       ansible.builtin.file:
         path: "{{ edpm_telemetry_certs }}/tls.crt"
         mode: "0644"
@@ -111,6 +111,7 @@
         group: ceilometer
 
     - name: Change the owner of the key
+      become: true
       ansible.builtin.file:
         path: "{{ edpm_telemetry_certs }}/tls.key"
         mode: "0644"

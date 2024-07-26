@@ -51,6 +51,7 @@
   ansible.builtin.include_tasks: hugepages.yml
 
 - name: Check if the kernelargs entry is already present in the file
+  become: true
   ansible.builtin.replace:
     regexp: EDPM_KERNEL_ARGS
     dest: /etc/default/grub

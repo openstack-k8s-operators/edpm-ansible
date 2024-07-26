@@ -39,7 +39,6 @@
           Please check value of Ansible variable edpm_frr_bgp_uplinks.
 
 - name: Configure FRR
-  become: true
   ansible.builtin.template:
     src: frr.conf.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
@@ -49,7 +48,6 @@
   register: _frr_config_result
 
 - name: Configure FRR daemons
-  become: true
   ansible.builtin.template:
     src: daemons.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/daemons"

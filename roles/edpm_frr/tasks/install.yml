@@ -21,6 +21,8 @@
     state: directory
     setype: "{{ item.setype }}"
     mode: "{{ item.mode }}"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
   loop:
     - {'path': /var/log/containers/frr, 'setype': container_file_t, 'mode': '0750'}
     - {'path': "{{ edpm_frr_config_basedir }}", 'setype': container_file_t, 'mode': '0750'}
@@ -44,7 +46,6 @@
       - "selinux"
 
 - name: Create directory {{ edpm_frr_config_basedir }}
-  become: true
   ansible.builtin.file:
     path: "{{ edpm_frr_config_basedir }}/etc/frr"
     recurse: true
