@@ -34,5 +34,5 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ edpm_ceph_client_files_config_home }}/{{ item | basename }}"
-    mode: "{{ '600' if item | regex_search('.*.keyring$') else '644' }}"
+    mode: "{{ '0600' if item | regex_search('.*.keyring$') else '0644' }}"
   loop: "{{ edpm_ceph_client_dist }}"

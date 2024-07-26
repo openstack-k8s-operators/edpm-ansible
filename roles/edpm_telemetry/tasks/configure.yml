@@ -70,7 +70,7 @@
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: "{{ item.mode | default('640') }}"
+    mode: "{{ item.mode | default('0640') }}"
     remote_src: "{{ telemetry_test | default('false') }}"
   loop: "{{ configs }}"
 

@@ -42,7 +42,7 @@
   ansible.builtin.template:
     src: frr.conf.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
-    mode: '644'
+    mode: '0644'
     selevel: s0
     setype: container_file_t
   register: _frr_config_result
@@ -51,7 +51,7 @@
   ansible.builtin.template:
     src: daemons.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/daemons"
-    mode: '644'
+    mode: '0644'
     selevel: s0
     setype: container_file_t
   register: _frr_daemons_result
