@@ -13,3 +13,15 @@
         # common directories
         - "/dev/hugepages1G"
         - "/dev/hugepages2MB"
+    - name: Check if directories are mounted
+      shell: mount | grep "{{ item }}"
+      register: mount_check
+      ignore_errors: yes
+      with_items:
+        - "/dev/hugepages1G"
+        - "/dev/hugepages2MB"
+    - name: Fail if any directory is not mounted
+      fail:
+        msg: "Directory {{ item.item }} is not mounted"
+      when: item.rc != 0
+      with_items: "{{ mount_check.results }}"
