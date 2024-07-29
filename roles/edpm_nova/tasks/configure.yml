@@ -72,8 +72,8 @@
     path: "{{ item.path }}"
     state: "directory"
     setype: "container_file_t"
-    owner: "{{ item.owner | default(ansible_user) }}"
-    group: "{{ item.group | default(ansible_user) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
@@ -87,8 +87,8 @@
     path: "{{ item.path }}"
     setype: "container_file_t"
     state: "directory"
-    owner: "{{ item.owner | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "/var/lib/nova", "mode": "0755"}
