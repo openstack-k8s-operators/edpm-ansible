@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Create neutron-dhcp-agent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     setype: "container_file_t"
