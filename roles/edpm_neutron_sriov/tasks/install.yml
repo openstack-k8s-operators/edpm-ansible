@@ -20,8 +20,8 @@
     path: "{{ item.path }}"
     setype: "container_file_t"
     state: directory
-    owner: "{{ item.owner | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {'path': "/var/lib/openstack/config/containers", "mode": "0755", "owner": "{{ ansible_user }}", "group": "{{ ansible_user }}"}

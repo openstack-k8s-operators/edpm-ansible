@@ -34,8 +34,8 @@
     path: "{{ item.path }}"
     state: "directory"
     setype: "container_file_t"
-    owner: "{{ item.owner | default(ansible_user) }}"
-    group: "{{ item.group | default(ansible_user) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "{{ edpm_swift_config_dest }}", "mode": "0755"}
@@ -49,8 +49,8 @@
     path: "{{ item.path }}"
     state: "directory"
     setype: "container_file_t"
-    owner: "{{ item.owner | default(ansible_user) }}"
-    group: "{{ item.group | default(ansible_user) }}"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "/srv/node", "mode": "0750", "owner": "swift", "group": "swift"}

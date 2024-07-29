@@ -25,8 +25,8 @@
     path: "{{ edpm_derive_pci_device_spec_conf_dir }}"
     setype: "container_file_t"
     state: directory
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: "0755"
 
 - name: Check if edpm node has the sriov nova conf
