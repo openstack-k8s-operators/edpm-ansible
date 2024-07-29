@@ -25,7 +25,7 @@
       ansible.builtin.template:
         src: ovn-bgp-agent.conf.j2
         dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/bgp-agent.conf"
-        mode: "644"
+        mode: "0644"
         selevel: s0
         setype: container_file_t
       register: _ovn_bgp_agent_config_result
