@@ -48,16 +48,20 @@
         key: libvirt
       register: libvirt_user
 
-    # TODO: Temporarily disabled until we can reconcile new rules
-    #       in the tool with our environment
-    # - name: validate tls with virt-pki-validate
-    #   become: true
-    #   ansible.builtin.shell: "virt-pki-validate"
-    #   register: virt_pki_validate
-    # - name: Assert that virt-pki-validate returns no errors
-    #   assert:
-    #     that:
-    #       - "virt_pki_validate.rc == 0"
+    - name: validate tls with virt-pki-validate
+      become: true
+      ansible.builtin.shell: "virt-pki-validate"
+      register: virt_pki_validate
+      failed_when: false
+    - name: Print virt-pki-validate output
+      debug:
+        msg: "{{ virt_pki_validate.stdout }}"
+    - name: Test result of virt-pki-validate
+      block:
+        - name: Assert that virt-pki-validate returns no errors
+          assert:
+            that: "{{ 'FAIL' not in virt_pki_validate.stdout }}"
+      when: virt_pki_validate.rc != 0
 
     - name: ensure we can connect to libvirt with virsh via tls
       # Note we need become because the client cert is owned by root
