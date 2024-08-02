@@ -7,5 +7,3 @@
         name: "osp.edpm.edpm_telemetry_logging"
       vars:
         telemetry_test: true
-        ansible_user: root
-        ansible_user_dir: /root
