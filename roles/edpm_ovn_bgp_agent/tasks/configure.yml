@@ -50,6 +50,7 @@
       loop: "{{ edpm_neutron_ovn_secrets.files }}"
 
 - name: Add OVS Manager
+  become: true
   block:
     - name: Check if OVS Manager already exists
       ansible.builtin.shell: |
