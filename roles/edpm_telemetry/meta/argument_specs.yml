@@ -47,3 +47,7 @@ argument_specs:
         type: "str"
         required: true
         description: "The path in the compute node where the cacerts are stored"
+      edpm_telemetry_old_tripleo_compute_sevices:
+        type: list
+        required: true
+        description: List of ceilometer agents to be stopped during EDPM adoption
