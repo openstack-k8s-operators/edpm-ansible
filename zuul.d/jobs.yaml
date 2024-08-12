@@ -71,3 +71,8 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_tuned
+- job:
+    name: edpm-ansible-molecule-edpm_telemetry
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_telemetry

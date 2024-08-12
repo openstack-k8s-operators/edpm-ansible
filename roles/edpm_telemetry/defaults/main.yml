@@ -42,3 +42,5 @@ edpm_telemetry_image_download_retries: 5
 edpm_telemetry_old_tripleo_compute_sevices:
   - tripleo_ceilometer_agent_compute.service
   - tripleo_ceilometer_agent_ipmi.service
+# Image to use for kepler
+edpm_telemetry_kepler_image: "quay.io/sustainable_computing_io/kepler:release-0.7.11"
