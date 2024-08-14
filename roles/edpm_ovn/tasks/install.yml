@@ -24,7 +24,6 @@
     owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
     group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
   loop:
-    - {'path': /var/log/containers/openvswitch, 'mode': '0750'}
     - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
     - {'path': /var/lib/openvswitch/ovn, "owner": "openvswitch", "group": "openvswitch"}
 
