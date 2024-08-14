@@ -25,7 +25,6 @@
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {'path': "{{ edpm_neutron_metadata_agent_config_dir }}"}
-    - {'path': "/var/log/containers/neutron"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn-metadata-proxy", "mode": "0755"}
