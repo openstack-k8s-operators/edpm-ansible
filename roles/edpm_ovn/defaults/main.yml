@@ -60,8 +60,6 @@ edpm_ovn_controller_common_volumes:
   - /lib/modules:/lib/modules:ro
   - /run:/run
   - /var/lib/openvswitch/ovn:/run/ovn:shared,z
-  - /var/log/containers/openvswitch:/var/log/openvswitch:z
-  - /var/log/containers/openvswitch:/var/log/ovn:z
   - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
 
 edpm_ovn_controller_tls_volumes:
