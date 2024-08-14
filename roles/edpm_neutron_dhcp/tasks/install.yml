@@ -27,8 +27,6 @@
     - {'path': "/var/lib/openstack/config/containers", "mode": "0750"}
     - {'path': "/var/lib/neutron", "mode": "0750"}
     - {'path': "{{ edpm_neutron_dhcp_agent_config_dir }}", "mode": "0755"}
-    - {'path': "/var/log/containers/stdouts", "mode": "0755"}
-    - {'path': "/var/log/containers/neutron", "mode": "0755"}
     - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}", "mode": "0755"}
     - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}/kill_scripts", "mode": "0755"}
     - {'path': "{{ edpm_neutron_dhcp_agent_lib_dir }}/ns-metadata-proxy", "mode": "0755"}
