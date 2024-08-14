@@ -21,9 +21,6 @@ an appropriate export on your development system. Of course, this implies
 your OpenShift deployment that runs the openstack-operator has access to
 the NFS server, including any required firewall rules.
 
-* `EL 8 instructions <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/deploying_different_types_of_servers/exporting-nfs-shares_deploying-different-types-of-servers#assembly_configuring-the-nfs-server-to-run-behind-a-firewall_exporting-nfs-shares>`_
-* `EL 9 instructions <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/managing_file_systems/exporting-nfs-shares_managing-file-systems#assembly_configuring-the-nfs-server-to-run-behind-a-firewall_exporting-nfs-shares>`_
-
 When using OpenShift Local (aka CRC), your export will be something like this:
 
 .. code-block:: console
