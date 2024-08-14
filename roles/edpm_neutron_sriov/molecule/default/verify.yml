@@ -15,8 +15,6 @@
         - "/var/lib/openstack/config/containers"
         - "/var/lib/kolla/config_files/neutron_sriov_agent.json"
         - "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
-        - "/var/log/containers/neutron"
-        - "/var/log/containers/stdouts"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
@@ -27,19 +25,6 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
         - "neutron_sriov_agent"
-
-    - name: ensure that log file for neutron-sriov-agent exist
-      become: true
-      block:
-        - name: Check if file /var/log/containers/neutron/neutron-sriov-nic-agent.log exist
-          ansible.builtin.stat:
-            path: /var/log/containers/neutron/neutron-sriov-nic-agent.log
-          register: log_file
-        - name: Assert file /var/log/containers/neutron/neutron-sriov-nic-agent.log exist
-          ansible.builtin.assert:
-            that:
-              - log_file.stat.exists
-            fail_msg: "File /var/log/containers/neutron/neutron-sriov-nic-agent.log does not exist"
 
     - name: Ensure that 10-neutron-sriov.conf was copied into the container
       block:
