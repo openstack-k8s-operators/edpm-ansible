@@ -1,13 +1,10 @@
-command: "neutron-ovn-agent --log-file={{ edpm_neutron_ovn_agent_log_dir }}/ovn-agent.log"
+command: "neutron-ovn-agent"
 config_files:
   - source: /etc/neutron.conf.d/01-rootwrap.conf
     dest: /etc/neutron/rootwrap.conf
     owner: root:root
     perm: '0600'
 permissions:
-  - owner: neutron:neutron
-    path: /var/log/neutron
-    recurse: true
   - owner: neutron:neutron
     path: /var/lib/neutron
     recurse: true
