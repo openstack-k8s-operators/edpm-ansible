@@ -4,13 +4,3 @@ config_files:
     dest: /etc/ovn-bgp-agent/
     merge: true
     preserve_properties: true
-permissions:
-  - path: /var/log/ovn-bgp-agent
-    owner: ovn-bgp:ovn-bgp
-    recurse: true
-  - path: /var/log/openvswitch
-    owner: root:root
-    recurse: true
-  - path: /var/log/ovn
-    owner: root:root
-    recurse: true
