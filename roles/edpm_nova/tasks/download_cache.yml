@@ -3,6 +3,7 @@
 - name: Download needed container image
   containers.podman.podman_image:
     name: "{{ edpm_nova_compute_image }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   become: true
   register: edpm_nova_image_download
   until: edpm_nova_image_download.failed == false
