@@ -3,6 +3,7 @@
 - name: Download needed container
   containers.podman.podman_image:
     name: "{{ edpm_multipathd_image }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   become: true
   register: edpm_multipathd_image_download
   until: edpm_multipathd_image_download.failed == false
