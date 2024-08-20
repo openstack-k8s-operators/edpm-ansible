@@ -24,7 +24,11 @@ fabricd=no
 #
 # Command line options for the daemons
 #
+{% if edpm_frr_zebra_graceful_restart_time != '' %}
+zebra_options=("-A 127.0.0.1 -r -K {{ edpm_frr_zebra_graceful_restart_time |int }}")
+{% else %}
 zebra_options=("-A 127.0.0.1 -r")
+{% endif %}
 bgpd_options=("-A 127.0.0.1")
 ospfd_options=("-A 127.0.0.1")
 ospf6d_options=("-A ::1")
