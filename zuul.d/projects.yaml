@@ -16,6 +16,7 @@
         - edpm-ansible-molecule-edpm_ovn_bgp_agent
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
+        - edpm-ansible-molecule-edpm_tuned
         - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
             dependencies:

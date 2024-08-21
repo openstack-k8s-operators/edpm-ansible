@@ -4,17 +4,15 @@ dependency:
   options:
     role-file: collections.yml
 driver:
-  name: podman
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
-- command: /sbin/init
-  dockerfile: Dockerfile.j2
-  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-  name: instance
-  privileged: true
-  registry:
-    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
-  ulimits:
-  - host
+  - name: compute-1
+    groups:
+      - compute
 provisioner:
   log: true
   name: ansible
