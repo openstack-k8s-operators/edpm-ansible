@@ -1,4 +1,4 @@
-ansible-core==2.14.6
+ansible-core>=2.15.0
 molecule>=5.1.0,<6.0.0
 molecule-plugins[podman,vagrant]>=23.5.0
 pytest-testinfra
