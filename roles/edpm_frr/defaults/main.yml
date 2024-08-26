@@ -64,6 +64,7 @@ edpm_frr_watchfrr: true
 edpm_frr_watchfrr_options: ''
 edpm_frr_zebra: true
 edpm_frr_zebra_nht_resolve_via_default: true
+edpm_frr_zebra_graceful_restart_time: ''
 edpm_frr_conf_custom_globals: ''
 edpm_frr_conf_custom_router_bgp: ''
 edpm_frr_conf_custom_ipv4: ''
