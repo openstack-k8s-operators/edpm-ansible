@@ -9,6 +9,8 @@
       - github.com/openstack-k8s-operators/ci-framework
     vars:
       roles_dir: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/openstack-k8s-operators/edpm-ansible'].src_dir }}/roles/{{ TEST_RUN }}"
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 
 # non-containerized role jobs
 - job:
@@ -16,58 +18,82 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_bootstrap
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_podman
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_podman
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_module_load
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_module_load
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_kernel
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_kernel
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_libvirt
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_libvirt
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_nova
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_nova
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_frr
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_frr
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_iscsid
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_iscsid
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_ovn_bgp_agent
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_ovn_bgp_agent
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_ovs
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_ovs
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_tripleo_cleanup
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_tripleo_cleanup
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
 - job:
     name: edpm-ansible-molecule-edpm_tuned
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_tuned
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_VERBOSITY: 2
