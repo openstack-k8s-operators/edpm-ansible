@@ -1,4 +1,4 @@
-FROM quay.io/ansible/creator-ee:v0.14.1 as builder
+FROM quay.io/ansible/creator-ee:v0.21.0 as builder
 
 ARG REMOTE_SOURCE=.
 ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
@@ -8,7 +8,7 @@ RUN cd $REMOTE_SOURCE_DIR && \
     ansible-galaxy collection install -U --timeout 120 -r requirements.yml --collections-path "/usr/share/ansible/collections" && \
     ansible-galaxy collection install -U $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
 
-FROM quay.io/ansible/creator-ee:v0.14.1 as runner
+FROM quay.io/ansible/creator-ee:v0.21.0 as runner
 
 RUN \
 microdnf install -y \
