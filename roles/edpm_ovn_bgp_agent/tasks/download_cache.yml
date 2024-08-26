@@ -3,6 +3,7 @@
 - name: Download needed container images for in node ovn cluster
   containers.podman.podman_image:
     name: "{{ item }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   loop:
     - "{{ edpm_ovn_bgp_agent_local_ovn_nb_db_image }}"
     - "{{ edpm_ovn_bgp_agent_local_ovn_sb_db_image }}"
@@ -18,6 +19,7 @@
 - name: Download needed container images
   containers.podman.podman_image:
     name: "{{ edpm_ovn_bgp_agent_image }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   become: true
   register: edpm_ovn_bgp_agent_images_download
   until: edpm_ovn_bgp_agent_images_download.failed == false

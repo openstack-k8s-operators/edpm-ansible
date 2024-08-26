@@ -22,6 +22,8 @@
       test_deps_edpm_packages:
         - openvswitch
         - os-net-config
+  vars:
+    edpm_download_cache_podman_auth_file: "" # Override since the file doesn't exist
   tasks:
     - ansible.builtin.include_role:
         name: osp.edpm.env_data

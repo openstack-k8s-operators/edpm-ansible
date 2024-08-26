@@ -28,5 +28,6 @@
       - ssh-known-hosts
       - run-os
       - reboot-os
+    edpm_download_cache_podman_auth_file: ""
   roles:
     - role: "edpm_download_cache"

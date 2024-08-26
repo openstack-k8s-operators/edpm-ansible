@@ -17,6 +17,7 @@
 - name: Download needed container images
   containers.podman.podman_image:
     name: "{{ item }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   loop:
     - "{{ edpm_telemetry_ceilometer_compute_image }}"
     - "{{ edpm_telemetry_ceilometer_ipmi_image }}"

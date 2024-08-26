@@ -24,10 +24,33 @@
   retries: "{{ edpm_podman_download_retries }}"
   delay: "{{ edpm_podman_download_delay }}"
 
+- name: Create default authfile if it wouldn't be created by podman-login
+  become: true
+  when:
+    - edpm_container_registry_logins | length == 0
+    - edpm_podman_auth_file | length > 0
+  block:
+    - name: Ensure presence of authfile dir
+      ansible.builtin.file:
+        path: "{{ edpm_podman_auth_file | dirname }}"
+        state: directory
+        mode: "0770"
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+        recurse: true
+    - name: Ensure presence of authfile
+      ansible.builtin.copy:
+        content: "{}"
+        dest: "{{ edpm_podman_auth_file }}"
+        mode: "0660"
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+
 - name: Perform container registry login(s) with buildah
   become: true
   ansible.builtin.shell: |-
-    buildah login --username=$REGISTRY_USERNAME \
+    buildah login --authfile {{ edpm_podman_auth_file }} \
+                  --username=$REGISTRY_USERNAME \
                   --password=$REGISTRY_PASSWORD \
                   $REGISTRY
   environment:
