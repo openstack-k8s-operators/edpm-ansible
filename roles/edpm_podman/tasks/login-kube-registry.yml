@@ -29,18 +29,33 @@
   when: ca_copy.changed|bool  # noqa: no-handler
   changed_when: true
 
-- name: Create containers dir for authfile
+- name: Create default authfile if it wouldn't be created by podman-login
   become: true
-  ansible.builtin.file:
-    path: /root/containers
-    state: directory
-    mode: 0700
+  when:
+    - edpm_container_registry_logins | length == 0
+    - edpm_podman_auth_file | length > 0
+  block:
+    - name: Ensure presence of authfile dir
+      ansible.builtin.file:
+        path: "{{ edpm_podman_auth_file | dirname }}"
+        state: directory
+        mode: "0770"
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+        recurse: true
+    - name: Ensure presence of authfile
+      ansible.builtin.copy:
+        content: "{}"
+        dest: "{{ edpm_podman_auth_file }}"
+        mode: "0660"
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
 
 - name: Perform container registry login(s) with podman to kubernetes registry
   become: true
   ansible.builtin.shell: >
     podman login
-      --authfile ~/.config/containers/auth.json
+      --authfile {{ edpm_podman_auth_file }}
       --username={{ edpm_nodeset_name }}
       --password={{ lookup('ansible.builtin.file', edpm_podman_kube_sa_path + '/token') }}
       {{ edpm_podman_kube_registry_url }}
