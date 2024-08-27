@@ -22,12 +22,12 @@
   register: rsyslog_service_state
 
 - name: Configure rsyslog if present
-  become: true
   when:
     - (rsyslog_service_state is success) and
       ((rsyslog_service_state.status['SubState'] | lower) == 'running')
   block:
     - name: Install openssl module support for rsyslog
+      become: true
       ansible.builtin.dnf:
         name: rsyslog-openssl
         state: present
@@ -42,7 +42,6 @@
         remote_src: "{{ telemetry_test | default('false') }}"
 
     - name: Deploy rsyslog configuration
-      become: true
       ansible.builtin.copy:
         src: "{{ edpm_telemetry_logging_config_src }}/10-telemetry.conf"
         dest: "{{ edpm_telemetry_rsyslog_config_dest }}/10-telemetry.conf"

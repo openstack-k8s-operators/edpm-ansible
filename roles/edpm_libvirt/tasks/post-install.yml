@@ -32,12 +32,12 @@
     - install
     - post-libvirt
     - ceph
-  become: true
   when:
     - found_confs.files is defined
     - found_confs.files | length > 0
   block:
     - name: Extract FSIDs from Ceph configuration files
+      become: true
       ansible.builtin.shell: |
         set -o pipefail;
         echo {{ (item | basename).split('.')[0] }}

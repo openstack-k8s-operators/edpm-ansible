@@ -15,11 +15,13 @@
 # under the License.
 
 - name: Fix grub entries to have name start with GRUB_
+  become: true
   ansible.builtin.replace:
     path: '/etc/default/grub'
     regexp: '^(EDPM_KERNEL_ARGS)(.*)'
     replace: 'GRUB_\1\2'
 - name: Fix grub entries in append statement
+  become: true
   ansible.builtin.replace:
     path: '/etc/default/grub'
     regexp: '(.*){(EDPM_KERNEL_ARGS)}(.*)'

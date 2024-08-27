@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Create persistent directories
+  become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -31,6 +32,7 @@
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/external/pids", "mode": "0755"}
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
+  become: true
   ansible.posix.seboolean:
     name: virt_sandbox_use_netlink
     persistent: true

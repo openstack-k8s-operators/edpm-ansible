@@ -152,7 +152,7 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     remote_src: true
-    mode: "0600"
+    mode: "0644"
     owner: "root"
     group: "root"
   when: edpm_libvirt_tls_certs_enabled

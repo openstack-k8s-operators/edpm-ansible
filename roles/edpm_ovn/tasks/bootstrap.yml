@@ -15,11 +15,13 @@
 # under the License.
 
 - name: Ensure the Openvswitch package is installed
+  become: true
   ansible.builtin.package:
     name: openvswitch
     state: present
 
 - name: Ensure the OVS service is running
+  become: true
   ansible.builtin.systemd:
     name: openvswitch
     state: started
