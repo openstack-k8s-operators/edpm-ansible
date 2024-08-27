@@ -1,14 +1,13 @@
 ---
 
-- name: Check if bootstrap command has been executed
-  ansible.builtin.stat:
-    path: "{{ edpm_bootstrap_command_done_file }}"
-  register: edpm_bootstrap_command_executed
+- name: Re-read facts
+  ansible.builtin.setup:
+    filter: ansible_local
 
 - name: Bootstrap command
   when:
     - edpm_bootstrap_command != ""
-    - not edpm_bootstrap_command_executed.stat.exists
+    - ansible_local.edpm is undefined or ansible_local.edpm.bootstrap.hash != edpm_bootstrap_command | hash('sha512')
   become: true
   block:
 
@@ -25,15 +24,16 @@
           stderr: "{{ bootstrap_cmd.stderr_lines }}"
       failed_when: bootstrap_cmd.rc != 0
 
+    - name: Create directory for ansible custom facts
+      ansible.builtin.file:
+        state: directory
+        path: /etc/ansible/facts.d
+        mode: "0755"
+
     - name: Mark bootstrap command as executed on node
-      ansible.builtin.file:
-        path: "{{ edpm_bootstrap_command_done_file }}"
-        state: touch
-        mode: '0600'
-
-  rescue:
-
-    - name: "Delete {{ edpm_bootstrap_command_done_file }}"
-      ansible.builtin.file:
-        path: "{{ edpm_bootstrap_command_done_file }}"
-        state: absent
+      ansible.builtin.copy:
+        dest: /etc/ansible/facts.d/edpm.fact
+        content: |
+          [bootstrap]
+          hash={{ edpm_bootstrap_command | hash('sha512') }}
+        mode: "0644"

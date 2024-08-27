@@ -18,11 +18,14 @@ provisioner:
     defaults:
       fact_caching: jsonfile
       fact_caching_connection: /tmp/molecule/facts
+      callback_enabled: profile_tasks
   env:
     ANSIBLE_FILTER_PLUGINS: ${ANSIBLE_FILTER_PLUGINS:-/usr/share/ansible/plugins/filter}
     ANSIBLE_LIBRARY: ${ANSIBLE_LIBRARY:-/usr/share/ansible/plugins/modules}
     ANSIBLE_ROLES_PATH: ${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles
     ANSIBLE_STDOUT_CALLBACK: yaml
+    ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+    ANSIBLE_VERBOSITY: ${ANSIBLE_VERBOSITY:-3}
   inventory:
     hosts:
       all:
