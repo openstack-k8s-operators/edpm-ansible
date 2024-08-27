@@ -22,7 +22,7 @@ provisioner:
   log: true
   config_options:
     interpreter_python: auto_silent
-    callback_whitelist: profile_tasks, timer, yaml
+    callbacks_enabled: profile_tasks, timer, yaml
   env:
     ANSIBLE_STDOUT_CALLBACK: yaml
 
