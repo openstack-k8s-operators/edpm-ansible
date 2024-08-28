@@ -64,8 +64,9 @@
   become: true
   when:
     - cmdline is defined
-    - edpm_kernel_args|string
-    - not (cmdline | regex_search( '^.*' + edpm_kernel_args + '.*$' | string ))
+    - edpm_kernel_args is defined
+    - edpm_kernel_args | type_debug == "AnsibleUnicode"
+    - cmdline is not regex( '^.*' ~ edpm_kernel_args ~ '\\s.*$' )
   block:
     # Leapp does not recognise grun entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
