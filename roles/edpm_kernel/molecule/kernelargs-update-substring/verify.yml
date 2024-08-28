@@ -19,30 +19,34 @@
   hosts: all
   become: true
   gather_facts: false
-  vars:
-    tripleo_kernel_args: "isolcpus=1,3,5,7,9"
+  pre_tasks:
+    - name: Importing test_vars
+      include_vars: "test_vars.yml"
   tasks:
-    - name: Check if the variable is applied to the grub file
-      lineinfile:
-        path: /etc/default/grub
-        line: 'GRUB_EDPM_KERNEL_ARGS=" {{ tripleo_kernel_args }} "'
-        state: present
-      check_mode: true
-      register: grub
-      failed_when: (grub is changed) or (grub is failed)
-    - name: Check if the older name entries are removed
-      lineinfile:
-        path: /etc/default/grub
-        regexp: '^EDPM_KERNEL_ARGS.*'
-        state: absent
-      check_mode: true
-      register: grub
-      failed_when: (grub is changed) or (grub is failed)
-    - name: Check if the older name entries are removed for append
-      lineinfile:
-        path: /etc/default/grub
-        regexp: '.*{EDPM_KERNEL_ARGS}.*'
-        state: absent
-      check_mode: true
-      register: grub
-      failed_when: (grub is changed) or (grub is failed)
+    - name: Grub config validation
+      block:
+        - name: Check if the kernel args is applied to the grub file
+          lineinfile:
+            path: /etc/default/grub
+            line: "{{ expected_line }}"
+            state: present
+          check_mode: true
+          register: grub
+          failed_when: (grub is changed) or (grub is failed)
+        - name: Checking reboot_required
+          fail:
+            msg: |
+              reboot_required is defined and reboot_required is enabled
+          when:
+            - reboot_required is defined and reboot_required
+      rescue:
+        - name: Output /etc/default/grub
+          import_tasks: ../../resources/molecule/print_grub_content.yml
+        - name: Grub config validation failed
+          fail:
+            msg: |
+              reboot_required is defined and reboot_required is enabled: {{ reboot_required | default(false) }}
+              Grub config validation failed. Expected:
+              {{ expected_line }}
+              Validation task returned:
+              {{ grub }}

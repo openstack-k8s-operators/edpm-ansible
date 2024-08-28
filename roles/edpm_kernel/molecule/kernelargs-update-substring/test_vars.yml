@@ -1,0 +1,3 @@
+expected_line: 'GRUB_EDPM_KERNEL_ARGS=" default_hugepagesz=2048 hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 isolcpus=1 "'
+_mocked_cmdline: default_hugepagesz=2M hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 isolcpus=1,3
+edpm_kernel_args: default_hugepagesz=2M hugepagesz=2048 hugepages=10 hugepagesz=4096 hugepages=10 isolcpus=1
