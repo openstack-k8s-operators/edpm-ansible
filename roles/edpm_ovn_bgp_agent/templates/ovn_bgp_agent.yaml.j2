@@ -1,7 +1,8 @@
 {%- set edpm_ovn_bgp_agent_volumes = [] %}
 {%- set edpm_ovn_bgp_agent_volumes =
         edpm_ovn_bgp_agent_volumes +
-        edpm_ovn_bgp_agent_common_volumes %}
+        edpm_ovn_bgp_agent_common_volumes +
+        edpm_ovn_bgp_agent_tls_cacert_volumes %}
 {%- if edpm_ovn_bgp_agent_local_ovn_routing|bool %}
 {%- set edpm_ovn_bgp_agent_volumes =
         edpm_ovn_bgp_agent_volumes +
