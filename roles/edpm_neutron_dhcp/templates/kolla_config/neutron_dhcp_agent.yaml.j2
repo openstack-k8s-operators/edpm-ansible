@@ -6,9 +6,6 @@ config_files:
     perm: '0600'
 permissions:
   - owner: neutron:neutron
-    path: /var/log/neutron
-    recurse: true
-  - owner: neutron:neutron
     path: /var/lib/neutron
     recurse: true
   - optional: true

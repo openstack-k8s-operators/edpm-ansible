@@ -105,9 +105,7 @@ class TestNeutronDHCP(unittest.TestCase):
                 "/var/lib/neutron/external/pids/",
                 "/var/lib/neutron/ns-metadata-proxy/",
                 "/var/lib/openstack/config/containers",
-                "/var/lib/config-data/ansible-generated/neutron-dhcp-agent",
-                "/var/log/containers/neutron",
-                "/var/log/containers/stdouts"]:
+                "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"]:
             assert self.host.file(directory).is_directory
 
     def test_kolla_config_file_was_created(self):
