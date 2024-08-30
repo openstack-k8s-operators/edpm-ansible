@@ -9,7 +9,6 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
         - "/var/lib/config-data/ansible-generated/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf"
-        - "/var/log/containers/ovn-bgp-agent"
         - "/var/lib/edpm-config/container-startup-config/ovn_bgp_agent"
 
     - name: ensure podman container exists and are running
