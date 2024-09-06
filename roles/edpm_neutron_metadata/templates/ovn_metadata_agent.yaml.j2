@@ -7,7 +7,6 @@
         edpm_neutron_metadata_volumes +
         edpm_neutron_metadata_tls_volumes %}
 {%- endif -%}
-start_order: 2
 image: "{{ edpm_neutron_metadata_agent_image }}"
 net: host
 pid: host
