@@ -8,7 +8,6 @@
         edpm_ovn_bgp_agent_local_ovn_cluster_volumes +
         edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes %}
 {%- endif -%}
-start_order: 1
 image: "{{ edpm_ovn_bgp_agent_local_ovn_controller_image }}"
 net: host
 privileged: true
