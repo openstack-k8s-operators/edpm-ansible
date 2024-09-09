@@ -33,6 +33,16 @@
     edpm_container_manage_config_patterns: ceilometer_agent_ipmi.json
     edpm_container_manage_clean_orphans: false
 
+- name: Check that tls.crt exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.crt"
+  register: tls_crt_stat
+
+- name: Check that tls.key exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.key"
+  register: tls_key_stat
+
 - name: Deploy node_exporter container with TLS enabled if certs are present
   become: true
   containers.podman.podman_container:
