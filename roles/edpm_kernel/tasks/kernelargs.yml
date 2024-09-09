@@ -65,7 +65,7 @@
   when:
     - cmdline is defined
     - edpm_kernel_args is defined
-    - edpm_kernel_args | type_debug == "AnsibleUnicode"
+    - edpm_kernel_args | type_debug in ["AnsibleUnicode", "str"]
     - cmdline is not regex( '^.*' ~ edpm_kernel_args ~ '\\s.*$' )
   block:
     # Leapp does not recognise grun entries starting other than GRUB
