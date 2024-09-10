@@ -29,7 +29,6 @@
   vars:
     edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: ceilometer_agent_ipmi.json
     edpm_container_manage_clean_orphans: false
 
