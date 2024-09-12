@@ -184,9 +184,8 @@ def _has_link(interface):
         with open('/sys/class/net/{}/carrier'.format(interface)) as f:
             has_link = int(f.read().strip())
     except FileNotFoundError:
-        has_link = 0
-    if has_link == 1:
-        return True
+        return False
+    return has_link == 1
 
 
 def main():
@@ -235,7 +234,7 @@ def main():
         results['msg'] = ("Successfully run %s." % cmd)
     if run.returncode == 2 and detailed_exit_codes:
         # NOTE: dprince this udev rule can apparently leak DHCP processes?
-        # https://bugs.launchpad.net/edpm/+bug/1538259
+        # https://bugs.launchpad.net/tripleo/+bug/1538259
         # until we discover the root cause we can simply disable the
         # rule because networking has already been configured at this point
         udev_file = '/etc/udev/rules.d/99-dhcp-all-interfaces.rules'
