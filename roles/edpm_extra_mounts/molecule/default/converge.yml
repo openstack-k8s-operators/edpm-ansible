@@ -25,11 +25,10 @@
       vars:
         edpm_extra_mounts: []
         edpm_default_mounts:
-          - name: 'hugepages1G'
-            path: '/dev/hugepages1G'
+          - path: '/dev/hugepages1G'
             opts: 'pagesize=1G'
             fstype: 'hugetlbfs'
-          - name: 'hugepages2MB'
-            path: '/dev/hugepages2MB'
+            group: 'hugetlbfs'
+          - path: '/dev/hugepages2MB'
             opts: 'pagesize=2M'
             fstype: 'hugetlbfs'
