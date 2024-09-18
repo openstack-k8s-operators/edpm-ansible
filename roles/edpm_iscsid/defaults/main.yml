@@ -45,3 +45,5 @@ edpm_iscsid_chap_algs: >-
     default('check', true) == 'enabled') |
     ternary('', ',SHA1,MD5')
   }}
+
+edpm_iscsid_healthcheck: true
