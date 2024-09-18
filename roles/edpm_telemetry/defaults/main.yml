@@ -44,3 +44,16 @@ edpm_telemetry_old_tripleo_compute_sevices:
   - tripleo_ceilometer_agent_ipmi.service
 # Image to use for kepler
 edpm_telemetry_kepler_image: "quay.io/sustainable_computing_io/kepler:release-0.7.11"
+# Instruction for distribution of container health check scripts
+edpm_healthcheck_sources:
+  ceilometer_agent_compute: ceilometer_agent
+  ceilometer_agent_ipmi: ceilometer_agent
+  iscsid: iscsid
+  logrotate_crond: logrotate_crond
+  multipathd: multipathd
+  node_exporter: node_exporter
+  nova_compute: nova_compute
+  ovn_controller: noop
+  ovn_metadata_agent: noop
+# If telemetry services should have health checks enabled
+edpm_telemetry_healthcheck: true

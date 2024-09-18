@@ -56,3 +56,5 @@ edpm_nova_old_tripleo_compute_sevices:
 
 # a list of addtional host mounts
 edpm_nova_extra_bind_mounts: []
+
+edpm_nova_healthcheck: true

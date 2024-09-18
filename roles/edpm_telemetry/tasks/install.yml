@@ -33,6 +33,16 @@
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
 
+- name: Enable healthcheck for node_exporter container
+  ansible.builtin.set_fact:
+    healthcheck_mount: "/var/lib/containers/healthchecks/node_exporter"
+  when: "{{ edpm_telemetry_healthcheck }}"
+
+- name: Disable healthcheck for node_exporter container
+  ansible.builtin.set_fact:
+    healthcheck_mount: "/var/lib/containers/healthchecks/noop"
+  when: "{{ edpm_telemetry_healthcheck }}"
+    
 - name: Deploy node_exporter container with TLS enabled if certs are present
   become: true
   containers.podman.podman_container:
@@ -63,10 +73,12 @@
       - "--no-collector.powersupplyclass"
       - "--no-collector.pressure"
       - "--no-collector.rapl"
+    healthcheck: /openstack/healthcheck
     volumes:
       - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw"
       - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
       - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
+      - "/var/lib/containers/healthchecks/node_exporter:/openstack:ro,z"
   when:
     - tls_key_stat.stat.exists and tls_crt_stat.stat.exists
 
@@ -99,8 +111,10 @@
       - "--no-collector.powersupplyclass"
       - "--no-collector.pressure"
       - "--no-collector.rapl"
+    healthcheck: /openstack/healthcheck
     volumes:
       - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
+      - "/var/lib/containers/healthchecks/node_exporter:/openstack:ro,z"
   when:
     - not tls_key_stat.stat.exists or not tls_crt_stat.stat.exists
 

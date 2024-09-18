@@ -88,3 +88,8 @@ argument_specs:
       edpm_logrotate_crond_dateyesterday:
         default: null
         description: Configures the dateyesterday parameter used with dateext parameter.
+      edpm_logrotate_crond_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection

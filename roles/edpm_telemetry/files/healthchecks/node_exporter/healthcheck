@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright 2024 Inc.
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import requests
+import sys
+
+TIMEOUT = 1 #second
+EXPORTER_URI = "http://localhost:9100/metrics"
+
+
+def curl(uri: string) -> (int, str):
+    with requests.get(uri, timeout=TIMEOUT, allow_redirects=True,
+                      stream=True, verify=False) as req:
+        ip, port = req.raw._original_response.fp.raw._sock.getpeername()[0:2]
+        code = req.status_code,
+        t = req.elapsed.total_seconds()
+        print(print(f"{code} {ip}:{port} ({t}s)"))
+
+        fail = int(code) < 200 or int(code) > 299
+        return fail, code
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        uri = sys.argv[1]
+    else:
+        uri = EXPORTER_URI
+    rc, reason = curl(uri)
+    if rc != 0:
+        print(reason)
+    sys.exit(rc)
