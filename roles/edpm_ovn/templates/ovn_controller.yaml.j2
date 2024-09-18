@@ -1,7 +1,8 @@
 {%- set edpm_ovn_controller_volumes = [] %}
 {%- set edpm_ovn_controller_volumes =
         edpm_ovn_controller_volumes +
-        edpm_ovn_controller_common_volumes %}
+        edpm_ovn_controller_common_volumes +
+        edpm_ovn_controller_tls_cacert_volumes %}
 {%- if edpm_ovn_tls_enabled | bool %}
 {%- set edpm_ovn_controller_volumes =
         edpm_ovn_controller_volumes +
