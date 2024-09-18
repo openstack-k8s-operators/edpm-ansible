@@ -64,3 +64,5 @@ edpm_logrotate_crond_dateext: null
 edpm_logrotate_crond_dateformat: null
 # Configures the dateyesterday parameter used with dateext parameter.
 edpm_logrotate_crond_dateyesterday: null
+
+edpm_logrotate_crond_healthcheck: true

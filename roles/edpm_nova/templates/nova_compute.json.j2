@@ -8,6 +8,12 @@
     "environment": {
         "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS"
     },
+{% if edpm_nova_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck",
+        "mount": "/var/lib/containers/healthchecks/nova_compute"
+    },
+{% endif %}
     "volumes": [
         "/var/lib/openstack/config/nova:/var/lib/kolla/config_files:ro",
 {% if ca_bundle_exists|bool %}

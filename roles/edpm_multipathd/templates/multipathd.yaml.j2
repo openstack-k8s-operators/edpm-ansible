@@ -2,6 +2,11 @@ image: {{ edpm_multipathd_image }}
 net: host
 privileged: true
 restart: always
+{% if edpm_multipathd_healthcheck %}
+healthcheck:
+  test: /openstack/healthcheck
+  mount: /var/lib/containers/healthchecks/multipathd
+{% endif %}
 volumes:
   {{ edpm_container_standalone_common_volumes | default([]) + edpm_multipathd_volumes }}
 environment:
