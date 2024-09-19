@@ -17,7 +17,7 @@
         "/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro",
         "/etc/localtime:/etc/localtime:ro",
         "/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro",
-{% if edpm_telemetry_tls_certs_enabled %}
+{% if ca_bundle_exists|bool %}
 	"{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
 {% endif %}
         "/dev/log:/dev/log"

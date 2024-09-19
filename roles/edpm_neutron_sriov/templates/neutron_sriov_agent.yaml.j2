@@ -8,12 +8,8 @@ volumes:
   {% set edpm_neutron_sriov_volumes = [] %}
   {%- set edpm_neutron_sriov_volumes =
           edpm_neutron_sriov_volumes +
-          edpm_neutron_sriov_common_volumes %}
-{%- if edpm_neutron_sriov_tls_enabled | bool %}
-  {%- set edpm_neutron_sriov_volumes =
-          edpm_neutron_sriov_volumes +
-          edpm_neutron_sriov_tls_volumes %}
-{%- endif -%}
+          edpm_neutron_sriov_common_volumes +
+          edpm_neutron_sriov_tls_cacert_volumes %}
   {{ edpm_neutron_sriov_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

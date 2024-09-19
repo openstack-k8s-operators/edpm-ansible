@@ -27,6 +27,11 @@
   loop:
     - {"path": "{{ edpm_telemetry_config_dest }}"}
 
+- name: Determine if cacert file exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
+  register: ca_bundle_stat_res
+
 - name: Render ceilometer config files
   tags:
     - edpm_telemetry
@@ -81,6 +86,8 @@
     mode: 0644
   with_fileglob:
     - ../templates/*.j2
+  vars:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
 
 - name: Check that tls.crt exists
   ansible.builtin.stat:
