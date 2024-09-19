@@ -29,8 +29,8 @@
 - name: Mount extra and default directories
   become: true
   ansible.posix.mount:
-    name: "{{ item.name }}"
-    src: "{{ item.path }}"
+    path: "{{ item.path }}"
+    src: "{{ item.src | default('none') }}"
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts }}"
     state: mounted

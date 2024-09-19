@@ -23,5 +23,5 @@ edpm_extra_mounts_hide_sensitive_logs: true
 
 edpm_extra_mounts: []
 edpm_default_mounts: [
-  {name: 'hugepages1G', path: '/dev/hugepages1G', opts: 'pagesize=1G', fstype: 'hugetlbfs', group: 'hugetlbfs'},
-  {name: 'hugepages2M', path: /dev/hugepages2M, opts: 'pagesize=2M', fstype: 'hugetlbfs', group: 'hugetlbfs'}]
+  {path: '/dev/hugepages1G', opts: 'pagesize=1G', fstype: 'hugetlbfs', group: 'hugetlbfs'},
+  {path: /dev/hugepages2M, opts: 'pagesize=2M', fstype: 'hugetlbfs', group: 'hugetlbfs'}]
