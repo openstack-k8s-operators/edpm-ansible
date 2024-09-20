@@ -22,3 +22,7 @@ argument_specs:
         description: >
           Used to select which list of services are running
           on the machine. The list is provided by openstack-operator.
+      edpm_download_cache_podman_auth_file:
+        type: str
+        default: ~/.config/containers/auth.json
+        description: Location of authentication file to be used by podman.

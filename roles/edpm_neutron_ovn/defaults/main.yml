@@ -12,23 +12,23 @@ edpm_neutron_ovn_images_download_retries: 5
 
 edpm_neutron_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_ovn_service_name }}"
 edpm_neutron_ovn_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-agent
-edpm_neutron_ovn_agent_log_dir: "/var/log/neutron"
 
 edpm_neutron_ovn_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified"
 
 edpm_neutron_ovn_common_volumes:
   - /run/openvswitch:/run/openvswitch:z
   - "{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z"
-  - /var/log/containers/neutron:/var/log/neutron:z
   - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
 
 edpm_neutron_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_neutron_ovn_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_neutron_ovn_service_name }}"
+edpm_neutron_ovn_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_neutron_ovn_service_name }}/tls-ca-bundle.pem"
+edpm_neutron_ovn_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+edpm_neutron_ovn_tls_cacert_volumes: []
+
 edpm_neutron_ovn_tls_volumes:
   - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_ovn_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
-  - "{{ edpm_neutron_ovn_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
 # Neutron conf
 # DEFAULT

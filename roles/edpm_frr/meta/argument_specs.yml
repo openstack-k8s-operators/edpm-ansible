@@ -202,3 +202,7 @@ argument_specs:
         default: true
         description: ''
         type: bool
+      edpm_frr_zebra_graceful_restart_time:
+        default: ''
+        description: Zebra graceful_restart time (seconds)
+        type: str

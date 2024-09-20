@@ -28,6 +28,5 @@
   vars:
     edpm_container_manage_config: '/var/lib/openstack/config/containers'
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_debug: true
     edpm_container_manage_config_patterns: 'nova_compute.json'
     edpm_container_manage_clean_orphans: false

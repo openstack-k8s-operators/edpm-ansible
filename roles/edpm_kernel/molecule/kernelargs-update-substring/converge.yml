@@ -18,46 +18,14 @@
   hosts: all
   become: true
   pre_tasks:
+    - name: Importing test_vars
+      include_vars: "test_vars.yml"
     - name: Backing up /etc/default/grub
       import_tasks: ../../resources/molecule/backup_grub.yml
   tasks:
-    - name: First pass with custom variable
-      block:
-        - name: create kernelargs entry with the older name
-          lineinfile:
-            dest: /etc/default/grub
-            regexp: '^EDPM_KERNEL_ARGS.*'
-            insertafter: '^GRUB_CMDLINE_LINUX.*'
-            line: 'EDPM_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
-        - name: create append entry with older name
-          lineinfile:
-            dest: /etc/default/grub
-            line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${EDPM_KERNEL_ARGS}"'
-            insertafter: '^EDPM_KERNEL_ARGS.*'
-        - include_role:
-            name: osp.edpm.edpm_kernel
-            tasks_from: kernelargs.yml
-          vars:
-            edpm_kernel_defer_reboot: true
+    - include_role:
+        name: osp.edpm.edpm_kernel
+        tasks_from: kernelargs.yml
       vars:
-        edpm_kernel_args: "isolcpus=1,3,5,7,9,11,13,15"
-    - name: Second pass with custom variable (substring of the first)
-      block:
-        - name: create kernelargs entry with the older name
-          lineinfile:
-            dest: /etc/default/grub
-            regexp: '^EDPM_KERNEL_ARGS.*'
-            insertafter: '^GRUB_CMDLINE_LINUX.*'
-            line: 'EDPM_KERNEL_ARGS=" {{ edpm_kernel_args }} "'
-        - name: create append entry with older name
-          lineinfile:
-            dest: /etc/default/grub
-            line: 'GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:+$GRUB_CMDLINE_LINUX }${EDPM_KERNEL_ARGS}"'
-            insertafter: '^EDPM_KERNEL_ARGS.*'
-        - include_role:
-            name: osp.edpm.edpm_kernel
-            tasks_from: kernelargs.yml
-          vars:
-            edpm_kernel_defer_reboot: true
-      vars:
-        edpm_kernel_args: "isolcpus=1,3,5,7,9"
+        edpm_kernel_defer_reboot: true
+        cmdline: "{{ _mocked_cmdline }}"

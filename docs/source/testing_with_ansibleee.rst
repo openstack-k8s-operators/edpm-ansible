@@ -21,14 +21,14 @@ an appropriate export on your development system. Of course, this implies
 your OpenShift deployment that runs the openstack-operator has access to
 the NFS server, including any required firewall rules.
 
-* `EL 8 instructions <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/deploying_different_types_of_servers/exporting-nfs-shares_deploying-different-types-of-servers#assembly_configuring-the-nfs-server-to-run-behind-a-firewall_exporting-nfs-shares>`_
-* `EL 9 instructions <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/managing_file_systems/exporting-nfs-shares_managing-file-systems#assembly_configuring-the-nfs-server-to-run-behind-a-firewall_exporting-nfs-shares>`_
+* `EL 8 instructions <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/deploying_different_types_of_servers/deploying-an-nfs-server_deploying-different-types-of-servers>`_
+* `EL 9 instructions <https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_using_network_file_services/deploying-an-nfs-server_configuring-and-using-network-file-services>`_
 
 When using OpenShift Local (aka CRC), your export will be something like this:
 
 .. code-block:: console
 
-    % echo "${HOME}/edpm-ansible 192.168.130.0/24(rw,sync,no_root_squash)" > /etc/exports
+    % echo "${HOME}/edpm-ansible 192.168.130.0/24(rw,sync,no_root_squash,insecure)" > /etc/exports
 
     % exportfs -r
 

@@ -12,6 +12,7 @@ on:
     - 'plugins/**'
     - 'molecule-requirements.txt'
     - 'requirements.yml'
+  workflow_dispatch:
 jobs:
   run_molecule:
     strategy:
@@ -41,7 +42,6 @@ jobs:
         - edpm_sshd
         - edpm_ssh_known_hosts
         - edpm_timezone
-        - edpm_tuned
         - edpm_telemetry
         - edpm_telemetry_logging
         - edpm_update

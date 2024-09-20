@@ -149,3 +149,7 @@ argument_specs:
         description: >
           The kubernetes registry URL that will be used for login when
           edpm_podman_login_kube_registry is true.
+      edpm_podman_auth_file:
+        type: str
+        default: ~/.config/containers/auth.json
+        description: Location of authentication file to be used by podman.

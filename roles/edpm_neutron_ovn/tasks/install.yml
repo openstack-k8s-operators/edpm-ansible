@@ -25,4 +25,3 @@
     group: "{{ ansible_user | default(ansible_user_id) }}"
   loop:
     - {'path': "{{ edpm_neutron_ovn_agent_config_dir }}"}
-    - {'path': "/var/log/containers/neutron"}

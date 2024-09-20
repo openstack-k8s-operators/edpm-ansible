@@ -16,10 +16,6 @@ argument_specs:
         default: quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified
         description: The container image to use to deploy Neutron OVN agent
         type: str
-      edpm_neutron_ovn_agent_log_dir:
-        default: /var/log/neutron
-        description: Log directory to be used by Neutron OVN agent
-        type: str
       edpm_neutron_ovn_agent_DEFAULT_debug:
         default: 'True'
         description: Enable debug mode
@@ -84,14 +80,13 @@ argument_specs:
         default:
           - /run/openvswitch:/run/openvswitch:z
           - '{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z'
-          - /var/log/containers/neutron:/var/log/neutron:z
           - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
         description: Volume mounts for Neutron OVN agent
         type: list
       edpm_neutron_ovn_tls_enabled:
         default: false
         description: >
-          Should TLS certs and cacerts be configured for neutron ovn agent
+          Should TLS certs be configured for neutron ovn agent
         type: bool
       edpm_neutron_ovn_agent_config_src:
         default: "/var/lib/openstack/configs/neutron-ovn"

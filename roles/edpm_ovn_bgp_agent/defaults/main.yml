@@ -64,13 +64,16 @@ edpm_ovn_bgp_agent_common_volumes:
   - /run/frr:/run/frr:shared,z
   - /run/openvswitch:/run/openvswitch:shared,z
 
+edpm_ovn_bgp_agent_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_ovn_bgp_agent_service_name }}/tls-ca-bundle.pem"
+edpm_ovn_bgp_agent_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+edpm_ovn_bgp_agent_tls_cacert_volumes: []
+
 edpm_ovn_bgp_agent_tls_volumes:
   - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
-  - "/var/lib/openstack/cacerts/{{ edpm_ovn_bgp_agent_service_name }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 
-  # we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
+# we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
 
 # seconds between retries for download tasks
 edpm_ovn_bgp_agent_images_download_delay: 5
@@ -111,8 +114,6 @@ edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes:
   - /lib/modules:/lib/modules:ro
   - /run:/run
   - /var/lib/openvswitch/ovn:/run/ovn:shared,z
-  - /var/log/containers/openvswitch:/var/log/openvswitch:z
-  - /var/log/containers/openvswitch:/var/log/ovn:z
 
 edpm_ovn_bgp_agent_local_ovn_controller_volumes:
   - /var/lib/kolla/config_files/bgp_ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
@@ -127,3 +128,4 @@ edpm_ovn_bgp_agent_local_ovn_northd_volumes:
   - /var/lib/kolla/config_files/northd.json:/var/lib/kolla/config_files/config.json:ro
 
 edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes: "{{ edpm_ovn_bgp_agent_tls_volumes }}"
+edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes: "{{ edpm_ovn_bgp_agent_tls_cacert_volumes }}"

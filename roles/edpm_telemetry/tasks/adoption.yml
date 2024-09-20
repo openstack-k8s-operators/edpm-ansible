@@ -1,0 +1,10 @@
+---
+- name: Stop and disable ceilometer agent services
+  tags:
+    - adoption
+    - telemetry
+  ansible.builtin.include_role:
+    role: osp.edpm.edpm_tripleo_cleanup
+  vars:
+    edpm_old_tripleo_services: "{{ edpm_telemetry_old_tripleo_compute_sevices }}"
+  when: edpm_telemetry_old_tripleo_compute_sevices | default([]) | length > 0

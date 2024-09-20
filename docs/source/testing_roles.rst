@@ -39,7 +39,7 @@ Creating a VM to run molecule
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The
-[edpm_libvirt](https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_libvirt)
+`edpm_libvirt <https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_libvirt>`_
 molecule senario uses the delegated driver to run against localhost.
 Thus, it's better to run it inside an ephemeral virtual machine as
 it cannot be run insider of a container.
@@ -47,7 +47,7 @@ it cannot be run insider of a container.
 Boot a VM based on `CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2`
 from https://cloud.centos.org/centos/9-stream/x86_64/images.
 
-Use [repo-setup](https://github.com/openstack-k8s-operators/repo-setup)
+Use `repo-setup <https://github.com/openstack-k8s-operators/repo-setup>`_
 to configure the DNF repositories of the VM.
 
 .. code-block:: console

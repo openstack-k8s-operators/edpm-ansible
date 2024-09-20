@@ -20,10 +20,6 @@ argument_specs:
         default: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
         description: ''
         type: str
-      edpm_neutron_metadata_agent_log_dir:
-        default: /var/log/neutron
-        description: ''
-        type: str
       edpm_neutron_metadata_agent_lib_dir:
         default: "/var/lib/neutron"
         description: |
@@ -110,7 +106,6 @@ argument_specs:
           - /run/openvswitch:/run/openvswitch:z
           - '{{ edpm_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z'
           - /run/netns:/run/netns:shared
-          - /var/log/containers/neutron:/var/log/neutron:z
           - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
           - "{{ edpm_neutron_metadata_agent_lib_dir }}:/var/lib/neutron:shared,z"
           - "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn_metadata_haproxy_wrapper:/usr/local/bin/haproxy:ro"
@@ -142,4 +137,3 @@ argument_specs:
           - /var/lib/openstack/certs/neutron_metadata_agent/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
-          - /var/lib/openstack/cacerts/neutron_metadata_agent/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z

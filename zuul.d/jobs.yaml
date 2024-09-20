@@ -66,3 +66,8 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_tripleo_cleanup
+- job:
+    name: edpm-ansible-molecule-edpm_tuned
+    parent: edpm-ansible-molecule-base
+    vars:
+      TEST_RUN: edpm_tuned

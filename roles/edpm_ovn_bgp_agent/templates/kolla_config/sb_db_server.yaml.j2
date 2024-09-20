@@ -1,8 +1,1 @@
 command: "/usr/share/ovn/scripts/ovn-ctl --no-monitor run_sb_ovsdb {% if edpm_ovn_bgp_agent_internal_tls_enable | bool %} -p /etc/pki/tls/private/ovndb.key -c /etc/pki/tls/certs/ovndb.crt -C /etc/pki/tls/certs/ovndbca.crt {% else %} --db-sb-create-insecure-remote=yes  {% endif %}"
-permissions:
-  - path: /var/log/openvswitch
-    owner: root:root
-    recurse: true
-  - path: /var/log/ovn
-    owner: root:root
-    recurse: true
