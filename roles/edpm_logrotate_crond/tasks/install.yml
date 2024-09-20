@@ -25,6 +25,15 @@
   retries: "{{ edpm_logrotate_crond_download_retries }}"
   delay: "{{ edpm_logrotate_crond_download_delay }}"
 
+- name: Gather SELinux fact if needed
+  when:
+    - ansible_facts.selinux is undefined
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
 - name: Allow logrotate to read inside containers
   become: true
   ansible.posix.seboolean:

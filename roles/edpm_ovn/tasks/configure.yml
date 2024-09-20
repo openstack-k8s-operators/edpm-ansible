@@ -36,6 +36,15 @@
       delegate_to: localhost
       become: false
 
+    - name: Gather ansible_machine_id fact if needed
+      when:
+        - ansible_machine_id is undefined
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "machine"
+
     - name: Load ovsdb configuration from file
       ansible.builtin.include_vars:
         file: "{{ edpm_ovn_config_src }}/ovsdb-config"

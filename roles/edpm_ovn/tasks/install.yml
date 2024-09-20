@@ -27,6 +27,15 @@
     - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
     - {'path': /var/lib/openvswitch/ovn, "owner": "openvswitch", "group": "openvswitch"}
 
+- name: Gather SELinux fact if needed
+  when:
+    - ansible_facts.selinux is undefined
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
 - name: Enable virt_sandbox_use_netlink for healthcheck
   become: true
   ansible.posix.seboolean:

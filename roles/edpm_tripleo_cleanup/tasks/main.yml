@@ -21,6 +21,9 @@
   ansible.builtin.systemd_service:
     daemon_reload: true
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
 - name: Set list of tripleo services
   tags:
     - adoption

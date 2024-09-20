@@ -1,7 +1,8 @@
 ---
 - name: Check remote connections
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
-  gather_facts: false
+  strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
   tasks:
     - name: Wait for connection
       ansible.builtin.wait_for_connection:
@@ -10,6 +11,7 @@
 - name: Bootstrap node
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
   max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
   tasks:

@@ -30,6 +30,15 @@
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn-metadata-proxy", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/external/pids", "mode": "0755"}
 
+- name: Gather SELinux fact if needed
+  when:
+    - ansible_facts.selinux is undefined
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
 - name: Enable virt_sandbox_use_netlink for healthcheck
   become: true
   ansible.posix.seboolean:
