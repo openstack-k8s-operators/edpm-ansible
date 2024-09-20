@@ -1,4 +1,11 @@
 ---
+- name: Gather facts if they don't exist
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "distribution"
+  when: "'distribution' not in ansible_facts"
 
 - name: Download needed packages
   ansible.builtin.dnf:
