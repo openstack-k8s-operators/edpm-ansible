@@ -22,3 +22,4 @@ edpm_pre_adoption_validation_old_neutron_config: /var/lib/config-data/puppet-gen
 edpm_pre_adoption_validation_hostname_enabled: true
 edpm_pre_adoption_validation_kernel_args_enabled: true
 edpm_pre_adoption_validation_tuned_enabled: true
+edpm_pre_adoption_validation_machined_enabled: true
