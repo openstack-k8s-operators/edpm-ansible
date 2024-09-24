@@ -76,3 +76,6 @@
     parent: edpm-ansible-molecule-base
     vars:
       TEST_RUN: edpm_telemetry
+- job:
+    name: edpm-ansible-tempest-multinode
+    parent: openstack-operator-tempest-multinode
