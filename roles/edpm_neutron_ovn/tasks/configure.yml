@@ -27,8 +27,12 @@
       when: cacert_bundle_exists.stat.exists
 
 - name: Gather facts if they don't exist
+  when: "'system' not in ansible_facts"
   ansible.builtin.setup:
-    gather_subset: min
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "system"
 
 - name: Configure neutron configuration files
   block:

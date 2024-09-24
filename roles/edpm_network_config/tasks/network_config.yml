@@ -16,7 +16,7 @@
 
 - name: Gather SELinux fact if needed
   when:
-    - ansible_facts.selinux is undefined
+    - "'selinux' not in ansible_facts"
   ansible.builtin.setup:
     gather_subset:
       - "!all"

@@ -39,8 +39,12 @@
           Please check value of Ansible variable edpm_frr_bgp_uplinks.
 
 - name: Gather facts if they don't exist
+  when: "'system' not in ansible_facts"
   ansible.builtin.setup:
-    gather_subset: min
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "system"
 
 - name: Configure FRR
   ansible.builtin.template:
