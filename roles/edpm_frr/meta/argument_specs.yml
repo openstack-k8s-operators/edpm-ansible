@@ -143,7 +143,7 @@ argument_specs:
         description: ''
         type: str
       edpm_frr_hostname:
-        default: '{{ ansible_facts[''hostname''] }}'
+        default: '{{ ansible_facts[''hostname''] | default("")}}'
         description: Dynamically retrieved from ansible facts.
         type: str
       edpm_frr_image:
