@@ -16,7 +16,7 @@
 
 - name: Converge
   hosts: all
-  gather_facts: true
+  gather_facts: false
   become: true
   roles:
     - role: "edpm_ovn_bgp_agent"
