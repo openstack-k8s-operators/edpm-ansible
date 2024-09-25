@@ -17,6 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   pre_tasks:
    - name: Backing up /etc/default/grub
      import_tasks: ../../resources/molecule/backup_grub.yml

@@ -17,6 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   tasks:
     - name: "Include edpm_users with non default config"
       ansible.builtin.include_role:

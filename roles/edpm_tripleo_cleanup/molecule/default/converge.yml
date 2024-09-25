@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  gather_facts: false
   roles:
     - role: "osp.edpm.edpm_tripleo_cleanup"
       vars:

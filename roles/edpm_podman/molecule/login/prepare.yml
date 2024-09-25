@@ -15,6 +15,7 @@
 # under the License.
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
@@ -23,7 +24,7 @@
 
 - name: Prepare
   hosts: all
-  gather_facts: true
+  gather_facts: false
   vars:
     edpm_container_registry_insecure_registries:
       - localhost:5000

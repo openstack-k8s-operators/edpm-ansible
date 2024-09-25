@@ -63,6 +63,15 @@
   delegate_to: localhost
   run_once: true
 
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
+
 - name: Create container config dirs
   tags:
     - configure
@@ -78,6 +87,7 @@
   loop:
     - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
     - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
+
 - name: Create persistent directories
   tags:
     - configure

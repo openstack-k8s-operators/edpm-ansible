@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  gather_facts: false
   tasks:
     - name: Test edpm_telemetry_logging role
       ansible.builtin.include_role:
