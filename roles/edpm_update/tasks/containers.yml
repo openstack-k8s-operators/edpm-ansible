@@ -19,7 +19,8 @@
   tags:
     - edpm_iscsid
     - edpm_update
-  when: '"nova-storage" in edpm_update_running_services'
+  # iscsid is part of the "nova" EDPM service
+  when: '"nova" in edpm_update_running_services'
 
 - name: Updates containers for edpm_ovn role
   ansible.builtin.include_role:
@@ -85,7 +86,8 @@
   tags:
     - edpm_multipathd
     - edpm_update
-  when: '"nova-storage" in edpm_update_running_services'
+  # multipathd is part of the "nova" EDPM service
+  when: '"nova" in edpm_update_running_services'
 
 - name: Updates containers for edpm_nova role
   ansible.builtin.include_role:
