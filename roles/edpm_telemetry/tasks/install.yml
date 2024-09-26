@@ -150,7 +150,7 @@
       TimeoutStopSec=70
       ExecStartPre=/bin/rm -f %t/%n.ctr-id
       ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon -d --replace --name kepler \
-          --privileged --network=host --pid=host --rm -e EXPOSE_ESTIMATED_IDLE_POWER_METRICS="true" -e ENABLE_PROCESS_METRICS="true" \
+          --privileged -p 8888:8888 --pid=host --rm -e EXPOSE_ESTIMATED_IDLE_POWER_METRICS="true" -e ENABLE_PROCESS_METRICS="true" \
           -v /lib/modules:/lib/modules -v /usr/src:/usr/src -v /sys/:/sys/ -v /proc:/proc -v /etc:/etc \
           {{ edpm_telemetry_kepler_image }}
       ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
