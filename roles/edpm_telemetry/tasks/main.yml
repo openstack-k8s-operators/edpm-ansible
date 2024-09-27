@@ -22,3 +22,6 @@
 
 - name: Install telemetry metrics
   ansible.builtin.import_tasks: install.yml
+
+- name: Finish health check deployment
+  ansible.builtin.import_tasks: install_healthchecks_step2.yml

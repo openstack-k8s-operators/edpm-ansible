@@ -26,3 +26,4 @@
     - name: Deploy telemetry metrics
       ansible.builtin.import_role:
         name: osp.edpm.edpm_telemetry
+      

@@ -13,9 +13,15 @@
   ansible.builtin.copy:
     src: "healthchecks/{{ item.value }}/"
     dest: "/var/lib/containers/healthchecks/{{ item.key }}"
-    owner: root
-    group: root
+    owner: "root"
+    group: "root"
     mode: '0700'
-  loop: "{{ edpm_healthcheck_sources | dict2items }}"
   become: true
+  loop: "{{ edpm_healthcheck_sources | dict2items }}"
+
+
+
+
+
+  
     
