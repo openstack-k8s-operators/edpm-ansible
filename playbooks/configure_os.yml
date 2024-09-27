@@ -16,7 +16,7 @@
     - name: Install health check scripts
       ansible.builtin.import_role:
         name: osp.edpm.edpm_telemetry
-        tasks_from: install_healthchecks.yml
+        tasks_from: install_healthchecks_step1.yml
       tags:
         - edpm_podman
     # Configures systemd services including `edpm-container-shutdown`

@@ -20,7 +20,7 @@ import os
 import sys
 
 
-ROTATION_SPREAD = datetime.timedelta(day=1)
+ROTATION_SPREAD = datetime.timedelta(days=1)
 STATUS_LOG_PATH = "/var/lib/logrotate/logrotate-crond.status"
 
 
@@ -44,7 +44,7 @@ def check_rotation(log_path: str) -> (int, str):
             if rdt.date() >= limit:
                 return 0, ""
         else:
-            return 1, "No log was rotated today."
+            return 1, "No log was rotated is %s" % ROTATION_SPREAD
 
 
 if __name__ == "__main__":

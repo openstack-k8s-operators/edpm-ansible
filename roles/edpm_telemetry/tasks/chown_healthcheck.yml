@@ -1,0 +1,36 @@
+---
+
+- name: "Wait until container {{ hc_script.key }} is up and running"
+  containers.podman.podman_container_info:
+    name: "{{ hc_script.key }}"
+  register: podman_info
+  retries: 5
+  delay: 5
+  until:
+    - podman_info.containers|length>0
+    - podman_info.containers.0.State.Running == true
+  become: true
+
+- name: "Get user under which container {{ hc_script.key }} runs"
+  containers.podman.podman_container_exec:
+    name: "{{ hc_script.key }}"
+    command: "id -u"
+  register: user_id
+  become: true
+
+- name: "Get group under which container {{ hc_script.key }} runs"
+  containers.podman.podman_container_exec:
+    name: "{{ hc_script.key }}"
+    command: "id -g"
+  register: group_id
+  become: true
+
+- name: "Correct ownership if health check script for container {{ hc_script.key }}"
+  ansible.builtin.file:
+    path: "/var/lib/containers/healthchecks/{{ hc_script.key }}"
+    state: directory
+    recurse: true
+    owner: "{{ user_id.stdout_lines.0 }}"
+    group: "{{ group_id.stdout_lines.0 }}"
+    mode: '0700'
+  become: true
