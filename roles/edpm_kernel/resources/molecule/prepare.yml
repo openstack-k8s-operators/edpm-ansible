@@ -17,6 +17,7 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
     - role: osp.edpm.env_data

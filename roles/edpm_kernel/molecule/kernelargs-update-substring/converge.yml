@@ -17,6 +17,7 @@
 - name: Converge
   hosts: all
   become: true
+  gather_facts: false
   pre_tasks:
     - name: Importing test_vars
       include_vars: "test_vars.yml"

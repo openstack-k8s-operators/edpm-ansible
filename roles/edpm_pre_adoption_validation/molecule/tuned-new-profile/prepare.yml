@@ -17,11 +17,13 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps  # noqa: role-name[path]
     - role: osp.edpm.env_data
 - name: Setup DUT
   hosts: all
+  gather_facts: false
   pre_tasks:
   - name: Create /etc/tuned/ directory
     become: true

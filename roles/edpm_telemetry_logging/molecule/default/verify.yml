@@ -1,6 +1,7 @@
 ---
 - name: Verify ceilometer
   hosts: all
+  gather_facts: false
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   vars_files:

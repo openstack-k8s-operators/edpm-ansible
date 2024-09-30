@@ -17,6 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   tasks:
     - name: "Include edpm_ceph_client_files"
       ansible.builtin.include_role:

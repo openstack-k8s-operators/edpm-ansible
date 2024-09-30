@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     - name: Check if unit file exists and fail if it does
       ansible.builtin.file:
