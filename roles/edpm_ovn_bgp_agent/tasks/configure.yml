@@ -19,21 +19,6 @@
     name: osp.edpm.edpm_ovn
     tasks_from: "bootstrap.yml"
 
-- name: Set cacert mount if present
-  block:
-    - name: Determine if cacert file exists
-      ansible.builtin.stat:
-        path: "{{ edpm_ovn_bgp_agent_tls_cacert_bundle_src }}"
-      register: cacert_bundle_exists
-
-    - name: Set ca_cert mount
-      ansible.builtin.set_fact:
-        edpm_ovn_bgp_agent_tls_cacert_volumes:
-          - "{{ edpm_ovn_bgp_agent_tls_cacert_bundle_src }}:{{ edpm_ovn_bgp_agent_tls_cacert_bundle_dest }}:ro,z"
-        edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes:
-          - "{{ edpm_ovn_bgp_agent_tls_cacert_bundle_src }}:{{ edpm_ovn_bgp_agent_tls_cacert_bundle_dest }}:ro,z"
-      when: cacert_bundle_exists.stat.exists
-
 - name: Configure OVN BGP agent
   block:
     - name: Render OVN BGP agent config files
