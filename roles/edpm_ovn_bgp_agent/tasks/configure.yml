@@ -16,8 +16,8 @@
 
 - name: Ensure Openvswitch installed and running
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_ovn
-    tasks_from: "bootstrap.yml"
+    name: osp.edpm.edpm_ovs
+    tasks_from: "install.yml"
 
 - name: Set cacert mount if present
   block:
