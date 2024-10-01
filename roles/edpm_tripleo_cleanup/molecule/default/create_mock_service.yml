@@ -1,0 +1,19 @@
+---
+- name: Create mock service
+  become: true
+  ansible.builtin.copy:
+    src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/test-data/fake-tripleo-service.service"
+    dest: "{{ item.path }}/{{ item.service_name }}.service"
+    mode: '0644'
+
+- name: Enable mock service
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item.service_name }}"
+    enabled: true
+
+- name: Start mock service
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item.service_name }}"
+    state: started
