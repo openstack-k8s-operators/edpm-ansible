@@ -1,0 +1,46 @@
+{
+    "image": "{{ edpm_telemetry_node_exporter_image }}",
+    "restart": "always",
+    "recreate": true,
+    "privileged": true,
+    "ports": ["9100:9100"],
+    "command": [
+{% if tls_cert_exists|bool %}
+        "--web.config.file=/etc/node_exporter/node_exporter.yaml",
+{% endif %}
+        "--collector.systemd",
+        "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service",
+        "--web.disable-exporter-metrics",
+        "--no-collector.dmi",
+        "--no-collector.entropy",
+        "--no-collector.thermal_zone",
+        "--no-collector.time",
+        "--no-collector.timex",
+        "--no-collector.uname",
+        "--no-collector.stat",
+        "--no-collector.hwmon",
+        "--no-collector.os",
+        "--no-collector.selinux",
+        "--no-collector.textfile",
+        "--no-collector.powersupplyclass",
+        "--no-collector.pressure",
+        "--no-collector.rapl"
+    ],
+    "net": "host",
+    "environment": {
+        "OS_ENDPOINT_TYPE":"internal"
+    },
+{% if edpm_telemetry_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck",
+        "mount": "/var/lib/containers/healthchecks/node_exporter"
+    },
+{% endif %}
+    "volumes": [
+{% if tls_cert_exists|bool %}
+        "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z",
+        "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z",
+{% endif %}
+        "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
+    ]
+}
