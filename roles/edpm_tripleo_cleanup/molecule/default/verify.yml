@@ -3,8 +3,11 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Check if unit file exists and fail if it does
+    - name: Check if unit files exist and fail if it does
       ansible.builtin.file:
-        path: /usr/lib/systemd/system/fake-tripleo-service.service
+        path: "{{ item.path }}/{{ item.service_name }}.service"
         state: absent
       check_mode: true
+      loop:
+        - { service_name: 'fake-tripleo-service', path: '/usr/lib/systemd/system' }
+        - { service_name: 'fake-etc-tripleo-service', path: '/etc/systemd/system' }

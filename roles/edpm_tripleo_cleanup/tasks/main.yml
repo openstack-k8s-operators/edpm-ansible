@@ -66,11 +66,12 @@
 - name: Remove unit files
   tags:
     - adoption
-  become: true
-  ansible.builtin.file:
-    path: /usr/lib/systemd/system/{{ item }}.service
-    state: absent
-  loop: "{{ tripleo_services }}"
+  ansible.builtin.include_tasks: remove_unit_files.yml
+  loop:
+    - /usr/lib/systemd/system
+    - /etc/systemd/system
+  loop_control:
+    loop_var: path
   when: edpm_remove_tripleo_unit_files
 
 - name: Adopt (stop tracking) certs from tripleo

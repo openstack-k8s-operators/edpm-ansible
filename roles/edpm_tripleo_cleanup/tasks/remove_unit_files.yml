@@ -1,0 +1,9 @@
+---
+- name: "Remove unit files from the location: {{ path }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ path }}/{{ service_name }}.service"
+    state: absent
+  loop: "{{ tripleo_services }}"
+  loop_control:
+    loop_var: service_name

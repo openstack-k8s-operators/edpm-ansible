@@ -7,3 +7,4 @@
       vars:
         edpm_old_tripleo_services:
           - fake-tripleo-service
+          - fake-etc-tripleo-service
