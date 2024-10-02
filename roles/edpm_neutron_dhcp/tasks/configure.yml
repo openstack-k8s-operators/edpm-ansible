@@ -14,19 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Set cacert mount if present
-  block:
-    - name: Determine if cacert file exists
-      ansible.builtin.stat:
-        path: "{{ edpm_neutron_dhcp_tls_cacert_bundle_src }}"
-      register: cacert_bundle_exists
-
-    - name: Set ca_cert mount
-      ansible.builtin.set_fact:
-        edpm_neutron_dhcp_tls_cacert_volumes:
-          - "{{ edpm_neutron_dhcp_tls_cacert_bundle_src }}:{{ edpm_neutron_dhcp_tls_cacert_bundle_dest }}:ro,z"
-      when: cacert_bundle_exists.stat.exists
-
 - name: Configure neutron configuration files
   block:
     - name: Render neutron configuration files
