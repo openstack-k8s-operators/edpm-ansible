@@ -59,7 +59,7 @@ argument_specs:
         type: dict
         description: >
           Contains information about distribution of container health check scripts.
-          Keys state for container names and value is name of a script directory 
+          Keys state for container names and value is name of a script directory
           from module's files directory.
         default:
           ceilometer_agent_compute: ceilometer_agent

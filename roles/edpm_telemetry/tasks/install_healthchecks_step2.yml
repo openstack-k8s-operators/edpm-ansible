@@ -15,10 +15,3 @@
   loop: "{{ edpm_healthcheck_sources | dict2items }}"
   loop_control:
     loop_var: hc_script
-
-
-
-
-
-  
-    
