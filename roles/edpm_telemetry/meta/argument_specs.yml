@@ -51,17 +51,15 @@ argument_specs:
         type: list
         required: true
         description: List of ceilometer agents to be stopped during EDPM adoption
-<<<<<<< HEAD
       edpm_telemetry_kepler_image:
         type: str
         required: true
         description: "Kepler image url"
-=======
       edpm_telemetry_healthcheck_sources:
         type: dict
         description: >
           Contains information about distribution of container health check scripts.
-          Keys state for container names and value is name of a script directory 
+          Keys state for container names and value is name of a script directory
           from module's files directory.
         default:
           ceilometer_agent_compute: ceilometer_agent
@@ -73,4 +71,3 @@ argument_specs:
           nova_compute: nova_compute
           ovn_controller: noop
           ovn_metadata_agent: noop
->>>>>>> 11352a4 (Healthcheck distribution)

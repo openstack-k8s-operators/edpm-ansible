@@ -51,7 +51,7 @@ def check_pollsters(socket_path: str) -> (int, str):
     for line in report.split('\n'):
         pollster, timestr = line.split()
         timestamp = datetime.datetime.fromisoformat(timestr)
-            
+
         if timestamp < limit:
             return 1, f"{pollster}'s timestamp is out of limit"
     return 0, ""
