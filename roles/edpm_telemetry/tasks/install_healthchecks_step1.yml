@@ -18,10 +18,3 @@
     mode: '0700'
   become: true
   loop: "{{ edpm_healthcheck_sources | dict2items }}"
-
-
-
-
-
-  
-    

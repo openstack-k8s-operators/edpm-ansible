@@ -31,7 +31,7 @@ def check_rotation(log_path: str) -> (int, str):
     """
     if not os.path.isfile(log_path):
         return 1, "Status log %s does not exist." % log_path
-    with open(log_path, 'r') as status_log: 
+    with open(log_path, 'r') as status_log:
         for record in status_log:
             if not record or "logrotate state" in record:
                 continue
