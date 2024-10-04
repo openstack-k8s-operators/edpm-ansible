@@ -22,27 +22,31 @@
   register: rsyslog_service_state
 
 - name: Configure rsyslog if present
+  become: true
   when:
     - (rsyslog_service_state is success) and
       ((rsyslog_service_state.status['SubState'] | lower) == 'running')
   block:
     - name: Install openssl module support for rsyslog
-      become: true
       ansible.builtin.dnf:
         name: rsyslog-openssl
         state: present
       when: telemetry_test is undefined or not telemetry_test
 
     - name: Copy Openshift CA to the node
-      become: true
       ansible.builtin.copy:
         src: "{{ edpm_telemetry_logging_config_src }}/ca-openshift.crt"
         dest: "/etc/pki/rsyslog/ca-openshift.crt"
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
 
+    - name: Change permissions of /etc/rsyslog.d to 755
+      ansible.builtin.file:
+        path: /etc/rsyslog.d
+        mode: '0755'
+        state: directory
+
     - name: Deploy rsyslog configuration
-      become: true
       ansible.builtin.copy:
         src: "{{ edpm_telemetry_logging_config_src }}/10-telemetry.conf"
         dest: "{{ edpm_telemetry_rsyslog_config_dest }}/10-telemetry.conf"
