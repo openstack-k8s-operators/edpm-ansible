@@ -43,3 +43,23 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+
+- name: Create a directory for container health checks
+  ansible.builtin.file:
+    path: /var/lib/containers/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy logrotate_crond health check script
+  ansible.builtin.copy:
+    src: healthchecks/logrotate_crond/
+    dest: /var/lib/containers/healthchecks/logrotate_crond
+    setype: container_file_t
+    owner: "root"
+    group: "root"
+    mode: '0700'
+  become: true
