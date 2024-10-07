@@ -51,3 +51,21 @@
         state: directory
         mode: "0755"
         setype: container_file_t
+
+    - name: Create a directory for container health checks
+      ansible.builtin.file:
+        path: /var/lib/containers/healthchecks
+        state: directory
+        setype: container_file_t
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Deploy multipathd health check script
+      ansible.builtin.copy:
+        src: healthchecks/multipathd/
+        dest: /var/lib/containers/healthchecks/multipathd
+        setype: container_file_t
+        owner: root
+        group: root
+        mode: '0700'

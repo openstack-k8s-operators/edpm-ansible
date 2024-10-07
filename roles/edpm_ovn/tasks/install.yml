@@ -34,6 +34,8 @@
   loop:
     - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
     - {'path': /var/lib/openvswitch/ovn, "owner": "openvswitch", "group": "openvswitch"}
+    - {'path': /var/lib/containers/healthchecks, 'mode': '0755'}
+
 
 - name: Gather SELinux fact if needed
   when:
@@ -53,3 +55,13 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+
+- name: Deploy ovn_controller health check script
+  ansible.builtin.copy:
+    src: healthchecks/ovn_controller/
+    dest: /var/lib/containers/healthchecks/ovn_controller
+    setype: container_file_t
+    owner: root
+    group: root
+    mode: '0700'
+  become: true
