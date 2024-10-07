@@ -1,5 +1,25 @@
 ---
 
+- name: Create a directory for container health checks
+  ansible.builtin.file:
+    path: /var/lib/containers/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy multipathd health check script
+  ansible.builtin.copy:
+    src: healthchecks/nova_compute/
+    dest: /var/lib/containers/healthchecks/nova_compute
+    setype: container_file_t
+    owner: root
+    group: root
+    mode: '0700'
+  become: true
+
 - name: Check if ca bundle exists
   ansible.builtin.stat:
     path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
