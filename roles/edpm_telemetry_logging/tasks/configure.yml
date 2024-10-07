@@ -40,7 +40,7 @@
         mode: "0644"
         remote_src: "{{ telemetry_test | default('false') }}"
 
-    - name: Change permissions of /etc/rsyslog.d to 755
+    - name: Ensure that /etc/rsyslog.d/ exists with the right permissions
       ansible.builtin.file:
         path: /etc/rsyslog.d
         mode: '0755'
