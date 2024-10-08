@@ -16,21 +16,21 @@
 
 - name: Create a directory for container health checks
   ansible.builtin.file:
-    path: /var/lib/containers/healthchecks
+    path: /var/lib/openstack/healthchecks
     state: directory
     setype: container_file_t
-    owner: root
-    group: root
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: '0755'
   become: true
 
 - name: Deploy telemetry health check scripts
   ansible.builtin.copy:
     src: "healthchecks/{{ item.value }}/"
-    dest: "/var/lib/containers/healthchecks/{{ item.key }}"
+    dest: "/var/lib/openstack/healthchecks/{{ item.key }}"
     setype: container_file_t
-    owner: root
-    group: root
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: '0700'
   become: true
   loop: "{{ edpm_telemetry_healthcheck_sources | dict2items }}"
@@ -115,12 +115,14 @@
 
 - name: List deployed health check scripts
   ansible.builtin.find:
-    paths: /var/lib/containers/healthchecks/
+    paths: /var/lib/openstack/healthchecks/
+    file_type: directory
   register: deployed_hc
+  become: true
 
 - name: Correct health check scripts ownership based on container user IDs
   ansible.builtin.include_tasks:
     file: chown_healthcheck.yml
-  loop: "{{ deployed_hc }}"
+  loop: "{{ deployed_hc.files }}"
   loop_control:
     loop_var: hc_script

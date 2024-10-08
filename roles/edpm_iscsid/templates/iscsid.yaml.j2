@@ -5,7 +5,7 @@ restart: always
 {% if edpm_iscsid_healthcheck %}
 healthcheck:
   test: /openstack/healthcheck
-  mount: /var/lib/containers/healthchecks/iscsid
+  mount: /var/lib/openstack/healthchecks/iscsid
 {% endif %}
 volumes:
   {{ edpm_container_standalone_common_volumes | default([]) + edpm_iscsid_volumes }}

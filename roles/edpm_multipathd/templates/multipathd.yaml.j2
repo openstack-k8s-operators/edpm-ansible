@@ -5,7 +5,7 @@ restart: always
 {% if edpm_multipathd_healthcheck %}
 healthcheck:
   test: /openstack/healthcheck
-  mount: /var/lib/containers/healthchecks/multipathd
+  mount: /var/lib/openstack/healthchecks/multipathd
 {% endif %}
 volumes:
   {{ edpm_container_standalone_common_volumes | default([]) + edpm_multipathd_volumes }}

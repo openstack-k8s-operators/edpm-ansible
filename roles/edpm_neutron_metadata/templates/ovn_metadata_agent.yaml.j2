@@ -20,7 +20,7 @@ depends_on:
 {% if edpm_neutron_metadata_healthcheck %}
 healthcheck:
         test: /openstack/healthcheck
-        mount: /var/lib/containers/healthchecks/ovn_metadata_agent
+        mount: /var/lib/openstack/healthchecks/ovn_metadata_agent
 {% endif %}
 volumes: {{ edpm_neutron_metadata_volumes }}
 environment:

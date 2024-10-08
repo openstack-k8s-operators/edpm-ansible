@@ -37,7 +37,7 @@
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn-metadata-proxy", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/external/pids", "mode": "0755"}
-    - {'path': /var/lib/containers/healthchecks, "mode": "0755"}
+    - {'path': /var/lib/openstack/healthchecks, "mode": "0755"}
 
 - name: Gather SELinux fact if needed
   when:
@@ -79,9 +79,8 @@
 - name: Deploy ovn_metadata_agent health check script
   ansible.builtin.copy:
     src: healthchecks/ovn_metadata_agent/
-    dest: /var/lib/containers/healthchecks/ovn_metadata_agent
+    dest: /var/lib/openstack/healthchecks/ovn_metadata_agent
     setype: container_file_t
-    owner: root
-    group: root
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: '0700'
-  become: true
