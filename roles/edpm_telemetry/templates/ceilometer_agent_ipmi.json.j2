@@ -11,7 +11,7 @@
 {% if edpm_telemetry_healthcheck %}
     "healthcheck": {
         "test": "/openstack/healthcheck ipmi",
-        "mount": "/var/lib/containers/healthchecks/ceilometer_agent_ipmi"
+        "mount": "/var/lib/openstack/healthchecks/ceilometer_agent_ipmi"
     },
 {% endif %}
     "volumes": [

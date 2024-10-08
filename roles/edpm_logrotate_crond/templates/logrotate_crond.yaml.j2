@@ -7,7 +7,7 @@ restart: always
 {% if edpm_logrotate_crond_healthcheck %}
 healthcheck:
   test: /openstack/healthcheck
-  mount: /var/lib/containers/healthchecks/logrotate_crond
+  mount: /var/lib/openstack/healthchecks/logrotate_crond
 {% endif %}
 volumes:
   {{ edpm_container_standalone_common_volumes | default([]) + edpm_logrotate_crond_volumes }}

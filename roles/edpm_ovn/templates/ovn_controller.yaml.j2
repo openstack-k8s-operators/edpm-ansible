@@ -16,7 +16,7 @@ restart: always
 {% if edpm_ovn_healthcheck %}
 healthcheck:
         test: /openstack/healthcheck
-        mount: /var/lib/containers/healthchecks/ovn_controller
+        mount: /var/lib/openstack/healthchecks/ovn_controller
 {% endif %}
 depends_on:
   - openvswitch.service
