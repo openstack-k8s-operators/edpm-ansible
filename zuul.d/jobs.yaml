@@ -72,10 +72,10 @@
     vars:
       TEST_RUN: edpm_tuned
 - job:
-    name: edpm-ansible-molecule-edpm_telemetry
+    name: edpm-ansible-molecule-edpm_telemetry_power_monitoring
     parent: edpm-ansible-molecule-base
     vars:
-      TEST_RUN: edpm_telemetry
+      TEST_RUN: edpm_telemetry_power_monitoring
 - job:
     name: edpm-ansible-tempest-multinode
     parent: openstack-operator-tempest-multinode

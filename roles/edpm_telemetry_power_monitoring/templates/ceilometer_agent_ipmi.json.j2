@@ -3,6 +3,7 @@
     "user": "ceilometer",
     "restart": "always",
     "command": "kolla_start",
+    "privileged": "true",
     "net": "host",
     "environment": {
         "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS",
