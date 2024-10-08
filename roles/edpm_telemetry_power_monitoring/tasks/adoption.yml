@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,15 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Download needed container images
-  containers.podman.podman_image:
-    name: "{{ item }}"
-    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
-  loop:
-    - "{{ edpm_telemetry_ceilometer_compute_image }}"
-    - "{{ edpm_telemetry_node_exporter_image }}"
-  become: true
-  register: edpm_telemetry_images_download
-  until: edpm_telemetry_images_download.failed == false
-  retries: "{{ edpm_telemetry_image_download_retries }}"
-  delay: "{{ edpm_telemetry_image_download_delay }}"
+- name: Stop and disable ceilometer agent services
+  tags:
+    - adoption
+    - telemetry_power_monitoring
+  ansible.builtin.include_role:
+    role: osp.edpm.edpm_tripleo_cleanup
+  vars:
+    edpm_old_tripleo_services: "{{ edpm_telemetry_old_tripleo_compute_sevices }}"
+  when: edpm_telemetry_old_tripleo_compute_sevices | default([]) | length > 0

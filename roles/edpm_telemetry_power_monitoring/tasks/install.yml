@@ -1,0 +1,72 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Deploy ceilometer containers
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "ceilometer_agent_ipmi.json"
+    edpm_container_manage_clean_orphans: false
+
+- name: Create Kepler systemd unit file
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/edpm_kepler.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Podman edpm_kepler.service
+      Documentation=man:podman-generate-systemd(1)
+      Wants=network-online.target
+      After=network-online.target
+      RequiresMountsFor=%t/containers
+
+      [Service]
+      Environment=PODMAN_SYSTEMD_UNIT=%n
+      Restart=always
+      TimeoutStopSec=70
+      ExecStartPre=/bin/rm -f %t/%n.ctr-id
+      ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon -d --replace --name kepler \
+          --privileged --network=host --pid=host --rm -e EXPOSE_ESTIMATED_IDLE_POWER_METRICS="true" -e ENABLE_PROCESS_METRICS="true" \
+          -v /lib/modules:/lib/modules -v /usr/src:/usr/src -v /sys/:/sys/ -v /proc:/proc -v /etc:/etc \
+          {{ edpm_telemetry_kepler_image }}
+      ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+      ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+      Type=notify
+      NotifyAccess=all
+
+      [Install]
+      WantedBy=multi-user.target default.target
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart ceilometer ipmi
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_ceilometer_agent_ipmi.service
+
+- name: Enable and start Kepler service
+  become: true
+  ansible.builtin.systemd:
+    name: edpm_kepler.service
+    enabled: true
+    state: restarted
