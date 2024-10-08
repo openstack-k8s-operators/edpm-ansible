@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,14 +19,10 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_telemetry role.
     options:
-      edpm_telemetry_node_exporter_image:
+      edpm_telemetry_ceilometer_ipmi_image:
         type: "str"
         required: true
-        description: "The name of the node_exporter podman image"
-      edpm_telemetry_ceilometer_compute_image:
-        type: "str"
-        required: true
-        description: "The name of the ceilometer compute podman image"
+        description: "The name of the ceilometer ipmi podman image"
       edpm_telemetry_config_src:
         type: "str"
         required: true
@@ -47,10 +43,7 @@ argument_specs:
         type: list
         required: true
         description: List of ceilometer agents to be stopped during EDPM adoption
-      edpm_telemetry_healthcheck_sources:
-        type: dict
+      edpm_telemetry_kepler_image:
+        type: str
         required: true
-        description: >
-          Contains information about distribution of container health check scripts.
-          Keys state for container names and value is name of a script directory
-          from module's files directory.
+        description: "Kepler image url"

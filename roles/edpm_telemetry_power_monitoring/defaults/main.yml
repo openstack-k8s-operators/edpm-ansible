@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -22,10 +22,8 @@ edpm_telemetry_service_name: telemetry
 edpm_telemetry_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_service_name }}"
 # Directory in the compute node
 edpm_telemetry_config_dest: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
-# Image to use for node_exporter
-edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
-# Image to use for Ceilometer
-edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+# Image to use for Ceilometer Ipmi
+edpm_telemetry_ceilometer_ipmi_image: quay.io/podified-antelope-centos9/openstack-ceilometer-ipmi:current-podified
 # Certificates location for tls encryption
 edpm_telemetry_certs: "/var/lib/openstack/certs/{{ edpm_telemetry_service_name }}/default"
 # CA certs location for tls encryption
@@ -38,11 +36,12 @@ edpm_telemetry_image_download_delay: 5
 edpm_telemetry_image_download_retries: 5
 # list of tripleo telemetry services to stop during EDPM adoption
 edpm_telemetry_old_tripleo_compute_sevices:
-  - tripleo_ceilometer_agent_compute.service
+  - tripleo_ceilometer_agent_ipmi.service
+# Image to use for kepler
+edpm_telemetry_kepler_image: "quay.io/sustainable_computing_io/kepler:release-0.7.12"
 # Instruction for distribution of container health check scripts
-edpm_telemetry_healthcheck_sources:
-  ceilometer_agent_compute: ceilometer_agent
-  node_exporter: exporter
-#  kepler: exporter
+edpm_telemetry_power_monitoring_healthcheck_sources:
+  ceilometer_agent_ipmi: ceilometer_agent
+  kepler: exporter
 # If telemetry services should have health checks enabled
-edpm_telemetry_healthcheck: true
+edpm_telemetry_power_monitoring_healthcheck: true

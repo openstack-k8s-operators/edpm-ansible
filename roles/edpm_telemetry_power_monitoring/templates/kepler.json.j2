@@ -1,0 +1,36 @@
+{
+    "image": "{{ edpm_telemetry_kepler_image }}",
+    "privileged": "true",
+    "restart": "always",
+    "ports": ["8888:8888"],
+    "command": "-v 2",
+    "environment": {
+        "ENABLE_GPU": "true",
+        "ENABLE_MSR": "true",
+        "ENABLE_PROCESS_METRICS": "true",
+        "EXPOSE_ESTIMATED_IDLE_POWER_METRICS": "true",
+        "EXPOSE_CONTAINER_METRICS": "true",
+        "EXPOSE_VM_METRICS": "true",
+        "EXPOSE_HW_COUNTER_METRICS": "true",
+        "EXPOSE_IRQ_COUNTER_METRICS": "true",
+        "EXPOSE_BPF_METRICS": "true",
+        "EXPOSE_COMPONENT_POWER": "true",
+        "LIBVIRT_METADATA_URI": "http://openstack.org/xmlns/libvirt/nova/1.1"
+    },
+{% if edpm_telemetry_power_monitoring_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck kepler",
+        "mount": "/var/lib/openstack/healthchecks/kepler"
+    },
+{% endif %}
+    "volumes": [
+        "/lib/modules:/lib/modules:ro",
+        "/usr/src:/usr/src",
+        "/sys/:/sys/",
+        "/proc:/proc",
+        "/etc:/etc"
+    ],
+    "cap_add": [
+        "ALL"
+    ]
+}

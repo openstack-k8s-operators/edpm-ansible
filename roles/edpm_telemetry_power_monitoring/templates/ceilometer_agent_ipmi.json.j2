@@ -3,12 +3,13 @@
     "user": "ceilometer",
     "restart": "always",
     "command": "kolla_start",
+    "privileged": "true",
     "net": "host",
     "environment": {
         "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS",
         "OS_ENDPOINT_TYPE":"internal"
     },
-{% if edpm_telemetry_healthcheck %}
+{% if edpm_telemetry_power_monitoring_healthcheck %}
     "healthcheck": {
         "test": "/openstack/healthcheck ipmi",
         "mount": "/var/lib/openstack/healthchecks/ceilometer_agent_ipmi"
