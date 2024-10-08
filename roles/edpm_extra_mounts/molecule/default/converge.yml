@@ -17,6 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   tasks:
     - name: "Include edpm_users with non default config"
       ansible.builtin.include_role:
@@ -32,13 +33,11 @@
       vars:
         edpm_extra_mounts: []
         edpm_default_mounts:
-          - name: 'hugepages1G'
-            path: '/dev/hugepages1G'
+          - path: '/dev/hugepages1G'
             opts: 'pagesize=1G'
             fstype: 'hugetlbfs'
             group: 'hugetlbfs'
-          - name: 'hugepages2MB'
-            path: '/dev/hugepages2MB'
+          - path: '/dev/hugepages2MB'
             opts: 'pagesize=2M'
             fstype: 'hugetlbfs'
             group: 'hugetlbfs'

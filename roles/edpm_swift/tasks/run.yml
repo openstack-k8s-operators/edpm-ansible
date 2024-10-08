@@ -19,142 +19,38 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
-- name: Run swift_account_auditor container
+- name: Run swift containers
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_standalone_service: swift_account_auditor
+    edpm_container_standalone_service: swift
     edpm_container_standalone_container_defs:
       swift_account_auditor: "{{ lookup('template', 'templates/swift_account_auditor.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_account_auditor: "{{ lookup('template', 'templates/kolla_config/swift_account_auditor.yaml.j2') | from_yaml }}"
-
-- name: Run swift_account_reaper container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_account_reaper
-    edpm_container_standalone_container_defs:
       swift_account_reaper: "{{ lookup('template', 'templates/swift_account_reaper.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_account_reaper: "{{ lookup('template', 'templates/kolla_config/swift_account_reaper.yaml.j2') | from_yaml }}"
-
-- name: Run swift_account_replicator container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_account_replicator
-    edpm_container_standalone_container_defs:
       swift_account_replicator: "{{ lookup('template', 'templates/swift_account_replicator.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_account_replicator: "{{ lookup('template', 'templates/kolla_config/swift_account_replicator.yaml.j2') | from_yaml }}"
-
-- name: Run swift_account_server container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_account_server
-    edpm_container_standalone_container_defs:
       swift_account_server: "{{ lookup('template', 'templates/swift_account_server.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_account_server: "{{ lookup('template', 'templates/kolla_config/swift_account_server.yaml.j2') | from_yaml }}"
-
-- name: Run swift_container_auditor container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_container_auditor
-    edpm_container_standalone_container_defs:
       swift_container_auditor: "{{ lookup('template', 'templates/swift_container_auditor.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_container_auditor: "{{ lookup('template', 'templates/kolla_config/swift_container_auditor.yaml.j2') | from_yaml }}"
-
-- name: Run swift_container_replicator container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_container_replicator
-    edpm_container_standalone_container_defs:
       swift_container_replicator: "{{ lookup('template', 'templates/swift_container_replicator.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_container_replicator: "{{ lookup('template', 'templates/kolla_config/swift_container_replicator.yaml.j2') | from_yaml }}"
-
-- name: Run swift_container_server container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_container_server
-    edpm_container_standalone_container_defs:
       swift_container_server: "{{ lookup('template', 'templates/swift_container_server.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_container_server: "{{ lookup('template', 'templates/kolla_config/swift_container_server.yaml.j2') | from_yaml }}"
-
-- name: Run swift_container_updater container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_container_updater
-    edpm_container_standalone_container_defs:
       swift_container_updater: "{{ lookup('template', 'templates/swift_container_updater.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_container_updater: "{{ lookup('template', 'templates/kolla_config/swift_container_updater.yaml.j2') | from_yaml }}"
-
-- name: Run swift_object_auditor container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_object_auditor
-    edpm_container_standalone_container_defs:
       swift_object_auditor: "{{ lookup('template', 'templates/swift_object_auditor.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_object_auditor: "{{ lookup('template', 'templates/kolla_config/swift_object_auditor.yaml.j2') | from_yaml }}"
-
-- name: Run swift_object_expirer container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_object_expirer
-    edpm_container_standalone_container_defs:
       swift_object_expirer: "{{ lookup('template', 'templates/swift_object_expirer.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_object_expirer: "{{ lookup('template', 'templates/kolla_config/swift_object_expirer.yaml.j2') | from_yaml }}"
-
-- name: Run swift_object_replicator container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_object_replicator
-    edpm_container_standalone_container_defs:
       swift_object_replicator: "{{ lookup('template', 'templates/swift_object_replicator.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_object_replicator: "{{ lookup('template', 'templates/kolla_config/swift_object_replicator.yaml.j2') | from_yaml }}"
-
-- name: Run swift_object_server container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_object_server
-    edpm_container_standalone_container_defs:
       swift_object_server: "{{ lookup('template', 'templates/swift_object_server.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_object_server: "{{ lookup('template', 'templates/kolla_config/swift_object_server.yaml.j2') | from_yaml }}"
-
-- name: Run swift_object_updater container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: swift_object_updater
-    edpm_container_standalone_container_defs:
       swift_object_updater: "{{ lookup('template', 'templates/swift_object_updater.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      swift_object_updater: "{{ lookup('template', 'templates/kolla_config/swift_object_updater.yaml.j2') | from_yaml }}"
-
-- name: Run rsync container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: rsync
-    edpm_container_standalone_container_defs:
       rsync: "{{ lookup('template', 'templates/rsync.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
+      swift_account_auditor: "{{ lookup('template', 'templates/kolla_config/swift_account_auditor.yaml.j2') | from_yaml }}"
+      swift_account_reaper: "{{ lookup('template', 'templates/kolla_config/swift_account_reaper.yaml.j2') | from_yaml }}"
+      swift_account_replicator: "{{ lookup('template', 'templates/kolla_config/swift_account_replicator.yaml.j2') | from_yaml }}"
+      swift_account_server: "{{ lookup('template', 'templates/kolla_config/swift_account_server.yaml.j2') | from_yaml }}"
+      swift_container_auditor: "{{ lookup('template', 'templates/kolla_config/swift_container_auditor.yaml.j2') | from_yaml }}"
+      swift_container_replicator: "{{ lookup('template', 'templates/kolla_config/swift_container_replicator.yaml.j2') | from_yaml }}"
+      swift_container_server: "{{ lookup('template', 'templates/kolla_config/swift_container_server.yaml.j2') | from_yaml }}"
+      swift_container_updater: "{{ lookup('template', 'templates/kolla_config/swift_container_updater.yaml.j2') | from_yaml }}"
+      swift_object_auditor: "{{ lookup('template', 'templates/kolla_config/swift_object_auditor.yaml.j2') | from_yaml }}"
+      swift_object_expirer: "{{ lookup('template', 'templates/kolla_config/swift_object_expirer.yaml.j2') | from_yaml }}"
+      swift_object_replicator: "{{ lookup('template', 'templates/kolla_config/swift_object_replicator.yaml.j2') | from_yaml }}"
+      swift_object_server: "{{ lookup('template', 'templates/kolla_config/swift_object_server.yaml.j2') | from_yaml }}"
+      swift_object_updater: "{{ lookup('template', 'templates/kolla_config/swift_object_updater.yaml.j2') | from_yaml }}"
       rsync: "{{ lookup('template', 'templates/kolla_config/rsync.yaml.j2') | from_yaml }}"

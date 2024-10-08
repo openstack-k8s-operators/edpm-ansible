@@ -15,6 +15,7 @@
 # under the License.
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   become: true
   roles:
     - role: ../../../../molecule/common/test_deps
@@ -23,6 +24,7 @@
         - iproute
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: osp.edpm.env_data
 

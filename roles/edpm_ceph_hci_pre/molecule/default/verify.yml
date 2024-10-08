@@ -16,6 +16,7 @@
 
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     - name: Read generated file from defaults
       command: cat /var/lib/edpm-config/firewall/ceph-networks.yaml

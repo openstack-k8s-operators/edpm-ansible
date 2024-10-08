@@ -51,10 +51,6 @@ argument_specs:
           List of volumes formed by concatenation of several other volume list variables.
           Presence of TLS related mount points is conditioned on `edpm_enable_internal_tls`
         type: list
-      edpm_debug:
-        default: false
-        description: Sets `__OS_DEBUG` environment variable for the `edpm_nova_compute` role.
-        type: bool
       edpm_deploy_identifier:
         default: ''
         description: Sets `EDPM_DEPLOY_IDENTIFIER` environment variable.

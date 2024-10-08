@@ -20,6 +20,14 @@
     - edpm_container_registry_logins | length == 0
     - edpm_podman_auth_file | length > 0
   block:
+    - name: Gather user fact
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "user"
+      when:
+        - ansible_user is undefined
     - name: Ensure presence of authfile dir
       ansible.builtin.file:
         path: "{{ edpm_podman_auth_file | dirname }}"

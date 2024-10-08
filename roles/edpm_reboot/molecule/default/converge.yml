@@ -17,7 +17,7 @@
 
 - name: Converge
   hosts: all
-  gather_facts: true
+  gather_facts: false
   become: true
   tasks:
     - name: Create reboot_required directory

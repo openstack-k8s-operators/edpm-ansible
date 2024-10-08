@@ -16,6 +16,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   vars:
     # We cannot use the real multipathd command because the daemon needs
     # privileges that are not available in a rootless molecule container,

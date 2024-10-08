@@ -17,5 +17,6 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   roles:
     - role: "edpm_swift"

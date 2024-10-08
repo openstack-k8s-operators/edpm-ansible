@@ -15,6 +15,7 @@
 # under the License.
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
@@ -25,7 +26,7 @@
         - podman
 - name: Prepare
   hosts: all
-  gather_facts: true
+  gather_facts: false
   tasks:
     - ansible.builtin.include_role:
         name: osp.edpm.env_data

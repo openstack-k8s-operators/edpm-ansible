@@ -16,7 +16,7 @@
 - name: Prepare
   hosts: all
   become: true
-  gather_facts: true
+  gather_facts: false
   pre_tasks:
     - name: set basic user fact
       set_fact:

@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     - name: Ensure we activated GSSAPI
       ansible.builtin.lineinfile:

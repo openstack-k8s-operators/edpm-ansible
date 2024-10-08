@@ -16,7 +16,7 @@
 
 - name: Converge
   hosts: all
-  gather_facts: true
+  gather_facts: false
   become: true
   tasks:
     - ansible.builtin.include_role:

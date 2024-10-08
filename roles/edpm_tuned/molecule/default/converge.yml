@@ -18,5 +18,6 @@
 - name: Converge
   become: true
   hosts: all
+  gather_facts: false
   roles:
     - role: "osp.edpm.edpm_tuned"

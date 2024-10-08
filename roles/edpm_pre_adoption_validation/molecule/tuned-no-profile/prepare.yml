@@ -17,11 +17,13 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps  # noqa: role-name[path]
     - role: osp.edpm.env_data
 - name: Setup DUT
   hosts: all
+  gather_facts: false
   # NOTE(gibi): we intentionally not configure any tuned profile for this test
   # to simulate the that there is no tuned configure in the node before
   # adoption. We expect that the pre-adoption check fails as during adoption

@@ -15,6 +15,7 @@
 # under the License.
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
@@ -22,5 +23,6 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: osp.edpm.env_data

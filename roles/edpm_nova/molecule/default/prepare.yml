@@ -144,6 +144,14 @@
         csr_content: "{{ csr.csr }}"
         provider: selfsigned
 
+    - name: Gather required facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "default_ipv4"
+          -  "system"
+
     # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
     # currently manage the hostname on the DUT via boostrap or a dedicated role
     # in the molecule test. This is needed to ensure the hostname is resolvable

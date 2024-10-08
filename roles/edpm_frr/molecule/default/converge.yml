@@ -17,6 +17,7 @@
 - name: Converge
   hosts: all
   become: true
+  gather_facts: false
   vars:
     edpm_download_cache_podman_auth_file: "" # Override since the file doesn't exist
   pre_tasks:

@@ -86,7 +86,7 @@ argument_specs:
       edpm_neutron_ovn_tls_enabled:
         default: false
         description: >
-          Should TLS certs and cacerts be configured for neutron ovn agent
+          Should TLS certs be configured for neutron ovn agent
         type: bool
       edpm_neutron_ovn_agent_config_src:
         default: "/var/lib/openstack/configs/neutron-ovn"

@@ -17,9 +17,8 @@
 
 - name: Converge
   hosts: all
-  vars:
+  gather_facts: false
   tasks:
-
     - name: install edpm_logrotate_crond
       include_role:
         name: "osp.edpm.edpm_logrotate_crond"

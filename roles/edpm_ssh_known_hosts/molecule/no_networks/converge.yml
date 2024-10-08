@@ -17,6 +17,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   pre_tasks:
     - name: Override ssh_host_key_rsa_public test value in ansible_facts
       set_fact:

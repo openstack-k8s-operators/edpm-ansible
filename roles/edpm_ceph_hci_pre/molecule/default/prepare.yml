@@ -17,5 +17,6 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: osp.edpm.env_data

@@ -14,14 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure the Openvswitch package is installed
-  become: true
-  ansible.builtin.package:
-    name: openvswitch
-    state: present
-
-- name: Ensure the OVS service is running
-  become: true
-  ansible.builtin.systemd:
-    name: openvswitch
-    state: started
+- name: Ensure Openvswitch installed and running
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovs
+    tasks_from: "install.yml"

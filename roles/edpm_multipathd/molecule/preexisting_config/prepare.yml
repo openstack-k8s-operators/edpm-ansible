@@ -18,7 +18,7 @@
 - name: Prepare
   hosts: all
   become: true
-
+  gather_facts: false
   pre_tasks:
     - name: Precreate /etc/multipath.conf
       copy:

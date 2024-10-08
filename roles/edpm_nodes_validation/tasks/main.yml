@@ -15,6 +15,7 @@
 # under the License.
 
 - name: Collect default network fact
+  when: "'default_ipv4' not in ansible_facts"
   ansible.builtin.setup:
     gather_subset:
       - '!all'

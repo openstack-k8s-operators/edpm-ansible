@@ -96,13 +96,6 @@ argument_specs:
           Shell command that is executed before any packages are installed by the role.
           Can be used to register systems using any arbitrary registration command(s).
 
-      edpm_bootstrap_command_done_file:
-        type: path
-        default: /.bootstrap_command_done
-        description: |
-          The path of the file that will be used as a marker when the edpm_bootstrap_command
-          has been executed on the node.
-
       edpm_bootstrap_fips_mode:
         type: str
         default: check

@@ -17,6 +17,7 @@
 
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     - name: Get current timezone
       community.general.timezone:

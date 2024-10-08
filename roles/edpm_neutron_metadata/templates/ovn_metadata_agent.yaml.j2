@@ -1,13 +1,13 @@
 {%- set edpm_neutron_metadata_volumes = [] %}
 {%- set edpm_neutron_metadata_volumes =
         edpm_neutron_metadata_volumes +
-        edpm_neutron_metadata_common_volumes %}
+        edpm_neutron_metadata_common_volumes +
+        edpm_neutron_metadata_tls_cacert_volumes %}
 {%- if edpm_neutron_metadata_agent_tls_enabled | bool %}
 {%- set edpm_neutron_metadata_volumes =
         edpm_neutron_metadata_volumes +
         edpm_neutron_metadata_tls_volumes %}
 {%- endif -%}
-start_order: 2
 image: "{{ edpm_neutron_metadata_agent_image }}"
 net: host
 pid: host

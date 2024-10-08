@@ -63,6 +63,5 @@ edpm_container_standalone_volumes: "{{
         edpm_container_standalone_common_volumes)
   }}"
 
-edpm_debug: false
 edpm_deploy_identifier: ''
 edpm_iscsid_config_volume: /var/lib/config-data/ansible-generated/iscsid

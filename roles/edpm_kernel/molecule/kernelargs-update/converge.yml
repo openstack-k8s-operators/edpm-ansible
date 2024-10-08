@@ -16,6 +16,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   become: true
   vars:
     edpm_kernel_args: "test=1"

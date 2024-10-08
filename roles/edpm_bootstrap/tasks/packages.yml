@@ -16,10 +16,14 @@
 
 - name: Gather facts if they don't exist
   ansible.builtin.setup:
-    gather_subset: min
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "distribution"
   when: "'distribution' not in ansible_facts"
   tags:
     - always
+
 
 # Currently only supported on RHEL as edpm does not have a version package
 

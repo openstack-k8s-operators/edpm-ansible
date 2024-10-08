@@ -28,7 +28,7 @@
 
     - name: Ensure we get the ansible interfaces facts
       when:
-        - ansible_facts['interfaces'] is undefined
+        - "'interfaces' not in ansible_facts"
       ansible.builtin.setup:
         gather_subset:
           - '!all'

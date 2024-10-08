@@ -57,9 +57,11 @@ edpm_neutron_metadata_agent_ovn_ovsdb_probe_interval: '60000'
 # tls
 edpm_neutron_metadata_agent_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
+edpm_neutron_metadata_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_neutron_metadata_service_name }}/tls-ca-bundle.pem"
+edpm_neutron_metadata_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+edpm_neutron_metadata_tls_cacert_volumes: []
+
 edpm_neutron_metadata_tls_volumes:
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
-  - "/var/lib/openstack/cacerts/{{ edpm_neutron_metadata_service_name }}/tls-ca-bundle.pem:\
-    /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
