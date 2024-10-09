@@ -32,7 +32,7 @@
     },
 {% if edpm_telemetry_healthcheck %}
     "healthcheck": {
-        "test": "/openstack/healthcheck",
+        "test": "/openstack/healthcheck node_exporter",
         "mount": "/var/lib/openstack/healthchecks/node_exporter"
     },
 {% endif %}

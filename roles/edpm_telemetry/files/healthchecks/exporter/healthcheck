@@ -15,4 +15,4 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-netstat -plnt | grep -i listen | grep node_exporter
+ss -lnp | grep $1 || netstat -plnt | grep -i listen | grep $1
