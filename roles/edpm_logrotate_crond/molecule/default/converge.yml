@@ -18,12 +18,6 @@
 - name: Converge
   hosts: all
   gather_facts: false
-  pre_tasks:
-    - name: set basic user fact
-      set_fact:
-        ansible_user: "{{ lookup('env', 'USER') }}"
-      when:
-        - ansible_user is undefined
   tasks:
     - name: install edpm_logrotate_crond
       include_role:

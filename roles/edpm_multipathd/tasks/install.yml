@@ -14,6 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+      - "user_id"
+  when:
+    - ansible_user is undefined
+
 - name: Run multipathd install tasks with root privileges
   become: true
   block:
