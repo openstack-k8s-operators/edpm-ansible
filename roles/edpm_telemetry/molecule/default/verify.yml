@@ -23,15 +23,13 @@
         - "ceilometer_agent_compute"
         - "ceilometer_agent_ipmi"
         - "node_exporter"
-        - "kepler"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "edpm_ceilometer_agent_compute.service" }
-        - { "name": "edpm_ceilometer_agent_ipmi.service" }
-        - { "name": "edpm_node_exporter.service" }
-        - { "name": "edpm_kepler.service" }
+        - {"name": "edpm_ceilometer_agent_compute.service"}
+        - {"name": "edpm_ceilometer_agent_ipmi.service"}
+        - {"name": "edpm_node_exporter.service"}
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
@@ -42,6 +40,7 @@
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
         - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
+
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true

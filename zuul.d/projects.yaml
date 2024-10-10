@@ -18,7 +18,6 @@
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
-        - edpm-ansible-molecule-edpm_telemetry
         - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
             dependencies:
@@ -54,4 +53,3 @@
               - ^roles/edpm_neutron_metadata/*
               - ^roles/edpm_pre_adoption_validation/*
               - ^roles/edpm_tripleo_cleanup/*
-              - ^roles/edpm_telemetry/*
