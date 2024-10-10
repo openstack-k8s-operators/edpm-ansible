@@ -303,7 +303,12 @@ class EdpmContainerManage:
         if 'environment' in opts:
             opts['env'] = opts.pop('environment')
         if 'healthcheck' in opts and isinstance(opts['healthcheck'], dict):
-            opts['healthcheck'] = opts['healthcheck'].get('test', None)
+            tst = opts['healthcheck'].get('test', None)
+            # add healthcheck script to the list of volume mounts
+            mnt = opts['healthcheck'].get('mount', None)
+            if mnt is not None:
+                opts['volume'].append(f'{mnt}:{os.path.dirname(tst)}:ro,z')
+            opts['healthcheck'] = tst
         if 'check_interval' in opts:
             opts['healthcheck_interval'] = opts.pop('check_interval')
         if 'remove' in opts:

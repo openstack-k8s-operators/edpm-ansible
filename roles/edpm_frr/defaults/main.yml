@@ -56,7 +56,7 @@ edpm_frr_bgp_uplinks: ['nic1']
 edpm_frr_bgp_uplinks_scope: internal
 edpm_frr_config_basedir: "/var/lib/config-data/ansible-generated/frr"
 edpm_frr_defaults: traditional
-edpm_frr_hostname: "{{ ansible_facts['hostname'] | default('')}}"
+edpm_frr_hostname: "{{ ansible_facts['hostname'] | default('') }}"
 edpm_frr_log_level: informational
 edpm_frr_log_timestamp_precision: 3
 edpm_frr_version: 7.0

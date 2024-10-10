@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pgrep -f ceilometer-polling.*$1
+exit $?

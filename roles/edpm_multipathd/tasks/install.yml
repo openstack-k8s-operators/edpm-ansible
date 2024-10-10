@@ -14,6 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+      - "user_id"
+  when:
+    - ansible_user is undefined
+
 - name: Run multipathd install tasks with root privileges
   become: true
   block:
@@ -51,3 +61,21 @@
         state: directory
         mode: "0755"
         setype: container_file_t
+
+    - name: Create a directory for container health checks
+      ansible.builtin.file:
+        path: /var/lib/openstack/healthchecks
+        state: directory
+        setype: container_file_t
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+        mode: '0755'
+
+    - name: Deploy multipathd health check script
+      ansible.builtin.copy:
+        src: healthchecks/multipathd/
+        dest: /var/lib/openstack/healthchecks/multipathd
+        setype: container_file_t
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+        mode: '0700'

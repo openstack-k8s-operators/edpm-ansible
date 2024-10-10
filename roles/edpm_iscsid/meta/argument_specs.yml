@@ -39,3 +39,8 @@ argument_specs:
         type: str
         default: 'SHA3-256,SHA256,SHA1,MD5'
         description: List of allowed CHAP algorithms.
+      edpm_iscsid_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection
