@@ -1,0 +1,37 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# NOTE(gibi): We need this trick as these tasks depend on the
+# edpm_tuned_profile variable. If that var is not provided in the inventory
+# then it is defaulted by the edpm_tuned role to a non trivial default value.
+- name: Check systemd-container package present or not
+  ansible.builtin.package:
+    name: systemd-container
+    state: present
+  check_mode: true
+  register: is_systemd_container_package
+
+- name: Fail when systemd-container package is missing
+  ansible.builtin.assert:
+    that:
+      - is_systemd_container_package.changed
+    success_msg: Found installed systemd-container package
+    fail_msg: |
+      You must have the systemd-container package installed.
+      Do not install it manually as that stops VM instances.
+      Complete a minor update of the source cloud and reboot
+      your Nova Compute hypervisors ony by one. To reboot
+      a hypervisor, firstly live-migrate its VM instances.

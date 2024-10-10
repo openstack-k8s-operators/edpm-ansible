@@ -19,7 +19,9 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
+          edpm_pre_adoption_validation_kernel_args_enabled: true
           edpm_pre_adoption_validation_tuned_enabled: false
+          edpm_pre_adoption_validation_machined_enabled: false
           # This is already configured in the test env so this alone would be
           # OK
           edpm_kernel_args: "console=ttyS0"

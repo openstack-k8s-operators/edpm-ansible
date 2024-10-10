@@ -19,7 +19,9 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
+          edpm_pre_adoption_validation_kernel_args_enabled: true
           edpm_pre_adoption_validation_tuned_enabled: false
+          edpm_pre_adoption_validation_machined_enabled: false
           # this is a kernel arg that by default defined in the test env
           # we use this to simulate that what is requested during adoption
           # is already configured

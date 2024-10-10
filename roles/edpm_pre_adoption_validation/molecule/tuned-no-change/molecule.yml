@@ -19,6 +19,9 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
+          edpm_pre_adoption_validation_kernel_args_enabled: false
+          edpm_pre_adoption_validation_tuned_enabled: true
+          edpm_pre_adoption_validation_machined_enabled: false
           # NOTE(gibi): edpm_tuned_profile defaulted by the edpm_tuned_role
           # edpm_tuned_profile: throughput-performance
         hosts:
