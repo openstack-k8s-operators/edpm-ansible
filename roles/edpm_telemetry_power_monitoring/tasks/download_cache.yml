@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,8 +19,8 @@
     name: "{{ item }}"
     auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   loop:
-    - "{{ edpm_telemetry_ceilometer_compute_image }}"
-    - "{{ edpm_telemetry_node_exporter_image }}"
+    - "{{ edpm_telemetry_ceilometer_ipmi_image }}"
+    - "{{ edpm_telemetry_kepler_image }}"
   become: true
   register: edpm_telemetry_images_download
   until: edpm_telemetry_images_download.failed == false
