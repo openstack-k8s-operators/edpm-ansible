@@ -51,7 +51,3 @@ argument_specs:
         type: list
         required: true
         description: List of ceilometer agents to be stopped during EDPM adoption
-      edpm_telemetry_kepler_image:
-        type: str
-        required: true
-        description: "Kepler image url"

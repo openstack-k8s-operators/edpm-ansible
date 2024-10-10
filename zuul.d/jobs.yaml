@@ -78,4 +78,9 @@
       TEST_RUN: edpm_telemetry
 - job:
     name: edpm-ansible-tempest-multinode
+    vars:
+      cifmw_edpm_deploy_nova_compute_extra_config: |
+        # just to make the job fail
+        [libvirt]
+        cpu_mode = fooo
     parent: openstack-operator-tempest-multinode

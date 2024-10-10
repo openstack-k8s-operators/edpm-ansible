@@ -28,46 +28,22 @@
   vars_files:
     - ../../defaults/main.yml
   tasks:
-    - name: Enable package repos
-      become: true
-      ansible.builtin.shell: |
-        set -euxo pipefail
-        pushd /var/tmp
-        curl -sL https://github.com/openstack-k8s-operators/repo-setup/archive/refs/heads/main.tar.gz | tar -xz
-        pushd repo-setup-main
-        python3 -m venv ./venv
-        PBR_VERSION=0.0.0 ./venv/bin/pip install ./
-        ./venv/bin/repo-setup current-podified -b antelope
-        popd
-        rm -rf repo-setup-main
-
-    # NOTE(gibi): this is done by the boostrap role in a real deployment
-    - name: Install openstack-selinux
-      become: true
-      ansible.builtin.dnf:
-        name: "openstack-selinux"
-        state: present
-
     - name: Create config-data telemetry directory
-      become: true
       ansible.builtin.file:
         path: "{{ edpm_telemetry_config_src }}"
         state: directory
         mode: "0775"
 
     - name: Create /run/libvirt directory
-      become: true
       ansible.builtin.file:
         path: "/run/libvirt"
         state: directory
         mode: "0775"
 
     - name: Create libvirt user
-      become: true
       command: groupadd libvirt
 
     - name: Create ceilometer.conf
-      become: true
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_config_src }}/ceilometer.conf"
         mode: "0644"
@@ -99,7 +75,6 @@
           telemetry_secret=eQ5qb0yysfJ8lx82Vl061vSyY
 
     - name: Create polling.yaml
-      become: true
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_config_src }}/polling.yaml"
         mode: "0644"
@@ -128,14 +103,12 @@
                   - hardware.*
 
     - name: Create certs directory
-      become: true
       ansible.builtin.file:
         path: "{{ edpm_telemetry_certs }}"
         state: directory
         mode: "0775"
 
     - name: Create tls.crt
-      become: true
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_certs }}/tls.crt"
         mode: "0600"
@@ -160,7 +133,6 @@
           -----END CERTIFICATE-----
 
     - name: Create tls.key
-      become: true
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_certs }}/tls.key"
         mode: "0600"
