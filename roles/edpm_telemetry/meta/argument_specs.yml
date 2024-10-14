@@ -23,6 +23,10 @@ argument_specs:
         type: "str"
         required: true
         description: "The name of the node_exporter podman image"
+      edpm_telemetry_podman_exporter_image:
+        type: "str"
+        required: true
+        description: "The name of the podman_exporter podman image"
       edpm_telemetry_ceilometer_compute_image:
         type: "str"
         required: true

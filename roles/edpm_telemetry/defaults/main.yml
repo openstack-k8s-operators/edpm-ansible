@@ -24,6 +24,8 @@ edpm_telemetry_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_service
 edpm_telemetry_config_dest: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
 # Image to use for node_exporter
 edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
+# Image to use for podman_exporter
+edpm_telemetry_podman_exporter_image: quay.io/navidys/prometheus-podman-exporter:v1.10.1
 # Image to use for Ceilometer
 edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
 # Certificates location for tls encryption
@@ -43,6 +45,7 @@ edpm_telemetry_old_tripleo_compute_sevices:
 edpm_telemetry_healthcheck_sources:
   ceilometer_agent_compute: ceilometer_agent
   node_exporter: exporter
+  podman_exporter: exporter
 #  kepler: exporter
 # If telemetry services should have health checks enabled
 edpm_telemetry_healthcheck: true
