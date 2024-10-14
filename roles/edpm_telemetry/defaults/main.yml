@@ -42,3 +42,23 @@ edpm_telemetry_image_download_retries: 5
 edpm_telemetry_old_tripleo_compute_sevices:
   - tripleo_ceilometer_agent_compute.service
   - tripleo_ceilometer_agent_ipmi.service
+
+edpm_telemetry_node_exporter_command: >-
+  "--web.config.file=/etc/node_exporter/node_exporter.yaml"
+  "--collector.systemd"
+  "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
+  "--web.disable-exporter-metrics"
+  "--no-collector.dmi"
+  "--no-collector.entropy"
+  "--no-collector.thermal_zone"
+  "--no-collector.time"
+  "--no-collector.timex"
+  "--no-collector.uname"
+  "--no-collector.stat"
+  "--no-collector.hwmon"
+  "--no-collector.os"
+  "--no-collector.selinux"
+  "--no-collector.textfile"
+  "--no-collector.powersupplyclass"
+  "--no-collector.pressure"
+  "--no-collector.rapl"
