@@ -13,6 +13,11 @@ net: host
 privileged: true
 user: root
 restart: always
+{% if edpm_ovn_healthcheck %}
+healthcheck:
+        test: /openstack/healthcheck
+        mount: /var/lib/openstack/healthchecks/ovn_controller
+{% endif %}
 depends_on:
   - openvswitch.service
 {% if edpm_ovn_cpu_set | default(false) %}

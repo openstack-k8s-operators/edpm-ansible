@@ -47,3 +47,5 @@ edpm_multipathd_user_friendly_names: false
 
 # This may be overridden to deploy a custom multipath.conf file.
 edpm_multipathd_custom_config_file: ''
+# If container health check should be enabled
+edpm_multipathd_healthcheck: true

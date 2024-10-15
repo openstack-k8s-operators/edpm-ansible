@@ -137,3 +137,8 @@ argument_specs:
           - /var/lib/openstack/certs/neutron_metadata_agent/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
+      edpm_neutron_metadata_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection

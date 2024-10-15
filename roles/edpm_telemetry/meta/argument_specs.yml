@@ -51,3 +51,10 @@ argument_specs:
         type: list
         required: true
         description: List of ceilometer agents to be stopped during EDPM adoption
+      edpm_telemetry_healthcheck_sources:
+        type: dict
+        required: true
+        description: >
+          Contains information about distribution of container health check scripts.
+          Keys state for container names and value is name of a script directory
+          from module's files directory.

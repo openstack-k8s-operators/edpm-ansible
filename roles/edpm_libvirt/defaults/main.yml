@@ -46,10 +46,10 @@ edpm_libvirt_old_tripleo_compute_sevices:
 edpm_libvirt_range: ""
 edpm_libvirt_packages:
   # main libvirt packages
-  - libvirt {{edpm_libvirt_range}}
-  - libvirt-admin {{edpm_libvirt_range}}
-  - libvirt-client {{edpm_libvirt_range}}
-  - libvirt-daemon {{edpm_libvirt_range}}
+  - libvirt {{ edpm_libvirt_range }}
+  - libvirt-admin {{ edpm_libvirt_range }}
+  - libvirt-client {{ edpm_libvirt_range }}
+  - libvirt-daemon {{ edpm_libvirt_range }}
   # qemu pakcages
   - qemu-kvm
   - qemu-img

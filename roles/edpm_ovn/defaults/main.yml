@@ -99,3 +99,6 @@ edpm_ovn_ovs_external_ids:
 
 # Set openvswitch other_config.
 edpm_ovn_ovs_other_config: {}
+
+# If container health check should be enabled
+edpm_ovn_healthcheck: true

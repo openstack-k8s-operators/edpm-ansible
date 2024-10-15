@@ -65,3 +65,5 @@ edpm_neutron_metadata_tls_volumes:
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
   - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+
+edpm_neutron_metadata_healthcheck: true
