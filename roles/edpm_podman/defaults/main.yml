@@ -100,3 +100,6 @@ edpm_podman_kube_sa_path: /run/secrets/kubernetes.io/serviceaccount
 edpm_podman_kube_registry_url: default-route-openshift-image-registry.apps-crc.testing
 
 edpm_podman_auth_file: ~/.config/containers/auth.json
+
+edpm_podman_registries_conf: ""
+edpm_podman_disconnected_ocp: false
