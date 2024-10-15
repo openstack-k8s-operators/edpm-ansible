@@ -4,10 +4,13 @@
     - install
     - ovs
   become: true
-  ansible.builtin.package:
-    name: "{{ item }}"
+  ansible.builtin.dnf:
+    name: "{{ edpm_ovs_packages }}"
     state: present
-  loop: "{{ edpm_ovs_packages }}"
+  register: edpm_ovs_package_install
+  until: edpm_ovs_package_install is succeeded
+  retries: "{{ edpm_ovs_download_retries }}"
+  delay: "{{ edpm_ovs_download_delay }}"
 
 - name: Ensure ovs services are enabled and running
   tags:
