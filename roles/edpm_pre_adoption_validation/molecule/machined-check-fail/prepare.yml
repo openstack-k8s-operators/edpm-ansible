@@ -14,19 +14,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Validate hostname
-  when: edpm_pre_adoption_validation_hostname_enabled
-  ansible.builtin.include_tasks: hostname.yml
-
-- name: Validate kernel_args
-  when: edpm_pre_adoption_validation_kernel_args_enabled
-  ansible.builtin.include_tasks: kernel_args.yml
-
-- name: Validate tuned profile
-  when: edpm_pre_adoption_validation_tuned_enabled
-  ansible.builtin.include_tasks: tuned.yml
-
-- name: Validate systemd-container package
-  when: edpm_pre_adoption_validation_machined_enabled
-  ansible.builtin.include_tasks: tuned.yml
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps  # noqa: role-name[path]
+    - role: osp.edpm.env_data
+- name: Setup DUT
+  hosts: all
+  pre_tasks:
+  - name: Uninstall systemd-container, if present
+    become: true
+    ansible.builtin.package:
+      name: systemd-container
+      state: absent
+  tasks: []

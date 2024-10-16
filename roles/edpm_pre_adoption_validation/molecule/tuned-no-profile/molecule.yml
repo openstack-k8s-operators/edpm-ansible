@@ -19,6 +19,9 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
+          edpm_pre_adoption_validation_kernel_args_enabled: false
+          edpm_pre_adoption_validation_tuned_enabled: true
+          edpm_pre_adoption_validation_machined_enabled: false
         hosts:
           edpm-0:
             canonical_hostname: edpm-0.localdomain
