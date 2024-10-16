@@ -19,7 +19,7 @@
 # Service name this role manages
 edpm_telemetry_service_name: telemetry
 # Directory in the ansibleEE container
-edpm_telemetry_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_service_name }}"
+edpm_telemetry_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_service_name }}-power-monitoring"
 # Directory in the compute node
 edpm_telemetry_config_dest: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
 # Image to use for Ceilometer Ipmi
