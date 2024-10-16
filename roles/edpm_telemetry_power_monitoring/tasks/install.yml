@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -33,7 +33,7 @@
     group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: '0700'
   become: true
-  loop: "{{ edpm_telemetry_healthcheck_sources | dict2items }}"
+  loop: "{{ edpm_telemetry_power_monitoring_healthcheck_sources | dict2items }}"
 
 - name: Deploy ceilometer containers
   ansible.builtin.include_role:
@@ -41,29 +41,30 @@
   vars:
     edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "ceilometer_agent_compute.json"
+    edpm_container_manage_config_patterns: "ceilometer_agent_ipmi.json"
     edpm_container_manage_clean_orphans: false
 
-- name: Deploy node_exporter container
+- name: Deploy Kepler container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "node_exporter.json"
+    edpm_container_manage_config_patterns: "kepler.json"
     edpm_container_manage_clean_orphans: false
 
-- name: Restart node_exporter
+- name: Restart ceilometer ipmi
   become: true
   ansible.builtin.systemd:
     state: restarted
-    name: edpm_node_exporter.service
+    name: edpm_ceilometer_agent_ipmi.service
 
-- name: Restart ceilometer compute
+- name: Enable and start Kepler service
   become: true
   ansible.builtin.systemd:
+    name: edpm_kepler.service
+    enabled: true
     state: restarted
-    name: edpm_ceilometer_agent_compute.service
 
 - name: List deployed health check scripts
   ansible.builtin.find:
