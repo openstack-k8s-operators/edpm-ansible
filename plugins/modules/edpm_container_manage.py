@@ -317,6 +317,7 @@ class EdpmContainerManage:
             # NOTE(mwhahaha): converation from edpm format to podman as
             # systemd handles this restart config
             opts['restart'] = False
+            opts['state'] = 'created'
         if 'stop_grace_period' in opts:
             opts['stop_timeout'] = opts.pop('stop_grace_period')
 
