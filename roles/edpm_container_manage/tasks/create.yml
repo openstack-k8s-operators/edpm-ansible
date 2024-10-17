@@ -42,7 +42,7 @@
   vars:
     container_config: >
       {{ all_containers_hash | osp.edpm.dict_to_list |
-      osp.edpm.haskey(attribute='restart', value=['always', 'unless-stopped'], any=True) |
+      osp.edpm.haskey(attribute='restart', value=['always', 'unless-stopped'], any_value=True) |
       default([]) }}
   when:
     - edpm_container_manage_cli == 'podman'
