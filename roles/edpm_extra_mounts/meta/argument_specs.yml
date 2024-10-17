@@ -18,13 +18,13 @@ argument_specs:
       edpm_default_mounts:
         type: list
         default: [
-          {path: '/dev/hugepages1g', opts: 'pagesize=1G', fstype: 'hugetlbfs'},
+          {path: '/dev/hugepages1G', opts: 'pagesize=1G', fstype: 'hugetlbfs'},
           {path: /dev/hugepages2M, opts: 'pagesize=2M', fstype: 'hugetlbfs'}]
         description: |
           A list of mounts by default it is used to create hugepage mounts to be added to the edpm compute node.
           The list should be in the form of a list of dictionaries with the
           following keys:
-          - path: Path to the mount point eg. /dev/hugepages1g
+          - path: Path to the mount point eg. /dev/hugepages1G
           - opts: The options to set for the hugepage mount
           - fstype: The filesystem type by default hugetlbfs
           Optional keys:
