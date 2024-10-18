@@ -35,7 +35,7 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_metadata_agent_DEFAULT_metadata_workers:
-        default: '2'
+        default: '1'
         description: ''
         type: str
       edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host:
