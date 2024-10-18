@@ -4,6 +4,7 @@
     "restart": "always",
     "ports": ["8888:8888"],
     "command": "-v 2",
+    "recreate": true,
     "environment": {
         "ENABLE_GPU": "true",
         "ENABLE_MSR": "true",
