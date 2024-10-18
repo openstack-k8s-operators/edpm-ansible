@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # Copyright 2019 Red Hat, Inc.
 # All Rights Reserved.
 #
