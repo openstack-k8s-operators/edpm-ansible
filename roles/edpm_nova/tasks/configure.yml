@@ -183,7 +183,9 @@
     # openstack Caracal)
     # https://blueprints.launchpad.net/nova/+spec/libvirt-migrate-with-hostname-instead-of-ip
     - {"src": "02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
+    - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
   notify:
+    - Restart nova init
     - Restart nova
 
 - name: Create .ssh directory for the nova user on the host
