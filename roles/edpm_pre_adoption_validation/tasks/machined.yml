@@ -23,11 +23,13 @@
     state: present
   check_mode: true
   register: is_systemd_container_package
+  failed_when: false
 
 - name: Fail when systemd-container package is missing
   ansible.builtin.assert:
     that:
-      - is_systemd_container_package.changed
+      - not is_systemd_container_package.changed
+      - ("No package systemd-container available." not in is_systemd_container_package.failures | default([]))
     success_msg: Found installed systemd-container package
     fail_msg: |
       You must have the systemd-container package installed.
