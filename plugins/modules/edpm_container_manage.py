@@ -165,12 +165,6 @@ class EdpmContainerManage:
                             configs[override_config][mk] = mv
         return configs
 
-    def _get_version(self):
-        rc, out, err = self.module.run_command(['podman', b'--version'])
-        if rc != 0 or not out or 'version' not in out:
-            self.module.fail_json(msg='Can not determine podman version')
-        return out.split('versio')[1].strip()
-
     def _container_opts_defaults(self):
         default = {}
         opts = ARGUMENTS_SPEC_CONTAINER
@@ -347,10 +341,10 @@ class EdpmContainerManage:
 
             if success or retries <= 0:
                 break
-            else:
-                self.module.warn(f'Remaining retries for {name}: {retries}')
-                retries -= 1
-                time.sleep(retry_sleep)
+
+            self.module.warn(f'Remaining retries for {name}: {retries}')
+            retries -= 1
+            time.sleep(retry_sleep)
 
         return (name, success)
 

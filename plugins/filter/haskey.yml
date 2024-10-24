@@ -7,18 +7,18 @@ DOCUMENTATION:
   short_description: Retrun dictionaries with given key
   description: |
     This filter will take a list of dictionaries (data)
-    and will return the dictionnaries which have a certain key given
+    and will return the dictionaries which have a certain key given
     in parameter with 'attribute'.
     If reverse is set to True, the returned list won't contain dictionaries
     which have the attribute.
-    If any is set to True, the returned list will match any value in
+    If any_value is set to True, the returned list will match any value in
     the list of values for "value" parameter which has to be a list.
     If we want to exclude items which have certain key(s); these keys
     should be added to the excluded_keys list. If excluded_keys is used
     with reverse, we'll just exclude the items which had a key from
     excluded_keys in the reversed list.
 EXAMPLES: |
-  "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any=True) | default([]) }}"
+  "{{ all_containers_hash | osp.edpm.dict_to_list | osp.edpm.haskey(attribute='restart', value=['always','unless-stopped'], any_value=True) | default([]) }}"
 RETURN:
   _value:
     description: dictionaries containing key
