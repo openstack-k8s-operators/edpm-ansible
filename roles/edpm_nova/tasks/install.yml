@@ -19,6 +19,30 @@
   notify:
     - Restart nova
 
+- name: Render nova init container
+  tags:
+    - install
+    - nova
+  ansible.builtin.template:
+    src: "nova_compute_init.json.j2"
+    dest: "/var/lib/openstack/config/containers/nova_compute_init.json"
+    setype: "container_file_t"
+    mode: "0700"
+  notify:
+    - Restart nova init
+
+- name: Deploy nova init container
+  tags:
+    - install
+    - nova
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: 'nova_compute_init.json'
+    edpm_container_manage_clean_orphans: false
+
 - name: Deploy nova container
   tags:
     - install

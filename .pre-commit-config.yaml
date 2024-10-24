@@ -1,5 +1,17 @@
 ---
 repos:
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest tests/test_nova_statedir_ownership.py
+        language: python
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        additional_dependencies:
+          - pytest
+          - oslotest
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
