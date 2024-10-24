@@ -47,7 +47,7 @@ edpm_neutron_metadata_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
 
 # neutron-ovn-metadata-agent.conf
 edpm_neutron_metadata_agent_DEFAULT_debug: 'True'
-edpm_neutron_metadata_agent_DEFAULT_metadata_workers: '2'
+edpm_neutron_metadata_agent_DEFAULT_metadata_workers: '1'
 edpm_neutron_metadata_agent_DEFAULT_state_path: '/var/lib/neutron'
 edpm_neutron_metadata_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
 edpm_neutron_metadata_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
