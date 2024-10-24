@@ -29,4 +29,4 @@
 
 - name: Validate systemd-container package
   when: edpm_pre_adoption_validation_machined_enabled
-  ansible.builtin.include_tasks: tuned.yml
+  ansible.builtin.include_tasks: machined.yml
