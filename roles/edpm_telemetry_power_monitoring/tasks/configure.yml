@@ -88,16 +88,6 @@
     remote_src: "{{ telemetry_test | default('false') }}"
   loop: "{{ configs }}"
 
-- name: Add the config templates
-  ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    mode: 0644
-  with_fileglob:
-    - ../templates/*.j2
-  vars:
-    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
-
 - name: Check that tls.crt exists
   ansible.builtin.stat:
     path: "{{ edpm_telemetry_certs }}/tls.crt"
@@ -107,6 +97,17 @@
   ansible.builtin.stat:
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
+
+- name: Render container config templates
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: 0644
+  with_fileglob:
+    - ../templates/*.j2
+  vars:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
 - name: Configure tls if present
   when:
