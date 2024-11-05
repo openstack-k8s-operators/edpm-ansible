@@ -1,0 +1,61 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Ensure /var/log/journal exists
+  ansible.builtin.file:
+    path: /var/log/journal
+    state: directory
+    mode: '0750'
+    owner: root
+    group: root
+    setype: var_log_t
+  become: true
+
+- name: Gather services facts
+  ansible.builtin.service_facts:
+
+- name: Print cloud-init service status
+  ansible.builtin.debug:
+    var: ansible_facts.services["cloud-init.service"]
+
+- name: Check if cloud-init is disabled via kernel args
+  ansible.builtin.lineinfile:
+    path: /proc/cmdline
+    line: "cloud-init=disabled"
+    state: present
+  check_mode: true
+  register: cloud_init_vendor_disabled
+
+- name: Wait for cloud-init to finish, if enabled
+  community.general.cloud_init_data_facts:
+    filter: status
+  register: res
+  until: >
+    res.cloud_init_data_facts.status.v1.stage is defined and
+    not res.cloud_init_data_facts.status.v1.stage
+  retries: 50
+  delay: 5
+  when:
+    - not ansible_check_mode
+    - ansible_facts.services["cloud-init.service"] is defined
+    - ansible_facts.services["cloud-init.service"]["status"] != "not-found"
+    - ansible_facts.services["cloud-init.service"]["state"] == "running"
+    - ansible_facts.services["cloud-init.service"]["status"] == "enabled"
+    - cloud_init_vendor_disabled is changed
+  become: true
+
+- name: Execute bootstrap command
+  ansible.builtin.import_tasks: bootstrap_command.yml
