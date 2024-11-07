@@ -23,14 +23,20 @@
       ansible.builtin.getent:
         database: passwd
         key: "{{ item.name }}"
-  rescue:
+      register: user_check
+      ignore_errors: true
+
     - name: Ensure group is present on the host [ {{ item.name }} ]
       ansible.builtin.group:
         name: "{{ item.name }}"
         gid: "{{ item.gid }}"
         state: present
+      when: user_check is failed
+
     - name: Ensure user is present on the host [ {{ item.name }} ]
-      when: not (item.group_only | default(false))
+      when:
+        - not (item.group_only | default(false))
+        - user_check is failed
       ansible.builtin.user:
         name: "{{ item.name }}"
         uid: "{{ item.uid }}"
