@@ -31,6 +31,12 @@
         src: base-rules.yaml.j2
         mode: "0644"
 
+    - name: Write user rules snippet
+      ansible.builtin.copy:
+        dest: "{{ edpm_nftables_src }}/edpm-nftables-user-rules.yaml"
+        content: "{{ edpm_nftables_user_rules }}"
+        mode: "0644"
+
 - name: IPtables compatibility layout
   become: true
   block:
