@@ -1,1 +1,12 @@
-command: "/usr/share/ovn/scripts/ovn-ctl --no-monitor run_nb_ovsdb {% if edpm_ovn_bgp_agent_internal_tls_enable | bool %} -p /etc/pki/tls/private/ovndb.key -c /etc/pki/tls/certs/ovndb.crt -C /etc/pki/tls/certs/ovndbca.crt {% else %} --db-nb-create-insecure-remote=yes {% endif %}"
+command: >-
+  /usr/share/ovn/scripts/ovn-ctl --no-monitor run_nb_ovsdb
+  {% if edpm_ovn_bgp_agent_internal_tls_enable | bool %}
+  --ovn-nb-db-ssl-key=/etc/pki/tls/private/ovndb.key
+  --ovn-nb-db-ssl-cert=/etc/pki/tls/certs/ovndb.crt
+  --ovn-nb-db-ssl-ca-cert=/etc/pki/tls/certs/ovndbca.crt
+  --db-nb-cluster-local-proto=ssl
+  --db-nb-cluster-remote-proto=ssl
+  --db-nb-create-insecure-remote=no
+  {% else %}
+  --db-nb-create-insecure-remote=yes
+  {% endif %}
