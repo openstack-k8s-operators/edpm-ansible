@@ -3,7 +3,7 @@
   block:
     - name: Check if podman container exists {{ item }}
       become: true
-      ansible.builtin.command: podman ps -a --filter name={{item}} --format \{\{.Names\}\}
+      ansible.builtin.command: podman ps -a --filter name=^{{item}}\$ --format \{\{.Names\}\}
       register: containers
     - name: Assert podman container exists {{ item }}
       ansible.builtin.assert:
