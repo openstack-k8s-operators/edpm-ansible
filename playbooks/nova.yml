@@ -1,5 +1,4 @@
 ---
-
 - name: Deploy EDPM Nova storage infrastructure
   ansible.builtin.import_playbook: nova_storage.yml
 - name: Deploy EDPM Nova

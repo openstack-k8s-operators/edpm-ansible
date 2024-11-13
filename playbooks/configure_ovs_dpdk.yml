@@ -1,5 +1,6 @@
 ---
-
+- name: Check remote connections
+  ansible.builtin.import_playbook: connection.yml
 - name: Configure OvS DPDK
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear

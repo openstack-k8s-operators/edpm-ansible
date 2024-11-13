@@ -1,0 +1,9 @@
+---
+- name: Check remote connections
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
+  gather_facts: false
+  tasks:
+    - name: Check remote connections
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_nodes_validation
+        tasks_from: connection.yml
