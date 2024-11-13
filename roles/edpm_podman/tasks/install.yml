@@ -107,8 +107,8 @@
       when: not edpm_podman_disconnected_ocp
 
     - name: Write containers registries.conf
-      ansible.builtin.template:
-        src: "{{ edpm_podman_registries_conf }}"
+      ansible.builtin.copy:
+        content: "{{ edpm_podman_registries_conf }}"
         dest: /etc/containers/registries.conf
         owner: root
         group: root
