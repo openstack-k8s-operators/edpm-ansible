@@ -1,0 +1,36 @@
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as builder
+ARG PYV=3.12
+ARG REMOTE_SOURCE=.
+ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
+
+COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
+
+RUN $REMOTE_SOURCE_DIR/openstack_ansibleee/setup.sh
+
+RUN cd $REMOTE_SOURCE_DIR/openstack_ansibleee && \
+    ansible-galaxy collection install -U --timeout 120 -r ansibleee-requirements.yaml --collections-path "/usr/share/ansible/collections" && \
+    ansible-galaxy collection install -U --timeout 120 -r requirements.yaml --collections-path "/usr/share/ansible/collections" && \
+    ansible-galaxy collection install -U $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
+
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as runner
+
+ARG PYV=3.12
+ARG REMOTE_SOURCE=.
+ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
+
+COPY $REMOTE_SOURCE/openstack_ansibleee $REMOTE_SOURCE_DIR/openstack_ansibleee
+
+RUN $REMOTE_SOURCE_DIR/openstack_ansibleee/setup.sh
+
+COPY --from=builder /usr/share/ansible /usr/share/ansible
+COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
+COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /opt/builder/bin/edpm_entrypoint
+
+RUN sed '1d' /usr/local/lib/python${PYV}/site-packages/ansible_builder/_target_scripts/entrypoint >> /opt/builder/bin/edpm_entrypoint
+RUN mkdir /runner/project && chmod -R 775 /runner && chmod +x /opt/builder/bin/edpm_entrypoint && chmod ug+rw /etc/passwd
+
+ENV EDPM_SYSTEMROLES='fedora.linux_system_roles'
+WORKDIR /runner
+LABEL ansible-execution-environment=true
+ENTRYPOINT ["/opt/builder/bin/edpm_entrypoint", "dumb-init"]
