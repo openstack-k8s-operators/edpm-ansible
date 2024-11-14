@@ -55,7 +55,7 @@ jobs:
         image: openstack-ansibleee-runner
         tags: ${{ env.latesttag }} ${{ github.sha }} current-podified
         containerfiles: |
-          ./openstack_ansibleee/Dockerfile
+          ./openstack_ansibleee/Containerfile
 
     - name: Push openstack-ansibleee-runner To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
