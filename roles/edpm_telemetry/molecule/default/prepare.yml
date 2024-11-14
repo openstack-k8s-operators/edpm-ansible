@@ -34,6 +34,13 @@
         state: directory
         mode: "0775"
 
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+
     - name: Create /run/libvirt directory
       ansible.builtin.file:
         path: "/run/libvirt"
