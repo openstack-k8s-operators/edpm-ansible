@@ -49,7 +49,6 @@
     name: "{{ item }}"
     state: stopped
     enabled: false
-    masked: true
   register: result
   loop: "{{ tripleo_services }}"
   failed_when: false
@@ -73,6 +72,26 @@
   loop_control:
     loop_var: path
   when: edpm_remove_tripleo_unit_files
+
+- name: Mask tripleo services to make them unusable
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    masked: true
+  register: result_mask
+  loop: "{{ tripleo_services }}"
+  failed_when: false
+
+- name: Check for errors
+  ansible.builtin.fail:
+    msg: "Attempt to mask service {{ item.item }} failed with {{ item.msg }}"
+  loop: "{{ result_mask.results }}"
+  when: >
+    ('msg' in item) and
+    (item.msg != '') and
+    ("Could not find the requested service" not in item.msg)
 
 - name: Adopt (stop tracking) certs from tripleo
   tags:
