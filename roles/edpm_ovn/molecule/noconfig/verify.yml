@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     # we have to use shell to extract the values because openvswitch ansible
     # module doesn't seem to support dashes in key names, see:

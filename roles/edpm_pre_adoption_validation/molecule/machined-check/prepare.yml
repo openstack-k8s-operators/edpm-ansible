@@ -16,6 +16,7 @@
 
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps  # noqa: role-name[path]
       vars:
@@ -25,6 +26,7 @@
     - role: osp.edpm.env_data
 - name: Setup machined
   hosts: all
+  gather_facts: false
   pre_tasks:
     - name: Install systemd-container
       become: true
