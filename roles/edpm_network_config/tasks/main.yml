@@ -16,6 +16,7 @@
 
 - name: Configure network with network role from system roles [nmstate]
   when: edpm_network_config_tool == 'nmstate'
+  become: true
   block:
     - name: Install OVS NetworkManager plugin [nmstate]
       ansible.builtin.dnf:
