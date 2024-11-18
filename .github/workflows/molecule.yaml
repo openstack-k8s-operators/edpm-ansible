@@ -59,7 +59,7 @@ jobs:
     - name: Install ansible
       run: pip install ansible
     - name: Install collections
-      run: ansible-galaxy collection install -r requirements.yml
+      run: ansible-galaxy collection install --force -r requirements.yml
     - name: Install molecule deps
       run: pip install -r molecule-requirements.txt
     - name: Run molecule test
