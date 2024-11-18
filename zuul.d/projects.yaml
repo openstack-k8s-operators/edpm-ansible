@@ -19,6 +19,7 @@
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
+        - edpm-ansible-molecule-edpm_update
         - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
             dependencies:
@@ -56,3 +57,4 @@
               - ^roles/edpm_telemetry/*
               - ^roles/edpm_pre_adoption_validation/*
               - ^roles/edpm_tripleo_cleanup/*
+              - ^roles/edpm_update/*
