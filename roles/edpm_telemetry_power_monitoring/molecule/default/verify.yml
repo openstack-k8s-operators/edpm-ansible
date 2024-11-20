@@ -50,3 +50,6 @@
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
         - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
+
+    - name: ensure firewall is configured
+      ansible.builtin.include_tasks: "test-helpers/kepler.yaml"
