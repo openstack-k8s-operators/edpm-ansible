@@ -1,0 +1,26 @@
+---
+- name: Ensure firewall directory is present
+  become: true
+  ansible.builtin.file:
+    path: "/var/lib/edpm-config/firewall/"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Copy kepler firewall config
+  become: true
+  ansible.builtin.template:
+    src: "firewall.yaml.j2"
+    dest: "/var/lib/edpm-config/firewall/kepler.yaml"
+    mode: "0640"
+
+- name: Configure firewall for kepler
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nftables
+    tasks_from: "configure.yml"
+
+- name: Reload firewall for kepler
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nftables
+    tasks_from: "run.yml"
