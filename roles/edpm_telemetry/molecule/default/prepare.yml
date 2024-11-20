@@ -50,6 +50,15 @@
     - name: Create libvirt user
       command: groupadd libvirt
 
+    - name: Create firewall directory
+      become: true
+      ansible.builtin.file:
+        path: "/var/lib/edpm-config/firewall"
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
+
     - name: Create ceilometer.conf
       ansible.builtin.copy:
         dest: "{{ edpm_telemetry_config_src }}/ceilometer.conf"

@@ -22,3 +22,6 @@
 
 - name: Install telemetry metrics
   ansible.builtin.import_tasks: install.yml
+
+- name: Post-install
+  ansible.builtin.include_tasks: post-install.yml
