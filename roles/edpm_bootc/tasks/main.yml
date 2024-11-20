@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2024 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,13 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import edpm_bootc role
-  ansible.builtin.import_role:
-    name: edpm_bootc
+- name: Check for /bin/bootc
+  ansible.builtin.stat:
+    path: /bin/bootc
+  register: bootc_stat
 
-- name: Include download_cache tasks
-  ansible.builtin.include_tasks: download_cache.yml
-  when: not bootc
-
-- name: Import bootstrap tasks
-  ansible.builtin.import_tasks: bootstrap.yml
+- name: Set fact for bootc
+  ansible.builtin.set_fact:
+    bootc: "{{ bootc_stat.stat.exists }}"
