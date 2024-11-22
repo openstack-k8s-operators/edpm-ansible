@@ -18,9 +18,10 @@ tags:
   - RHOSP
   - EDPM
 dependencies:
-  ansible.posix: '*'
-  community.general: '*'
-  containers.podman: '*'
+  ansible.posix: "==1.2.0"
+  community.general: "==4.0.0"
+  containers.podman: "==1.10.4"
+  fedora.linux_system_roles: "==1.23.0"
 repository: https://github.com/openstack-k8s-operators/edpm-ansible
 documentation: https://openstack-k8s-operators.github.io/edpm-ansible
 homepage: https://github.com/openstack-k8s-operators/edpm-ansible
