@@ -7,15 +7,9 @@
     "recreate": true,
     "environment": {
         "ENABLE_GPU": "true",
-        "ENABLE_MSR": "true",
         "ENABLE_PROCESS_METRICS": "true",
         "EXPOSE_ESTIMATED_IDLE_POWER_METRICS": "true",
-        "EXPOSE_CONTAINER_METRICS": "true",
         "EXPOSE_VM_METRICS": "true",
-        "EXPOSE_HW_COUNTER_METRICS": "true",
-        "EXPOSE_IRQ_COUNTER_METRICS": "true",
-        "EXPOSE_BPF_METRICS": "true",
-        "EXPOSE_COMPONENT_POWER": "true",
         "LIBVIRT_METADATA_URI": "http://openstack.org/xmlns/libvirt/nova/1.1"
     },
 {% if edpm_telemetry_power_monitoring_healthcheck %}
@@ -25,13 +19,8 @@
     },
 {% endif %}
     "volumes": [
-        "/lib/modules:/lib/modules:ro",
-        "/usr/src:/usr/src",
+        "/run/libvirt:/run/libvirt:shared,ro",
         "/sys/:/sys/",
-        "/proc:/proc",
-        "/etc:/etc"
-    ],
-    "cap_add": [
-        "ALL"
+        "/proc:/proc"
     ]
 }
