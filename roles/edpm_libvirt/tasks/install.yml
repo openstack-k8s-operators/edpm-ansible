@@ -13,6 +13,7 @@
   delay: "{{ edpm_libvirt_download_delay }}"
   notify:
     - Restart libvirt
+  when: not edpm_use_bootc
 
 - name: Ensure monolithic libvirt and tcp socket activation is not enabled or running
   tags:
