@@ -18,6 +18,7 @@
   become: true
   ansible.builtin.dnf:
     name: yum-utils
+  when: not edpm_use_bootc
 
 - name: Check if reboot is required with needs-restarting
   ansible.builtin.command: needs-restarting -r
