@@ -44,7 +44,6 @@ jobs:
         - edpm_timezone
         - edpm_telemetry
         - edpm_telemetry_logging
-        - edpm_update
         - edpm_users
         - env_data
         - edpm_pre_adoption_validation

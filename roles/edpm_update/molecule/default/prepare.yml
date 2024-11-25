@@ -14,6 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Prepare test_deps
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
 
 - name: Prepare
   hosts: all

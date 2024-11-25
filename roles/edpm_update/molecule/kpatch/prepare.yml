@@ -14,20 +14,5 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-# All variables intended for modification should be placed in this file.
-
-# Toggle to enable/disable kpatch usage
-edpm_update_enable_kpatch: false
-
-# Toggle to enable/disable packages updates
-edpm_update_enable_packages_update: true
-
-# Toggle to enable/disable containers updates
-edpm_update_enable_containers_update: true
-
-# List of packages to exclude from the update
-edpm_update_exclude_packages:
-  - openvswitch
-
-edpm_update_running_services: "{{ edpm_service_types }}"
+- name: Run prepare playbook
+  ansible.builtin.import_playbook: ../default/prepare.yml

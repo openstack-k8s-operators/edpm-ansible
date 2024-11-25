@@ -9,9 +9,13 @@
 
 - name: Ensure openvswitch is excluded from bulk update
   ansible.builtin.set_fact:
-    edpm_update_exclude_packages: "{{ edpm_update_exclude_packages + ['openvswitch'] }}"
-  when:
-    "'openvswitch' not in edpm_update_exclude_packages"
+    _exclude_packages: >-
+      {{
+        _exclude_packages | default([]) +
+        edpm_update_exclude_packages +
+        ['openvswitch'] |
+        ansible.builtin.unique
+      }}
   tags:
     - edpm_update
 
@@ -21,6 +25,6 @@
     name: "*"
     state: latest
     update_cache: true
-    exclude: "{{ edpm_update_exclude_packages }}"
+    exclude: "{{ _exclude_packages }}"
   tags:
     - edpm_update

@@ -17,6 +17,10 @@
 
 # "edpm_update" will search for and load any operating system variable file
 
+- name: Apply kernel patch via kpatch
+  ansible.builtin.include_tasks: kpatch.yml
+  when: edpm_update_enable_kpatch
+
 - name: Update packages
   ansible.builtin.include_tasks: packages.yml
   when: edpm_update_enable_packages_update
