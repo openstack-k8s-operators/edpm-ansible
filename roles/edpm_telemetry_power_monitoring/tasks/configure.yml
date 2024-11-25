@@ -1,0 +1,130 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
+
+- name: Create ceilometer config dir
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    setype: "{{ item.setype | default('container_file_t') }}"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "{{ item.mode | default('0750') }}"
+    recurse: true
+  loop:
+    - {"path": "{{ edpm_telemetry_config_dest }}"}
+
+- name: Determine if cacert file exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
+  register: ca_bundle_stat_res
+
+- name: Render ceilometer config files
+  tags:
+    - edpm_telemetry_power_monitoring
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0644"
+  loop:
+    - {"src": "ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
+
+- name: Configure ceilometer user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42405 is matching with the uid and gid created by kolla in the ceilometer containers
+      - {"name": "ceilometer", "uid": "42405", "gid": "42405", "shell": "/sbin/nologin", "comment": "ceilometer user", "groups": "libvirt"}
+    edpm_users_extra_dirs: []
+
+- name: Gather ceilometer config files
+  ansible.builtin.set_fact:
+    configs:
+      - "src": "{{ edpm_telemetry_config_src }}/ceilometer.conf"
+        "dest": "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
+      - "src": "{{ edpm_telemetry_config_src }}/polling.yaml"
+        "dest": "{{ edpm_telemetry_config_dest }}/polling.yaml"
+
+- name: Check for custom.conf existence
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_config_src }}/custom.conf"
+  delegate_to: localhost
+  register: custom_ceilometer_conf
+
+- name: Append custom.conf to config files
+  ansible.builtin.set_fact:
+    configs: "{{ configs + [{'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf' }] }}"
+  when: custom_ceilometer_conf.stat.exists
+
+- name: Copy generated ceilometer configs
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default('0640') }}"
+    remote_src: "{{ telemetry_test | default('false') }}"
+  loop: "{{ configs }}"
+
+- name: Check that tls.crt exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.crt"
+  register: tls_crt_stat
+
+- name: Check that tls.key exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.key"
+  register: tls_key_stat
+
+- name: Render container config templates
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: 0644
+  with_fileglob:
+    - ../templates/*.j2
+  vars:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+- name: Configure tls if present
+  when:
+    - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
+  block:
+    - name: Change the owner of the crt
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_telemetry_certs }}/tls.crt"
+        mode: "0644"
+        owner: ceilometer
+        group: ceilometer
+
+    - name: Change the owner of the key
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_telemetry_certs }}/tls.key"
+        mode: "0644"
+        owner: ceilometer
+        group: ceilometer

@@ -12,10 +12,6 @@ argument_specs:
         type: bool
         default: false
 
-      test_deps_repo_version:
-        type: str
-        default: "{{ ansible_facts['distribution'] | lower }}{{ ansible_facts['distribution_major_version'] }}-master"
-
       test_deps_mirrors_file_path:
         type: str
         default: /etc/ci/mirror_info.sh

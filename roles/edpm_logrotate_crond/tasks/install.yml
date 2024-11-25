@@ -14,7 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Install cronie
   become: true
   ansible.builtin.dnf:
@@ -25,6 +24,25 @@
   retries: "{{ edpm_logrotate_crond_download_retries }}"
   delay: "{{ edpm_logrotate_crond_download_delay }}"
 
+- name: Gather SELinux fact if needed
+  when:
+    - "'selinux' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+      - "user_id"
+  when:
+    - ansible_user is undefined
+
 - name: Allow logrotate to read inside containers
   become: true
   ansible.posix.seboolean:
@@ -34,3 +52,23 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+
+- name: Create a directory for container health checks
+  ansible.builtin.file:
+    path: /var/lib/openstack/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0755'
+  become: true
+
+- name: Deploy logrotate_crond health check script
+  ansible.builtin.copy:
+    src: healthchecks/logrotate_crond/
+    dest: /var/lib/openstack/healthchecks/logrotate_crond
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true

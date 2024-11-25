@@ -153,3 +153,13 @@ argument_specs:
         type: str
         default: ~/.config/containers/auth.json
         description: Location of authentication file to be used by podman.
+      edpm_podman_registries_conf:
+        type: str
+        default: ""
+        description: "The registries.conf file contents that we will use on each node"
+      edpm_podman_disconnected_ocp:
+        type: bool
+        default: false
+        description: >
+          Indicates whether the OCP environment we're deployed from is using a custom
+          registry and specifically a ImageContentSourcePolicy to set registry mirrors.

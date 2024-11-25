@@ -21,6 +21,6 @@ fi
 source $LOCAL_MOLECULE_ENV/bin/activate
 
 pip install -r molecule-requirements.txt
-ansible-galaxy collection install -r requirements.yml
+ansible-galaxy collection install --force -r requirements.yml
 ./scripts/test_roles.py
 deactivate

@@ -15,12 +15,14 @@
 # under the License.
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
         - podman
 - name: Prepare
   hosts: all
+  gather_facts: false
   roles:
     - role: osp.edpm.env_data
   vars_files:
@@ -32,6 +34,13 @@
         state: directory
         mode: "0775"
 
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+
     - name: Create /run/libvirt directory
       ansible.builtin.file:
         path: "/run/libvirt"
@@ -40,6 +49,15 @@
 
     - name: Create libvirt user
       command: groupadd libvirt
+
+    - name: Create firewall directory
+      become: true
+      ansible.builtin.file:
+        path: "/var/lib/edpm-config/firewall"
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
 
     - name: Create ceilometer.conf
       ansible.builtin.copy:

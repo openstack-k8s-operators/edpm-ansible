@@ -16,6 +16,7 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   become: true
   pre_tasks:
     - name: Importing test_vars

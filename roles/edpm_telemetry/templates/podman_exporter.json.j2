@@ -1,0 +1,22 @@
+{
+    "image": "{{ edpm_telemetry_podman_exporter_image }}",
+    "restart": "always",
+    "recreate": true,
+    "user": "root",
+    "privileged": true,
+    "ports": ["9882:9882"],
+    "net": "host",
+    "environment": {
+        "OS_ENDPOINT_TYPE": "internal",
+        "CONTAINER_HOST": "unix:///run/podman/podman.sock"
+    },
+{% if edpm_telemetry_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck podman_exporter",
+        "mount": "/var/lib/openstack/healthchecks/podman_exporter"
+    },
+{% endif %}
+    "volumes": [
+       "/run/podman/podman.sock:/run/podman/podman.sock:rw,z"
+    ]
+}

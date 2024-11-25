@@ -35,7 +35,7 @@ argument_specs:
         description: ''
         type: str
       edpm_neutron_metadata_agent_DEFAULT_metadata_workers:
-        default: '2'
+        default: '1'
         description: ''
         type: str
       edpm_neutron_metadata_agent_DEFAULT_nova_metadata_host:
@@ -137,3 +137,8 @@ argument_specs:
           - /var/lib/openstack/certs/neutron_metadata_agent/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z
           - /var/lib/openstack/certs/neutron_metadata_agent/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z
+      edpm_neutron_metadata_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection

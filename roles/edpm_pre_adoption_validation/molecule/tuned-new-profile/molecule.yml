@@ -19,6 +19,9 @@ provisioner:
       all:
         vars:
           edpm_pre_adoption_validation_hostname_enabled: false
+          edpm_pre_adoption_validation_kernel_args_enabled: false
+          edpm_pre_adoption_validation_tuned_enabled: true
+          edpm_pre_adoption_validation_machined_enabled: false
           # This means the adoption config requests a different profile
           # that is configured so we expect the check to fail.
           edpm_tuned_profile: cpu-partitioning

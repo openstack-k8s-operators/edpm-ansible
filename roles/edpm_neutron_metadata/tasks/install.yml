@@ -13,6 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
 
 - name: Create persistent directories
   become: true
@@ -29,6 +37,16 @@
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn-metadata-proxy", "mode": "0755"}
     - {'path': "{{ edpm_neutron_metadata_agent_lib_dir }}/external/pids", "mode": "0755"}
+    - {'path': /var/lib/openstack/healthchecks, "mode": "0755"}
+
+- name: Gather SELinux fact if needed
+  when:
+    - "'selinux' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
   become: true
@@ -57,3 +75,13 @@
     mode: "0755"
   with_items:
     - {"src": "wrappers/kill-script.j2", "dest": "haproxy-kill"}
+
+- name: Deploy ovn_metadata_agent health check script
+  ansible.builtin.copy:
+    src: healthchecks/ovn_metadata_agent/
+    dest: /var/lib/openstack/healthchecks/ovn_metadata_agent
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true

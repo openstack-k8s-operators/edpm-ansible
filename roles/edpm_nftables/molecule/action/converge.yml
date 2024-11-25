@@ -17,19 +17,39 @@
 
 - name: Converge
   hosts: all
+  gather_facts: false
   become: true
   vars:
     edpm_nftables_src: /opt/edpm-firewall
+    edpm_nftables_user_rules: |
+          - rule_name: '011 testing user action'
+            rule:
+              proto: udp
+              dport: 1211
+              action: accept
+          - rule_name: '021 user string port-range check'
+            rule:
+              proto: udp
+              dport: 5555-5558
+              action: drop
   tasks:
     - name: Run role
       ansible.builtin.import_role:
         name: osp.edpm.edpm_nftables
         tasks_from: configure.yml
+
     - name: "Ensure we drop connections on TCP/1211"
       lineinfile:
         path: /etc/nftables/edpm-rules.nft
         line: 'add rule inet filter EDPM_INPUT tcp dport { 1211 } ct state new counter drop comment "010 testing action"'
       register: line_in_file
+
+    - name: "Ensure we accept connections on UDP/1211"
+      lineinfile:
+        path: /etc/nftables/edpm-rules.nft
+        line: 'add rule inet filter EDPM_INPUT udp dport { 1211 } ct state new counter accept comment "011 testing user action"'
+      register: udp_line_in_file
+      failed_when: udp_line_in_file.changed
 
     - name: Clean everything nftables related
       import_role:

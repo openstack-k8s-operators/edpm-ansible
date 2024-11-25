@@ -3,6 +3,7 @@
 - name: Configure OvS DPDK
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
   tasks:
     - name: Configure OvS DPDK configs
       ansible.builtin.import_role:

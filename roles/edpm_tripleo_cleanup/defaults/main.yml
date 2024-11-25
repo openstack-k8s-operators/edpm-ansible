@@ -37,3 +37,4 @@ edpm_service_removal_skip_list:
   - tripleo_swift_object_replicator.service
   - tripleo_swift_object_server.service
   - tripleo_swift_object_updater.service
+  - tripleo-container-shutdown.service

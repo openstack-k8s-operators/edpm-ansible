@@ -24,3 +24,7 @@ argument_specs:
         type: bool
         default: true
         description: Whether the tuned profile checks are executed.
+      edpm_pre_adoption_validation_machined_enabled:
+        type: bool
+        default: true
+        description: Whether the systemd-container package checks are executed.

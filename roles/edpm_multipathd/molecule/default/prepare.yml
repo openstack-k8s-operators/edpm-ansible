@@ -14,12 +14,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Prepare
+- name: Prepare test deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
         - iproute
         - iscsi-initiator-utils
         - podman
-    - role: env_data
+- name: Prepare
+  hosts: all
+  roles:
+    - role: osp.edpm.env_data
+  tasks:
+    - name: set /etc/localtime
+      become: true
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link

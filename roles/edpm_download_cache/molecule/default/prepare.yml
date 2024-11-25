@@ -16,6 +16,7 @@
 
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true

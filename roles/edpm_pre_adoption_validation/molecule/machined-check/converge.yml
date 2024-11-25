@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Converge
+      block:
+        - name: "Include role"
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_pre_adoption_validation

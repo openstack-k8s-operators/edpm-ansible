@@ -165,12 +165,6 @@ class EdpmContainerManage:
                             configs[override_config][mk] = mv
         return configs
 
-    def _get_version(self):
-        rc, out, err = self.module.run_command(['podman', b'--version'])
-        if rc != 0 or not out or 'version' not in out:
-            self.module.fail_json(msg='Can not determine podman version')
-        return out.split('versio')[1].strip()
-
     def _container_opts_defaults(self):
         default = {}
         opts = ARGUMENTS_SPEC_CONTAINER
@@ -303,7 +297,12 @@ class EdpmContainerManage:
         if 'environment' in opts:
             opts['env'] = opts.pop('environment')
         if 'healthcheck' in opts and isinstance(opts['healthcheck'], dict):
-            opts['healthcheck'] = opts['healthcheck'].get('test', None)
+            tst = opts['healthcheck'].get('test', None)
+            # add healthcheck script to the list of volume mounts
+            mnt = opts['healthcheck'].get('mount', None)
+            if mnt is not None:
+                opts['volume'].append(f'{mnt}:{os.path.dirname(tst)}:ro,z')
+            opts['healthcheck'] = tst
         if 'check_interval' in opts:
             opts['healthcheck_interval'] = opts.pop('check_interval')
         if 'remove' in opts:
@@ -312,6 +311,7 @@ class EdpmContainerManage:
             # NOTE(mwhahaha): converation from edpm format to podman as
             # systemd handles this restart config
             opts['restart'] = False
+            opts['state'] = 'created'
         if 'stop_grace_period' in opts:
             opts['stop_timeout'] = opts.pop('stop_grace_period')
 
@@ -341,10 +341,10 @@ class EdpmContainerManage:
 
             if success or retries <= 0:
                 break
-            else:
-                self.module.warn(f'Remaining retries for {name}: {retries}')
-                retries -= 1
-                time.sleep(retry_sleep)
+
+            self.module.warn(f'Remaining retries for {name}: {retries}')
+            retries -= 1
+            time.sleep(retry_sleep)
 
         return (name, success)
 

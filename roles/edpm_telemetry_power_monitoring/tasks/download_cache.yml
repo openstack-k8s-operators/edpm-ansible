@@ -1,0 +1,28 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ item }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
+  loop:
+    - "{{ edpm_telemetry_ceilometer_ipmi_image }}"
+    - "{{ edpm_telemetry_kepler_image }}"
+  become: true
+  register: edpm_telemetry_images_download
+  until: edpm_telemetry_images_download.failed == false
+  retries: "{{ edpm_telemetry_image_download_retries }}"
+  delay: "{{ edpm_telemetry_image_download_delay }}"

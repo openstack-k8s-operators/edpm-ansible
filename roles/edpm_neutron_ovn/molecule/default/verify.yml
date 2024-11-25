@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  gather_facts: false
   tasks:
     - name: Include defaults/main.yml
       ansible.builtin.include_vars: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"

@@ -14,128 +14,61 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Create a directory for container health checks
+  ansible.builtin.file:
+    path: /var/lib/openstack/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0755'
+  become: true
+
+- name: Deploy telemetry health check scripts
+  ansible.builtin.copy:
+    src: "healthchecks/{{ item.value }}/"
+    dest: "/var/lib/openstack/healthchecks/{{ item.key }}"
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true
+  loop: "{{ edpm_telemetry_healthcheck_sources | dict2items }}"
+
 - name: Deploy ceilometer containers
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
     edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "ceilometer_*.json"
+    edpm_container_manage_config_patterns: "ceilometer_agent_compute.json"
     edpm_container_manage_clean_orphans: false
 
-- name: Check that tls.crt exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.crt"
-  register: tls_crt_stat
+- name: Deploy node_exporter container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "node_exporter.json"
+    edpm_container_manage_clean_orphans: false
 
-- name: Check that tls.key exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.key"
-  register: tls_key_stat
-
-- name: Deploy node_exporter container with TLS enabled if certs are present
-  become: true
-  containers.podman.podman_container:
-    image: "{{ edpm_telemetry_node_exporter_image }}"
-    name: node_exporter
-    state: present
-    recreate: true
-    privileged: true
-    ports:
-      - "9100:9100"
-    command:
-      - "--web.config.file=/etc/node_exporter/node_exporter.yaml"
-      - "--collector.systemd"
-      - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
-      # Disable collectors which we don't need
-      - "--web.disable-exporter-metrics"
-      - "--no-collector.dmi"
-      - "--no-collector.entropy"
-      - "--no-collector.thermal_zone"
-      - "--no-collector.time"
-      - "--no-collector.timex"
-      - "--no-collector.uname"
-      - "--no-collector.stat"
-      - "--no-collector.hwmon"
-      - "--no-collector.os"
-      - "--no-collector.selinux"
-      - "--no-collector.textfile"
-      - "--no-collector.powersupplyclass"
-      - "--no-collector.pressure"
-      - "--no-collector.rapl"
-    volumes:
-      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw"
-      - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
-      - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
-  when:
-    - tls_key_stat.stat.exists and tls_crt_stat.stat.exists
-
-- name: Deploy node_exporter container with TLS disabled if there are no certs present
-  become: true
-  containers.podman.podman_container:
-    image: "{{ edpm_telemetry_node_exporter_image }}"
-    name: node_exporter
-    state: present
-    recreate: true
-    privileged: true
-    ports:
-      - "9100:9100"
-    command:
-      - "--collector.systemd"
-      - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
-      # Disable collectors which we don't need
-      - "--web.disable-exporter-metrics"
-      - "--no-collector.dmi"
-      - "--no-collector.entropy"
-      - "--no-collector.thermal_zone"
-      - "--no-collector.time"
-      - "--no-collector.timex"
-      - "--no-collector.uname"
-      - "--no-collector.stat"
-      - "--no-collector.hwmon"
-      - "--no-collector.os"
-      - "--no-collector.selinux"
-      - "--no-collector.textfile"
-      - "--no-collector.powersupplyclass"
-      - "--no-collector.pressure"
-      - "--no-collector.rapl"
-    volumes:
-      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
-  when:
-    - not tls_key_stat.stat.exists or not tls_crt_stat.stat.exists
-
-- name: Create systemd service file for node_exporter
-  become: true
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/edpm_node_exporter.service
-    mode: "0644"
-    content: |
-      [Unit]
-      Description=node_exporter container
-      Wants=network-online.target
-      After=network-online.target
-      RequiresMountsFor=%t/containers
-
-      [Service]
-      Restart=always
-      ExecStart=/usr/bin/podman start node_exporter
-      ExecReload=/usr/bin/podman kill --signal HUP node_exporter
-      ExecStop=/usr/bin/podman stop node_exporter
-      ExecStopPost=/usr/bin/podman stop node_exporter
-      SuccessExitStatus=0 137 142 143
-      TimeoutStopSec=84
-      KillMode=control-group
-      Type=forking
-      RestartSec=60
-
-      [Install]
-      WantedBy=multi-user.target
-
-- name: Enable node_exporter
-  become: true
-  ansible.builtin.systemd:
-    enabled: true
-    name: edpm_node_exporter.service
+- name: Deploy podman_exporter container
+  block:
+    - name: Start podman.socket service
+      ansible.builtin.systemd_service:
+        name: podman.socket
+        state: started
+        enabled: true
+      become: true
+    - name: Start podman_exporter container
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_manage
+      vars:
+        edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+        edpm_container_manage_healthcheck_disabled: true
+        edpm_container_manage_config_patterns: "podman_exporter.json"
+        edpm_container_manage_clean_orphans: false
 
 - name: Restart node_exporter
   become: true
@@ -143,14 +76,28 @@
     state: restarted
     name: edpm_node_exporter.service
 
+- name: Restart podman_exporter
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_podman_exporter.service
+
 - name: Restart ceilometer compute
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: edpm_ceilometer_agent_compute.service
 
-- name: Restart ceilometer ipmi
+- name: List deployed health check scripts
+  ansible.builtin.find:
+    paths: /var/lib/openstack/healthchecks/
+    file_type: directory
+  register: deployed_hc
   become: true
-  ansible.builtin.systemd:
-    state: restarted
-    name: edpm_ceilometer_agent_ipmi.service
+
+- name: Correct health check scripts ownership based on container user IDs
+  ansible.builtin.include_tasks:
+    file: chown_healthcheck.yml
+  loop: "{{ deployed_hc.files }}"
+  loop_control:
+    loop_var: hc_script

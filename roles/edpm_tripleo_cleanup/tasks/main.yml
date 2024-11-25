@@ -21,6 +21,9 @@
   ansible.builtin.systemd_service:
     daemon_reload: true
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
 - name: Set list of tripleo services
   tags:
     - adoption
@@ -36,7 +39,7 @@
       ansible.builtin.service_facts:
     - name: Filter for tripleo services and skip the ones in skip list
       ansible.builtin.set_fact:
-        tripleo_services: "{{ ansible_facts.services.keys() | select('contains', 'tripleo') | reject('in', edpm_service_removal_skip_list ) }}"
+        tripleo_services: "{{ ansible_facts.services.keys() | select('contains', 'tripleo') | reject('in', edpm_service_removal_skip_list) }}"
 
 - name: Stop and disable tripleo services
   tags:
@@ -46,7 +49,6 @@
     name: "{{ item }}"
     state: stopped
     enabled: false
-    masked: true
   register: result
   loop: "{{ tripleo_services }}"
   failed_when: false
@@ -63,12 +65,33 @@
 - name: Remove unit files
   tags:
     - adoption
-  become: true
-  ansible.builtin.file:
-    path: /usr/lib/systemd/system/{{ item }}.service
-    state: absent
-  loop: "{{ tripleo_services }}"
+  ansible.builtin.include_tasks: remove_unit_files.yml
+  loop:
+    - /usr/lib/systemd/system
+    - /etc/systemd/system
+  loop_control:
+    loop_var: path
   when: edpm_remove_tripleo_unit_files
+
+- name: Mask tripleo services to make them unusable
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    masked: true
+  register: result_mask
+  loop: "{{ tripleo_services }}"
+  failed_when: false
+
+- name: Check for errors
+  ansible.builtin.fail:
+    msg: "Attempt to mask service {{ item.item }} failed with {{ item.msg }}"
+  loop: "{{ result_mask.results }}"
+  when: >
+    ('msg' in item) and
+    (item.msg != '') and
+    ("Could not find the requested service" not in item.msg)
 
 - name: Adopt (stop tracking) certs from tripleo
   tags:

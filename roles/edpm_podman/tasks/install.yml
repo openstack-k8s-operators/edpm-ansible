@@ -28,7 +28,7 @@
 
     - name: Ensure we get the ansible interfaces facts
       when:
-        - ansible_facts['interfaces'] is undefined
+        - "'interfaces' not in ansible_facts"
       ansible.builtin.setup:
         gather_subset:
           - '!all'
@@ -104,6 +104,17 @@
         group: root
         setype: etc_t
         mode: "0644"
+      when: not edpm_podman_disconnected_ocp
+
+    - name: Write containers registries.conf
+      ansible.builtin.copy:
+        content: "{{ edpm_podman_registries_conf }}"
+        dest: /etc/containers/registries.conf
+        owner: root
+        group: root
+        setype: etc_t
+        mode: "0644"
+      when: edpm_podman_disconnected_ocp
 
     - name: Write containers.conf
       community.general.ini_file:

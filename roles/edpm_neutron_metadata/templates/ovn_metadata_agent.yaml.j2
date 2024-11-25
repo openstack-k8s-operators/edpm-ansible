@@ -17,6 +17,11 @@ user: root
 restart: always
 depends_on:
   - openvswitch.service
+{% if edpm_neutron_metadata_healthcheck %}
+healthcheck:
+        test: /openstack/healthcheck
+        mount: /var/lib/openstack/healthchecks/ovn_metadata_agent
+{% endif %}
 volumes: {{ edpm_neutron_metadata_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

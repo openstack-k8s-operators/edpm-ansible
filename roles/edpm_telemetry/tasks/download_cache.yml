@@ -20,7 +20,6 @@
     auth_file: "{{ edpm_download_cache_podman_auth_file }}"
   loop:
     - "{{ edpm_telemetry_ceilometer_compute_image }}"
-    - "{{ edpm_telemetry_ceilometer_ipmi_image }}"
     - "{{ edpm_telemetry_node_exporter_image }}"
   become: true
   register: edpm_telemetry_images_download

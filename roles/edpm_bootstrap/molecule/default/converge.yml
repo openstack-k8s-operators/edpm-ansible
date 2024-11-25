@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  gather_facts: false
   tasks:
     - name: "Download required role packages"
       ansible.builtin.include_role:

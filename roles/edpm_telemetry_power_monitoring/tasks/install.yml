@@ -1,0 +1,81 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Create a directory for container health checks
+  ansible.builtin.file:
+    path: /var/lib/openstack/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0755'
+  become: true
+
+- name: Deploy telemetry health check scripts
+  ansible.builtin.copy:
+    src: "healthchecks/{{ item.value }}/"
+    dest: "/var/lib/openstack/healthchecks/{{ item.key }}"
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true
+  loop: "{{ edpm_telemetry_power_monitoring_healthcheck_sources | dict2items }}"
+
+- name: Deploy ceilometer containers
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "ceilometer_agent_ipmi.json"
+    edpm_container_manage_clean_orphans: false
+
+- name: Deploy Kepler container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "kepler.json"
+    edpm_container_manage_clean_orphans: false
+
+- name: Restart ceilometer ipmi
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm_ceilometer_agent_ipmi.service
+
+- name: Enable and start Kepler service
+  become: true
+  ansible.builtin.systemd:
+    name: edpm_kepler.service
+    enabled: true
+    state: restarted
+
+- name: List deployed health check scripts
+  ansible.builtin.find:
+    paths: /var/lib/openstack/healthchecks/
+    file_type: directory
+  register: deployed_hc
+  become: true
+
+- name: Correct health check scripts ownership based on container user IDs
+  ansible.builtin.include_tasks:
+    file: chown_healthcheck.yml
+  loop: "{{ deployed_hc.files }}"
+  loop_control:
+    loop_var: hc_script

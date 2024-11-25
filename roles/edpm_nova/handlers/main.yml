@@ -19,3 +19,10 @@
     state: restarted
     name: "edpm_nova_compute.service"
   listen: "Restart nova"
+
+- name: Restart nova init container
+  become: true
+  containers.podman.podman_container:
+    name: nova_compute_init
+    state: started
+  listen: "Restart nova init"

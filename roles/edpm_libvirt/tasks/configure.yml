@@ -7,6 +7,15 @@
   no_log: true
   when: edpm_libvirt_tls_certs_enabled|bool
 
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
+
 - name: Create libvirt config dir
   tags:
     - configure

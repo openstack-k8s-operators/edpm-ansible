@@ -1,0 +1,55 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Verify ceilometer
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  vars_files:
+    - ../../defaults/main.yml
+  tasks:
+    - name: ensure expected directories exist
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      loop:
+        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_ipmi.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-ipmi.json"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
+        - "{{ edpm_telemetry_config_dest }}/polling.yaml"
+
+    - name: ensure podman container exists and are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+      loop:
+        - "ceilometer_agent_ipmi"
+        - "kepler"
+
+    - name: ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "edpm_ceilometer_agent_ipmi.service" }
+        - { "name": "edpm_kepler.service" }
+
+    - name: ensure kolla_set_configs copied the expected files and started the correct binary
+      become: true
+      ansible.builtin.shell: |
+        podman logs ceilometer_agent_ipmi 2>&1 | grep "{{item}}" > /dev/null
+      loop:
+        - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
+        - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
+        - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
+        - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
+
+    - name: ensure firewall is configured
+      ansible.builtin.include_tasks: "test-helpers/kepler.yaml"

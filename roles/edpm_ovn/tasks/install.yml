@@ -13,6 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
 
 - name: Create persistent directories
   become: true
@@ -26,6 +34,17 @@
   loop:
     - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
     - {'path': /var/lib/openvswitch/ovn, "owner": "openvswitch", "group": "openvswitch"}
+    - {'path': /var/lib/openstack/healthchecks, 'mode': '0755'}
+
+
+- name: Gather SELinux fact if needed
+  when:
+    - "'selinux' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
 
 - name: Enable virt_sandbox_use_netlink for healthcheck
   become: true
@@ -36,3 +55,13 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+
+- name: Deploy ovn_controller health check script
+  ansible.builtin.copy:
+    src: healthchecks/ovn_controller/
+    dest: /var/lib/openstack/healthchecks/ovn_controller
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true

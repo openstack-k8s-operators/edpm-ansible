@@ -1,6 +1,7 @@
 ---
 - name: Verify ceilometer
   hosts: all
+  gather_facts: false
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   vars_files:
@@ -10,9 +11,7 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
         - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_compute.json"
-        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_ipmi.json"
         - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json"
-        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-ipmi.json"
         - "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
         - "{{ edpm_telemetry_config_dest }}/polling.yaml"
 
@@ -20,15 +19,13 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
         - "ceilometer_agent_compute"
-        - "ceilometer_agent_ipmi"
         - "node_exporter"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - {"name": "edpm_ceilometer_agent_compute.service"}
-        - {"name": "edpm_ceilometer_agent_ipmi.service"}
-        - {"name": "edpm_node_exporter.service"}
+        - { "name": "edpm_ceilometer_agent_compute.service" }
+        - { "name": "edpm_node_exporter.service" }
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
@@ -38,17 +35,6 @@
         - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
         - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
-        - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
-
-
-    - name: ensure kolla_set_configs copied the expected files and started the correct binary
-      become: true
-      ansible.builtin.shell: |
-        podman logs ceilometer_agent_ipmi 2>&1 | grep "{{item}}" > /dev/null
-      loop:
-        - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
-        - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
-        - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
         - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
 
     - name: ensure that the correcty binary started with TLS

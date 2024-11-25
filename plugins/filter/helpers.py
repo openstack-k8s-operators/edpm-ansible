@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # Copyright 2019 Red Hat, Inc.
 # All Rights Reserved.
 #
@@ -118,16 +118,16 @@ class FilterModule:
 
         return to_delete
 
-    def haskey(self, data, attribute, value=None, reverse=False, any=False,
+    def haskey(self, data, attribute, value=None, reverse=False, any_value=False,
                excluded_keys=[]):
         """Return dict data with a specific key.
 
         This filter will take a list of dictionaries (data)
-        and will return the dictionnaries which have a certain key given
+        and will return the dictionaries which have a certain key given
         in parameter with 'attribute'.
         If reverse is set to True, the returned list won't contain dictionaries
         which have the attribute.
-        If any is set to True, the returned list will match any value in
+        If any_value is set to True, the returned list will match any value in
         the list of values for "value" parameter which has to be a list.
         If we want to exclude items which have certain key(s); these keys
         should be added to the excluded_keys list. If excluded_keys is used
@@ -151,11 +151,11 @@ class FilterModule:
                     if value is None:
                         return_list.append(i)
                     else:
-                        if isinstance(value, list) and any:
+                        if isinstance(value, list) and any_value:
                             if v[attribute] in value:
                                 return_list.append({k: v})
-                        elif any:
-                            raise TypeError("value has to be a list if any is "
+                        elif any_value:
+                            raise TypeError("value has to be a list if any_value is "
                                             "set to True.")
                         else:
                             if v[attribute] == value:

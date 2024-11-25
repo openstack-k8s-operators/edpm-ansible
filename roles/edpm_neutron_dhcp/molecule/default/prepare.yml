@@ -15,7 +15,7 @@
 # under the License.
 - name: Ensure that {{ lookup('env', 'USER') }} user exists in the fake node
   hosts: fake-networker-1
-  gather_facts: true
+  gather_facts: false
   tasks:
       - ansible.builtin.user:
           name: "{{ lookup('env', 'USER') }}"
@@ -23,6 +23,7 @@
 
 - name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_setup_edpm: true
@@ -33,7 +34,7 @@
 
 - name: Prepare
   hosts: all
-  gather_facts: true
+  gather_facts: false
   tasks:
     - include_role:
         name: osp.edpm.env_data

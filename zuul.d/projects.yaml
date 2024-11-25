@@ -5,6 +5,7 @@
       - podified-multinode-edpm-baremetal-pipeline
     github-check:
       jobs:
+        - edpm-ansible-tempest-multinode
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_podman
         - edpm-ansible-molecule-edpm_module_load
@@ -17,6 +18,7 @@
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
+        - edpm-ansible-molecule-edpm_telemetry_power_monitoring
         - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
             dependencies:
@@ -35,6 +37,7 @@
               - ^playbooks/libvirt.yml
               - ^playbooks/ovn.yml
               - ^playbooks/neutron_metadata.yml
+              - ^playbooks/telemetry.yml
               - ^roles/edpm_bootstrap/*
               - ^roles/edpm_download_cache/*
               - ^roles/edpm_network_config/*
@@ -50,5 +53,6 @@
               - ^roles/edpm_libvirt/*
               - ^roles/edpm_ovn/*
               - ^roles/edpm_neutron_metadata/*
+              - ^roles/edpm_telemetry/*
               - ^roles/edpm_pre_adoption_validation/*
               - ^roles/edpm_tripleo_cleanup/*

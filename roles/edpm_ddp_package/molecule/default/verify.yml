@@ -1,6 +1,7 @@
 ---
 - name: Verify
   hosts: all
+  gather_facts: false
   vars:
     ddp_module_file: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/test-data/ddp/ice.pkg"
   tasks:

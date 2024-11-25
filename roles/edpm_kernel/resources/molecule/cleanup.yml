@@ -17,6 +17,7 @@
 
 - name: Restore environment
   hosts: all
+  gather_facts: false
   tasks:
     - name: Restore the default grub file
       become: true

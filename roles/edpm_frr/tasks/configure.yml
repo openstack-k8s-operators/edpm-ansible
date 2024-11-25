@@ -31,12 +31,23 @@
     - name: Construct FRR uplink interfaces from os-net-config mappings
       ansible.builtin.set_fact:
         edpm_frr_bgp_uplinks_mapped: "{{ edpm_frr_bgp_uplinks | map('extract', iface_map) | list }}"
-  rescue:
+      register: check_edpm_frr_bgp_uplinks_mapped
+      ignore_errors: true
+
     - name: Failed to construct FRR uplink interfaces
       ansible.builtin.fail:
         msg: |
           Failed to map at least one interface from {{ edpm_frr_bgp_uplinks }} to {{ iface_map }}.
           Please check value of Ansible variable edpm_frr_bgp_uplinks.
+      when: check_edpm_frr_bgp_uplinks_mapped is failed
+
+- name: Gather facts if they don't exist
+  when: "'system' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "system"
 
 - name: Configure FRR
   ansible.builtin.template:
