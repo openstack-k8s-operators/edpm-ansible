@@ -36,7 +36,7 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_standalone_service: ovn_controller
+    edpm_container_standalone_service: edpm-compute@ovn_controller
     edpm_container_standalone_container_defs:
       ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
