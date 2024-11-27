@@ -22,6 +22,8 @@
         path: "/var/lib/openstack"
         mode: 0755
         state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         setype: "container_file_t"
 
     - name: Create /var/lib/openstack/cron
