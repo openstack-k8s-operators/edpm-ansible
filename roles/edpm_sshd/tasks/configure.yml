@@ -74,10 +74,15 @@
          {% if edpm_sshd_banner_enabled %}
          {% set _ = edpm_sshd_server_options.__setitem__('Banner', '/etc/issue') %}
          {% endif %}
-         {% if edpm_sshd_motd_enabled %}
-         {% set _ = edpm_sshd_server_options.__setitem__('PrintMotd', 'yes') %}
-         {% endif %}
          {{ edpm_sshd_server_options }}
+
+    - name: Set sshd motd when enabled
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/sshd
+        regexp: "^session.*optional.*pam_motd.so"
+        line: "session    optional     pam_motd.so motd=/etc/motd"
+        state: present
+      when: edpm_sshd_motd_enabled
 
     - name: Adjust ssh server configuration
       become: true
