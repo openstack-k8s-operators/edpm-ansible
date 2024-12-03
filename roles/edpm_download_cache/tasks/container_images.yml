@@ -9,7 +9,7 @@
     - download_cache
 
 - name: Download images for edpm_iscsid role
-  when: '"nova-storage" in edpm_download_cache_running_services'
+  when: '"nova" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_iscsid
     tasks_from: download_cache.yml
@@ -62,7 +62,7 @@
     - download_cache
 
 - name: Download images for edpm_multipathd role
-  when: '"nova-storage" in edpm_download_cache_running_services'
+  when: '"nova" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
     name: osp.edpm.edpm_multipathd
     tasks_from: download_cache.yml
