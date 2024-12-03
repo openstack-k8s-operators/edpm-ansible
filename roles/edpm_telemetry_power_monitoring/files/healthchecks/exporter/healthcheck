@@ -15,4 +15,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-ss -lnp | grep $1 || netstat -plnt | grep -i listen | grep $1
+URL="http://0.0.0.0:8888"
+
+# Get the HTTP status code using curl
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+# If the HTTP status code is not 200, exit with a non-zero code
+if [ "$HTTP_CODE" -ne 200 ]; then
+          echo "$1 Health check failed: HTTP status code $HTTP_CODE"
+            exit 1
+fi
+
+echo "$1 Health check passed: HTTP status code $HTTP_CODE"
+exit 0
