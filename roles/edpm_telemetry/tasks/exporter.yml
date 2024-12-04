@@ -1,0 +1,26 @@
+---
+
+- name: Deploy health check script
+  ansible.builtin.copy:
+    src: "healthchecks/{{ edpm_telemetry_healthcheck_sources[exporter] }}/"
+    dest: "/var/lib/openstack/healthchecks/{{ exporter }}"
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'
+  become: true
+
+- name: Deploy exporter container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: "{{ exporter }}.json"
+    edpm_container_manage_clean_orphans: false
+
+- name: Restart exporter container
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: "edpm_{{ exporter }}.service"

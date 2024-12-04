@@ -49,3 +49,7 @@ edpm_telemetry_healthcheck_sources:
 #  kepler: exporter
 # If telemetry services should have health checks enabled
 edpm_telemetry_healthcheck: true
+# List of ceilometer agents to be stopped during EDPM adoption
+edpm_telemetry_enabled_exporters:
+  - ceilometer_agent_compute
+  - node_exporter

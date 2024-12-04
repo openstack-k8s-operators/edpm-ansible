@@ -58,3 +58,7 @@ argument_specs:
           Contains information about distribution of container health check scripts.
           Keys state for container names and value is name of a script directory
           from module's files directory.
+      edpm_telemetry_enabled_exporters:
+        type: list
+        required: true
+        description: "List of exporters to be deployed in the compute node"
