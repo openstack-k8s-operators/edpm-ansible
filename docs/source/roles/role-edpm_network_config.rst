@@ -1,10 +1,35 @@
-=============================
+============================
 Role - edpm_network_config
-=============================
+============================
 
-.. note::
-  When the `edpm_network_config_tool` is set to `'os-net-config'`, the `ctlplane_gateway_ip` and `ctlplane_ip`
-  variables must be set on the host.
+Usage
+~~~~~
 
-.. include::
-  ../collections/osp/edpm/edpm_network_config_role.rst
+This Ansible role does the following tasks:
+
+* Read the configured edpm_network_config_tool
+  The following choices can be used to configure the host network:
+  - nmstate, i.e based on systemroles.network
+  - os-net-config, i.e based on custom tasks
+  os-net-config is the default tool for this role
+
+* For os-net-config option, this role prepares the host by
+  - creating necessary folders and files for rendering network
+  templates and NIC mappings (optional)
+  - Checks for the presence of required RPMS
+  - Uses "provider" ifcfg/nmstate based on flag "edpm_network_config_nmstate"
+
+Here is an example playbook to run os-net-config tool:
+
+.. code-block:: YAML
+
+    - name: Apply network_config
+      block:
+        - name: Configure host network with edpm-ansible
+          include_role:
+            name: edpm_network_config
+          vars:
+            edpm_network_config_template: "{{ nic_config_file }}"
+
+.. literalinclude:: ../../../roles/edpm_network_config/tasks/os_net_config.yml
+   :language: YAML
