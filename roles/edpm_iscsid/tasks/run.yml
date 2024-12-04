@@ -56,6 +56,7 @@
     state: restarted
 
 - name: Remove iscsid container restart sentinel file
+  become: true
   ansible.builtin.file:
     path: /etc/iscsi/.iscsid_restart_required
     state: absent
