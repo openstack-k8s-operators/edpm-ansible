@@ -19,6 +19,10 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Update iscsi health check script
+  ansible.builtin.include_tasks:
+    file: healthchecks.yml
+
 - name: Manage iscsid containers
   ansible.builtin.include_role:
     name: edpm_container_standalone

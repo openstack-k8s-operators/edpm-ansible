@@ -24,69 +24,20 @@
     mode: '0755'
   become: true
 
-- name: Deploy telemetry health check scripts
-  ansible.builtin.copy:
-    src: "healthchecks/{{ item.value }}/"
-    dest: "/var/lib/openstack/healthchecks/{{ item.key }}"
-    setype: container_file_t
-    owner: "{{ ansible_user | default(ansible_user_id) }}"
-    group: "{{ ansible_user | default(ansible_user_id) }}"
-    mode: '0700'
+- name: Start podman.socket service
+  ansible.builtin.systemd_service:
+    name: podman.socket
+    state: started
+    enabled: true
   become: true
-  loop: "{{ edpm_telemetry_healthcheck_sources | dict2items }}"
+  when: '"podman_exporter" in edpm_telemetry_enabled_exporters'
 
-- name: Deploy ceilometer containers
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
-  vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "ceilometer_agent_compute.json"
-    edpm_container_manage_clean_orphans: false
-
-- name: Deploy node_exporter container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
-  vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "node_exporter.json"
-    edpm_container_manage_clean_orphans: false
-
-- name: Deploy podman_exporter container
-  block:
-    - name: Start podman.socket service
-      ansible.builtin.systemd_service:
-        name: podman.socket
-        state: started
-        enabled: true
-      become: true
-    - name: Start podman_exporter container
-      ansible.builtin.include_role:
-        name: osp.edpm.edpm_container_manage
-      vars:
-        edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-        edpm_container_manage_healthcheck_disabled: true
-        edpm_container_manage_config_patterns: "podman_exporter.json"
-        edpm_container_manage_clean_orphans: false
-
-- name: Restart node_exporter
-  become: true
-  ansible.builtin.systemd:
-    state: restarted
-    name: edpm_node_exporter.service
-
-- name: Restart podman_exporter
-  become: true
-  ansible.builtin.systemd:
-    state: restarted
-    name: edpm_podman_exporter.service
-
-- name: Restart ceilometer compute
-  become: true
-  ansible.builtin.systemd:
-    state: restarted
-    name: edpm_ceilometer_agent_compute.service
+- name: Deploy enabled exporters
+  ansible.builtin.include_tasks:
+    file: exporter.yml
+  loop: "{{ edpm_telemetry_enabled_exporters }}"
+  loop_control:
+    loop_var: exporter
 
 - name: List deployed health check scripts
   ansible.builtin.find:
