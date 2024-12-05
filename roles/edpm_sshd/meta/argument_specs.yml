@@ -58,6 +58,7 @@ argument_specs:
             - 'LC_IDENTIFICATION LC_ALL LANGUAGE'
             - 'XMODIFIERS'
           Subsystem: 'sftp /usr/libexec/openssh/sftp-server'
+          PrintMotd: 'no'
       edpm_sshd_configure_firewall:
         type: bool
         default: false

@@ -56,6 +56,7 @@ edpm_sshd_server_options:
     - 'LC_IDENTIFICATION LC_ALL LANGUAGE'
     - 'XMODIFIERS'
   Subsystem: 'sftp /usr/libexec/openssh/sftp-server'
+  PrintMotd: 'no'
 
 # Firewall configuration part
 edpm_sshd_configure_firewall: true
