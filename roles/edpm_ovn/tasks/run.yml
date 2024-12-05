@@ -45,3 +45,54 @@
       ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
       ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+  when: not edpm_use_bootc
+
+- name: Configure ovn_controller for bootc deployments
+  block:
+  - name: Collect default pod spec
+    ansible.builtin.slurp:
+      src: /usr/share/containers/systemd/ovn_controller.yaml
+    register: ovn_controller_pod_spec
+
+  - name: Decode and parse the YAML content
+    ansible.builtin.set_fact:
+      ovn_controller_pod_spec: "{{ ovn_controller_pod_spec.content | b64decode | from_yaml }}"
+
+  - name: Update fields in the YAML data
+    ansible.builtin.set_fact:
+      updated_pod_spec: >-
+        {{
+          ovn_controller_pod_spec | combine({
+            'spec': {
+              'containers': ovn_controller_pod_spec.spec.containers | zip_longest([], [{'image': edpm_ovn_controller_agent_image}]) | map('combine') | list,
+               },
+            }, recursive=true)
+        }}
+
+  - name: Write the updated pod spec to /etc
+    ansible.builtin.copy:
+      content: "{{ updated_pod_spec | to_yaml }}"
+      dest: /etc/containers/systemd/ovn_controller.yaml
+      mode: '0644'
+
+  - name: Copy systemd service template
+    ansible.builtin.copy:
+      remote_src: true
+      src: /usr/share/containers/systemd/edpm-compute@.kube
+      dest: /etc/containers/systemd/edpm-compute@.kube
+
+  - name: Update service template Yaml path
+    ansible.builtin.ini_file:
+      path: /etc/containers/systemd/edpm-compute@.kube
+      section: Kube
+      option: "Yaml"
+      value: "/etc/containers/systemd/%i.yaml"
+      mode: "0644"
+
+  - name: Run ovn_controller container
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+      name: edpm-compute@ovn_controller
+      state: started
+  become: true
+  when: edpm_use_bootc

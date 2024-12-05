@@ -45,3 +45,12 @@
       ovn_metadata_agent: "{{ lookup('template', 'ovn_metadata_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
       ovn_metadata_agent: "{{ lookup('template', 'kolla_ovn_metadata_agent.yaml.j2') | from_yaml }}"
+
+  when: not edpm_use_bootc
+
+- name: Run ovn_controller container
+  ansible.builtin.systemd_service:
+    name: edpm-compute@ovn_metadata_agent
+    state: started
+  become: true
+  when: edpm_use_bootc
