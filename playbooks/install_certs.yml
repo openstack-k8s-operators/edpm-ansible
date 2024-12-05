@@ -1,5 +1,6 @@
 ---
-
+- name: Check remote connections
+  ansible.builtin.import_playbook: connection.yml
 - name: EDPM Install Certs
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: free

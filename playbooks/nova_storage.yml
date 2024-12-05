@@ -1,5 +1,6 @@
 ---
-
+- name: Check remote connections
+  ansible.builtin.import_playbook: connection.yml
 - name: Deploy Nova storage infrastructure
   hosts: all
   strategy: linear
