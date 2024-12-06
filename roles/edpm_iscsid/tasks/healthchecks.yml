@@ -1,0 +1,30 @@
+---
+
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
+
+- name: Ensure base directory for health checks exists
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/openstack/healthchecks
+    state: directory
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0755'
+
+- name: Deploy iscsi health check script
+  become: true
+  ansible.builtin.copy:
+    src: healthchecks/iscsid/
+    dest: "/var/lib/openstack/healthchecks/iscsid"
+    setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: '0700'

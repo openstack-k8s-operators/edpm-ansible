@@ -30,7 +30,6 @@
         - {'path': /var/lib/iscsi, 'setype': container_file_t}
         - {'path': /var/lib/config-data, 'setype': container_file_t, 'selevel': s0, 'mode': '0755'}
         - {'path': /var/lib/config-data/ansible-generated/iscsid, 'setype': container_file_t, 'mode': '0755'}
-        - {'path': /var/lib/openstack/healthchecks, 'setype': container_file_t, 'mode': '0755'}
 
     - name: Stat /lib/systemd/system/iscsid.socket
       ansible.builtin.stat:
@@ -56,12 +55,3 @@
         - ansible_facts.services["iscsi.service"] is defined
         - ansible_facts.services["iscsi.service"]["status"] != "not-found"
         - ansible_facts.services["iscsi.service"]["status"] == "enabled"
-
-    - name: Deploy iscsi health check script
-      ansible.builtin.copy:
-        src: healthchecks/iscsid/
-        dest: "/var/lib/openstack/healthchecks/iscsid"
-        setype: container_file_t
-        owner: "{{ ansible_user | default(ansible_user_id) }}"
-        group: "{{ ansible_user | default(ansible_user_id) }}"
-        mode: '0700'

@@ -14,6 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Update logrotate_crond health check script
+  ansible.builtin.include_tasks:
+    file: healthchecks.yml
 
 - name: Manage logrotate_crond containers
   ansible.builtin.include_role:
