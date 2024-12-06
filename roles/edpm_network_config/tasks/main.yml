@@ -46,7 +46,25 @@
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
-- name: Load edpm_network_config tasks [os-net-config]
-  ansible.builtin.include_tasks:
-    file: network_config.yml
+
+- name: Disable auto-configuration of all interfaces by NetworkManager
   when: edpm_network_config_tool == 'os-net-config'
+  become: true
+  block:
+    - name: Set 'no-auto-default' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        mode: "0644"
+        no_extra_spaces: true
+        section: main
+        option: no-auto-default
+        value: "*"
+        backup: true
+    - name: Restart NetworkManager
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: restarted
+    - name: Load edpm_network_config tasks for os-net-config tool
+      ansible.builtin.include_tasks:
+        file: network_config.yml
