@@ -33,5 +33,7 @@
               next_hop: 192.168.180.1
     edpm_network_config_manage_service: false
     edpm_network_config_hide_sensitive_logs: false
+    edpm_bootstrap_network_service: 'NetworkManager'
+    edpm_network_config_tool: 'os-net-config'
   roles:
     - role: "osp.edpm.edpm_network_config"
