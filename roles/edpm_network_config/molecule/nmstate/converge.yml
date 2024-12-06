@@ -34,5 +34,6 @@
               prefix-length: 24
             dhcp: false
             enabled: true
+    edpm_bootstrap_network_service: 'NetworkManager'
   roles:
     - role: osp.edpm.edpm_network_config
