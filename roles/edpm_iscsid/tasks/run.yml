@@ -25,7 +25,7 @@
 
 - name: Manage iscsid containers
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+     name: edpm_container_standalone
   vars:
     edpm_container_standalone_service: iscsid
     edpm_container_standalone_container_defs:
@@ -33,6 +33,24 @@
     edpm_container_standalone_kolla_config_files:
       iscsid: "{{ lookup('file', 'files/iscsid.yaml') | from_yaml }}"
   register: manage_iscsid_stat
+  when: not ansible_local.bootc
+
+- name: Configure iscsid for bootc
+  when: ansible_local.bootc
+  become: true
+  block:
+  - name: Render kolla config file
+    ansible.builtin.template:
+      src: templates/iscsid.yaml.j2
+      dest: /var/lib/kolla/config_files/iscsid.json
+      mode: 0644
+
+  - name: Manage iscsid crond containers
+    ansible.builtin.systemd_service:
+      name: edpm-compute@iscsid
+      enabled: true
+      state: started
+    register: manage_iscsid_stat
 
 - name: Check if the iscsid container restart is required
   ansible.builtin.stat:
@@ -49,10 +67,21 @@
 - name: Restart iscsid container to refresh /etcd/iscsid.conf
   become: true
   when:
+    - not ansible_local.bootc
     - not manage_iscsid_stat.changed|bool
     - iscsi_restart_stat.stat.exists|bool
   ansible.builtin.systemd:
     name: edpm_iscsid
+    state: restarted
+
+- name: Restart iscsid container to refresh /etcd/iscsid.conf
+  become: true
+  when:
+    - ansible_local.bootc
+    - not manage_iscsid_stat.changed|bool
+    - iscsi_restart_stat.stat.exists|bool
+  ansible.builtin.systemd:
+    name: edpm-compute@iscsid
     state: restarted
 
 - name: Remove iscsid container restart sentinel file

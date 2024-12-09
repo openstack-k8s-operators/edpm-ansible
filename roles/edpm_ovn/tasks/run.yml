@@ -45,3 +45,21 @@
       ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
       ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+  when: not ansible_local.bootc
+
+- name: Configure OVN Controller container on bootc nodes
+  become: true
+  when: ansible_local.bootc
+  block:
+  - name: Render kolla config file for ovn_controller
+    ansible.builtin.template:
+      src: templates/kolla_ovn_controller.yaml
+      dest: /var/lib/kolla/config_files/ovn_controller.json
+      mode: 0644
+
+  - name: Run ovn_controller container
+    ansible.builtin.systemd_service:
+      name: edpm-compute@ovn_controller
+      enabled: true
+      state: started
+
