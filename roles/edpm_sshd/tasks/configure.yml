@@ -76,14 +76,6 @@
          {% endif %}
          {{ edpm_sshd_server_options }}
 
-    - name: Set sshd motd when enabled
-      ansible.builtin.lineinfile:
-        path: /etc/pam.d/sshd
-        regexp: "^session.*optional.*pam_motd.so"
-        line: "session    optional     pam_motd.so motd=/etc/motd"
-        state: present
-      when: edpm_sshd_motd_enabled
-
     - name: Adjust ssh server configuration
       become: true
       ansible.builtin.template:
