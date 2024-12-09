@@ -37,3 +37,4 @@ edpm_ovs_packages:
   - openvswitch
 # whether to reload the openvswitch service after an update is complete
 edpm_ovs_reload_after_update: false
+edpm_use_bootc: false
