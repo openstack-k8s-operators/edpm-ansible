@@ -24,7 +24,7 @@ argument_specs:
         default: os-net-config
         choices:
           - os-net-config
-          - nmstate
+          - nmstate (experimental, unsupported)
       edpm_network_config_update:
         type: bool
         description: Apply NetworkConfig or not

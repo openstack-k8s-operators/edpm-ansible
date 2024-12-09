@@ -21,6 +21,7 @@
   vars:
     # edpm_network_config - nmstate
     edpm_network_config_tool: 'nmstate'
+    edpm_network_config_tool_nmstate_override: true
     edpm_network_config_template: |
       ---
       interfaces:
