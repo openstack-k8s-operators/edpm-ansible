@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Fail when edpm_network_config_tool=nmstate unless edpm_network_config_tool_nmstate_override=true
+  ansible.builtin.fail:
+    msg: |
+      edpm_network_config_tool=nmstate is experimental and not supported.
+      Set edpm_network_config_tool_nmstate_override=true to continue anyway.
+  when:
+    - edpm_network_config_tool == 'nmstate'
+    - not edpm_network_config_tool_nmstate_override|bool
+
 - name: Configure network with network role from system roles [nmstate]
   when: edpm_network_config_tool == 'nmstate'
   become: true

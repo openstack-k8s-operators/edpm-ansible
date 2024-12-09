@@ -22,10 +22,13 @@
 # This variable let the use choose which tool will be used to configure networking on hosts
 # Accepted values are:
 # * os-net-config (default) -> the os-net-config will be used
-# * nmstate -> the network role from linux-system-roles/rhel-system-roles will be used to
+# * nmstate (experimental, unsupported) -> the network role from linux-system-roles/rhel-system-roles will be used to
 #   configure networking on hosts. In particular, the nmstate tool should cover all the
 #   supported scenario. Refer to nmstate.io for configuration snippets.
 edpm_network_config_tool: os-net-config
+
+# Must be set to true to allow usage of nmstate as edpm_network_config_tool
+edpm_network_config_tool_nmstate_override: false
 
 # Packages needed by nmstate (via system-role)
 edpm_network_config_systemrole_nmstate_dependencies:
