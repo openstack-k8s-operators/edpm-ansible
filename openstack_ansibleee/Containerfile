@@ -8,7 +8,6 @@ COPY $REMOTE_SOURCE $REMOTE_SOURCE_DIR
 RUN $REMOTE_SOURCE_DIR/openstack_ansibleee/setup.sh
 
 RUN cd $REMOTE_SOURCE_DIR/openstack_ansibleee && \
-    ansible-galaxy collection install -U --timeout 120 -r ansibleee-requirements.yaml --collections-path "/usr/share/ansible/collections" && \
     ansible-galaxy collection install -U --timeout 120 -r requirements.yaml --collections-path "/usr/share/ansible/collections" && \
     ansible-galaxy collection install -U $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
 
