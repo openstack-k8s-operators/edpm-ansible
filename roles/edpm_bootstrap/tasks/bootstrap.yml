@@ -14,24 +14,102 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import edpm_bootc role
-  ansible.builtin.import_role:
-    name: edpm_bootc
+- name: Ensure /var/log/journal exists
+  ansible.builtin.file:
+    path: /var/log/journal
+    state: directory
+    mode: '0750'
+    owner: root
+    group: root
+    setype: var_log_t
+  become: true
 
-- name: Import common pre packages tasks
-  ansible.builtin.import_tasks: bootstrap-common-pre-packages.yml
+- name: Gather services facts
+  ansible.builtin.service_facts:
 
-- name: Include packages tasks
-  ansible.builtin.include_tasks: packages.yml
-  when: not bootc
+- name: Print cloud-init service status
+  ansible.builtin.debug:
+    var: ansible_facts.services["cloud-init.service"]
 
-- name: Import common post packages tasks
-  ansible.builtin.import_tasks: bootstrap-common-post-packages.yml
+- name: Check if cloud-init is disabled via kernel args
+  ansible.builtin.lineinfile:
+    path: /proc/cmdline
+    line: "cloud-init=disabled"
+    state: present
+  check_mode: true
+  register: cloud_init_vendor_disabled
 
-- name: Include swap tasks
-  ansible.builtin.include_tasks: swap.yml
-  when: not bootc
+- name: Wait for cloud-init to finish, if enabled
+  community.general.cloud_init_data_facts:
+    filter: status
+  register: res
+  until: >
+    res.cloud_init_data_facts.status.v1.stage is defined and
+    not res.cloud_init_data_facts.status.v1.stage
+  retries: 50
+  delay: 5
+  when:
+    - not ansible_check_mode
+    - ansible_facts.services["cloud-init.service"] is defined
+    - ansible_facts.services["cloud-init.service"]["status"] != "not-found"
+    - ansible_facts.services["cloud-init.service"]["state"] == "running"
+    - ansible_facts.services["cloud-init.service"]["status"] == "enabled"
+    - cloud_init_vendor_disabled is changed
+  become: true
 
-- name: Import FIPS tasks
+- name: Execute bootstrap command
+  ansible.builtin.import_tasks: bootstrap_command.yml
+
+- name: Import packages tasks
+  ansible.builtin.import_tasks: packages.yml
+
+- name: Set selinux state
+  ansible.posix.selinux:
+    policy: targeted
+    state: "{{ edpm_bootstrap_selinux_mode }}"
+  become: true
+
+- name: Stop NetworkManager from updating resolv.conf
+  when: ( edpm_bootstrap_network_service == 'NetworkManager' ) and ( not edpm_bootstrap_network_resolvconf_update )
+  become: true
+  block:
+    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        no_extra_spaces: true
+        section: main
+        option: dns
+        value: none
+        backup: true
+        mode: '0644'
+    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        no_extra_spaces: true
+        section: main
+        option: rc-manager
+        value: unmanaged
+        backup: true
+        mode: '0644'
+    - name: Reload NetworkManager
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: reloaded
+
+- name: Stop dhclient from updating resolv.conf
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/dhcp/dhclient-enter-hooks
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      make_resolv_conf() { : ; }
+
+- name: Configure swap
+  ansible.builtin.import_tasks: swap.yml
+
+- name: FIPS tasks
   ansible.builtin.import_tasks: fips.yml
   when: edpm_bootstrap_fips_mode != 'check'

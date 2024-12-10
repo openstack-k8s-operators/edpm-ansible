@@ -14,13 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Import edpm_bootc role
-  ansible.builtin.import_role:
-    name: edpm_bootc
-
-- name: Include download_cache tasks
-  ansible.builtin.include_tasks: download_cache.yml
-  when: not bootc
+- name: Import download_cache tasks
+  ansible.builtin.import_tasks: download_cache.yml
 
 - name: Import bootstrap tasks
   ansible.builtin.import_tasks: bootstrap.yml
