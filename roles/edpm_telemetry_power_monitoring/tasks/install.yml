@@ -63,8 +63,7 @@
   become: true
   ansible.builtin.systemd:
     name: edpm_kepler.service
-    enabled: true
-    state: restarted
+    state: started
 
 - name: List deployed health check scripts
   ansible.builtin.find:
