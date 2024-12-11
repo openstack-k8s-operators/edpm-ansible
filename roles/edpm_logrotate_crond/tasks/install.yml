@@ -24,7 +24,7 @@
   retries: "{{ edpm_logrotate_crond_download_retries }}"
   delay: "{{ edpm_logrotate_crond_download_delay }}"
   when:
-  - not edpm_use_bootc
+  - not bootc
 
 - name: Gather SELinux fact if needed
   when:

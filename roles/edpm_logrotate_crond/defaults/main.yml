@@ -66,4 +66,3 @@ edpm_logrotate_crond_dateformat: null
 edpm_logrotate_crond_dateyesterday: null
 # If container health check should be enabled
 edpm_logrotate_crond_healthcheck: true
-edpm_use_bootc: false

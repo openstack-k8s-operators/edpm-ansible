@@ -27,7 +27,7 @@
       retries: "{{ edpm_sshd_download_retries }}"
       delay: "{{ edpm_sshd_download_delay }}"
       when:
-        - not edpm_use_bootc
+        - not bootc
 
     # NOTE(mwhahaha): we need this here because in order to validate our generated
     # config, we need to ensure the host keys exist

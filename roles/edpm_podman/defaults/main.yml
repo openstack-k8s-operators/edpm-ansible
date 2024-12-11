@@ -103,4 +103,3 @@ edpm_podman_auth_file: ~/.config/containers/auth.json
 
 edpm_podman_registries_conf: ""
 edpm_podman_disconnected_ocp: false
-edpm_use_bootc: false

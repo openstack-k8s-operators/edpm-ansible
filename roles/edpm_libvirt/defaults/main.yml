@@ -72,4 +72,3 @@ edpm_libvirt_password_path: /var/lib/openstack/configs/{{ edpm_libvirt_service_n
 # certs
 edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/{{ edpm_libvirt_service_name }}/default
-edpm_use_bootc: false
