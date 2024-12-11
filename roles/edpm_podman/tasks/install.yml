@@ -25,7 +25,7 @@
       until: edpm_podman_package_download is succeeded
       retries: "{{ edpm_podman_download_retries }}"
       delay: "{{ edpm_podman_download_delay }}"
-      when: not edpm_use_bootc
+      when: not bootc
 
     - name: Ensure we get the ansible interfaces facts
       when:

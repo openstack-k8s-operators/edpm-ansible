@@ -36,4 +36,3 @@ edpm_nova_compute_config_dir: /var/lib/config-data/ansible-generated/nova_libvir
 
 # KSM control
 edpm_kernel_enable_ksm: false
-edpm_use_bootc: false

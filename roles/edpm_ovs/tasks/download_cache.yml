@@ -9,4 +9,4 @@
   until: _install_packages_result is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
   delay: "{{ edpm_ovs_download_delay }}"
-  when: not edpm_use_bootc
+  when: not bootc
