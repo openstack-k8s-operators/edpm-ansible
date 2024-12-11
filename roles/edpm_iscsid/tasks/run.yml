@@ -24,15 +24,12 @@
     file: healthchecks.yml
 
 - name: Manage iscsid containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: iscsid
-    edpm_container_standalone_container_defs:
-      iscsid: "{{ lookup('template', 'iscsid.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      iscsid: "{{ lookup('file', 'files/iscsid.yaml') | from_yaml }}"
+  ansible.builtin.systemd_service:
+    name: edpm-compute@iscsid
+    enabled: true
+    state: started
   register: manage_iscsid_stat
+  become: true
 
 - name: Check if the iscsid container restart is required
   ansible.builtin.stat:
@@ -52,7 +49,7 @@
     - not manage_iscsid_stat.changed|bool
     - iscsi_restart_stat.stat.exists|bool
   ansible.builtin.systemd:
-    name: edpm_iscsid
+    name: edpm-compute@iscsid
     state: restarted
 
 - name: Remove iscsid container restart sentinel file
