@@ -133,3 +133,10 @@
         mode: "0644"
         owner: ceilometer
         group: ceilometer
+
+- name: Start ceilometer_agent_compute container - bootc
+  ansible.builtin.systemd_service:
+    name: edpm-compute@ceilometer_agent_compute
+    state: started
+    enabled: true
+  when: bootc
