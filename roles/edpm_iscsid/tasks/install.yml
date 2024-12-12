@@ -46,7 +46,7 @@
     - name: Gather services facts
       ansible.builtin.service_facts:
 
-    - name: Stop iscsi.service
+    - name: Stop and disable iscsi.service
       ansible.builtin.systemd:
         name: iscsi.service
         state: stopped
@@ -55,3 +55,13 @@
         - ansible_facts.services["iscsi.service"] is defined
         - ansible_facts.services["iscsi.service"]["status"] != "not-found"
         - ansible_facts.services["iscsi.service"]["status"] == "enabled"
+
+    - name: Stop and disable iscsi-starter.service
+      ansible.builtin.systemd:
+        name: iscsi-starter.service
+        state: stopped
+        enabled: false
+      when:
+        - ansible_facts.services["iscsi-starter.service"] is defined
+        - ansible_facts.services["iscsi-starter.service"]["status"] != "not-found"
+        - ansible_facts.services["iscsi-starter.service"]["status"] == "enabled"
