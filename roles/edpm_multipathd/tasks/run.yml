@@ -29,6 +29,7 @@
     enabled: true
     state: started
   register: manage_multipathd_stat
+  become: true
 
 - name: Check if the multipathd container restart is required
   ansible.builtin.stat:
