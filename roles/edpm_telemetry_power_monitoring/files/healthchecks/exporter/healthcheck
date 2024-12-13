@@ -15,4 +15,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-ss -lnp | grep $1 || netstat -plnt | grep -i listen | grep $1
+URL="http://0.0.0.0:8888/healthz"
+
+# Get the HTTP status code and response body using curl
+RESPONSE=$(curl -s -w "%{http_code}" $URL)
+BODY=${RESPONSE:0:-3}  # Extract the body (all but the last 3 characters)
+HTTP_CODE=${RESPONSE: -3}  # Extract the last 3 characters as the HTTP status code
+
+# Check the HTTP status code
+if [ "$HTTP_CODE" -ne 200 ]; then
+    echo "$1 Health check failed: HTTP status code $HTTP_CODE"
+    exit 1
+fi
+
+# Check if the response body contains "ok"
+if [[ "$BODY" != *"ok"* ]]; then
+    echo "$1 Health check failed: Response body does not contain 'ok'"
+    exit 1
+fi
+
+echo "$1 Health check passed: HTTP status code $HTTP_CODE, Health response 'ok'"
+exit 0
