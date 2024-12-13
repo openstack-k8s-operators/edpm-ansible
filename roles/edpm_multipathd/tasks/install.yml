@@ -41,7 +41,7 @@
         - ansible_facts.services["multipathd"]["status"] == "enabled"
       failed_when: false
       loop:
-        - edpm-compute@multipathd.service
+        - multipathd.service
         - multipathd.socket
       loop_control:
         index_var: multipath_service_index
