@@ -20,7 +20,7 @@
 
 - name: Include download_cache tasks
   ansible.builtin.include_tasks: download_cache.yml
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Import bootstrap tasks
   ansible.builtin.import_tasks: bootstrap.yml

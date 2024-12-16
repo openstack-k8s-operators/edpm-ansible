@@ -37,11 +37,9 @@
     file: healthchecks.yml
 
 - name: Run ovn_controller container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: ovn_controller
-    edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+  ansible.builtin.systemd_service:
+    name: edpm-compute@ovn_controller
+    enabled: true
+    state: started
+  become: true
+

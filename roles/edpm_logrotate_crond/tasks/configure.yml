@@ -17,9 +17,15 @@
 - name: Configure tmpwatch on the host
   become: true
   block:
+    - name: Create /var/lib/openstack/cron
+      ansible.builtin.file:
+        path: "/var/lib/openstack/cron"
+        mode: 0644
+        state: directory
+
     - name: Push script
       ansible.builtin.copy:
-        dest: /usr/local/sbin/containers-tmpwatch
+        dest: /var/lib/openstack/cron/containers-tmpwatch
         owner: root
         group: root
         mode: "0755"

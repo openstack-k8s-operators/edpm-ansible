@@ -42,6 +42,7 @@
         name: osp.edpm.edpm_kernel
       tags:
         - edpm_kernel
+      when: not ansible_local.bootc
     - name: Import edpm_tuned
       ansible.builtin.import_role:
         name: osp.edpm.edpm_tuned
@@ -53,9 +54,11 @@
         tasks_from: kernelargs.yml
       tags:
         - edpm_kernel
+      when: not ansible_local.bootc
     - name: Configure KSM for kernel
       ansible.builtin.import_role:
         name: osp.edpm.edpm_kernel
         tasks_from: ksm.yml
       tags:
         - edpm_kernel
+      when: not ansible_local.bootc
