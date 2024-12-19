@@ -16,9 +16,10 @@
 #    under the License.
 
 URL="http://0.0.0.0:8888/healthz"
+TIMEOUT=5 # Timeout in seconds
 
 # Get the HTTP status code and response body using curl
-RESPONSE=$(curl -s -w "%{http_code}" $URL)
+RESPONSE=$(curl -s -w "%{http_code}" $URL --max-time $TIMEOUT)
 BODY=${RESPONSE:0:-3}  # Extract the body (all but the last 3 characters)
 HTTP_CODE=${RESPONSE: -3}  # Extract the last 3 characters as the HTTP status code
 

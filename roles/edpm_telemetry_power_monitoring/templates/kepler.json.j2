@@ -3,13 +3,15 @@
     "privileged": "true",
     "restart": "always",
     "ports": ["8888:8888"],
-    "command": "-v 2",
+    "net": "host",
+    "command": "-v=2",
     "recreate": true,
     "environment": {
         "ENABLE_GPU": "true",
+        "EXPOSE_CONTAINER_METRICS": "true",
         "ENABLE_PROCESS_METRICS": "true",
-        "EXPOSE_ESTIMATED_IDLE_POWER_METRICS": "true",
         "EXPOSE_VM_METRICS": "true",
+        "EXPOSE_ESTIMATED_IDLE_POWER_METRICS": "false",
         "LIBVIRT_METADATA_URI": "http://openstack.org/xmlns/libvirt/nova/1.1"
     },
 {% if edpm_telemetry_power_monitoring_healthcheck %}
@@ -21,7 +23,7 @@
     "volumes": [
         "/lib/modules:/lib/modules:ro",
         "/run/libvirt:/run/libvirt:shared,ro",
-        "/sys/:/sys/",
+        "/sys:/sys",
         "/proc:/proc"
     ]
 }
