@@ -19,6 +19,11 @@
     msg: "List of PMD cores cannot be empty - edpm_ovs_dpdk_pmd_core_list"
   when: not edpm_ovs_dpdk_pmd_core_list|string or edpm_ovs_dpdk_pmd_core_list == 'null'
 
+- name: Check valid input for edpm_ovs_dpdk_socket_memory
+  ansible.builtin.fail:
+    msg: "Socket Memory cannot be empty - edpm_ovs_dpdk_socket_memory"
+  when: not edpm_ovs_dpdk_socket_memory|string or edpm_ovs_dpdk_socket_memory == 'null'
+
 - name: PMD cores config
   when: edpm_ovs_dpdk_pmd_core_list|string
   block:

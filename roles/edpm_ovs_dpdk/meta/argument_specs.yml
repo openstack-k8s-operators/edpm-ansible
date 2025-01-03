@@ -6,7 +6,6 @@ argument_specs:
     options:
       edpm_ovs_dpdk_pmd_core_list:
         type: str
-        default: ""
         description: OvS DPDK PMD Core list
       edpm_ovs_dpdk_lcore_list:
         type: str
@@ -22,7 +21,6 @@ argument_specs:
         description: OvS DPDK extra configs
       edpm_ovs_dpdk_socket_memory:
         type: str
-        default: ""
         description: OvS DPDK Socket Memory
       edpm_ovs_dpdk_revalidator_cores:
         type: str
