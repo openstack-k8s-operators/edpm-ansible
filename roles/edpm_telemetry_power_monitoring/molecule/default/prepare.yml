@@ -147,6 +147,12 @@
                   - volume.*
                   - hardware.*
 
+    - name: Install crypto dependency
+      become: true
+      ansible.builtin.dnf:
+        name: python3-cryptography
+        state: present
+
     - name: Create certs directory
       become: true
       ansible.builtin.file:
@@ -154,63 +160,20 @@
         state: directory
         mode: "0775"
 
-    - name: Create tls.crt
+    - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
       become: true
-      ansible.builtin.copy:
-        dest: "{{ edpm_telemetry_certs }}/tls.crt"
+      community.crypto.openssl_privatekey:
+        path: "{{ edpm_telemetry_certs }}/tls.key"
         mode: "0600"
         owner: root
         group: root
-        content: |
-          -----BEGIN CERTIFICATE-----
-          MIICdTCCAhugAwIBAgIRANbtgxUt6z0Lgu63tMkJi/owCgYIKoZIzj0EAwIwGjEY
-          MBYGA1UEAxMPcm9vdGNhLWludGVybmFsMB4XDTI0MDIyMDEwMjQwN1oXDTI1MDIx
-          OTEwMjQwN1owADCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMMIngiZ
-          KKDAYL7pwP3ti5XD8cNHaYfjHXmpeXWCinDjsnbVbxbIg8tbk/S37J7bVKXzkynZ
-          fqy5zm0OAMcUQpzVpAm8a4BNgBpyOkEmvI3wuk2+eV9UTvdxfnZH49w1PP1y6YMp
-          eTe4L/N73f+85S4T4t0z0LzuaUnBmDzrMHti1dhKEa4dHeUXgm0X4bIUYy7LDzJS
-          RXZWLrTlNudqNGTJjqysLF+tG0/42m+aCrDyobnGnDhipqKiDAymm/8imea4z9RN
-          TJB7YamWsKME1TWMXKTGdpvukzD5hMqSR9nb8GLhnSp2+affjONEA2qTFb2EjQsy
-          UN3H8TlxDTg4nU8CAwEAAaOBkDCBjTAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAww
-          CgYIKwYBBQUHAwEwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRw5+MeAyVauyYD
-          qxHKihlwOahznTA3BgNVHREBAf8ELTArgiNlZHBtLWNvbXB1dGUtMC5jdGxwbGFu
-          ZS5leGFtcGxlLmNvbYcEwKh6ZDAKBggqhkjOPQQDAgNIADBFAiEA/pS5XYr/Kcux
-          YAcw+uSB/iTMy5v/rXhGNyIIRuzhei0CIAr/jg2QBtOJGSr0DVUF+0qdi1o1GAxN
-          Ldhr3K2EKWFY
-          -----END CERTIFICATE-----
 
-    - name: Create tls.key
+    - name: Create simple self-signed certificate
       become: true
-      ansible.builtin.copy:
-        dest: "{{ edpm_telemetry_certs }}/tls.key"
+      community.crypto.x509_certificate:
+        path: "{{ edpm_telemetry_certs }}/tls.crt"
+        privatekey_path: "{{ edpm_telemetry_certs }}/tls.key"
+        provider: selfsigned
         mode: "0600"
         owner: root
         group: root
-        content: |
-          -----BEGIN RSA PRIVATE KEY-----
-          MIIEogIBAAKCAQEAwwieCJkooMBgvunA/e2LlcPxw0dph+Mdeal5dYKKcOOydtVv
-          FsiDy1uT9LfsnttUpfOTKdl+rLnObQ4AxxRCnNWkCbxrgE2AGnI6QSa8jfC6Tb55
-          X1RO93F+dkfj3DU8/XLpgyl5N7gv83vd/7zlLhPi3TPQvO5pScGYPOswe2LV2EoR
-          rh0d5ReCbRfhshRjLssPMlJFdlYutOU252o0ZMmOrKwsX60bT/jab5oKsPKhucac
-          OGKmoqIMDKab/yKZ5rjP1E1MkHthqZawowTVNYxcpMZ2m+6TMPmEypJH2dvwYuGd
-          Knb5p9+M40QDapMVvYSNCzJQ3cfxOXENODidTwIDAQABAoIBADtnD4M86vPzRERB
-          vCdbR62I7cT1pj3ePecFaFoTNYlmwL+TCG/fCM1SikD6GBbWZPTauFMBzKRdP3NV
-          1YTNNfDA3WKdwfxlHoRvkDCx1LJCxOvS/PK9IgQZzFPIV62FhZsIefkaE7KV5fz6
-          GEbBSOh85BdNpeE1mFn/nhfH5o9dpfbeZp3omO7jONGSK6RitMRxAQ8si1gXoGPG
-          VjN4tYUlxNf4Y7xULfjdtWThHzuvzgE86kQ5+mwLdxpPn2HT+H6yS270/NYzGSPm
-          lCBh5C8DtHAoE7riFzSNz9kqZ6dtqAqc98fIlKV1q/J40cCpg1+/DtgT0u7alBhg
-          c+ECQaECgYEA3RAoFqp5ZzTiXwAfbzpTrdFefKgmh+cKt9vLyL/J4NN+sK19GhMA
-          vHUazI0butFEgF2OVuFr2ohDHFguA/D/ocMpyYZLnLvx7RndKm2rUcHOpd06VJH4
-          SXyY7URETOCQ2QzcTEAooSa5njnpJHzk8YxMa/r8I7lomOVMObAQFLECgYEA4dta
-          TT6EMRjH3DlPvoaZg2WVcHYeHRkPuBv/guHpIlWMwx5ywLkl+TDF/b5La8H9ZJAP
-          PLgv8zTHa3gbdnKq1VLB5ldwvcF61JhYwluyOsltJ4ARJ8j3m5WB3h0fm4Gu7YXl
-          ercUDPBjYm5Zn7h6i8A5svV5yiZkaVxiIGYoUf8CgYA3dsVIIo+BOICPa113r7+s
-          /bniNuIr+Oj0hl4TySLimM3RkEWyFBB8ODl4FvNdJQI13sNGwxonY0bLRsiMzpuk
-          v22tlVdFRNaHMZUO/yMbyS+K5/2pmFIeRfesmBM24qUVACgJrZNEE45Ax7DaKcfb
-          XuMRuJAoem1m5yj/1E/EkQKBgADAVAqRvKrVJEUNQ8Ckffo76kVXfz4liTHZlf3/
-          dmEQ28kCXutZMlEj4mS3r1SKbqdY+1P+YNp0QH2RBrZcJ0lSXya+/7cB38C5SQJM
-          f8lGRkCtYmE5f+lak/YDLsm7orNTkLHZzg1E92+qYk3vtSil2QtJWcBcZFUdY44s
-          CNJNAoGAGmsvAw2tOqXU0hn/8oH2tjfD9sfYnKMe19vdJLPSQjJZv31QZPzl2g4j
-          yCCnUxqB0fmzNM/1TuPBzBcdtLWhV7k10jxrovkAHSDXsGBb/+8BbWH04tOhoOO7
-          snX6BmT+G0RSby8naSiNl/8DM96Nj2Oh0WOwIa4oNdro3IaVqMs=
-          -----END RSA PRIVATE KEY-----

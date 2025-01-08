@@ -16,3 +16,4 @@
 
 collections:
   - name: community.general
+  - name: community.crypto
