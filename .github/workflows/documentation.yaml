@@ -29,7 +29,7 @@ jobs:
         uses: actions/configure-pages@v3
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1.160.0
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
       - name: Setup python
