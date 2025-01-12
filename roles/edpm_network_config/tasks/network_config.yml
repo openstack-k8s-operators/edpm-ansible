@@ -47,7 +47,7 @@
   until: edpm_network_config_onc_download is succeeded
   retries: "{{ edpm_network_config_download_retries }}"
   delay: "{{ edpm_network_config_download_delay }}"
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Ensure /var/lib/edpm-config directory exists
   become: true

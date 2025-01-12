@@ -29,4 +29,4 @@
   ansible.builtin.package:
     name: nvme-cli
     state: present
-  when: not bootc
+  when: not ansible_local.bootc

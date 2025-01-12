@@ -139,4 +139,4 @@
     name: edpm-compute@ceilometer_agent_compute
     state: started
     enabled: true
-  when: bootc
+  when: ansible_local.bootc

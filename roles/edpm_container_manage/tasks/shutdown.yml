@@ -27,7 +27,7 @@
       loop:
         - 'edpm-container-shutdown'
         - 'edpm-start-podman-container'
-      when: not edpm_use_bootc
+      when: not ansible_local.bootc
 
     - name: "Create systemd preset dir"
       ansible.builtin.file:

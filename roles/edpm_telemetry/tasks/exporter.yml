@@ -18,14 +18,14 @@
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: "{{ exporter }}.json"
     edpm_container_manage_clean_orphans: false
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Restart exporter container
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: "edpm_{{ exporter }}.service"
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Deploy exporter container - bootc
   ansible.builtin.systemd_service:
