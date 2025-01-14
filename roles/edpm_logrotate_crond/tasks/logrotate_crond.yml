@@ -24,3 +24,13 @@
       logrotate_crond: "{{ lookup('template', 'logrotate_crond.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
       logrotate_crond: "{{ lookup('file', 'files/logrotate_crond.yaml') | from_yaml }}"
+  when: not ansible_local.bootc
+
+- name: Manage logrotate crond containers
+  ansible.builtin.systemd_service:
+    name: edpm-compute@logrotate_crond
+    enabled: true
+    state: started
+  become: true
+  when: ansible_local.bootc
+
