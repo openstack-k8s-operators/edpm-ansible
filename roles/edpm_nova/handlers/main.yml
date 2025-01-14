@@ -19,6 +19,7 @@
     state: restarted
     name: "edpm_nova_compute.service"
   listen: "Restart nova"
+  when: not ansible_local.bootc
 
 - name: Restart nova init container
   become: true
@@ -26,3 +27,12 @@
     name: nova_compute_init
     state: started
   listen: "Restart nova init"
+  when: not ansible_local.bootc
+
+- name: Restart nova container
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: edpm-compute@nova_compute
+  listen: "Restart nova"
+  when: ansible_local.bootc
