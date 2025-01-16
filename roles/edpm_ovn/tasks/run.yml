@@ -53,7 +53,7 @@
   block:
   - name: Render kolla config file for ovn_controller
     ansible.builtin.template:
-      src: templates/kolla_ovn_controller.yaml
+      src: templates/kolla_ovn_controller.yaml.j2
       dest: /var/lib/kolla/config_files/ovn_controller.json
       mode: 0644
 

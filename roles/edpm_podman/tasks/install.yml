@@ -160,3 +160,13 @@
         setype: var_log_t
       become: true
 
+    - name: Ensure /var/lib/kolla/config_files/ exists
+      ansible.builtin.file:
+        path: /var/lib/kolla/config_files
+        state: directory
+        mode: '0750'
+        owner: root
+        group: root
+        setype: container_file_t
+      become: true
+
