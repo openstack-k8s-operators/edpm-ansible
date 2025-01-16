@@ -99,3 +99,18 @@
   ansible.builtin.include_role:
     name: edpm_install_certs
     tasks_from: adoption
+
+- name: Cleanup tripleo services from the systemd
+  become: true
+  tags:
+    - adoption
+  when: edpm_remove_tripleo_unit_files
+  block:
+    - name: Reload units
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+    - name: Reset state of failed systemd units
+      ansible.builtin.command:
+        cmd: /usr/bin/systemctl reset-failed {{ item }}  # noqa: command-instead-of-module no-changed-when
+      loop: "{{ tripleo_services }}"
+      failed_when: false
