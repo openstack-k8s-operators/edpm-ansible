@@ -12,7 +12,7 @@
         name: osp.edpm.edpm_ovs
       tags:
         - edpm_ovs
-    # Sets up network using OVS
+    # Sets up EDPM network using os-net-config
     - name: Import edpm_network_config
       ansible.builtin.import_role:
         name: osp.edpm.edpm_network_config
