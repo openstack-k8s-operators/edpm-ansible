@@ -36,6 +36,7 @@
       ansible.builtin.dnf:
         name: 'dracut-config-generic'
         state: absent
+      when: not ansible_local.bootc
 
     - name: Ensure the /etc/modules-load.d/ directory exists
       ansible.builtin.file:
