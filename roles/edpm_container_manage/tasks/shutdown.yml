@@ -17,17 +17,24 @@
 - name: Create EDPM Container systemd service
   become: true
   block:
+    - name: "Create /var/local/libexec dir"
+      file:
+        state: directory
+        path: /var/local/libexec
+        recurse: true
+        setype: container_file_t
+
     - name: "Deploy edpm-container-shutdown and edpm-start-podman-container"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/{{ item }}"
-        dest: "/usr/libexec/{{ item }}"
+        dest: "/var/local/libexec/{{ item }}"
         mode: '0700'
         owner: root
         group: root
+        setype: container_file_t
       loop:
         - 'edpm-container-shutdown'
         - 'edpm-start-podman-container'
-      when: not edpm_use_bootc
 
     - name: "Create systemd preset dir"
       ansible.builtin.file:
