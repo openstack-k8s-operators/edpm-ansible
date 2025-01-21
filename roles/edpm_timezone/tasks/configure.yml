@@ -15,6 +15,23 @@
 # under the License.
 
 
+# TODO(slagle): should this be in edpm-image-builder instead?
+- name: Manage /etc/localtime
+  when: ansible_local.bootc
+  block:
+    - name: Check for /etc/localtime
+      stat:
+        path: /etc/localtime
+      register: localtime_stat
+
+    - name: Symlink /etc/localtime to timezone file if it doesn't exist
+      become: true
+      file:
+        state: link
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/{{ edpm_timezone }}
+      when: not localtime_stat.stat.exists
+
 - name: Set timezone
   become: true
   community.general.timezone:
