@@ -23,14 +23,14 @@
 
 - name: Include packages tasks
   ansible.builtin.include_tasks: packages.yml
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Import common post packages tasks
   ansible.builtin.import_tasks: bootstrap-common-post-packages.yml
 
 - name: Include swap tasks
   ansible.builtin.include_tasks: swap.yml
-  when: not bootc
+  when: not ansible_local.bootc
 
 - name: Import FIPS tasks
   ansible.builtin.import_tasks: fips.yml
