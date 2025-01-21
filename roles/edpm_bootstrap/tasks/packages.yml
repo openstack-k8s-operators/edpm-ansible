@@ -65,6 +65,7 @@
 - name: Install and enable network service
   when:
     - (edpm_bootstrap_legacy_network_packages | length) > 0
+    - not ansible_local.bootc
   become: true
   block:
     - name: Deploy network-scripts required for deprecated network service
