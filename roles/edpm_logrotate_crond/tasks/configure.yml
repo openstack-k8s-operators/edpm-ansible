@@ -22,8 +22,6 @@
         path: "/var/lib/openstack"
         mode: 0755
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
         setype: "container_file_t"
 
     - name: Create /var/lib/openstack/cron
@@ -52,7 +50,7 @@
         name: "Remove old logs"
         special_time: "daily"
         user: "root"
-        job: "/usr/local/sbin/containers-tmpwatch"
+        job: "/var/lib/openstack/cron/containers-tmpwatch"
 
 - name: Configure logrotate_crond
   become: true
