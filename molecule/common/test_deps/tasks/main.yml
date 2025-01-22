@@ -153,3 +153,29 @@
         releasever: "{{ ansible_facts['distribution_major_version'] }}"
       when:
         - (test_deps_extra_packages | length) > 0
+
+- name: Bootc block
+  become: true
+  block:
+    - name: Check for /etc/ansible/facts.d/bootc.fact
+      stat:
+        path: /etc/ansible/facts.d/bootc.fact
+      register: bootc_fact_stat
+
+    - name: Create /etc/ansible/facts.d
+      file:
+        state: directory
+        path: /etc/ansible/facts.d
+
+    - name: Create /etc/ansible/facts.d/bootc.fact
+      copy:
+        dest: /etc/ansible/facts.d/bootc.fact
+        content: |
+          #!/bin/bash
+          echo "{{ test_deps_bootc_fact | lower }}"
+        mode: 0755
+
+    - name: Gather local facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "local"
