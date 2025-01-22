@@ -14,6 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
+- name: Gather local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "local"
+
 - name: Install cronie
   become: true
   ansible.builtin.dnf:
