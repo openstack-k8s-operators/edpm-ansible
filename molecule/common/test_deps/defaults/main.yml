@@ -20,3 +20,5 @@ test_deps_setup_edpm: false
 test_deps_mirrors_file_path: /etc/ci/mirror_info.sh
 test_deps_setup_stream: true
 test_deps_setup_ceph: false
+# Value to use for the bootc fact
+test_deps_bootc_fact: false
