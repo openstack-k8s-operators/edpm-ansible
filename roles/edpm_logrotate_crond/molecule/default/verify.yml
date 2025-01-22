@@ -23,7 +23,7 @@
 
     - name: Push script
       ansible.builtin.stat:
-        path: /usr/local/sbin/containers-tmpwatch
+        path: /var/lib/openstack/cron/containers-tmpwatch
       register: stat_result
       failed_when: not stat_result.stat.exists
 
@@ -31,7 +31,7 @@
       ansible.builtin.shell:
         crontab -l
       register: crontab
-      failed_when: "'@daily /usr/local/sbin/containers-tmpwatch' not in crontab.stdout"
+      failed_when: "'@daily /var/lib/openstack/cron/containers-tmpwatch' not in crontab.stdout"
 
     - name: Ensure config directories exist
       ansible.builtin.stat:
