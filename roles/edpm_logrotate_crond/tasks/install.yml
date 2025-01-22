@@ -18,6 +18,8 @@
 - name: Gather local facts
   ansible.builtin.setup:
     gather_subset:
+      - "!all"
+      - "!min"
       - "local"
 
 - name: Install cronie
