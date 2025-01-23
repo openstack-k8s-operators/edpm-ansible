@@ -5,6 +5,7 @@
       - podified-multinode-edpm-baremetal-pipeline
     github-check:
       jobs:
+        - noop
         - edpm-ansible-tempest-multinode
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_podman
