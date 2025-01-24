@@ -14,66 +14,92 @@
 - job:
     name: edpm-ansible-molecule-edpm_bootstrap
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_bootstrap/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_bootstrap
 - job:
     name: edpm-ansible-molecule-edpm_podman
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_podman/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_podman
 - job:
     name: edpm-ansible-molecule-edpm_module_load
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_module_load/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_module_load
 - job:
     name: edpm-ansible-molecule-edpm_kernel
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_kernel/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_kernel
 - job:
     name: edpm-ansible-molecule-edpm_libvirt
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_libvirt/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_libvirt
 - job:
     name: edpm-ansible-molecule-edpm_nova
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_nova/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_nova
 - job:
     name: edpm-ansible-molecule-edpm_frr
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_frr/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_frr
 - job:
     name: edpm-ansible-molecule-edpm_iscsid
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_iscsid/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_iscsid
 - job:
     name: edpm-ansible-molecule-edpm_ovn_bgp_agent
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_ovn_bgp_agent/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_ovn_bgp_agent
 - job:
     name: edpm-ansible-molecule-edpm_ovs
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_ovs/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_ovs
 - job:
     name: edpm-ansible-molecule-edpm_tripleo_cleanup
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_tripleo_cleanup/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_tripleo_cleanup
 - job:
     name: edpm-ansible-molecule-edpm_tuned
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_tuned/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_tuned
 - job:
     name: edpm-ansible-molecule-edpm_telemetry_power_monitoring
     parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_telemetry_power_monitoring/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_telemetry_power_monitoring
 - job:
