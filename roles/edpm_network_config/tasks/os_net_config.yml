@@ -42,6 +42,7 @@
             msg: "{{ os_net_config_config['content'] | b64decode | trim }}"
     - name: Run edpm_os_net_config_module with network_config
       edpm_os_net_config:
+        cleanup: "{{ edpm_network_config_nonconfigured_cleanup }}"
         config_file: "{{ nic_config_file }}"
         debug: "{{ edpm_network_config_debug | bool }}"
         detailed_exit_codes: true
