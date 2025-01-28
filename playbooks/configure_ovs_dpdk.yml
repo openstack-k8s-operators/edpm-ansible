@@ -5,6 +5,12 @@
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
   tasks:
+    - name: Install openvswitch package
+      become: true
+      ansible.builtin.dnf:
+        name: openvswitch
+        state: present
+
     - name: Configure OvS DPDK configs
       ansible.builtin.import_role:
         name: osp.edpm.edpm_ovs_dpdk
