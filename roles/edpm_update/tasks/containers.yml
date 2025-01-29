@@ -100,6 +100,15 @@
     - edpm_update
   when: '"nova" in edpm_update_running_services'
 
+- name: Updates configs for edpm_nova role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_nova
+    tasks_from: configure.yml
+  tags:
+    - edpm_nova
+    - edpm_update
+  when: '"nova" in edpm_update_running_services'
+
 - name: Updates containers for edpm_neutron_sriov role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_sriov
