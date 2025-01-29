@@ -42,8 +42,8 @@ edpm_libvirt_old_tripleo_compute_sevices:
   - tripleo_nova_virtqemud.service
   - tripleo_nova_virtsecretd.service
   - tripleo_nova_virtstoraged.service
-# TODO: uncap libvirt once libvirt 10 is available
-edpm_libvirt_range: ""
+# TODO: uncap libvirt once issue we're seeing CI with latest versions are fixed
+edpm_libvirt_range: "<10.10.0-4"
 edpm_libvirt_packages:
   # main libvirt packages
   - libvirt {{ edpm_libvirt_range }}
@@ -51,7 +51,7 @@ edpm_libvirt_packages:
   - libvirt-client {{ edpm_libvirt_range }}
   - libvirt-daemon {{ edpm_libvirt_range }}
   # qemu pakcages
-  - qemu-kvm
+  - qemu-kvm-9.1.0-7
   - qemu-img
   # libguestfs is need for config drive and ephermeral disks
   - libguestfs

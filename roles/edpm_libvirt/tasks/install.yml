@@ -7,6 +7,7 @@
   ansible.builtin.dnf:
     name: "{{ edpm_libvirt_packages }}"
     state: present
+    allow_downgrade: true
   register: edpm_libvirt_package_install
   until: edpm_libvirt_package_install is succeeded
   retries: "{{ edpm_libvirt_download_retries }}"

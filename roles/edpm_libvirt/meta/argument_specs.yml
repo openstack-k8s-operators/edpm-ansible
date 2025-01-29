@@ -44,7 +44,7 @@ argument_specs:
           - libvirt-admin {{edpm_libvirt_range}}
           - libvirt-client {{edpm_libvirt_range}}
           - libvirt-daemon {{edpm_libvirt_range}}
-          - qemu-kvm
+          - qemu-kvm-9.1.0-7
           - qemu-img
           - libguestfs
           - libseccomp
