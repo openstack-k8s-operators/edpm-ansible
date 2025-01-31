@@ -112,11 +112,14 @@
   when:
     - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
   block:
-    - name: Create config file for node_exporter
-      ansible.builtin.template:
-        dest: "{{ edpm_telemetry_config_dest }}/node_exporter.yaml"
-        mode: "0644"
-        src: node_exporter.yaml.j2
+    - name: Create config file for exporters
+      ansible.builtin.include_tasks:
+        file: exporter_tls.yml
+      loop:
+        - node_exporter
+        - podman_exporter
+      loop_control:
+        loop_var: exporter
 
     - name: Change the owner of the crt
       become: true

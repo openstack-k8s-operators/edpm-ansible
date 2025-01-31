@@ -53,3 +53,4 @@ edpm_telemetry_healthcheck: true
 edpm_telemetry_enabled_exporters:
   - ceilometer_agent_compute
   - node_exporter
+  - podman_exporter
