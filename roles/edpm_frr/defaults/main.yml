@@ -83,7 +83,6 @@ edpm_frr_volumes:
   - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
   - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
   - "{{ edpm_frr_config_basedir }}:/var/lib/kolla/config_files/src:ro"
-  - /var/log/containers/frr:/var/log/frr:z
   - /run/frr:/run/frr:shared,z
 
 # seconds between retries for download tasks
