@@ -72,6 +72,9 @@ edpm_bootstrap_selinux_mode: enforcing
 # Swap management
 edpm_bootstrap_swap_size_megabytes: 1024
 edpm_bootstrap_swap_path: /swap
+# swap path needs to be under /var on bootc, so a separate default value is
+# needed.
+edpm_bootstrap_swap_path_bootc: /var/swap
 edpm_bootstrap_swap_partition_enabled: false
 edpm_bootstrap_swap_partition_label: swap1
 

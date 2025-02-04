@@ -110,7 +110,6 @@
 
 - name: Include swap tasks
   ansible.builtin.include_tasks: swap.yml
-  when: not ansible_local.bootc
 
 - name: FIPS tasks
   ansible.builtin.import_tasks: fips.yml
