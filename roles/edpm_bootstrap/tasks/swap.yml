@@ -16,7 +16,6 @@
 
 - name: Configure swap file
   when:
-    - not ansible_local.bootc
     - not edpm_bootstrap_swap_partition_enabled|bool
     - edpm_bootstrap_swap_size_megabytes|int > 0
   become: true
