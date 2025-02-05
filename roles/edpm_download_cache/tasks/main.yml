@@ -20,7 +20,9 @@
 
 - name: Download packages
   ansible.builtin.include_tasks: packages.yml
-  when: edpm_download_cache_packages | bool
+  when:
+    - edpm_download_cache_packages | bool
+    - not ansible_local.bootc
 
 - name: Download container images
   ansible.builtin.include_tasks: container_images.yml
