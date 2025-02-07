@@ -8,10 +8,6 @@ argument_specs:
         type: str
         default: ""
         description: OvS DPDK PMD Core list
-      edpm_ovs_dpdk_lcore_list:
-        type: str
-        default: ""
-        description: OvS DPDK LCore list
       edpm_ovs_dpdk_memory_channels:
         type: int
         default: 4
