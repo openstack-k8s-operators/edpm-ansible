@@ -31,18 +31,6 @@
       ansible.builtin.set_fact:
         edpm_ovs_other_config: "{{ {} | combine(pmd_cpu_mask) }}"
 
-- name: Set DPDK lcores config
-  when: edpm_ovs_dpdk_lcore_list|string
-  block:
-    - name: Apply DPDK lcores config
-      ansible.builtin.set_fact:
-        dpdk_lcore_mask:
-          dpdk-lcore-mask: "{{ edpm_ovs_dpdk_lcore_list | osp.edpm.cpu_mask }}"
-
-    - name: Append other_config with DPDK lcores
-      ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_lcore_mask) }}"
-
 - name: Add memory channels to dpdk extra
   ansible.builtin.set_fact:
     edpm_ovs_dpdk_extra_internal: "{{ edpm_ovs_dpdk_extra }} -n {{ edpm_ovs_dpdk_memory_channels }}"
