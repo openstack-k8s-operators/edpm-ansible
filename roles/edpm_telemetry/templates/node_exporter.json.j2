@@ -8,8 +8,6 @@
 {% if tls_cert_exists|bool %}
         "--web.config.file=/etc/node_exporter/node_exporter.yaml",
 {% endif %}
-        "--collector.systemd",
-        "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service",
         "--web.disable-exporter-metrics",
         "--no-collector.dmi",
         "--no-collector.entropy",
@@ -39,8 +37,7 @@
     "volumes": [
 {% if tls_cert_exists|bool %}
         "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z",
-        "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z",
+        "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
 {% endif %}
-        "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw,z"
     ]
 }
