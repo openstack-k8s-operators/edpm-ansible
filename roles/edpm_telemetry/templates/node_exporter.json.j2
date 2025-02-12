@@ -8,8 +8,6 @@
 {% if tls_cert_exists|bool %}
         "--web.config.file=/etc/node_exporter/node_exporter.yaml",
 {% endif %}
-        "--collector.systemd",
-        "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service",
         "--web.disable-exporter-metrics",
         "--no-collector.dmi",
         "--no-collector.entropy",
