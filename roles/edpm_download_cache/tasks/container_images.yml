@@ -100,6 +100,12 @@
     name: osp.edpm.edpm_telemetry
     tasks_from: download_cache.yml
 
+- name: Download images for edpm_telemetry_power_monitoring role
+  when: '"telemetry-power-monitoring" in edpm_download_cache_running_services'
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_telemetry_power_monitoring
+    tasks_from: download_cache.yml
+
 - name: Download images for edpm_swift role
   when: '"swift" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
