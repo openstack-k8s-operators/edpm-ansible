@@ -106,7 +106,7 @@
         mode: "0644"
       when: not edpm_podman_disconnected_ocp
 
-    - name: Write containers registries.conf
+    - name: Write containers registries.conf for disconnected ocp
       ansible.builtin.copy:
         content: "{{ edpm_podman_registries_conf }}"
         dest: /etc/containers/registries.conf
