@@ -52,7 +52,7 @@ edpm_frr_bgp_neighbor_ttl_security_hops: 1
 edpm_frr_bgp_peers: []
 # List of interfaces frr should use to set up peering
 edpm_frr_bgp_asn: 64999
-edpm_frr_bgp_uplinks: ['nic1']
+edpm_frr_bgp_uplinks: []
 edpm_frr_bgp_uplinks_scope: internal
 edpm_frr_config_basedir: "/var/lib/config-data/ansible-generated/frr"
 edpm_frr_defaults: traditional

@@ -25,8 +25,17 @@
   ansible.builtin.set_fact:
     iface_map: "{{ os_net_config_result.stdout }}"
 
+
+- name: Assert either edpm_frr_bgp_peers or edpm_frr_bgp_uplinks configured
+  ansible.builtin.assert:
+    that:
+      - "edpm_frr_bgp_uplinks or edpm_frr_bgp_peers"
+
 - name: FRR uplink interfaces
-  when: edpm_frr_bgp_uplinks
+  # if edpm_frr_bgp_peers are defined, edpm_frr_bgp_uplinks are not used to create frr.conf.j2
+  when:
+    - edpm_frr_bgp_uplinks
+    - not edpm_frr_bgp_peers
   block:
     - name: Construct FRR uplink interfaces from os-net-config mappings
       ansible.builtin.set_fact:
