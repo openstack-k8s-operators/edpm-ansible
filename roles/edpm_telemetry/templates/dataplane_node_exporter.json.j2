@@ -1,0 +1,28 @@
+{
+    "image": "{{ edpm_telemetry_dataplane_node_exporter_image }}",
+    "restart": "always",
+    "recreate": true,
+    "privileged": true,
+    "ports": ["9101:9101"],
+    "command": [],
+    "net": "host",
+    "environment": {
+        "OS_ENDPOINT_TYPE":"internal",
+        "DATAPLANE_NODE_EXPORTER_YAML":"/etc/dataplane_node_exporter/dataplane_node_exporter.yaml"
+    },
+{% if edpm_telemetry_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck dataplane-no",
+        "mount": "/var/lib/openstack/healthchecks/dataplane_node_exporter"
+    },
+{% endif %}
+    "volumes": [
+        "{{ edpm_telemetry_config_dest }}/dataplane_node_exporter.yaml:/etc/dataplane_node_exporter/dataplane_node_exporter.yaml:z",
+{% if tls_cert_exists|bool %}
+        "{{ edpm_telemetry_certs }}:/etc/dataplane_node_exporter/tls:z",
+{% endif %}
+        "/var/run/openvswitch:/run/openvswitch:rw,z",
+        "/var/lib/openvswitch/ovn:/run/ovn:rw,z",
+        "/proc:/host/proc:ro"
+    ]
+}
