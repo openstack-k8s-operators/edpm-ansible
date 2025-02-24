@@ -28,6 +28,8 @@ edpm_telemetry_node_exporter_image: quay.io/prometheus/node-exporter:v1.5.0
 edpm_telemetry_podman_exporter_image: quay.io/navidys/prometheus-podman-exporter:v1.10.1
 # Image to use for Ceilometer
 edpm_telemetry_ceilometer_compute_image: quay.io/podified-antelope-centos9/openstack-ceilometer-compute:current-podified
+# Image to use for dataplane_node_exporter
+edpm_telemetry_dataplane_node_exporter_image: quay.io/openstack-k8s-operators/dataplane-node-exporter:latest
 # Certificates location for tls encryption
 edpm_telemetry_certs: "/var/lib/openstack/certs/{{ edpm_telemetry_service_name }}/default"
 # CA certs location for tls encryption
@@ -46,6 +48,7 @@ edpm_telemetry_healthcheck_sources:
   ceilometer_agent_compute: ceilometer_agent
   node_exporter: exporter
   podman_exporter: exporter
+  dataplane_node_exporter: exporter
 #  kepler: exporter
 # If telemetry services should have health checks enabled
 edpm_telemetry_healthcheck: true
@@ -54,3 +57,4 @@ edpm_telemetry_enabled_exporters:
   - ceilometer_agent_compute
   - node_exporter
   - podman_exporter
+  - dataplane_node_exporter
