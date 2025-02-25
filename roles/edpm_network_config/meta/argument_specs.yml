@@ -79,3 +79,7 @@ argument_specs:
         type: str
         description: "Name of the public network interface"
         default: nic1
+      edpm_network_config_nonconfigured_cleanup:
+        type: bool
+        description: "Cleanup network interfaces not in network config"
+        default: false
