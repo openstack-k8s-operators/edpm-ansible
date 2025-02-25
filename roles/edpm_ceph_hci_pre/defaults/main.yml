@@ -108,7 +108,7 @@ edpm_ceph_hci_pre_firewall_services:
   - name: ceph_dashboard
     num: 100
     dport:
-      - 8444
+      - 8443
     ranges: "{{ edpm_ceph_hci_pre_storage_ranges | list }}"
   - name: ceph_grafana_frontend
     num: 100
