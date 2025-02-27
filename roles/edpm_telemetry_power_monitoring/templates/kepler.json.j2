@@ -4,7 +4,12 @@
     "restart": "always",
     "ports": ["8888:8888"],
     "net": "host",
-    "command": "-v=2",
+    "command": [
+{% if tls_cert_exists|bool %}
+        "--web.config.file=/etc/kepler/web-config.yml",
+{% endif %}
+        "-v=2"
+    ],
     "recreate": true,
     "environment": {
         "ENABLE_GPU": "true",
@@ -21,6 +26,10 @@
     },
 {% endif %}
     "volumes": [
+{% if tls_cert_exists|bool %}
+        "/var/lib/openstack/certs/telemetry-power-monitoring/default:/etc/kepler/tls:z",
+        "/var/lib/openstack/config/telemetry-power-monitoring/web-config.yml:/etc/kepler/web-config.yml:z",
+{% endif %}
         "/lib/modules:/lib/modules:ro",
         "/run/libvirt:/run/libvirt:shared,ro",
         "/sys:/sys",
