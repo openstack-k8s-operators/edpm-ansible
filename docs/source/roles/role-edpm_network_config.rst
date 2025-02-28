@@ -19,6 +19,11 @@ This Ansible role does the following tasks:
   - Checks for the presence of required RPMS
   - Uses "provider" ifcfg/nmstate based on flag "edpm_network_config_nmstate"
 
+Note: By default this role will cleanup devices/interfaces not in
+"edpm_network_config_template". If there is requirement to keep them
+for pre-provisioned nodes, "edpm_network_config_nonconfigured_cleanup"
+ansible var can be set to "false".
+
 Here is an example playbook to run os-net-config tool:
 
 .. code-block:: YAML

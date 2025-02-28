@@ -1,0 +1,28 @@
+{
+    "image": "{{ edpm_telemetry_openstack_network_exporter_image }}",
+    "restart": "always",
+    "recreate": true,
+    "privileged": true,
+    "ports": ["9105:9105"],
+    "command": [],
+    "net": "host",
+    "environment": {
+        "OS_ENDPOINT_TYPE":"internal",
+        "OPENSTACK_NETWORK_EXPORTER_YAML":"/etc/openstack_network_exporter/openstack_network_exporter.yaml"
+    },
+{% if edpm_telemetry_healthcheck %}
+    "healthcheck": {
+        "test": "/openstack/healthcheck openstack-netwo",
+        "mount": "/var/lib/openstack/healthchecks/openstack_network_exporter"
+    },
+{% endif %}
+    "volumes": [
+        "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml:/etc/openstack_network_exporter/openstack_network_exporter.yaml:z",
+{% if tls_cert_exists|bool %}
+        "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z",
+{% endif %}
+        "/var/run/openvswitch:/run/openvswitch:rw,z",
+        "/var/lib/openvswitch/ovn:/run/ovn:rw,z",
+        "/proc:/host/proc:ro"
+    ]
+}
