@@ -10,7 +10,6 @@
       loop:
         - "/var/lib/edpm-config/container-startup-config/frr"
         - "/var/lib/config-data/ansible-generated/frr"
-        - "/var/log/containers/frr"
         - "/etc/tmpfiles.d/"
         - "/var/lib/config-data/ansible-generated/frr/etc/frr"
 
@@ -53,24 +52,6 @@
               - check_frr_daemons_file.stat.exists
             fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/daemons does not exist"
 
-    - name: "Use lookup to get container frr log"
-      vars:
-        local_file: /var/log/containers/frr/frr.log
-        remote_file: /home/zuul/frr_container.log
-      when: lookup( 'file', local_file, errors='ignore' )
-      copy:
-        src: "{{ local_file}}"
-        dest: "{{ remote_file }}"
-
-    - name: "Use lookup to get stdout frr.log"
-      vars:
-        local_file: /var/log/containers/stdouts/frr.log
-        remote_file: /home/zuul/frr_stdouts.log
-      when: lookup( 'file', local_file, errors='ignore' )
-      copy:
-        src: "{{ local_file}}"
-        dest: "{{ remote_file }}"
-
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
@@ -80,16 +61,3 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_frr.service"}
-
-    - name: ensure that log file for frr exist
-      become: true
-      block:
-        - name: Check if file /var/log/containers/frr/frr.log exist
-          ansible.builtin.stat:
-            path: /var/log/containers/frr/frr.log
-          register: log_file
-        - name: Assert file /var/log/containers/frr/frr.log exist
-          ansible.builtin.assert:
-            that:
-              - log_file.stat.exists
-            fail_msg: "File /var/log/containers/frr/frr.log does not exist"
