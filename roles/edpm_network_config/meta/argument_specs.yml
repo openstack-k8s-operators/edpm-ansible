@@ -62,7 +62,7 @@ argument_specs:
         description: >
           If enabled, safe defaults (DHCP for all interfaces) will be applied in
           case of failing while applying the provided net config.
-        default: true
+        default: false
       edpm_network_config_template:
         type: str
         description: "Which settings template should be rendered."
