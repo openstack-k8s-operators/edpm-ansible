@@ -18,15 +18,15 @@
   osp.edpm.edpm_nftables_snippet:
     dest: /var/lib/edpm-config/firewall/frr.yaml
     content: |
-      - rule_name: 121 frr bgp port 
+      - rule_name: 121 frr bgp port
         rule:
           proto: tcp
-          dport: 
+          dport:
            - 179
       - rule_name: 122 frr bfd port
         rule:
           proto: udp
-          dport:       
+          dport:
            - 3784
            - 3785
            - 4784
