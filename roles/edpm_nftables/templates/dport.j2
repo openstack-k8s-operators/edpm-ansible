@@ -1,7 +1,7 @@
 {%- set ns = namespace(_dport='') %}
 {%- if 'dport' in rule %}
 {%    if rule['dport'] is iterable and (rule['dport'] is not string and rule['dport'] is not mapping) -%}
-{%      set ns._dport = rule['dport'] |join(',') -%}
+{%      set ns._dport = rule['dport'] |join(', ') -%}
 {%    else -%}
 {%      set ns._dport = rule['dport'] -%}
 {%    endif -%}
@@ -9,7 +9,7 @@
 {#- This is for legacy things - Really, use dport... #}
 {%- if 'port' in rule %}
 {%    if rule['port'] is iterable and (rule['port'] is not string and rule['port'] is not mapping) -%}
-{%      set ns._dport = rule['port'] |join(',') -%}
+{%      set ns._dport = rule['port'] |join(', ') -%}
 {%    else -%}
 {%      set ns._dport = rule['port'] -%}
 {%    endif -%}
