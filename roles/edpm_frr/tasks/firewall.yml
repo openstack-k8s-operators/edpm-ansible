@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Inject firewall rules for OVN
+- name: Inject firewall rules for frr BGP and BFD
   osp.edpm.edpm_nftables_snippet:
     dest: /var/lib/edpm-config/firewall/frr.yaml
     content: |
@@ -23,7 +23,7 @@
           proto: tcp
           dport:
            - 179
-      - rule_name: 122 frr bfd port
+      - rule_name: 122 frr bfd ports
         rule:
           proto: udp
           dport:
@@ -34,12 +34,12 @@
            - 49153
           state: ["UNTRACKED"]
 
-- name: Configure firewall for the ovn
+- name: Configure firewall for frr BGP and BFD
   ansible.builtin.include_role:
       name: osp.edpm.edpm_nftables
       tasks_from: "configure.yml"
 
-- name: Apply firewall for the ovn
+- name: Apply firewall for frr BGP and BFD
   ansible.builtin.include_role:
       name: osp.edpm.edpm_nftables
       tasks_from: "run.yml"

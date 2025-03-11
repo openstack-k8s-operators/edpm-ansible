@@ -52,7 +52,7 @@
               - check_frr_daemons_file.stat.exists
             fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/daemons does not exist"
 
-    - name: verify ovn firewall rules are applied
+    - name: verify frr BGP and BFD firewall rules are applied
       block:
         - name: rule source file exists
           become: true
@@ -60,7 +60,7 @@
             path: "/var/lib/edpm-config/firewall/frr.yaml"
           register: rule_source_exists
 
-        - name: Assert ovn rule source file exists
+        - name: Assert frr BGP and BFD rule source file exists
           ansible.builtin.assert:
             that:
               - rule_source_exists.stat.exists
