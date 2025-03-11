@@ -144,6 +144,11 @@
         csr_content: "{{ csr.csr }}"
         provider: selfsigned
 
+    - name: Set permissions for certificate authority public key
+      ansible.builtin.file:
+        path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
+        mode: 0644
+
     - name: Gather required facts
       ansible.builtin.setup:
         gather_subset:
