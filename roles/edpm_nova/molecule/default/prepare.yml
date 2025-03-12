@@ -46,7 +46,7 @@
         pushd repo-setup-main
         python3 -m venv ./venv
         PBR_VERSION=0.0.0 ./venv/bin/pip install ./
-        ./venv/bin/repo-setup current-podified -b antelope
+        ./venv/bin/repo-setup -d centos9 current-podified -b antelope
         popd
         rm -rf repo-setup-main
     # NOTE(gibi): this is done by the boostrap role in a real deployment
@@ -143,6 +143,11 @@
         privatekey_path: "{{ edpm_nova_tls_ca_src_dir }}/ca.key"
         csr_content: "{{ csr.csr }}"
         provider: selfsigned
+
+    - name: Set permissions for certificate authority public key
+      ansible.builtin.file:
+        path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
+        mode: 0644
 
     - name: Gather required facts
       ansible.builtin.setup:
