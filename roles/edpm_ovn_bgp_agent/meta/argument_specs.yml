@@ -27,7 +27,7 @@ argument_specs:
         default: false
       edpm_ovn_bgp_agent_driver:
         type: str
-        default: ovn_bgp_driver
+        default: nb_ovn_bgp_driver
       edpm_ovn_bgp_agent_private_key:
         description: Location of private TLS key. Keep it safe.
         type: path
