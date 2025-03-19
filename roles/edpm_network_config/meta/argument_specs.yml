@@ -52,7 +52,7 @@ argument_specs:
       edpm_network_config_nmstate:
         type: bool
         description: "If enabled, use nmstate and network manager for network configuration."
-        default: false
+        default: true
       edpm_network_config_os_net_config_mappings:
         type: dict
         description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
