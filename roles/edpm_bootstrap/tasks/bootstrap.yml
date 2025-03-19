@@ -69,44 +69,6 @@
     state: "{{ edpm_bootstrap_selinux_mode }}"
   become: true
 
-- name: Stop NetworkManager from updating resolv.conf
-  when: ( edpm_bootstrap_network_service == 'NetworkManager' ) and ( not edpm_bootstrap_network_resolvconf_update )
-  become: true
-  block:
-    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
-      community.general.ini_file:
-        path: /etc/NetworkManager/NetworkManager.conf
-        state: present
-        no_extra_spaces: true
-        section: main
-        option: dns
-        value: none
-        backup: true
-        mode: '0644'
-    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
-      community.general.ini_file:
-        path: /etc/NetworkManager/NetworkManager.conf
-        state: present
-        no_extra_spaces: true
-        section: main
-        option: rc-manager
-        value: unmanaged
-        backup: true
-        mode: '0644'
-    - name: Reload NetworkManager
-      ansible.builtin.systemd:
-        name: NetworkManager
-        state: reloaded
-
-- name: Stop dhclient from updating resolv.conf
-  become: true
-  ansible.builtin.copy:
-    dest: /etc/dhcp/dhclient-enter-hooks
-    mode: "0755"
-    content: |
-      #!/bin/sh
-      make_resolv_conf() { : ; }
-
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
 

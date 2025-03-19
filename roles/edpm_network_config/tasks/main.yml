@@ -41,6 +41,9 @@
         state: restarted
       when: nm_ovs_status.changed  # noqa: no-handler
 
+- name: Import DNS NetworkManager configs tasks
+  ansible.builtin.import_tasks: dns_nm_configs.yml
+
 - name: Configure network with network role from system roles [nmstate]
   when: edpm_network_config_tool == 'nmstate'
   become: true
