@@ -63,6 +63,10 @@
         tasks_from: "download_cache.yml"
 
     - name: "Running FRR"
+      vars:
+        edpm_frr_bgp_peers:
+          - 10.64.0.1
+          - 10.65.0.1
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         apply:
