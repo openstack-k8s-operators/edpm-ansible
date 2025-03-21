@@ -27,6 +27,7 @@ jobs:
         - edpm_ddp_package
         - edpm_derive_pci_device_spec
         - edpm_download_cache
+        - edpm_frr
         - edpm_growvols
         - edpm_logrotate_crond
         - edpm_multipathd
