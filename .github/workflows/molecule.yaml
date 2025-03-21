@@ -58,7 +58,8 @@ jobs:
     - name: Check whether the role is modified
       id: check_role
       run: |
-        if [[ $(git diff --name-only roles | grep "${{ matrix.tested_role }}/") ]]; then
+        git fetch origin $GITHUB_BASE_REF
+        if [[ $(git diff --name-only origin/$GITHUB_BASE_REF roles | grep "${{ matrix.tested_role }}/") ]]; then
           echo "modified=true" >> $GITHUB_OUTPUT
         else
           echo "modified=false" >> $GITHUB_OUTPUT
