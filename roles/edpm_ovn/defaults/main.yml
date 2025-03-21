@@ -11,7 +11,7 @@ edpm_ovn_images_download_delay: 5
 edpm_ovn_images_download_retries: 5
 
 edpm_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_ovn_service_name }}"
-edpm_ovn_bridge: br-int
+edpm_ovn_bridge: "br-int"
 edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
 
 # Local unicast prefix
