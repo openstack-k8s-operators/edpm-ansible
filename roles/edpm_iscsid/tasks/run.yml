@@ -23,16 +23,24 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Manage iscsid containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: iscsid
-    edpm_container_standalone_container_defs:
-      iscsid: "{{ lookup('template', 'iscsid.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      iscsid: "{{ lookup('file', 'files/iscsid.yaml') | from_yaml }}"
+- name: Cleanup old standalone container
+  ansible.builtin.file:
+    path: /etc/systemd/system/edpm_iscsid.service
+    state: absent
+  become: true
+
+- name: Render iscsid quadlet file
+  ansible.builtin.template:
+    src: templates/iscsid.yaml.j2
+    dest: /etc/containers/systemd/iscsid.yaml
+  become: true
   register: manage_iscsid_stat
+
+- name: Start iscsi quadlet
+  ansible.builtin.systemd_service:
+    name: edpm-compute@iscsid
+    state: restarted
+  become: true
 
 - name: Check if the iscsid container restart is required
   ansible.builtin.stat:
@@ -52,7 +60,7 @@
     - not manage_iscsid_stat.changed|bool
     - iscsi_restart_stat.stat.exists|bool
   ansible.builtin.systemd:
-    name: edpm_iscsid
+    name: edpm-compute@iscsid.service
     state: restarted
 
 - name: Remove iscsid container restart sentinel file
