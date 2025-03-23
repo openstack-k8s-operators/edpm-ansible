@@ -33,21 +33,51 @@ edpm_container_standalone_container_defs: {}
 # List of common volumes that can be included in the template of a container
 # definition to include the most common volumes.
 edpm_container_standalone_common_volumes:
-  - /etc/hosts:/etc/hosts:ro
-  - /etc/localtime:/etc/localtime:ro
+  - path: /etc/hosts
+    mountPath: /etc/hosts
+    readOnly: true
+    name: etc-hosts
+  - path: /etc/localtime
+    mountPath: /etc/localtime
+    readOnly: true
+    name: etc-localtime
   # OpenSSL trusted CAs
-  - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
-  - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
-  - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-  - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
-  - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+  - path: /etc/pki/ca-trust/extracted
+    mountPath: /etc/pki/ca-trust/extracted
+    readOnly: true
+    name: ca-extracted
+  - path: /etc/pki/ca-trust/source/anchors
+    mountPath: /etc/pki/ca-trust/source/anchors
+    readOnly: true
+    name: anchors
+  - path: /etc/pki/tls/certs/ca-bundle.crt
+    mountPath: /etc/pki/tls/certs/ca-bundle.crt
+    readOnly: true
+    name: ca-bundle
+  - path: /etc/pki/tls/certs/ca-bundle.trust.crt
+    mountPath: /etc/pki/tls/certs/ca-bundle.trust.crt
+    readOnly: true
+    name: ca-trust-bundle
+  - path: /etc/pki/tls/cert.pem
+    mountPath: /etc/pki/tls/cert.pem
+    readOnly: true
+    name: tls-cert
   # Syslog socket
-  - /dev/log:/dev/log
+  - path: /dev/log
+    mountPath: /dev/log
+    readOnly: false
+    name: dev-log
 
 # List of volumes included when internal tls is enabled
 edpm_container_standalone_internal_tls_volumes:
-  - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
-  - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
+  - path: /etc/pki/tls/certs/httpd
+    mountPath: /etc/pki/tls/certs/httpd
+    readOnly: true
+    name: certs-httpd
+  - path: /etc/pki/tls/private/httpd
+    mountPath: /etc/pki/tls/private/httpd
+    readOnly: true
+    name: private-httpd
 
 # Internal TLS vars. These vars are not prefixed with the role name as they are
 # intended to be set from other services/roles.
