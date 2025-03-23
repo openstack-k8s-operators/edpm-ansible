@@ -1,13 +1,37 @@
-image: {{ edpm_iscsid_image }}
-net: host
-privileged: true
-restart: always
-{% if edpm_iscsid_healthcheck %}
-healthcheck:
-  test: /openstack/healthcheck
-  mount: /var/lib/openstack/healthchecks/iscsid
-{% endif %}
-volumes:
-  {{ edpm_container_standalone_common_volumes | default([]) + edpm_iscsid_volumes }}
-environment:
-  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: /etc/iscsi:z
+  creationTimestamp: "2024-12-09T02:00:14Z"
+  labels:
+    app: iscsid
+  name: iscsid
+spec:
+  hostNetwork: true
+  volumes:
+  {% set vols = edpm_container_quadlet_common_volumes | default([]) + edpm_iscsid_volumes %}
+  {%- for vol in vols -%}
+  - hostPath: 
+      path: {{ vol.path }}
+    name: {{ vol.name }}
+  {% endfor -%}
+  containers:
+  - args:
+    - kolla_start
+    env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ALWAYS
+    image: {{ edpm_iscsid_image }}
+    name: iscsid
+    securityContext:
+      privileged: true
+      procMount: Unmasked
+    volumeMounts:
+    {% set vols = edpm_container_quadlet_common_volumes | default([]) + edpm_iscsid_volumes %}
+    {%- for vol in vols -%}
+    - mountPath: {{ vol.mountPath }}
+      name: {{ vol.name }}
+      readOnly: {{ vol.readOnly }}
+    {% endfor -%}

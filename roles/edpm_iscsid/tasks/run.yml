@@ -14,25 +14,27 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure /usr/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
-
 - name: Update iscsi health check script
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Manage iscsid containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
+- name: Cleanup existing standalone conatiner
+  ansible.builtin.import_role:
+    name: edpm_container_quadlet
+    tasks_from: cleanup.yml
   vars:
-    edpm_container_standalone_service: iscsid
-    edpm_container_standalone_container_defs:
-      iscsid: "{{ lookup('template', 'iscsid.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
+    edpm_container_quadlet_service: iscsid
+
+- name: Configure and start iscsid quadlet
+  ansible.builtin.import_role:
+    name: edpm_container_quadlet
+  vars:
+    edpm_container_quadlet_service: iscsid
+    edpm_container_quadlet_service_use_host_network: true
+    edpm_container_quadlet_service_volumes: "{{ edpm_iscsid_volumes }}"
+    edpm_container_quadlet_service_image: "{{ edpm_iscsid_image }}"
+    edpm_container_quadlet_kolla_config_files:
       iscsid: "{{ lookup('file', 'files/iscsid.yaml') | from_yaml }}"
-  register: manage_iscsid_stat
 
 - name: Check if the iscsid container restart is required
   ansible.builtin.stat:
@@ -49,10 +51,9 @@
 - name: Restart iscsid container to refresh /etcd/iscsid.conf
   become: true
   when:
-    - not manage_iscsid_stat.changed|bool
     - iscsi_restart_stat.stat.exists|bool
   ansible.builtin.systemd:
-    name: edpm_iscsid
+    name: edpm@iscsid
     state: restarted
 
 - name: Remove iscsid container restart sentinel file
