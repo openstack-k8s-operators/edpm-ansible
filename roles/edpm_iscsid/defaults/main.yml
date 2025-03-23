@@ -29,14 +29,38 @@ edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
 edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
 edpm_iscsid_volumes:
-  - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
-  - /dev:/dev
-  - /run:/run
-  - /sys:/sys
-  - /lib/modules:/lib/modules:ro
-  - /etc/iscsi:/etc/iscsi:z
-  - /etc/target:/etc/target:z
-  - /var/lib/iscsi:/var/lib/iscsi:z
+  - path: /var/lib/kolla/config_files/iscsid.json
+    mountPath: /var/lib/kolla/config_files/config.json
+    readOnly: true
+    name: iscsid-kolla-config
+  - path: /dev
+    mountPath: /dev
+    readOnly: false
+    name: dev
+  - path: /run
+    mountPath: /run
+    readOnly: false
+    name: run
+  - path: /sys
+    mountPath: /sys
+    readOnly: false
+    name: sys
+  - path: /lib/modules
+    mountPath: /lib/modules
+    readOnly: true
+    name: modules
+  - path: /etc/iscsi
+    mountPath: /etc/iscsi
+    readOnly: false
+    name: etc-iscsi
+  - path: /etc/target
+    mountPath: /etc/target
+    readOnly: false
+    name: etc-target
+  - path: /var/lib/iscsi
+    mountPath: /var/lib/iscsi
+    readOnly: false
+    name: var-lib-iscsi
 
 edpm_iscsid_chap_algs: >-
   {{
@@ -47,3 +71,4 @@ edpm_iscsid_chap_algs: >-
   }}
 # if container health check should be enabled
 edpm_iscsid_healthcheck: true
+edpm_container_quadlet_service: ""
