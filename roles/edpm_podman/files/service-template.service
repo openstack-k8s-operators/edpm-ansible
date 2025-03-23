@@ -1,0 +1,11 @@
+[Unit]
+Description=%i container
+After=edpm-container-shutdown.service
+After=openvswitch.service
+Wants=openvswitch.service
+
+[Kube]
+Yaml=/etc/containers/systemd/%i.yaml
+
+[Install]
+WantedBy=multi-user.target
