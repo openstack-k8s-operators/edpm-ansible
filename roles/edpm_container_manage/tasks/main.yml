@@ -40,6 +40,7 @@
   when:
     - (all_containers_hash|length) > 0
     - edpm_container_manage_cli == 'podman'
+    - not edpm_use_quadlets
   become: true
   block:
     - name: "Update container configs with new config hashes"
