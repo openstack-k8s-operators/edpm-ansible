@@ -54,3 +54,17 @@ edpm_telemetry_enabled_exporters:
   - ceilometer_agent_compute
   - node_exporter
   - podman_exporter
+
+edpm_telemetry_volumes:
+    - path: "{{ edpm_telemetry_config_dest }}"
+      mountPath: /var/lib/openstack/config
+      name: openstack-config
+      readOnly: false
+    - path: "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json"
+      mountPath: /var/lib/kolla/config_files/config.json
+      name: ceilometer-agent-compute-json
+      readOnly: false
+    - path: /run/libvirt
+      mountPath: /run/libvirt
+      name: run-libvirt
+      readOnly: true

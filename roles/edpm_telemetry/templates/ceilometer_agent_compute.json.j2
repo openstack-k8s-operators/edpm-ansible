@@ -1,31 +1,40 @@
-{
-    "image": "{{ edpm_telemetry_ceilometer_compute_image }}",
-    "user": "ceilometer",
-    "restart": "always",
-    "command": "kolla_start",
-    "security_opt": "label:type:ceilometer_polling_t",
-    "net": "host",
-    "environment": {
-        "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS",
-        "OS_ENDPOINT_TYPE":"internal"
-    },
-{% if edpm_telemetry_healthcheck %}
-    "healthcheck": {
-        "test": "/openstack/healthcheck compute",
-        "mount": "/var/lib/openstack/healthchecks/ceilometer_agent_compute"
-    },
-{% endif %}
-    "volumes": [
-        "{{ edpm_telemetry_config_dest }}:/var/lib/openstack/config/:z",
-        "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json:/var/lib/kolla/config_files/config.json:z",
-        "/run/libvirt:/run/libvirt:shared,ro",
-        "/etc/hosts:/etc/hosts:ro",
-        "/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro",
-        "/etc/localtime:/etc/localtime:ro",
-        "/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro",
-{% if ca_bundle_exists|bool %}
-	"{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
-{% endif %}
-        "/dev/log:/dev/log"
-    ]
-}
+---
+ apiVersion: v1
+ kind: Pod
+ metadata:
+   annotations:
+     bind-mount-options: /var/lib/openstack/cacerts/telemetry/tls-ca-bundle.pem:z
+   labels:
+     app: ceilometeragentcompute
+   name: ceilometeragentcompute
+ spec:
+   containers:
+   - args:
+     - kolla_start
+     env:
+     - name: KOLLA_CONFIG_STRATEGY
+       value: COPY_ALWAYS
+     - name: OS_ENDPOINT_TYPE
+       value: internal
+     image: {{ edpm_telemetry_ceilometer_compute_image }}
+     name: ceilometeragentcompute
+     securityContext:
+       runAsGroup: 42405
+       runAsUser: 42405
+       seLinuxOptions:
+         type: ceilometer_polling_t
+     volumeMounts:
+     {% set volumes = edpm_container_standalone_common_volumes | default([]) + edpm_telemetry_volumes %}
+     {%- for vol in volumes -%}
+     - mountPath: {{ vol.mountPath }}
+       name: {{ vol.name }}
+       readOnly: {{ vol.readOnly }}
+     {% endfor -%}
+   hostNetwork: true
+   volumes:
+   {% set volumes = edpm_container_standalone_common_volumes | default([]) + edpm_telemetry_volumes %}
+   {%- for vol in volumes -%}
+   - hostPath: 
+       path: {{ vol.path }}
+     name: {{ vol.name }}
+   {% endfor -%}
