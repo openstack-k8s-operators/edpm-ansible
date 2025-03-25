@@ -23,16 +23,31 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Manage multipathd containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: multipathd
-    edpm_container_standalone_container_defs:
-      multipathd: "{{ lookup('template', 'multipathd.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      multipathd: "{{ lookup('template', 'kolla_multipathd.yaml.j2') | from_yaml }}"
+- name: Stop and disable old standalone container
+  ansible.builtin.systemd_service:
+    name: edpm_multipathd
+    state: stopped
+    enabled: false
+  become: true
+
+- name: Cleanup old standalone container
+  ansible.builtin.file:
+    path: /etc/systemd/system/edpm_multipathd.service
+    state: absent
+  become: true
+
+- name: Render multipathd quadlet file
+  ansible.builtin.template:
+    src: templates/multipathd.yaml.j2
+    dest: /etc/containers/systemd/multipathd.yaml
+  become: true
   register: manage_multipathd_stat
+
+- name: Start multipathd quadlet
+  ansible.builtin.systemd_service:
+    name: edpm-compute@multipathd
+    state: restarted
+  become: true
 
 - name: Check if the multipathd container restart is required
   ansible.builtin.stat:
@@ -59,7 +74,7 @@
 
     - name: "Restart container to refresh its /etc/multipath.conf"
       ansible.builtin.systemd:
-        name: "edpm_{{ multipath_container }}"
+        name: "edpm_compute@{{ multipath_container }}"
         state: restarted
       loop: "{{ multipath_conf_containers.stdout_lines | default([]) }}"
       loop_control:
