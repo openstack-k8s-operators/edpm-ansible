@@ -14,6 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
+- name: Include bootc tasks
+  ansible.builtin.include_tasks: bootc.yml
+
 - name: Ensure /var/log/journal exists
   ansible.builtin.file:
     path: /var/log/journal
