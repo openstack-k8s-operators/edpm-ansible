@@ -8,6 +8,14 @@
      app: ceilometeragentcompute
    name: ceilometeragentcompute
  spec:
+   hostNetwork: true
+   volumes:
+   {% set volumes = edpm_container_standalone_common_volumes | default([]) + edpm_telemetry_volumes %}
+   {%- for vol in volumes -%}
+   - hostPath: 
+       path: {{ vol.path }}
+     name: {{ vol.name }}
+   {% endfor -%}
    containers:
    - args:
      - kolla_start
@@ -30,11 +38,3 @@
        name: {{ vol.name }}
        readOnly: {{ vol.readOnly }}
      {% endfor -%}
-   hostNetwork: true
-   volumes:
-   {% set volumes = edpm_container_standalone_common_volumes | default([]) + edpm_telemetry_volumes %}
-   {%- for vol in volumes -%}
-   - hostPath: 
-       path: {{ vol.path }}
-     name: {{ vol.name }}
-   {% endfor -%}
