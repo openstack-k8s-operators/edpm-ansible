@@ -18,12 +18,34 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Manage logrotate_crond containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: logrotate_crond
-    edpm_container_standalone_container_defs:
-      logrotate_crond: "{{ lookup('template', 'logrotate_crond.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      logrotate_crond: "{{ lookup('file', 'files/logrotate_crond.yaml') | from_yaml }}"
+- name: Stop old standalone container
+  ansible.builtin.systemd_service: 
+    name: edpm_logrotate_crond
+    state: stopped
+    enabled: false
+  become: true
+
+- name: Cleanup old standalone container
+  ansible.builtin.file:
+    path: /etc/systemd/system/edpm_logrotate.service
+    state: absent
+  become: true
+
+- name: Copy logrotate crond kolla file
+  ansible.builtin.copy:
+    src: files/logrotate_crond.yaml
+    dest: /var/lib/kolla/config_files/logrotate_crond.json
+
+- name: Render logrotate quadlet file
+  ansible.builtin.template:
+    src: templates/logrotate_crond.yaml.j2
+    dest: /etc/containers/systemd/logrotate.yaml
+  register: edpm_logrotate_quadlet_changed
+  become: true
+
+- name: Start logrotate Quadlet
+  ansible.builtin.systemd:
+    name: edpm-compute@logrotate
+    state: restarted
+  become: true
+  when: edpm_logrotate_quadlet_changed
