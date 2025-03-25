@@ -24,15 +24,42 @@ edpm_multipathd_image_download_retries: 5
 
 edpm_multipathd_command: "/usr/sbin/multipathd -d"
 edpm_multipathd_volumes:
-  - /var/lib/kolla/config_files/multipathd.json:/var/lib/kolla/config_files/config.json:ro
-  - /dev:/dev
-  - /run/udev:/run/udev
-  - /sys:/sys
-  - /lib/modules:/lib/modules:ro
-  - /etc/iscsi:/etc/iscsi:ro
-  - /var/lib/iscsi:/var/lib/iscsi:z
-  - /etc/multipath:/etc/multipath:z
-  - /etc/multipath.conf:/etc/multipath.conf:ro
+  - path: /var/lib/kolla/config_files/multipathd.json
+    mountPath: /var/lib/kolla/config_files/config.json
+    name: kolla-config
+    readOnly: true
+  - path: /dev
+    mountPath: /dev
+    name: dev
+    readOnly: false
+  - path: /run/udev
+    mountPath: /run/udev
+    name: run-udev
+    readOnly: false
+  - path: /sys
+    mountPath: /sys
+    name: sys
+    readOnly: false
+  - path: /lib/modules
+    mountPath: /lib/modules
+    name: lib-modules
+    readOnly: true
+  - path: /etc/iscsi
+    mountPath: /etc/iscsi
+    name: etc-iscsi
+    readOnly: true
+  - path: /var/lib/iscsi
+    mountPath: /var/lib/iscsi
+    name: var-lib-iscsi
+    readOnly: false
+  - path: /etc/multipath
+    mountPath: /etc/multipath
+    name: etc-multipath
+    readOnly: false
+  - path: /etc/multipath.conf
+    mountPath: /etc/multipath.conf
+    name: etc-multipath-conf
+    readOnly: true
 
 # These should not need to be overridden except in unique situations.
 edpm_multipathd_restart_sentinel: /etc/multipath/.multipath_restart_required
