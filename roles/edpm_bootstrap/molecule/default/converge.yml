@@ -3,6 +3,9 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        filter: ansible_local
     - name: "Download required role packages"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_bootstrap"
