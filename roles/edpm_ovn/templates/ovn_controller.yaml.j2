@@ -1,28 +1,38 @@
-{%- set edpm_ovn_controller_volumes = [] %}
-{%- set edpm_ovn_controller_volumes =
-        edpm_ovn_controller_volumes +
-        edpm_ovn_controller_common_volumes +
-        edpm_ovn_controller_tls_cacert_volumes %}
-{%- if edpm_ovn_tls_enabled | bool %}
-{%- set edpm_ovn_controller_volumes =
-        edpm_ovn_controller_volumes +
-        edpm_ovn_controller_tls_volumes %}
-{%- endif -%}
-image: "{{ edpm_ovn_controller_agent_image }}"
-net: host
-privileged: true
-user: root
-restart: always
-{% if edpm_ovn_healthcheck %}
-healthcheck:
-        test: /openstack/healthcheck
-        mount: /var/lib/openstack/healthchecks/ovn_controller
-{% endif %}
-depends_on:
-  - openvswitch.service
-{% if edpm_ovn_cpu_set | default(false) %}
-cpuset_cpus: "{{ edpm_ovn_cpu_set }}"
-{% endif %}
-volumes: {{ edpm_ovn_controller_volumes }}
-environment:
-  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: /var/lib/openstack/certs/ovn/default/ca.crt:z
+  creationTimestamp: "2024-12-09T03:34:08Z"
+  labels:
+    app: ovncontroller-pod
+  name: ovncontroller-pod
+spec:
+  hostNetwork: true
+  hostname: {{ ansible_fqdn }}
+  volumes:
+  {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_ovn_controller_common_volumes + edpm_ovn_controller_tls_volumes %}
+  {%- for vol in vols -%}
+  - hostPath: 
+      path: {{ vol.path }}
+    name: {{ vol.name }}
+  {% endfor -%}
+  containers:
+  - args:
+    - kolla_start
+    env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ALWAYS
+    image: {{ edpm_ovn_controller_agent_image }}
+    name: ovncontroller
+    securityContext:
+      privileged: true
+      procMount: Unmasked
+    volumeMounts:
+    {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_ovn_controller_common_volumes + edpm_ovn_controller_tls_volumes %}
+    {%- for vol in vols -%}
+    - mountPath: {{ vol.mountPath }}
+      name: {{ vol.name }}
+      readOnly: {{ vol.readOnly }}
+    {% endfor -%}
