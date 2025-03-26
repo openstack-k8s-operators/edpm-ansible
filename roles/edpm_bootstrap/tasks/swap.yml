@@ -22,7 +22,7 @@
   block:
     - name: Set swap path
       set_fact:
-        edpm_bootstrap_swap_path_value: |
+        edpm_bootstrap_swap_path_value: |-
           {% if ansible_local.bootc | bool %}{{ edpm_bootstrap_swap_path_bootc }}{% else %}{{ edpm_bootstrap_swap_path }}{% endif %}
     - name: Create swapfile if needed
       ansible.builtin.command:
