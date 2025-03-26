@@ -36,12 +36,29 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Run ovn_metadata_agent container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: ovn_metadata_agent
-    edpm_container_standalone_container_defs:
-      ovn_metadata_agent: "{{ lookup('template', 'ovn_metadata_agent.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      ovn_metadata_agent: "{{ lookup('template', 'kolla_ovn_metadata_agent.yaml.j2') | from_yaml }}"
+- name: Stop and disable old standalone container
+  ansible.builtin.systemd_service:
+    name: edpm_ovn_metadata_agent
+    state: stopped
+    enabled: false
+  become: true
+  ignore_errors: true
+
+- name: Cleanup old standalone container
+  ansible.builtin.file:
+    path: /etc/systemd/system/edpm_ovn_metadata_agent.service
+    state: absent
+  become: true
+
+- name: Render edpm_ovn_metadata_agent quadlet file
+  ansible.builtin.template:
+    src: templates/ovn_metadata_agent.yaml.j2
+    dest: /etc/containers/systemd/ovn_metadata_agent.yaml
+  become: true
+  register: manage_ovn_controller_stat
+
+- name: Start OVN metadata quadlet
+  ansible.builtin.systemd_service:
+    name: edpm-compute@ovn_metadata_agent
+    state: restarted
+  become: true

@@ -1,27 +1,39 @@
-{%- set edpm_neutron_metadata_volumes = [] %}
-{%- set edpm_neutron_metadata_volumes =
-        edpm_neutron_metadata_volumes +
-        edpm_neutron_metadata_common_volumes +
-        edpm_neutron_metadata_tls_cacert_volumes %}
-{%- if edpm_neutron_metadata_agent_tls_enabled | bool %}
-{%- set edpm_neutron_metadata_volumes =
-        edpm_neutron_metadata_volumes +
-        edpm_neutron_metadata_tls_volumes %}
-{%- endif -%}
-image: "{{ edpm_neutron_metadata_agent_image }}"
-net: host
-pid: host
-cgroupns: host
-privileged: true
-user: root
-restart: always
-depends_on:
-  - openvswitch.service
-{% if edpm_neutron_metadata_healthcheck %}
-healthcheck:
-        test: /openstack/healthcheck
-        mount: /var/lib/openstack/healthchecks/ovn_metadata_agent
-{% endif %}
-volumes: {{ edpm_neutron_metadata_volumes }}
-environment:
-  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: /var/lib/openstack/certs/neutron-metadata/default/tls.crt:z
+  labels:
+    app: ovnmetadataagent
+  name: ovnmetadataagent
+spec:
+  hostNetwork: true
+  volumes:
+  {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_neutron_metadata_common_volumes + edpm_neutron_metadata_tls_cacert_volumes %}
+  {%- for vol in vols -%}
+  - hostPath: 
+      path: {{ vol.path }}
+    name: {{ vol.name }}
+  {% endfor -%}
+  containers:
+  - args:
+    - kolla_start
+    env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ALWAYS
+    image: {{ edpm_neutron_metadata_agent_image }}
+    name: ovnmetadataagent
+    securityContext:
+      privileged: true
+      procMount: Unmasked
+      runAsGroup: 0
+      runAsUser: 0
+    volumeMounts:
+    {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_neutron_metadata_common_volumes + edpm_neutron_metadata_tls_cacert_volumes %}
+    {%- for vol in vols -%}
+    - mountPath: {{ vol.mountPath }}
+      name: {{ vol.name }}
+      readOnly: {{ vol.readOnly }}
+    {% endfor -%}
+

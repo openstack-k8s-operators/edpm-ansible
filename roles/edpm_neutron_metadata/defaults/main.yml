@@ -17,13 +17,34 @@ edpm_neutron_metadata_agent_lib_dir: "/var/lib/neutron"
 edpm_neutron_metadata_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified"
 
 edpm_neutron_metadata_common_volumes:
-  - /run/openvswitch:/run/openvswitch:z
-  - "{{ edpm_neutron_metadata_agent_config_dir }}:/etc/neutron.conf.d:z"
-  - /run/netns:/run/netns:shared
-  - /var/lib/kolla/config_files/ovn_metadata_agent.json:/var/lib/kolla/config_files/config.json:ro
-  - "{{ edpm_neutron_metadata_agent_lib_dir }}:/var/lib/neutron:shared,z"
-  - "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn_metadata_haproxy_wrapper:/usr/local/bin/haproxy:ro"
-  - "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
+  - path: /run/openvswitch
+    mountPath: /run/openvswitch
+    name: run-openvswitch
+    readOnly: false
+  - path: "{{ edpm_neutron_metadata_agent_config_dir }}"
+    mountPath: /etc/neutron.conf.d
+    name: etc-neutron-conf-d
+    readOnly: false
+  - path: /run/netns
+    mountPath: /run/netns
+    name: run-netns
+    readOnly: false
+  - path: /var/lib/kolla/config_files/ovn_metadata_agent.json
+    mountPath: /var/lib/kolla/config_files/config.json
+    name: kolla-config
+    readOnly: true
+  - path: "{{ edpm_neutron_metadata_agent_lib_dir }}"
+    mountPath: /var/lib/neutron
+    name: var-lib-shared
+    readOnly: false
+  - path: "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn_metadata_haproxy_wrapper"
+    mountPath: /usr/local/bin/haproxy
+    name: haproxy
+    readOnly: true
+  - path: "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts"
+    mountPath: /etc/neutron/kill_scripts
+    name: kill-scripts
+    readOnly: true
 
 # Sidecar containers settings
 edpm_neutron_metadata_agent_sidecar_debug: false
@@ -62,8 +83,17 @@ edpm_neutron_metadata_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/t
 edpm_neutron_metadata_tls_cacert_volumes: []
 
 edpm_neutron_metadata_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - path: "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/ca.crt"
+    mountPath: /etc/pki/tls/certs/ovndbca.crt
+    name: ovndb-ca-crt
+    readOnly: true
+  - path: "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.crt"
+    mountPath: /etc/pki/tls/certs/ovndb.crt
+    name: ovndb-crt
+    readOnly: true
+  - path: "/var/lib/openstack/certs/{{ edpm_neutron_metadata_service_name }}/default/tls.key"
+    mountPath: /etc/pki/tls/private/ovndb.key
+    name: ovndb-key
+    readOnly: true
 
 edpm_neutron_metadata_healthcheck: true
