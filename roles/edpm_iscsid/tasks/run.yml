@@ -23,6 +23,14 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
+- name: Stop and disable old standalone container
+  ansible.builtin.systemd_service:
+    name: edpm_iscsid
+    state: stopped
+    enabled: false
+  become: true
+  ignore_errors: true
+
 - name: Cleanup old standalone container
   ansible.builtin.file:
     path: /etc/systemd/system/edpm_iscsid.service
