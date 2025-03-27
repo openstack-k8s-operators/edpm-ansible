@@ -17,6 +17,9 @@
 - name: Include host prep tasks
   ansible.builtin.import_tasks: install.yml
 
+- name: Configure firewall rules
+  ansible.builtin.import_tasks: firewall.yml
+
 - name: Configure FRR
   ansible.builtin.import_tasks: configure.yml
 
