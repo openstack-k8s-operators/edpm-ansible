@@ -26,7 +26,7 @@ restart: always
 depends_on:
   - openvswitch.service
 part_of:
-  - frr.service
+  - edpm_frr.service
 volumes: {{ edpm_ovn_bgp_agent_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
