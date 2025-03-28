@@ -27,21 +27,33 @@
           - "{{ edpm_ovn_controller_tls_cacert_bundle_src }}:{{ edpm_ovn_controller_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
-
 - name: Update ovn_controller health check script
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Run ovn_controller container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: ovn_controller
-    edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+- name: Stop and disable old standalone container
+  ansible.builtin.systemd_service:
+    name: edpm_ovn_controller
+    state: stopped
+    enabled: false
+  become: true
+  ignore_errors: true
+
+- name: Cleanup old standalone container
+  ansible.builtin.file:
+    path: /etc/systemd/system/edpm_ovn_controller.service
+    state: absent
+  become: true
+
+- name: Render ovn_controller quadlet file
+  ansible.builtin.template:
+    src: templates/ovn_controller.yaml.j2
+    dest: /etc/containers/systemd/ovn_controller.yaml
+  become: true
+  register: manage_ovn_controller_stat
+
+- name: Start ovn_controller quadlet
+  ansible.builtin.systemd_service:
+    name: edpm-compute@ovn_controller
+    state: restarted
+  become: true

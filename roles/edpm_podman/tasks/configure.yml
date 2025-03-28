@@ -19,6 +19,12 @@
 - name: Import login-kube-registry.yml tasks
   ansible.builtin.import_tasks: login-kube-registry.yml
   when: edpm_podman_login_kube_registry|bool
+- name: Write quadlet service template
+  ansible.builtin.copy:
+    src: files/service-template.service
+    dest: /etc/containers/systemd/edpm-compute@.kube
+  become: true
+  when: edpm_use_quadlets | default(false)
 - name: Configure edpm_container_manage to generate systemd drop-in dependencies
   become: true
   ansible.builtin.copy:
@@ -29,7 +35,9 @@
       dependencies for containers that have special
       start/stop ordering constraints. It ensures that
       those constraints are enforced on reboot/shutdown.
-  when: edpm_podman_systemd_drop_in_dependencies|bool
+  when: 
+    - not edpm_use_quadlets
+    - edpm_podman_systemd_drop_in_dependencies|bool
 - name: Configure edpm_container_manage to not generate drop-in dependencies
   become: true
   ansible.builtin.file:
