@@ -15,12 +15,12 @@
 # under the License.
 
 
-# "edpm_container_quadlets" will search for and load any operating system variable file
+# "edpm_container_quadlet" will search for and load any operating system variable file
 
-- name: "Ensure directory exists: {{ edpm_container_quadlets_kolla_config_dir }}"
+- name: "Ensure directory exists: {{ edpm_container_quadlet_kolla_config_dir }}"
   become: true
   ansible.builtin.file:
-    path: "{{ edpm_container_quadlets_kolla_config_dir }}"
+    path: "{{ edpm_container_quadlet_kolla_config_dir }}"
     state: directory
     recurse: true
     setype: container_file_t
@@ -29,9 +29,9 @@
   become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
-    dest: "{{ edpm_container_quadlets_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
+    dest: "{{ edpm_container_quadlet_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
     mode: "0600"
-  loop: "{{ edpm_container_quadlets_kolla_config_files | dict2items }}"
+  loop: "{{ edpm_container_quadlet_kolla_config_files | dict2items }}"
 
 - name: Copy systemd service template file
   ansible.builtin.copy:
