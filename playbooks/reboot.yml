@@ -5,6 +5,9 @@
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
   tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        filter: ansible_local
     - name: Run edpm_reboot
       ansible.builtin.import_role:
         name: osp.edpm.edpm_reboot
