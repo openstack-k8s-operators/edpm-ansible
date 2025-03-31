@@ -17,7 +17,7 @@
 
 galaxy_info:
   author: OpenStack
-  description: EDPM OpenStack Role -- edpm_container_quadlets
+  description: EDPM OpenStack Role -- edpm_container_quadlet
   company: Red Hat
   license: Apache-2.0
   min_ansible_version: '2.9'
