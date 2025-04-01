@@ -1,13 +1,36 @@
-image: {{ edpm_multipathd_image }}
-net: host
-privileged: true
-restart: always
-{% if edpm_multipathd_healthcheck %}
-healthcheck:
-  test: /openstack/healthcheck
-  mount: /var/lib/openstack/healthchecks/multipathd
-{% endif %}
-volumes:
-  {{ edpm_container_standalone_common_volumes | default([]) + edpm_multipathd_volumes }}
-environment:
-  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: /etc/multipath:z
+  labels:
+    app: multipathd
+  name: multipathd
+spec:
+  hostNetwork: true
+  volumes:
+  {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_multipathd_volumes %}
+  {%- for vol in vols -%}
+  - hostPath: 
+      path: {{ vol.path }}
+    name: {{ vol.name }}
+  {% endfor -%}
+  containers:
+  - args:
+    - kolla_start
+    env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ALWAYS
+    image: {{ edpm_multipathd_image }}
+    name: multipathd
+    securityContext:
+      privileged: true
+      procMount: Unmasked
+    volumeMounts:
+    {% set vols = edpm_container_standalone_common_volumes | default([]) + edpm_multipathd_volumes %}
+    {%- for vol in vols -%}
+    - mountPath: {{ vol.mountPath }}
+      name: {{ vol.name }}
+      readOnly: {{ vol.readOnly }}
+    {% endfor %}

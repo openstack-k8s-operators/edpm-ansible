@@ -34,9 +34,18 @@ edpm_logrotate_crond_image: "quay.io/podified-antelope-centos9/openstack-cron:cu
 edpm_logrotate_crond_config_use_ansible: true
 edpm_logrotate_crond_config_dir: /var/lib/config-data/ansible-generated/crond
 edpm_logrotate_crond_volumes:
-  - /var/lib/kolla/config_files/logrotate_crond.json:/var/lib/kolla/config_files/config.json:ro
-  - "{{ edpm_logrotate_crond_config_dir ~ ':/var/lib/kolla/config_files/src:ro' }}"
-  - /var/log/containers:/var/log/containers:z
+  - path: /var/lib/kolla/config_files/logrotate_crond.json
+    mountPath: /var/lib/kolla/config_files/config.json
+    name: logrotate-kolla-config
+    readOnly: true
+  - path: "{{ edpm_logrotate_crond_config_dir }}"
+    mountPath: /var/lib/kolla/config_files/src
+    name: logrotate-kolla-src
+    readOnly: true
+  - path: /var/log/containers
+    mountPath: /var/log/containers
+    name: var-log-containers
+    readOnly: false
 
 # Enforces life time (days) of rotated and compressed files.
 # Overrides the rotation and rotate settings.
