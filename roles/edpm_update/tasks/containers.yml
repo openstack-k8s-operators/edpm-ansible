@@ -139,6 +139,17 @@
     - edpm_update
   when: '"run-os" in edpm_update_running_services'
 
+- name: Updates configs for edpm_telemetry role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_telemetry
+    tasks_from: update.yml
+    apply:
+      become: true
+  tags:
+    - edpm_telemetry
+    - edpm_update
+  when: '"telemetry" in edpm_update_running_services'
+
 - name: Updates containers for edpm_telemetry role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_telemetry

@@ -21,8 +21,10 @@
 {% if tls_cert_exists|bool %}
         "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z",
 {% endif %}
+{% if telemetry_test is not defined or not telemetry_test | bool %}
         "/var/run/openvswitch:/run/openvswitch:rw,z",
         "/var/lib/openvswitch/ovn:/run/ovn:rw,z",
+{% endif %}
         "/proc:/host/proc:ro"
     ]
 }
