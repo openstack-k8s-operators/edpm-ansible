@@ -47,12 +47,14 @@
         owner: root
         group: root
         mode: "0600"
+      register: iptables_nft_ruleset
 
     - name: Load empty ruleset
       ansible.builtin.command: nft -f /etc/nftables/iptables.nft
       register: nft_iptables
       changed_when: nft_iptables.rc == 0
       failed_when: nft_iptables.rc != 0
+      when: iptables_nft_ruleset.changed  # noqa: no-handler
 
 # Get current nft rules in JSON format, with our iptables compat content.
 - name: Get current nftables content
