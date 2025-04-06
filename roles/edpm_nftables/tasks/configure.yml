@@ -147,6 +147,18 @@
         group: root
         mode: "0600"
 
+    - name: Create a sentinel file when nft rules are changed
+      ansible.builtin.file:
+        path: /etc/nftables/edpm-rules.nft.changed
+        state: touch
+        owner: root
+        group: root
+        mode: "0600"
+      when:
+        - nft_ruleset is defined
+        - nft_ruleset is changed
+
+
 # We cannot use the "validate" parameter from the "template" module, since
 # we don't load the chains before. So let's validate now, with all the things.
 # Remember, the "iptables" compat layout is already loaded at this point.
