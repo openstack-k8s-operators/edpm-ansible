@@ -301,7 +301,7 @@ class EdpmContainerManage:
             # add healthcheck script to the list of volume mounts
             mnt = opts['healthcheck'].get('mount', None)
             if mnt is not None:
-                opts['volume'].append(f'{mnt}:{os.path.dirname(tst)}:ro,z')
+                opts['volume'].append(f'{mnt}:{os.path.dirname(tst)}:ro,z')  # noqa
             opts['healthcheck'] = tst
         if 'check_interval' in opts:
             opts['healthcheck_interval'] = opts.pop('check_interval')
