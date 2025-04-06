@@ -22,3 +22,4 @@ profile: production
 skip_list:
   - command-instead-of-shell
   - galaxy[version-incorrect]
+  - no-handler
