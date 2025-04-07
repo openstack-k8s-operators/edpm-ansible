@@ -110,6 +110,34 @@
 - name: Configure swap
   ansible.builtin.import_tasks: swap.yml
 
+- name: Check if CA cert file exists
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: /var/lib/openstack/cacerts/bootstrap/tls-ca-bundle.pem
+  register: ca_file
+
+- name: Copy CA cert file if present
+  when: ca_file.stat.exists
+  become: true
+  block:
+    - name: Ensure that the CA destination directory exists
+      ansible.builtin.file:
+        path: "/etc/pki/ca-trust/source/anchors"
+        state: "directory"
+        setype: "cert_t"
+        owner: "root"
+        group: "root"
+        mode: "0755"
+
+    - name: Copy CA certs to the standard location on the compute node
+      ansible.builtin.copy:
+        src: "/var/lib/openstack/cacerts/bootstrap/tls-ca-bundle.pem"
+        dest: "/etc/pki/ca-trust/source/anchors/tls-ca-bundle.pem"
+        mode: '0644'
+        owner: root
+        group: root
+      notify: "update-ca-trust"
+
 - name: FIPS tasks
   ansible.builtin.import_tasks: fips.yml
   when: edpm_bootstrap_fips_mode != 'check'
