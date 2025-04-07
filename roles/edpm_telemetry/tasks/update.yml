@@ -1,0 +1,36 @@
+---
+- name: Check for openstack_network_exporter config
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.json"
+  register: openstack_network_exporter_config_json
+
+- name: Install openstack_network_operator if not present
+  when: not openstack_network_exporter_config_json.stat.exists
+  become: true
+  block:
+    - name: Determine if cacert file exists
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
+      register: ca_bundle_stat_res
+
+    - name: Check that tls.crt exists
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_certs }}/tls.crt"
+      register: tls_crt_stat
+
+    - name: Check that tls.key exists
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_certs }}/tls.key"
+      register: tls_key_stat
+
+    - name: Render container config templates
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        mode: 0644
+      with_items:
+        - ../templates/openstack_network_exporter.json.j2
+        - ../templates/openstack_network_exporter.yaml.j2
+      vars:
+        ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+        tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
