@@ -47,12 +47,14 @@
         owner: root
         group: root
         mode: "0600"
+      register: iptables_nft_ruleset
 
     - name: Load empty ruleset
       ansible.builtin.command: nft -f /etc/nftables/iptables.nft
       register: nft_iptables
       changed_when: nft_iptables.rc == 0
       failed_when: nft_iptables.rc != 0
+      when: iptables_nft_ruleset.changed  # noqa: no-handler
 
 # Get current nft rules in JSON format, with our iptables compat content.
 - name: Get current nftables content
@@ -144,6 +146,18 @@
         owner: root
         group: root
         mode: "0600"
+
+    - name: Create a sentinel file when nft rules are changed
+      ansible.builtin.file:
+        path: /etc/nftables/edpm-rules.nft.changed
+        state: touch
+        owner: root
+        group: root
+        mode: "0600"
+      when:
+        - nft_ruleset is defined
+        - nft_ruleset is changed
+
 
 # We cannot use the "validate" parameter from the "template" module, since
 # we don't load the chains before. So let's validate now, with all the things.
