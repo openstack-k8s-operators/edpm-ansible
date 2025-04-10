@@ -21,9 +21,17 @@
   changed_when: false
   failed_when: false
 
+- name: Warn for changing FIPS status for bootc
+  ansible.builtin.debug:
+    msg: FIPS status can not be changed for bootc
+  when:
+    - edpm_bootstrap_fips_mode != 'check'
+    - ansible_local.bootc
+
 - name: Change FIPS status
   when:
     - edpm_bootstrap_fips_mode != 'check'
+    - not ansible_local.bootc
     - >
       edpm_bootstrap_fips_mode !=
       edpm_bootstrap_fips_fms_status |
