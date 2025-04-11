@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure /usr/libexec/edpm-start-podman-container exists
+- name: Ensure /var/local/libexec/edpm-start-podman-container exists
   ansible.builtin.import_role:
     name: edpm_container_manage
     tasks_from: shutdown.yml
