@@ -18,7 +18,7 @@
   become: true
   block:
     - name: "Create /var/local/libexec dir"
-      file:
+      ansible.builtin.file:
         state: directory
         path: /var/local/libexec
         recurse: true
