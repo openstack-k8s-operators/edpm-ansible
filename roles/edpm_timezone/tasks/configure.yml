@@ -20,13 +20,13 @@
   when: ansible_local.bootc
   block:
     - name: Check for /etc/localtime
-      stat:
+      ansible.builtin.stat:
         path: /etc/localtime
       register: localtime_stat
 
     - name: Symlink /etc/localtime to timezone file if it doesn't exist
       become: true
-      file:
+      ansible.builtin.file:
         state: link
         path: /etc/localtime
         src: /usr/share/zoneinfo/{{ edpm_timezone }}
