@@ -35,6 +35,7 @@
       until: nm_ovs_status is succeeded
       retries: "{{ edpm_network_config_download_retries }}"
       delay: "{{ edpm_network_config_download_delay }}"
+      when: not ansible_local.bootc
     - name: Restart NetworkManager after plugin installation [nmstate]
       ansible.builtin.systemd:
         name: NetworkManager

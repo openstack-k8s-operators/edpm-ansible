@@ -17,6 +17,7 @@
 
 - name: Install packages
   ansible.builtin.include_tasks: install.yml
+  when: not ansible_local.bootc
 
 - name: Configure tuned
   ansible.builtin.include_tasks: configure.yml

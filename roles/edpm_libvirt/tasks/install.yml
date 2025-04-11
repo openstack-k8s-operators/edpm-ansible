@@ -13,6 +13,7 @@
   delay: "{{ edpm_libvirt_download_delay }}"
   notify:
     - Restart libvirt
+  when: not ansible_local.bootc
 
 - name: Ensure monolithic libvirt and tcp socket activation is not enabled or running
   tags:

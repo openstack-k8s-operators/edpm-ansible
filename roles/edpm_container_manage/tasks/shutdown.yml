@@ -17,27 +17,42 @@
 - name: Create EDPM Container systemd service
   become: true
   block:
+    - name: "Create /var/local/libexec dir"
+      ansible.builtin.file:
+        state: directory
+        path: /var/local/libexec
+        recurse: true
+        setype: container_file_t
+
     - name: "Deploy edpm-container-shutdown and edpm-start-podman-container"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/{{ item }}"
-        dest: "/usr/libexec/{{ item }}"
+        dest: "/var/local/libexec/{{ item }}"
         mode: '0700'
         owner: root
         group: root
+        setype: container_file_t
       loop:
         - 'edpm-container-shutdown'
         - 'edpm-start-podman-container'
-    - name: "Create /usr/lib/systemd/system/edpm-container-shutdown.service"
+
+    - name: "Create systemd preset dir"
+      ansible.builtin.file:
+        state: "directory"
+        path: "/etc/systemd/system-preset"
+        mode: 0644
+
+    - name: "Create /etc/systemd/system/edpm-container-shutdown.service"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/edpm-container-shutdown-service"
-        dest: "/usr/lib/systemd/system/edpm-container-shutdown.service"
+        dest: "/etc/systemd/system/edpm-container-shutdown.service"
         mode: '0644'
         owner: root
         group: root
-    - name: "Create /usr/lib/systemd/system-preset/91-edpm-container-shutdown.preset"
+    - name: "Create /etc/systemd/system-preset/91-edpm-container-shutdown.preset"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/91-edpm-container-shutdown-preset"
-        dest: "/usr/lib/systemd/system-preset/91-edpm-container-shutdown.preset"
+        dest: "/etc/systemd/system-preset/91-edpm-container-shutdown.preset"
         mode: '0644'
         owner: root
         group: root
@@ -47,17 +62,17 @@
         state: started
         enabled: true
         daemon_reload: true
-    - name: "Create /usr/lib/systemd/system/netns-placeholder.service"
+    - name: "Create /etc/systemd/system/netns-placeholder.service"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/netns-placeholder-service"
-        dest: "/usr/lib/systemd/system/netns-placeholder.service"
+        dest: "/etc/systemd/system/netns-placeholder.service"
         mode: '0644'
         owner: root
         group: root
-    - name: "Create /usr/lib/systemd/system-preset/91-netns-placeholder.preset"
+    - name: "Create /etc/systemd/system-preset/91-netns-placeholder.preset"
       ansible.builtin.copy:
         src: "{{ role_path }}/files/91-netns-placeholder-preset"
-        dest: "/usr/lib/systemd/system-preset/91-netns-placeholder.preset"
+        dest: "/etc/systemd/system-preset/91-netns-placeholder.preset"
         mode: '0644'
         owner: root
         group: root
