@@ -23,7 +23,7 @@
   become: true
   ansible.builtin.copy:
     src: healthchecks/iscsid/
-    dest: "/var/lib/openstack/healthchecks/iscsid"
+    dest: "/var/lib/openstack/healthchecks/iscsid-iscsid"
     setype: container_file_t
     owner: "{{ ansible_user | default(ansible_user_id) }}"
     group: "{{ ansible_user | default(ansible_user_id) }}"
