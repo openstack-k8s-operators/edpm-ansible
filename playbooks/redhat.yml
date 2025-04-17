@@ -24,3 +24,5 @@
         - rhc_auth | length > 0
       tags:
         - edpm_bootstrap
+      vars:
+        rhc_organization: "{{ rhc_organization | int | default(omit) }}"  # noqa: jinja[invalid]
