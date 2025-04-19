@@ -21,6 +21,7 @@
           become: true
       when:
         - ansible_facts['distribution'] | lower == 'redhat'
+        - rhc_auth is defined
         - rhc_auth | length > 0
       tags:
         - edpm_bootstrap
