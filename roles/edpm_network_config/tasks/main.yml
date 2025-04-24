@@ -23,6 +23,29 @@
     - edpm_network_config_tool == 'nmstate'
     - not edpm_network_config_tool_nmstate_override|bool
 
+- name: Validate edpm_network_config_template against configuration tool
+  vars:
+    _tmpl: "{{ edpm_network_config_template | from_yaml }}"
+  block:
+    - name: Assert nmstate compatible edpm_network_config_template
+      when:
+        - edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
+      ansible.builtin.assert:
+        that:
+          - _tmpl.interfaces is defined
+        msg: |
+          nmstate is enabled, but edpm_network_config_template doesn't seem correct.
+    - name: Assert ifcfg compatible edpm_network_config_template
+      when:
+        - edpm_network_config_tool != 'nmstate'
+        - not edpm_network_config_nmstate | bool
+      ansible.builtin.assert:
+        that:
+          - _tmpl.network_config is defined
+        msg: |
+          ifcfg is enabled, but edpm_network_config_nmstate doesn't have "network_config"
+          key.
+
 - name: Configure network with network role from system roles [nmstate]
   when: edpm_network_config_tool == 'nmstate'
   become: true
