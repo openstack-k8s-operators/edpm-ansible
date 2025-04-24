@@ -6,7 +6,7 @@ RefuseManualStop=yes
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/ovn-bgp-agent-cleanup
+ExecStart=/var/local/libexec/ovn-bgp-agent-cleanup
 
 [Install]
 WantedBy=multi-user.target
