@@ -27,21 +27,24 @@
           - "{{ edpm_ovn_controller_tls_cacert_bundle_src }}:{{ edpm_ovn_controller_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
-- name: Ensure /usr/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
-
 - name: Update ovn_controller health check script
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
-- name: Run ovn_controller container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
+- name: Cleanup existing standalone conatiner
+  ansible.builtin.import_role:
+    name: edpm_container_quadlet
+    tasks_from: cleanup.yml
   vars:
-    edpm_container_standalone_service: ovn_controller
-    edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+    edpm_container_quadlet_service: "ovn_controller"
+
+- name: Configure and start ovn_controller quadlet
+  ansible.builtin.import_role:
+    name: edpm_container_quadlet
+  vars:
+    edpm_container_quadlet_service: ovn_controller
+    edpm_container_quadlet_service_use_host_network: true
+    edpm_container_quadlet_service_volumes: "{{ edpm_ovn_controller_volumes }}"
+    edpm_container_quadlet_service_image: "{{ edpm_ovn_controller_agent_image }}"
+    edpm_container_quadlet_kolla_config_files:
+      ovn_controller: "{{ lookup('template', 'templates/kolla_ovn_controller.yaml.j2') | from_yaml }}"

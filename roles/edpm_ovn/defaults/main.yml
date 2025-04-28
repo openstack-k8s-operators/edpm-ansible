@@ -56,20 +56,39 @@ edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% e
 ovn_match_northd_version: false
 ovn_monitor_all: true
 
-edpm_ovn_controller_common_volumes:
-  - /lib/modules:/lib/modules:ro
-  - /run:/run
-  - /var/lib/openvswitch/ovn:/run/ovn:shared,z
-  - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
+edpm_ovn_controller_volumes:
+  - path: /var/lib/kolla/config_files/ovn_controller.json
+    mountPath: /var/lib/kolla/config_files/config.json
+    readOnly: true
+    name: ovn-controller-kolla-config
+  - path: /run
+    mountPath: /run
+    readOnly: false
+    name: run
+  - path: /lib/modules
+    mountPath: /lib/modules
+    readOnly: true
+    name: modules
+  - path: /var/lib/openvswitch/ovn
+    mountPath: /run/ovn
+    readOnly: false
+    name: run-ovn
+  - path: /var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt
+    mountPath: /etc/pki/tls/certs/ovndbca.crt
+    readOnly: true
+    name: default-ca
+  - path: /var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.crt
+    mountPath: /etc/pki/tls/certs/ovndb.crt
+    readOnly: true
+    name: default-tls-cert
+  - path: /var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.key
+    mountPath: /etc/pki/tls/private/ovndb.key
+    readOnly: true
+    name: default-tls-key
 
 edpm_ovn_controller_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_ovn_service_name }}/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_volumes: []
-
-edpm_ovn_controller_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
 
 edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
@@ -102,3 +121,5 @@ edpm_ovn_ovs_other_config: {}
 
 # If container health check should be enabled
 edpm_ovn_healthcheck: true
+
+edpm_container_quadlet_service: ovn_controller
