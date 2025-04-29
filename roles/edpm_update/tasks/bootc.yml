@@ -15,26 +15,7 @@
 # under the License.
 
 
-# "edpm_update" will search for and load any operating system variable file
-
-- name: Apply kernel patch via kpatch
-  ansible.builtin.include_tasks: kpatch.yml
-  when:
-  - edpm_update_enable_kpatch
-  - not ansible_local.bootc
-
-- name: Update packages
-  ansible.builtin.include_tasks: packages.yml
-  when:
-  - edpm_update_enable_packages_update
-  - not ansible_local.bootc
-
-- name: Update OS (bootc)
-  ansible.builtin.include_tasks: bootc.yml
-  when: ansible_local.bootc
-
-- name: Update containers
-  ansible.builtin.include_tasks: containers.yml
-  when:
-  - edpm_update_enable_containers_update
-
+- name: Update bootc image
+  ansible.builtin.shell: bootc switch "{{ edpm_bootc_os_container_image }}"
+  become: true
+  register: bootc_result
