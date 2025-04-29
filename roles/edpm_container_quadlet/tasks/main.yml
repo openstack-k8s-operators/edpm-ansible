@@ -52,7 +52,7 @@
 
 - name: Starting quadlet {{ edpm_container_quadlet_service }}
   ansible.builtin.systemd_service:
-    name: edpm-compute@{{ edpm_container_quadlet_service }}
+    name: edpm@{{ edpm_container_quadlet_service }}
     state: restarted
     enabled: true
     daemon_reload: true
