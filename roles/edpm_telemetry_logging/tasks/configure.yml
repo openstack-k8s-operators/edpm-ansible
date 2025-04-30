@@ -31,7 +31,9 @@
       ansible.builtin.dnf:
         name: rsyslog-openssl
         state: present
-      when: telemetry_test is undefined or not telemetry_test
+      when:
+        - telemetry_test is undefined or not telemetry_test
+        - not ansible_local.bootc
 
     - name: Copy Openshift CA to the node
       ansible.builtin.copy:
