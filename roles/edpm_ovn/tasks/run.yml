@@ -31,12 +31,26 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
+- name: Check for standalone container
+  block:
+    - name: Check for systemd service file
+      ansible.builtin.stat:
+        path: "/etc/systemd/system/edpm_ovn_controller.service"
+      register: standalone_service_file
+
+    - name: Check for container
+      containers.podman.podman_container_info:
+        name: ovn_controller
+      become: true
+      register: standalone_container
+
 - name: Cleanup existing standalone conatiner
   ansible.builtin.import_role:
     name: edpm_container_quadlet
     tasks_from: cleanup.yml
   vars:
     edpm_container_quadlet_service: "ovn_controller"
+  when: (standalone_service_file.stat.exists or not standalone_container.stderr)
 
 - name: Configure and start ovn_controller quadlet
   ansible.builtin.import_role:
