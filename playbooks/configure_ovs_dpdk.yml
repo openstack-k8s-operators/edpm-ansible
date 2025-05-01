@@ -5,11 +5,16 @@
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
   tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        filter: ansible_local
+
     - name: Install openvswitch package
       become: true
       ansible.builtin.dnf:
         name: openvswitch
         state: present
+      when: not ansible_local.bootc
 
     - name: Configure OvS DPDK configs
       ansible.builtin.import_role:
