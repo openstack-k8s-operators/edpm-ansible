@@ -59,14 +59,22 @@
   check_mode: true
   register: grub_file_entry_check
 
-# Kernel Args Configuration
-- name: Kernel args configuration
-  become: true
+- name: Set set_kernel_args fact if args need to be set
+  ansible.builtin.set_fact:
+    set_kernel_args: true
   when:
     - cmdline is defined
     - edpm_kernel_args is defined
     - edpm_kernel_args | type_debug in ["AnsibleUnicode", "str"]
     - cmdline is not regex( '^.*' ~ edpm_kernel_args ~ '\\s.*$' )
+
+# Kernel Args Configuration
+- name: Kernel args configuration (package mode)
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+    - not ansible_local.bootc
   block:
     # Leapp does not recognise grun entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
@@ -108,6 +116,24 @@
       changed_when: _grub2_mkconfig.rc == 0
       failed_when: _grub2_mkconfig.rc != 0
 
+
+- name: Kernel args configuration (image mode)
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+    - ansible_local.bootc
+  block:
+    - name: Add kernel args to boot entries
+      ansible.builtin.shell: |
+        unshare -m /bin/bash -c "mount -o remount,rw /boot; sed \"s/$/ {{ edpm_kernel_args }}/\" /boot/loader/entries/*.conf"
+
+- name: Kernel args post configuration
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+  block:
     - name: Check for active tuned profile
       ansible.builtin.stat:
         path: "/etc/tuned/active_profile"
