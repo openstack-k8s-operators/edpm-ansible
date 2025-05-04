@@ -23,8 +23,8 @@
     - edpm_network_config_tool == 'nmstate'
     - not edpm_network_config_tool_nmstate_override|bool
 
-- name: Configure network with network role from system roles [nmstate]
-  when: edpm_network_config_tool == 'nmstate'
+- name: Install OVS NetworkManager plugin [nmstate and nmstate provider]
+  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
   become: true
   block:
     - name: Install OVS NetworkManager plugin [nmstate]
@@ -40,6 +40,11 @@
         name: NetworkManager
         state: restarted
       when: nm_ovs_status.changed  # noqa: no-handler
+
+- name: Configure network with network role from system roles [nmstate]
+  when: edpm_network_config_tool == 'nmstate'
+  become: true
+  block:
     - name: Render network_state variable
       ansible.builtin.set_fact:
         network_state: "{{ edpm_network_config_template | from_yaml }}"
