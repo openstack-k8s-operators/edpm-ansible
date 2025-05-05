@@ -26,6 +26,10 @@
 {% if ca_bundle_exists|bool %}
 	"{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z",
 {% endif %}
+{% if tls_cert_exists|bool %}
+         "{{ edpm_telemetry_config_dest }}/ceilometer_prom_exporter.yaml:/etc/ceilometer/ceilometer_prom_exporter.yaml:z",
+         "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z",
+ {% endif %}
         "/dev/log:/dev/log"
     ]
 }
