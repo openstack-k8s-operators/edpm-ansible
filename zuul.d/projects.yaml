@@ -4,6 +4,7 @@
     templates:
       - podified-multinode-edpm-baremetal-pipeline
     github-check:
+      debug: true
       jobs:
         - noop
         - edpm-ansible-tempest-multinode

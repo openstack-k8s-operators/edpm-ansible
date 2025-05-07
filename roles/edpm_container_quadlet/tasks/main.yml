@@ -15,7 +15,7 @@
 # under the License.
 
 
-# "edpm_container_quadlet" will search for and load any operating system variable file
+# "edpm_container_quadlet" will seariach for and load any operating system variable file
 
 - name: "Ensure directory exists: {{ edpm_container_quadlet_kolla_config_dir }}"
   become: true

@@ -1,5 +1,5 @@
 ---
-# defaults file for edpm_ovn
+# deefaults file for edpm_ovn
 
 # service name this role manages
 edpm_ovn_service_name: "ovn"
