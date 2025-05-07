@@ -56,7 +56,7 @@ edpm_ovn_protocol: "{% if edpm_enable_internal_tls | bool %}ssl{% else %}tcp{% e
 ovn_match_northd_version: false
 ovn_monitor_all: true
 
-edpm_ovn_controller_volumes:
+edpm_ovn_controller_common_volumes:
   - path: /var/lib/kolla/config_files/ovn_controller.json
     mountPath: /var/lib/kolla/config_files/config.json
     readOnly: true
@@ -73,6 +73,8 @@ edpm_ovn_controller_volumes:
     mountPath: /run/ovn
     readOnly: false
     name: run-ovn
+
+edpm_ovn_controller_tls_cert_volumes:
   - path: /var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt
     mountPath: /etc/pki/tls/certs/ovndbca.crt
     readOnly: true
@@ -85,6 +87,11 @@ edpm_ovn_controller_volumes:
     mountPath: /etc/pki/tls/private/ovndb.key
     readOnly: true
     name: default-tls-key
+
+edpm_ovn_controller_volumes: >-
+  {{ edpm_ovn_controller_common_volumes + edpm_ovn_controller_tls_cert_volumes
+     if edpm_ovn_tls_enabled | bool
+     else edpm_ovn_controller_common_volumes }}
 
 edpm_ovn_controller_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_ovn_service_name }}/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
