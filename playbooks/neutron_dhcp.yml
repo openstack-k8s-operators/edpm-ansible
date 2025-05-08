@@ -7,6 +7,10 @@
   any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
   max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
   tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        filter: ansible_local
+
     - name: Neutron DHCP agent
       ansible.builtin.import_role:
         name: osp.edpm.edpm_neutron_dhcp
