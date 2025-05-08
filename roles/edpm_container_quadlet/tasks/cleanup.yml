@@ -1,13 +1,19 @@
 ---
-- name: Stop and disable old standalone container for {{ edpm_container_quadlet_service }}
-  ansible.builtin.systemd_service:
-    name: "edpm_{{ edpm_container_quadlet_service }}"
-    state: stopped
-    enabled: false
-  become: true
 
-- name: Cleanup standalone service file for {{ edpm_container_quadlet_service }}
-  ansible.builtin.file:
-    path: "/etc/systemd/system/{{ edpm_container_quadlet_service }}.service"
-    state: absent
-  become: true
+- name: Cleanup old edpm and tripleo services
+  loop:
+    - "edpm"
+    - "tripleo"
+  block:
+    - name: Stop and disable old standalone container for {{ edpm_container_quadlet_service }}
+      ansible.builtin.systemd_service:
+        name: "{{ item }}_{{ edpm_container_quadlet_service }}"
+        state: stopped
+        enabled: false
+      become: true
+
+    - name: Cleanup standalone service file for {{ edpm_container_quadlet_service }}
+      ansible.builtin.file:
+        path: "/etc/systemd/system/{{ item }}_{{ edpm_container_quadlet_service }}.service"
+        state: absent
+      become: true
