@@ -48,7 +48,7 @@
     mode: "0644"
   # NOTE(tkajinam): Some containers can contain secrets in their environments.
   #                 Hide the output to avoid dumping these to output.
-  no_log: true
+  no_log: false
 
 - name: Starting quadlet {{ edpm_container_quadlet_service }}
   ansible.builtin.systemd_service:
@@ -57,3 +57,28 @@
     enabled: true
     daemon_reload: true
   become: true
+  ignore_errors: true
+
+- name: Get systemd output for {{ edpm_container_quadlet_service }}
+  shell: |
+    systemctl status edpm@{{ edpm_container_quadlet_service }}
+  register: systemd_output
+  ignore_errors: true
+
+- debug:
+    msg: "{{ systemd_output }}"
+
+- name: Get podman output for {{ edpm_container_quadlet_service }}
+  shell: |
+    podman ps -a
+  become: true
+  register: podman_ps_output
+  ignore_errors: true
+
+- debug:
+    msg: "{{ podman_ps_output }}"
+
+- name: Force failure
+  ansible.builtin.fail:
+    msg: "Failed"
+  when: systemd_output.failed
