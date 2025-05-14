@@ -22,8 +22,8 @@
         "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z",
 {% endif %}
 {% if telemetry_test is not defined or not telemetry_test | bool %}
-        "/var/run/openvswitch:/run/openvswitch:rw,z",
-        "/var/lib/openvswitch/ovn:/run/ovn:rw,z",
+        "/var/run/openvswitch:/run/openvswitch:ro",
+        "/var/lib/openvswitch/ovn:/run/ovn:ro",
 {% endif %}
         "/proc:/host/proc:ro"
     ]
