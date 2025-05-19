@@ -1,0 +1,43 @@
+- name: Test kernelargs
+  become: true
+  block:
+    - name: set kernelargs
+      vars:
+        edpm_kernel_args: "{{ test_kernelargs }}"
+      include_role:
+        name: osp.edpm.edpm_kernel
+        tasks_from: kernelargs.yml
+
+    - name: check kernelargs
+      ansible.builtin.lineinfile:
+        dest: /boot/loader/entries/{{ item }}
+        line:
+          options root=UUID=root-uuid rw boot=UUID=boot-uuid rw console=tty0 console=ttyS0 ostree=/ostree/boot.0/default/ostree-uuid/0 {{ test_kernelargs }}
+      loop:
+        - ostree-1.conf
+        - ostree-2.conf
+      check_mode: true
+      register: check_kernelargs
+
+    - name: check kernelargs EDPM_KERNEL_ARGS
+      ansible.builtin.lineinfile:
+        dest: /boot/loader/entries/{{ item }}
+        line: |-
+          # EDPM_KERNEL_ARGS={{ test_kernelargs }}
+      loop:
+        - ostree-1.conf
+        - ostree-2.conf
+      check_mode: true
+      register: check_kernelargs_edpm_kernel_args
+
+    - name: assert kernelargs
+      ansible.builtin.assert:
+        that:
+          - "{{ not item.changed }}"
+      loop: "{{ check_kernelargs.results }}"
+
+    - name: assert kernelargs EDPM_KERNEL_ARGS
+      ansible.builtin.assert:
+        that:
+          - "{{ not item.changed }}"
+      loop: "{{ check_kernelargs_edpm_kernel_args.results }}"
