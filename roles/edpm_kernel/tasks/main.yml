@@ -25,7 +25,7 @@
         name: "{{ edpm_kernel_extra_packages }}"
         state: present
       register: _install_packages_result
-      when: 
+      when:
         - edpm_kernel_extra_packages | length > 0
         - not ansible_local.bootc
       until: _install_packages_result is succeeded
