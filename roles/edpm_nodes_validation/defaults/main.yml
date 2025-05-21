@@ -22,5 +22,7 @@ edpm_nodes_validation_hide_sensitive_logs: true
 edpm_nodes_validation_ping_test_ips: []
 edpm_nodes_validation_validate_controllers_icmp: true
 edpm_nodes_validation_validate_fqdn: false
+edpm_nodes_validation_validate_fqdn_hosts_file: /etc/hosts
+edpm_nodes_validation_check_for_fqdn: true
 edpm_nodes_validation_validate_gateway_icmp: true
 edpm_nodes_validation_ping_test_gateway_ips: []
