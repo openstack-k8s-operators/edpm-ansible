@@ -1,0 +1,56 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Converge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: "Call edpm_update_system role"
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_update_system
+      vars:
+        edpm_service_types: []
+        edpm_update_system_enable_kpatch: true
+
+    # We have to run the verifications in this play to
+    # ensure we have access to the internally changed
+    # facts.
+    - name: Conduct some verifications
+      block:
+        - name: Ensure kernel related packages are excluded
+          ansible.builtin.assert:
+            that:
+              - _exclude_packages is defined
+              - "'kernel' in _exclude_packages"
+              - "'kernel-core' in _exclude_packages"
+
+        - name: Gather all installed packages
+          ansible.builtin.package_facts:
+
+        - name: Check service status if we have kpatch-patch installed
+          when:
+            - ansible_facts.packages["kpatch-patch"] is defined
+          block:
+            - name: Gather services
+              ansible.builtin.service_facts:
+
+            - name: Ensure kpatch.service is running
+              ansible.builtin.assert:
+                that:
+                  - ansible_facts.services['kpatch.service'] is defined
+                  - ansible_facts.services['kpatch.service'].state == 'running'
+                  - ansible_facts.services['kpatch.service'].status == 'enabled'
