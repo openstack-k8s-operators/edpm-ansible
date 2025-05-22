@@ -1,0 +1,38 @@
+---
+- name: Ensure we know about kernel version
+  when:
+    - ansible_facts['kernel'] is undefined
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all,!min'
+      - 'kernel'
+  tags:
+    - edpm_update_system
+
+- name: Ensure kpatch package is installed
+  become: true
+  ansible.builtin.package:
+    name: kpatch
+    state: present
+  tags:
+    - edpm_update_system
+
+- name: Install kpatch-patch if available  # noqa: package-latest
+  failed_when: false
+  become: true
+  ansible.builtin.package:
+    name: "kpatch-patch = {{ ansible_facts['kernel'] }}"
+    state: latest
+  tags:
+    - edpm_update_system
+
+- name: Ensure further update stages will not update kernel
+  vars:
+    _kernel_packages:
+      - kernel
+      - kernel-core
+  ansible.builtin.set_fact:
+    _exclude_packages: >-
+      {{ _exclude_packages + _kernel_packages | ansible.builtin.unique }}
+  tags:
+    - edpm_update_system
