@@ -110,10 +110,10 @@
         set -eux
         cd /tmp/repo-setup
         pip install -r requirements.txt
-        python setup.py install
+        python3 setup.py install
 
     - name: Create repos
-      ansible.builtin.command: repo-setup -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
+      ansible.builtin.command: /usr/local/bin/repo-setup -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
           -b master current-podified {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
 
     - name: Look for redhat-release rpm
