@@ -64,18 +64,18 @@
         state: absent
         keepcache: false
       loop:
-        - ubi-9-appstream
-        - ubi-9-baseos
-        - ubi-9-codeready-builder
+        - ubi-9-appstream-rpms
+        - ubi-9-baseos-rpms
+        - ubi-9-codeready-builder-rpms
 
-- name: Block for tripleo-repos
+- name: Block for repo-setup
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
   block:
     - name: Fetch latest repo version
       ansible.builtin.uri:
-        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-tripleo/delorean.repo
+        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-podified/delorean.repo
         return_content: true
       register: edpm_packages
 
@@ -85,21 +85,36 @@
         dest: /etc/yum.repos.d/delorean.repo
         mode: 0644
 
-- name: Install tripleo-repos package
+- name: Install repo-setup pre-requirements
   become: true
   ansible.builtin.package:
-    name: "python*tripleo-repos"
+    name:
+      - git
+      - python3-pip
     state: present
 
-- name: Tripleo setup block
+- name: Repo setup block
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
     - test_deps_setup_edpm | bool
   block:
-    - name: Create tripleo repos
-      ansible.builtin.command: tripleo-repos -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
-          -b master current-tripleo {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
+    - name: Get repo-setup repository # noqa: latest[git]
+      ansible.builtin.git:
+        accept_hostkey: true
+        dest: "/tmp/repo-setup"
+        repo: "https://github.com/openstack-k8s-operators/repo-setup"
+
+    - name: Install repo-setup
+      ansible.builtin.shell: |
+        set -eux
+        cd /tmp/repo-setup
+        pip install -r requirements.txt
+        python3 setup.py install
+
+    - name: Create repos
+      ansible.builtin.command: /usr/local/bin/repo-setup -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
+          -b master current-podified {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
 
     - name: Look for redhat-release rpm
       ansible.builtin.shell: |
