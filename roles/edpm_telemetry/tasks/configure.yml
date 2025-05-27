@@ -51,6 +51,12 @@
   loop:
     - {"src": "ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
 
+- name: Ensure group libvirt always exists
+  become: true
+  ansible.builtin.group:
+    name: libvirt
+    state: present
+
 - name: Configure ceilometer user and group on the host
   ansible.builtin.import_role:
     name: edpm_users
