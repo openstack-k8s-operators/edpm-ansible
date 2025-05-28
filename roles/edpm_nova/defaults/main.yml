@@ -21,7 +21,7 @@
 edpm_nova_service_name: nova
 
 # seconds between retries for download tasks
-edpm_nova_image_download_delay: "{{ edpm_download_delay | default(5) }}"
+edpm_nova_image_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
 edpm_nova_image_download_retries: "{{ edpm_download_retries | default(5) }}"
