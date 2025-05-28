@@ -20,7 +20,7 @@
 # All variables within this role should have a prefix of "edpm_swift"
 
 # seconds between retries for download tasks
-edpm_swift_images_download_delay: "{{ edpm_download_delay | default(5) }}"
+edpm_swift_images_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
 edpm_swift_images_download_retries: "{{ edpm_download_retries | default(5) }}"
