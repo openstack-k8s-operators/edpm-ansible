@@ -27,12 +27,7 @@
     - edpm_update_system
 
 - name: Ensure further update stages will not update kernel
-  vars:
-    _kernel_packages:
+  ansible.builtin.set_fact:
+    _exclude_packages_kpatch:
       - kernel
       - kernel-core
-  ansible.builtin.set_fact:
-    _exclude_packages: >-
-      {{ _exclude_packages + _kernel_packages | ansible.builtin.unique }}
-  tags:
-    - edpm_update_system
