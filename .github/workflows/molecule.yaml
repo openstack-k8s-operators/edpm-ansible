@@ -12,6 +12,7 @@ on:
     - 'plugins/**'
     - 'molecule-requirements.txt'
     - 'requirements.yml'
+    - 'molecule/**'
   workflow_dispatch:
 jobs:
   run_molecule:
