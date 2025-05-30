@@ -1,6 +1,6 @@
 ---
 
-- name: Apply package updates needed for service updates
+- name: Apply essential package updates required by services
   become: true
   vars:
     _exclude_packages_always:
