@@ -14,12 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Set up package exclusions
-  ansible.builtin.set_fact:
-    _exclude_packages: "{{ edpm_update_system_exclude_packages }}"
-  tags:
-    - edpm_update_system
-
 - name: Apply kernel patch via kpatch
   ansible.builtin.include_tasks: kpatch.yml
   when: edpm_update_system_enable_kpatch
