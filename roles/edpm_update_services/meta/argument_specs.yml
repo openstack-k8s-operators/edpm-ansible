@@ -1,0 +1,24 @@
+---
+argument_specs:
+  # ./roles/edpm_update_services/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_update role.
+    options:
+      edpm_update_services_enable_packages_update:
+        type: bool
+        default: true
+        description: Toggle to enable/disable packages update
+      edpm_update_services_enable_containers_update:
+        type: bool
+        default: true
+        description: Toggle to enable/disable containers update
+      edpm_update_services_exclude_packages:
+        type: list
+        default: []
+        description: List of packages to exclude from the update
+      edpm_update_services_running_services:
+        type: list
+        default: edpm_services
+        description: >
+          Used to select which list of services are running
+          on the machine. The list is provided by openstack-operator.

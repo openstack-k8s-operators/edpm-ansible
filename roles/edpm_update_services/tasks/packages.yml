@@ -1,0 +1,28 @@
+---
+
+- name: Ensure package update exclusions
+  vars:
+    _exclude_packages_always:
+      - kernel
+      - kernel-core
+      - openvswitch
+  ansible.builtin.set_fact:
+    _exclude_packages: >-
+      {{
+        edpm_update_services_exclude_packages
+        + _exclude_packages_always
+        | ansible.builtin.unique
+      }}
+  tags:
+    - edpm_update_services
+
+- name: Apply package updates needed for service updates
+  become: true
+  ansible.builtin.dnf:  # noqa: package-latest
+    name:
+      - openstack-selinux
+    state: latest
+    update_cache: true
+    exclude: "{{ _exclude_packages }}"
+  tags:
+    - edpm_update_services
