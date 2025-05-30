@@ -5,10 +5,13 @@ FROM {{ item.registry.url }}/{{ item.image }}
 FROM {{ item.image }}
 {% endif %}
 
-RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-wallaby/current/delorean.repo && \
+RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-master/current/delorean.repo && \
     dnf upgrade -y && \
-    dnf -y install sudo python3-libselinux selinux-policy {{ item.pkg_extras | default('') }} && \
-    dnf install -y python*tripleo-repos && \
+    dnf -y install sudo python3-libselinux selinux-policy git python3-pip {{ item.pkg_extras | default('') }} && \
+    git clone https://github.com/openstack-k8s-operators/repo-setup && \
+    cd repo-setup && \
+    pip install -r requirements.txt && \
+    python3 setup.py install && \
     dnf clean all -y
 
 CMD [ '/sbin/init' ]
