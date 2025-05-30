@@ -3,7 +3,6 @@
 aliases:
   edpm-approvers:
   - slagle
-  - bshephar
   - rabi
   - jpodivin
   ci-approvers:
