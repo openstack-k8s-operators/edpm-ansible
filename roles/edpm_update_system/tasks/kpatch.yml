@@ -9,11 +9,11 @@
   tags:
     - edpm_update_system
 
-- name: Ensure kpatch package is installed
+- name: Ensure latest kpatch package is installed  # noqa: package-latest
   become: true
   ansible.builtin.package:
     name: kpatch
-    state: present
+    state: latest
   tags:
     - edpm_update_system
 
