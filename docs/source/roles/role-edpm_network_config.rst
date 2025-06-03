@@ -19,10 +19,14 @@ This Ansible role does the following tasks:
   - Checks for the presence of required RPMS
   - Uses "provider" ifcfg/nmstate based on flag "edpm_network_config_nmstate"
 
-Note: By default this role will cleanup devices/interfaces not in
-"edpm_network_config_template". If there is requirement to keep them
-for pre-provisioned nodes, "edpm_network_config_nonconfigured_cleanup"
-ansible var can be set to "false".
+Note: * With nmstate-provider as the default for os-net-config,
+        "os-net-config --cleanup" should be used only for very
+        specific use case, eg
+        - SSH provisioned over VLAN-tagged single interface
+        - os-net-config needs to override ctlplane over bond+VLAN
+
+      * "os-net-config --cleanup" SHOULD NOT be set for update/adoption
+        use case
 
 Here is an example playbook to run os-net-config tool:
 
