@@ -23,6 +23,10 @@ edpm_update_services_enable_packages_update: true
 # Toggle to enable/disable containers update
 edpm_update_services_enable_containers_update: true
 
+# List of essential packages to include in the services update
+edpm_update_services_include_packages:
+  - openstack-selinux
+
 # List of packages to exclude from the update
 edpm_update_services_exclude_packages: []
 
