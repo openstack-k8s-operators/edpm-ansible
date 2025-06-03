@@ -23,5 +23,9 @@ edpm_update_system_enable_kpatch: false
 # Toggle to enable/disable packages update
 edpm_update_system_enable_packages_update: true
 
+# List of packages to include in the update
+edpm_update_system_include_packages:
+  - "*"
+
 # List of packages to exclude from the update
 edpm_update_system_exclude_packages: []

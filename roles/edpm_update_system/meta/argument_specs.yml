@@ -12,6 +12,11 @@ argument_specs:
         type: bool
         default: true
         description: Toggle to enable/disable packages update
+      edpm_update_system_include_packages:
+        type: list
+        default:
+          - "*"
+        description: List of packages to include in the update
       edpm_update_system_exclude_packages:
         type: list
         default: []
