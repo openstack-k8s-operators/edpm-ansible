@@ -48,25 +48,19 @@
 - name: RHEL Block
   become: true
   when:
-    - (ansible_facts['os_family'] | lower) == 'redhat'
-    - mirrors_file.stat.exists | bool
+    - ((ansible_facts['os_family'] | lower) == 'redhat') or (mirrors_file.stat.exists | bool)
   block:
     - name: Disable ubi host subscription-manager integration
       ansible.builtin.file:
         path: /etc/rhsm-host
         state: absent
 
-    - name: Disable ubi 9 repos
+    - name: Remove ubi 9 repos
       when: ansible_facts['distribution_major_version'] is version(9, '>=')
       become: true
-      ansible.builtin.yum_repository:
-        name: "{{ item }}"
+      ansible.builtin.file:
+        path: "/etc/yum.repos.d/ubi.repo"
         state: absent
-        keepcache: false
-      loop:
-        - ubi-9-appstream-rpms
-        - ubi-9-baseos-rpms
-        - ubi-9-codeready-builder-rpms
 
 - name: Block for repo-setup
   become: true
@@ -124,16 +118,8 @@
 
     - name: Workaround of redhat-release binary on ubi9
       when: rpm_found.rc == 0
-      block:
-        - name: Remove redhat-release
-          ansible.builtin.shell: |
-            rpm -e --nodeps redhat-release
-
-        - name: Install centos-stream-release
-          ansible.builtin.package:
-            name: "centos-stream-release"
-            state: latest
-            releasever: "{{ ansible_facts['distribution_major_version'] }}"
+      ansible.builtin.shell: |
+        rpm -e --nodeps redhat-release
 
     - name: Install edpm packages
       ansible.builtin.package:
