@@ -19,8 +19,8 @@ edpm_container_cli: "{{ container_cli | default('podman') }}"
 # All variables intended for modification should be placed in this file.
 
 edpm_multipathd_image: "quay.io/podified-antelope-centos9/openstack-multipathd:current-podified"
-edpm_multipathd_image_download_delay: 5
-edpm_multipathd_image_download_retries: 5
+edpm_multipathd_image_download_delay: "{{ edpm_download_delay | default(60) }}"
+edpm_multipathd_image_download_retries: "{{ edpm_download_retries | default(5) }}"
 
 edpm_multipathd_command: "/usr/sbin/multipathd -d"
 edpm_multipathd_volumes:
