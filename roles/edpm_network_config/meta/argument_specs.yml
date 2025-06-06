@@ -81,5 +81,5 @@ argument_specs:
         default: nic1
       edpm_network_config_nonconfigured_cleanup:
         type: bool
-        description: "Cleanup network interfaces not in network config"
-        default: true
+        description: "Cleanup network interfaces before network config"
+        default: false
