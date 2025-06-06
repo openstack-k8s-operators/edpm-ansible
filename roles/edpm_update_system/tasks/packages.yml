@@ -13,7 +13,7 @@
     _exclude_packages_always:
       - openvswitch
   ansible.builtin.dnf:  # noqa: package-latest
-    name: "*"
+    name: "{{ edpm_update_system_include_packages }}"
     state: latest
     update_cache: true
     exclude: >-

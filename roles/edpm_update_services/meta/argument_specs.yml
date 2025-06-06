@@ -12,6 +12,11 @@ argument_specs:
         type: bool
         default: true
         description: Toggle to enable/disable containers update
+      edpm_update_services_include_packages:
+        type: list
+        default:
+          - openstack-selinux
+        description: List of essential packages to include in the services update
       edpm_update_services_exclude_packages:
         type: list
         default: []
