@@ -46,6 +46,9 @@ edpm_bootstrap_packages_bootstrap:
   - systemd-container
   - crypto-policies-scripts
   - grubby
+  # sos allows must-gather to trigger sosreports on the EDPM
+  # nodes
+  - sos
 
 edpm_bootstrap_release_version_package:
   - rhoso-release
