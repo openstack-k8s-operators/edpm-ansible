@@ -22,9 +22,9 @@
 # service name this role manages
 edpm_libvirt_service_name: libvirt
 # seconds between retries for download tasks
-edpm_libvirt_download_delay: 5
+edpm_libvirt_download_delay: 30
 # number of retries for download tasks
-edpm_libvirt_download_retries: 5
+edpm_libvirt_download_retries: 10
 # this sould map to the libvirt
 edpm_libvirt_services:
   - virtlogd
