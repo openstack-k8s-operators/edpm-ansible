@@ -69,10 +69,12 @@
         option: no-auto-default
         value: "*"
         backup: true
+      register: nm_config_update
     - name: Restart NetworkManager
       ansible.builtin.systemd:
         name: NetworkManager
         state: restarted
+      when: nm_config_update.changed  # noqa: no-handler
     - name: Load edpm_network_config tasks for os-net-config tool
       ansible.builtin.include_tasks:
         file: network_config.yml
