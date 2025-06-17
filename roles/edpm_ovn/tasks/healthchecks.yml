@@ -23,7 +23,7 @@
   become: true
   ansible.builtin.copy:
     src: healthchecks/ovn_controller/
-    dest: /var/lib/openstack/healthchecks/ovn_controller
+    dest: /var/lib/openstack/healthchecks/ovn_controller-ovn_controller
     setype: container_file_t
     owner: "{{ ansible_user | default(ansible_user_id) }}"
     group: "{{ ansible_user | default(ansible_user_id) }}"
