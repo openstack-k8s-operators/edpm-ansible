@@ -1,0 +1,13 @@
+---
+- name: Deploy EDPM Neutron Opflex Agent 
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
+  strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
+  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
+  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
+  tasks:
+    - name: Neutron Opflex Agent
+      ansible.builtin.import_role:
+        name: /usr/share/ansible/roles/edpm_neutron_opflex_agent
+      tags:
+        - edpm_ciscoaci_neutron_opflex_agent

@@ -1,0 +1,15 @@
+{% set edpm_cisco_neutron_opflex_volumes = [] %}
+{%- set edpm_cisco_neutron_opflex_volumes =
+	    edpm_cisco_neutron_opflex_volumes +
+        edpm_cisco_neutron_opflex_common_volumes +
+        edpm_cisco_neutron_opflex_tls_cacert_volumes %}
+image: "{{ edpm_cisco_neutron_opflex_image }}"
+net: host
+pid: host
+cgroupns: host
+privileged: true
+user: root
+restart: always
+volumes: {{ edpm_cisco_neutron_opflex_volumes }}
+environment:
+  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

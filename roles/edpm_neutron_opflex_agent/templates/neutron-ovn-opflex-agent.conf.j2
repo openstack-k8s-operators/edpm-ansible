@@ -1,0 +1,34 @@
+[DEFAULT]
+debug = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_debug }}
+
+{% if edpm_cisco_neutron_opflex_agent_DEFAULT_nova_metadata_host is defined %}
+nova_metadata_host = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_nova_metadata_host }}
+{% endif %}
+
+{% if edpm_cisco_neutron_opflex_agent_DEFAULT_nova_metadata_protocol is defined %}
+nova_metadata_protocol = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_nova_metadata_protocol }}
+{% endif %}
+
+{% if edpm_cisco_neutron_opflex_agent_DEFAULT_metadata_proxy_shared_secret is defined %}
+metadata_proxy_shared_secret = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_metadata_proxy_shared_secret }}
+{% endif %}
+
+metadata_workers = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_metadata_workers }}
+state_path = {{ edpm_cisco_neutron_opflex_agent_DEFAULT_state_path }}
+
+[agent]
+root_helper = {{ edpm_cisco_neutron_opflex_agent_agent_root_helper }}
+
+[ovs]
+ovsdb_connection = {{ edpm_cisco_neutron_opflex_agent_ovs_ovsdb_connection }}
+ovsdb_connection_timeout = {{ edpm_cisco_neutron_opflex_agent_ovs_ovsdb_connection_timeout }}
+
+[ovn]
+ovsdb_probe_interval = {{ edpm_cisco_neutron_opflex_agent_ovn_ovsdb_probe_interval }}
+
+{% if edpm_cisco_neutron_opflex_agent_ovn_ovn_sb_connection is defined %}
+ovn_sb_connection = {{ edpm_cisco_neutron_opflex_agent_ovn_ovn_sb_connection }}
+{% endif %}
+
+# test = {{ edpm_neutron_opflex_agent_DEFAULT_transport_url }}
+# test2 = {{ edpm_cisco_neutron_opflex_DEFAULT_transport_url }}

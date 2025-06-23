@@ -1,0 +1,11 @@
+---
+
+- name: Download needed container images
+  containers.podman.podman_image:
+    name: "{{ edpm_cisco_neutron_opflex_image }}"
+    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
+  become: true
+  register: edpm_cisco_neutron_opflex_images_download
+  until: edpm_cisco_neutron_opflex_images_download.failed == false
+  retries: "{{ edpm_cisco_neutron_opflex_images_download_retries }}"
+  delay: "{{ edpm_cisco_neutron_opflex_images_download_delay }}"

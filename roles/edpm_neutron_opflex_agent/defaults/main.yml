@@ -1,0 +1,97 @@
+---
+# Copyright 2024 Cisco Systems Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# All variables intended for modification should be placed in this file.
+# All variables within this role should have a prefix of "edpm_opflex"
+
+# service name this role manages
+edpm_cisco_neutron_opflex_service_name: ciscoaci_neutron_opflex_agent
+
+# seconds between retries for download tasks
+edpm_cisco_neutron_opflex_images_download_delay: 5
+
+# number of retries for download tasks
+edpm_cisco_neutron_opflex_images_download_retries: 5
+
+edpm_cisco_neutron_opflex_image: "10.30.9.74:8787/osp18/openstack-ciscoaci-neutron-opflex:18.0.6"
+
+edpm_cisco_neutron_opflex_agent_config_src: "/var/lib/openstack/configs/{{ edpm_cisco_neutron_opflex_service_name }}"
+edpm_cisco_neutron_opflex_agent_conf_dir: "/etc/opflex-agent-ovs"
+edpm_cisco_neutron_opflex_agent_config_dir: "/var/lib/config-data/puppet-generated/neutron_opflex"
+edpm_cisco_neutron_opflex_lib_dir: "/var/lib/opflex"
+
+edpm_cisco_neutron_opflex_agent_neutron_dir: "/var/lib/config-data/puppet-generated/neutron"
+
+edpm_cisco_neutron_opflex_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/neutron-opflex-agent-custom-service/tls-ca-bundle.pem"
+edpm_cisco_neutron_opflex_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+edpm_cisco_neutron_opflex_tls_cacert_volumes: []
+
+edpm_cisco_neutron_opflex_common_volumes:    
+    - "/etc/hosts:/etc/hosts:ro"
+    - "/etc/localtime:/etc/localtime:ro"
+    - "/etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro"
+    - "/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro"
+    - "/etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro"
+    - "/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro"
+    - "/etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro"
+    - "/dev/log:/dev/log"
+    - "/etc/puppet:/etc/puppet:ro"
+    - "/var/lib/kolla/config_files/{{ edpm_cisco_neutron_opflex_service_name }}.json:/var/lib/kolla/config_files/config.json:ro"
+    - "/run/openvswitch:/run/openvswitch:shared,z"
+    - "{{ edpm_cisco_neutron_opflex_agent_config_dir }}:/var/lib/kolla/config_files/src:ro"
+    - "{{ edpm_cisco_neutron_opflex_agent_neutron_dir }}/etc/neutron/neutron_opflex.conf:/etc/neutron/neutron_opflex.conf:ro"
+    - "{{ edpm_cisco_neutron_opflex_agent_neutron_dir }}/etc/neutron/neutron.conf:/etc/neutron/neutron.conf:ro"
+    - "{{ edpm_cisco_neutron_opflex_agent_neutron_dir }}/etc/neutron/metadata_agent.ini:/etc/neutron/metadata_agent.ini:ro"
+    - "/var/log/containers/neutron:/var/log/neutron"
+    - "/var/log/containers/opflex:/var/log/opflex"
+    - "/var/run/openvswitch/:/var/run/openvswitch/:shared,z"
+    - "/run/netns:/run/netns:shared"
+    - "/lib/modules:/lib/modules:ro"
+    - "/var/lib/opflex/files:/var/lib/opflex-agent-ovs:shared,z"
+    - "/var/lib/opflex/sockets:/run/opflex:shared,z"
+    - "/var/lib/config-data/puppet-generated/neutron/neutron_opflex_supervisord.conf:/etc/neutron/neutron_opflex_supervisord.conf:ro"
+
+
+edpm_neutron_opflex_agent_DEFAULT_transport_url: ''
+edpm_cisco_neutron_opflex_DEFAULT_transport_url: ''
+
+
+
+# opflex-agent-ovs.conf
+# DEFAULT
+edpm_cisco_neutron_opflex_aci_apic_systemid: defaultSystemId
+edpm_cisco_neutron_opflex_vmm_hostname: defaultHostName
+
+# rootwrap.conf
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_filters_path: '/usr/share/neutron/rootwrap'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_use_syslog: 'False'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_daemon_timeout: '600'
+edpm_cisco_neutron_opflex_agent_rootwrap_DEFAULT_rlimit_nofile: '1024'
+
+# neutron-ovn-opflex-agent.conf
+edpm_cisco_neutron_opflex_agent_DEFAULT_debug: 'True'
+edpm_cisco_neutron_opflex_agent_DEFAULT_metadata_workers: '1'
+edpm_cisco_neutron_opflex_agent_DEFAULT_state_path: '/var/lib/neutron'
+edpm_cisco_neutron_opflex_agent_agent_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
+edpm_cisco_neutron_opflex_agent_ovs_ovsdb_connection: 'tcp:127.0.0.1:6640'
+edpm_cisco_neutron_opflex_agent_ovs_ovsdb_connection_timeout: '180'
+edpm_cisco_neutron_opflex_agent_ovn_ovsdb_probe_interval: '60000'
+
+# General Parameters
