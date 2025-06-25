@@ -23,7 +23,7 @@
 
     - name: Set ca_cert mount
       ansible.builtin.set_fact:
-        edpm_neutron_ovn_tls_cacert_volumes:
+        edpm_cisco_neutron_opflex_tls_cacert_volumes:
           - "{{ edpm_cisco_neutron_opflex_tls_cacert_bundle_src }}:{{ edpm_cisco_neutron_opflex_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
