@@ -43,7 +43,7 @@ description:
 options:
   cleanup:
     description:
-      - Cleanup unconfigured interfaces.
+      - Cleanup unconfigured interfaces, before applying.
     type: bool
     default: false
   config_file:
@@ -69,9 +69,9 @@ options:
     default: false
   use_nmstate:
     description:
-      - If enabled, use nmstate and network manager for network configuration.
+      - If disabled, use legacy ifcfg/network-scripts for network configuration.
     type: bool
-    default: false
+    default: true
 """
 
 EXAMPLES = """
