@@ -25,6 +25,15 @@
   tags:
     - edpm_users
 
+- name: Allow unprivileged rsync use port 873
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: '873'
+    sysctl_set: true
+    sysctl_file: "/etc/sysctl.d/99-edpm-swift.conf"
+    state: present
+    reload: true
+
 - name: Gather user fact
   ansible.builtin.setup:
     gather_subset:
