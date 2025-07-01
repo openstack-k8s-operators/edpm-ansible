@@ -39,4 +39,28 @@
       delegate_to: localhost
       run_once: true
 
+    - name: create etc-localtime
+      ansible.builtin.file:
+        src: ../usr/share/zoneinfo/America/New_York
+        dest: /etc/localtime
+        owner: root
+        group: root
+        state: link
+
+    - name: Create certs dir
+      ansible.builtin.file:
+        path: /var/lib/openstack/certs/ovn/default
+        recurse: true
+        mode: 655
+
+    - name: Touch dummy cert files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: touch
+        mode: 600
+      loop:
+        - /var/lib/openstack/certs/ovn/default/ca.crt
+        - /var/lib/openstack/certs/ovn/default/tls.crt
+        - /var/lib/openstack/certs/ovn/default/tls.key
+
   post_tasks: []
