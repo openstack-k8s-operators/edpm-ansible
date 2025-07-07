@@ -8,15 +8,6 @@
     - edpm_podman
     - download_cache
 
-- name: Download images for edpm_iscsid role
-  when: '"nova" in edpm_download_cache_running_services'
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_iscsid
-    tasks_from: download_cache.yml
-  tags:
-    - edpm_iscsid
-    - download_cache
-
 - name: Download images for edpm_ovn role
   when: '"ovn" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
