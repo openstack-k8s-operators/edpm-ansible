@@ -10,18 +10,6 @@
     - edpm_podman
     - edpm_update
 
-- name: Updates containers for edpm_iscsid role
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_iscsid
-    tasks_from: run.yml
-    apply:
-      become: true
-  tags:
-    - edpm_iscsid
-    - edpm_update
-  # iscsid is part of the "nova" EDPM service
-  when: '"nova" in edpm_update_running_services'
-
 - name: Updates containers for edpm_ovn role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_ovn
