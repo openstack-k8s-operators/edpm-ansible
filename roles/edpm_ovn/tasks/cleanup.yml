@@ -31,44 +31,51 @@
   changed_when: false
   ignore_errors: true
 
+- name: Initialize cleanup_ovn_cms_options_stdout variable
+  ansible.builtin.set_fact:
+    cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options.stdout | default('') }}"
+  when: cleanup_ovn_cms_options.rc == 0
+
 - name: Cleanup enable-chassis-as-gw when chassis GW not enabled
   ansible.builtin.set_fact:
-    cleanup_ovn_cms_options: "{{ cleanup_ovn_cms_options | regex_replace('enable-chassis-as-gw' ~ ',?', '') }}"
+    cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('enable-chassis-as-gw' ~ ',?', '') }}"
   when:
     - not edpm_enable_chassis_gw | bool
     - cleanup_ovn_cms_options.rc == 0
+    - cleanup_ovn_cms_options_stdout | length > 0
 
 - name: Cleanup enable-chassis-as-extport-host when chassis extport not enabled
   ansible.builtin.set_fact:
-    cleanup_ovn_cms_options: "{{ cleanup_ovn_cms_options | regex_replace('enable-chassis-as-extport-host' ~ ',?', '') }}"
+    cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('enable-chassis-as-extport-host' ~ ',?', '') }}"
   when:
     - not edpm_enable_chassis_extport | bool
     - cleanup_ovn_cms_options.rc == 0
+    - cleanup_ovn_cms_options_stdout | length > 0
 
 - name: Cleanup availability-zones
   when:
     - edpm_ovn_availability_zones | length == 0
     - cleanup_ovn_cms_options.rc == 0
+    - cleanup_ovn_cms_options_stdout | length > 0
   block:
     - name: Filter out availability-zones from stdout when undefined
       ansible.builtin.set_fact:
-        filtered_azs:
-          stdout: "{{ cleanup_ovn_cms_options.stdout | regex_replace('availability-zones=[^,]*' ~ ',?', '') }}"
+        filtered_azs: "{{ cleanup_ovn_cms_options_stdout | regex_replace('availability-zones=[^,]*' ~ ',?', '') }}"
 
     - name: Update cleanup_ovn_cms_options with filtered azs
       ansible.builtin.set_fact:
-        cleanup_ovn_cms_options: "{{ cleanup_ovn_cms_options | combine(filtered_azs | default({})) }}"
+        cleanup_ovn_cms_options_stdout: "{{ filtered_azs }}"
 
 - name: Set updated OVN CMS Options to the local OVSDB
   become: true
   ansible.builtin.shell: >
-    ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options={{ cleanup_ovn_cms_options.stdout }}
+    ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options={{ cleanup_ovn_cms_options_stdout }}
   register: cleanup_ovn_cms_options_set
   changed_when: cleanup_ovn_cms_options_set.rc == 0
   failed_when: cleanup_ovn_cms_options_set.rc != 0
   when:
     - cleanup_ovn_cms_options.rc == 0
-    - cleanup_ovn_cms_options.stdout != ""
+    - cleanup_ovn_cms_options_stdout | length > 0
 
 - name: Clear OVN CMS Options if updated string is empty
   become: true
@@ -79,4 +86,4 @@
   failed_when: cleanup_ovn_cms_options_remove.rc != 0
   when:
     - cleanup_ovn_cms_options.rc == 0
-    - cleanup_ovn_cms_options.stdout == ""
+    - cleanup_ovn_cms_options_stdout | length == 0
