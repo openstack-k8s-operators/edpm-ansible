@@ -26,9 +26,3 @@
       when: deploy_edpm_openstack_run_firewall | default(True) | bool
       tags:
         - edpm_firewall
-    - name: Run edpm_logrotate_crond
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: run.yml
-      tags:
-        - edpm_logrotate_crond
