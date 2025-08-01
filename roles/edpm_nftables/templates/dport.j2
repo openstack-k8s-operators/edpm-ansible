@@ -1,19 +1,19 @@
-{%- set ns = namespace(_dport='') %}
+{%- set ns = namespace(dport='') %}
 {%- if 'dport' in rule %}
 {%    if rule['dport'] is iterable and (rule['dport'] is not string and rule['dport'] is not mapping) -%}
-{%      set ns._dport = rule['dport'] |join(', ') -%}
+{%      set ns.dport = rule['dport'] |join(', ') -%}
 {%    else -%}
-{%      set ns._dport = rule['dport'] -%}
+{%      set ns.dport = rule['dport'] -%}
 {%    endif -%}
 {%- endif %}
 {#- This is for legacy things - Really, use dport... #}
 {%- if 'port' in rule %}
 {%    if rule['port'] is iterable and (rule['port'] is not string and rule['port'] is not mapping) -%}
-{%      set ns._dport = rule['port'] |join(', ') -%}
+{%      set ns.dport = rule['port'] |join(', ') -%}
 {%    else -%}
-{%      set ns._dport = rule['port'] -%}
+{%      set ns.dport = rule['port'] -%}
 {%    endif -%}
 {%- endif %}
-{%- if ns._dport != '' %}
- {{ rule.get('proto', false)|ternary('', 'tcp ') }}dport { {{ ns._dport |replace(':', '-') }} }
+{%- if ns.dport != '' %}
+ {{ rule.get('proto', false)|ternary('', 'tcp ') }}dport { {{ ns.dport |replace(':', '-') }} }
 {%- endif %}
