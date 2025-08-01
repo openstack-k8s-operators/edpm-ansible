@@ -111,14 +111,3 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_swift
     tasks_from: download_cache.yml
-
-- name: Download images for edpm_logrotate_crond role
-  when: ("install-os" in edpm_download_cache_running_services) or
-        ("configure-os" in edpm_download_cache_running_services) or
-        ("run-os" in edpm_download_cache_running_services)
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_logrotate_crond
-    tasks_from: download_cache_images.yml
-  tags:
-    - edpm_logrotate_crond
-    - download_cache

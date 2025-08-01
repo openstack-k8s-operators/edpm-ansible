@@ -49,7 +49,6 @@
               - ^roles/edpm_timezone/*
               - ^roles/edpm_container_manage/*
               - ^roles/edpm_nftables/*
-              - ^roles/edpm_logrotate_crond/*
               - ^roles/edpm_ssh_known_hosts/*
               - ^roles/edpm_install_certs/*
               - ^roles/edpm_libvirt/*
