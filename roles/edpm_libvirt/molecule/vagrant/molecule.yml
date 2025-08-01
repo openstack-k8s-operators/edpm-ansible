@@ -7,8 +7,8 @@ driver:
     name: libvirt
   provision: no
   parallel: true
-  default_box: 'generic/rocky9'
-  # default_box: 'generic/centos9s'
+  # default_box: 'generic/rocky9'
+  default_box: 'generic/centos9s'
 platforms:
 - name: compute-1
   memory: 8192

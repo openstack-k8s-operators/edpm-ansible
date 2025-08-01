@@ -1,0 +1,13 @@
+- name: Verify libvirt logging
+  vars:
+    expected: "{{item.expected | default('3:qemu 3:libvirt 4:object 4:json 4:event 3:util')}}"
+  block:
+    - name: Detect if libvirt log filters exists {{item.dest}} {{expected}}
+      become: true
+      ansible.builtin.command: grep -q 'log_filters="{{expected}}"' {{item.dest}}
+      register: libvirt_filter_exists
+    - name: Assert log filter exists in {{item.dest}}
+      ansible.builtin.assert:
+        that:
+          - libvirt_filter_exists.rc == 0
+        fail_msg: "libvirt log_filters are incorrect in {{item.dest}} {{expected}}"
