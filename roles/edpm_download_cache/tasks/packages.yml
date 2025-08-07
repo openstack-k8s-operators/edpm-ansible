@@ -47,17 +47,6 @@
     - edpm_network_config
     - download_cache
 
-- name: Download packages for edpm_logrotate_crond role
-  when: ("install-os" in edpm_download_cache_running_services) or
-        ("configure-os" in edpm_download_cache_running_services) or
-        ("run-os" in edpm_download_cache_running_services)
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_logrotate_crond
-    tasks_from: download_cache_packages.yml
-  tags:
-    - edpm_logrotate_crond
-    - download_cache
-
 - name: Download packages for edpm_sshd role
   when: ("install-os" in edpm_download_cache_running_services) or
         ("configure-os" in edpm_download_cache_running_services) or

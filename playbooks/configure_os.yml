@@ -39,12 +39,6 @@
         tasks_from: configure.yml
       tags:
         - edpm_timezone
-    - name: Configure edpm_logrotate_crond
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: configure.yml
-      tags:
-        - edpm_logrotate_crond
     - name: Configure nftables
       ansible.builtin.import_role:
         name: osp.edpm.edpm_nftables
