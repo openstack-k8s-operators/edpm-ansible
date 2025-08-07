@@ -26,10 +26,10 @@ edpm_ovs_dpdk_revalidator_cores: ""
 edpm_ovs_dpdk_handler_cores: ""
 edpm_ovs_dpdk_emc_insertion_probablity: ""
 edpm_ovs_dpdk_enable_tso: false
-edpm_ovs_dpdk_pmd_auto_lb: false
-edpm_ovs_dpdk_pmd_load_threshold: ""
-edpm_ovs_dpdk_pmd_improvement_threshold: ""
-edpm_ovs_dpdk_pmd_rebal_interval: ""
+edpm_ovs_dpdk_pmd_auto_lb: true
+edpm_ovs_dpdk_pmd_load_threshold: "70"
+edpm_ovs_dpdk_pmd_improvement_threshold: "25"
+edpm_ovs_dpdk_pmd_rebal_interval: "1"
 edpm_ovs_dpdk_vhost_postcopy_support: false
 edpm_ovs_dpdk_vhost_postcopy_ovs_options: "--mlockall=no"
 edpm_ovs_dpdk_shared_mem_pool: ""
