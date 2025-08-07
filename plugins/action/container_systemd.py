@@ -25,6 +25,11 @@ import yaml
 
 from ansible.errors import AnsibleActionFail
 from ansible.plugins.action import ActionBase
+try:
+    from ansible.template import trust_as_template
+except ImportError:
+    def trust_as_template(data):
+        return data
 from ansible.utils.display import Display
 
 
@@ -200,11 +205,10 @@ class ActionModule(ActionBase):
             'systemd-service.j2'
         )
         if not os.path.exists(source):
-            raise AnsibleActionFail('Template {} was '
-                                    'not found'.format(source))
+            raise AnsibleActionFail('Template {} was not found'.format(source))
         with open(source) as template_file:
             data = template_file.read()
-        return data
+            return trust_as_template(data)
 
     def _create_units(self, container_config, task_vars):
         """Create system units and get list of changed services
