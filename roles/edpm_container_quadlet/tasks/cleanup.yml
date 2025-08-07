@@ -1,13 +1,27 @@
 ---
-- name: Stop and disable old standalone container for {{ edpm_container_quadlet_service }}
-  ansible.builtin.systemd_service:
-    name: "edpm_{{ edpm_container_quadlet_service }}"
-    state: stopped
-    enabled: false
-  become: true
+- name: Check for systemd service file
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/edpm_{{ edpm_container_quadlet_service }}.service"
+  register: service_file
 
-- name: Cleanup standalone service file for {{ edpm_container_quadlet_service }}
-  ansible.builtin.file:
-    path: "/etc/systemd/system/{{ edpm_container_quadlet_service }}.service"
+- name: Cleanup systemd service and files
+  when: service_file.stat.exists
+  become: true
+  block:
+    - name: Stop and disable old standalone container for {{ edpm_container_quadlet_service }}
+      ansible.builtin.systemd_service:
+        name: "edpm_{{ edpm_container_quadlet_service }}"
+        state: stopped
+        enabled: false
+        no_block: true
+
+    - name: Cleanup standalone service file for {{ edpm_container_quadlet_service }}
+      ansible.builtin.file:
+        path: "/etc/systemd/system/{{ edpm_container_quadlet_service }}.service"
+        state: absent
+
+- name: Remove left over containers
+  containers.podman.podman_container:
+    name: "{{ edpm_container_quadlet_service }}"
     state: absent
   become: true
