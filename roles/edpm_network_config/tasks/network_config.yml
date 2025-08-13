@@ -48,6 +48,9 @@
   retries: "{{ edpm_network_config_download_retries }}"
   delay: "{{ edpm_network_config_download_delay }}"
 
+- name: Import DNS NetworkManager configs tasks
+  ansible.builtin.import_tasks: dns_nm_configs.yml
+
 - name: Ensure /var/lib/edpm-config directory exists
   become: true
   ansible.builtin.file:
