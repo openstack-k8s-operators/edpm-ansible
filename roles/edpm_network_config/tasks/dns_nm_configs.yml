@@ -29,7 +29,7 @@
   when: edpm_bootstrap_network_resolvconf_update
   become: true
   block:
-    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+    - name: Unset 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
@@ -42,7 +42,7 @@
       loop:
         - /etc/NetworkManager/NetworkManager.conf
         - /etc/NetworkManager/conf.d/99-cloud-init.conf
-    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+    - name: Unset 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
