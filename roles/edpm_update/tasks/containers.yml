@@ -128,17 +128,6 @@
       become: true
   when: '"neutron-dhcp" in edpm_update_running_services'
 
-- name: Updates containers for edpm_logrotate_crond role
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_logrotate_crond
-    tasks_from: run.yml
-    apply:
-      become: true
-  tags:
-    - edpm_logrotate_crond
-    - edpm_update
-  when: '"run-os" in edpm_update_running_services'
-
 - name: Updates configs for edpm_telemetry role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_telemetry
