@@ -64,4 +64,3 @@ edpm_container_standalone_volumes: "{{
   }}"
 
 edpm_deploy_identifier: ''
-edpm_iscsid_config_volume: /var/lib/config-data/ansible-generated/iscsid
