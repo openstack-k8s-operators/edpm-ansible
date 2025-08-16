@@ -1,7 +1,7 @@
 ---
 
-- name: Download packages needed by linux-system-role - nmstate
-  when: edpm_network_config_tool == 'nmstate'
+- name: Download packages needed by linux-system-role - nmstate and nmsate provider
+  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
   ansible.builtin.dnf:
     name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
     download_only: true

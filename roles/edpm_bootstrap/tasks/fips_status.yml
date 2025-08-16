@@ -31,7 +31,7 @@
       }}
 
 - name: Assert that we have the wanted status
-  when: edpm_bootstrap_fips_mode != check
+  when: edpm_bootstrap_fips_mode != 'check'
   ansible.builtin.assert:
     that:
       - >

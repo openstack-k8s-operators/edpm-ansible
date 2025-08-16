@@ -29,13 +29,13 @@
 - name: Assert either edpm_frr_bgp_peers or edpm_frr_bgp_uplinks configured
   ansible.builtin.assert:
     that:
-      - "edpm_frr_bgp_uplinks or edpm_frr_bgp_peers"
+      - edpm_frr_bgp_uplinks | length > 0 or edpm_frr_bgp_peers | length > 0
 
 - name: FRR uplink interfaces
   # if edpm_frr_bgp_peers are defined, edpm_frr_bgp_uplinks are not used to create frr.conf.j2
   when:
-    - edpm_frr_bgp_uplinks
-    - not edpm_frr_bgp_peers
+    - edpm_frr_bgp_uplinks | length > 0
+    - not edpm_frr_bgp_peers | length > 0
   block:
     - name: Construct FRR uplink interfaces from os-net-config mappings
       ansible.builtin.set_fact:

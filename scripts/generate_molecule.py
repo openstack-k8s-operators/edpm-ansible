@@ -16,7 +16,6 @@ PODMAN_EXCLUDED_ROLES = [
     'edpm_container_standalone',
     'edpm_hosts_entries',
     'edpm_iscsid',
-    'edpm_logrotate_crond',
     'edpm_network_config',
     'edpm_nftables',
     'edpm_nodes_validation',

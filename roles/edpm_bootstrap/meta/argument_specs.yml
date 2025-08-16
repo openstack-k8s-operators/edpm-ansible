@@ -60,14 +60,6 @@ argument_specs:
         default: enforcing
         description: "String for SELinux state. One of: disabled, enforcing, permissive"
 
-      edpm_bootstrap_network_resolvconf_update:
-        type: bool
-        default: false
-        description: |
-          Control resolv.conf management by NetworkManager
-          false = disable NetworkManager resolv.conf update (default)
-          true = enable NetworkManager resolv.conf update
-
       edpm_bootstrap_swap_size_megabytes:
         type: int
         default: 1024

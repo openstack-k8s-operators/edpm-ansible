@@ -86,7 +86,7 @@ edpm_frr_volumes:
   - /run/frr:/run/frr:shared,z
 
 # seconds between retries for download tasks
-edpm_frr_images_download_delay: 5
+edpm_frr_images_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
-edpm_frr_images_download_retries: 5
+edpm_frr_images_download_retries: "{{ edpm_download_retries | default(5) }}"
