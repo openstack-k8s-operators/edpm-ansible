@@ -1,0 +1,23 @@
+---
+argument_specs:
+  # ./roles/edpm_update_system/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_update role.
+    options:
+      edpm_update_system_enable_kpatch:
+        type: bool
+        default: false
+        description: Toggle to enable/disable kpatch usage
+      edpm_update_system_enable_packages_update:
+        type: bool
+        default: true
+        description: Toggle to enable/disable packages update
+      edpm_update_system_include_packages:
+        type: list
+        default:
+          - "*"
+        description: List of packages to include in the update
+      edpm_update_system_exclude_packages:
+        type: list
+        default: []
+        description: List of packages to exclude from the update

@@ -51,8 +51,8 @@ argument_specs:
         default: true
       edpm_network_config_nmstate:
         type: bool
-        description: "If enabled, use nmstate and network manager for network configuration."
-        default: false
+        description: "Uses nmstate and network manager for network configuration if enabled, otherwise ifcfg scripts will be used"
+        default: true
       edpm_network_config_os_net_config_mappings:
         type: dict
         description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
@@ -83,3 +83,10 @@ argument_specs:
         type: bool
         description: "Cleanup network interfaces not in network config"
         default: true
+      edpm_bootstrap_network_resolvconf_update:
+        type: bool
+        default: true
+        description: |
+          Control resolv.conf management by NetworkManager
+          false = disable NetworkManager resolv.conf update (default)
+          true = enable NetworkManager resolv.conf update

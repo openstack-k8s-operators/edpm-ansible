@@ -1,0 +1,55 @@
+---
+edpm_container_quadlet_kolla_config_dir: /var/lib/kolla/config_files
+edpm_container_quadlet_systemd_config_dir: "/etc/containers/systemd/"
+edpm_container_quadlet_service: ""
+edpm_container_quadlet_service_volumes: []
+edpm_container_quadlet_service_use_host_network: false
+edpm_container_quadlet_service_image: ""
+# List of common volumes that can be included in the template of a container
+# definition to include the most common volumes.
+edpm_container_quadlet_common_volumes:
+  - path: /etc/hosts
+    mountPath: /etc/hosts
+    readOnly: true
+    name: etc-hosts
+  - path: /etc/localtime
+    mountPath: /etc/localtime
+    readOnly: true
+    name: etc-localtime
+  # OpenSSL trusted CAs
+  - path: /etc/pki/ca-trust/extracted
+    mountPath: /etc/pki/ca-trust/extracted
+    readOnly: true
+    name: ca-extracted
+  - path: /etc/pki/ca-trust/source/anchors
+    mountPath: /etc/pki/ca-trust/source/anchors
+    readOnly: true
+    name: anchors
+  - path: /etc/pki/tls/certs/ca-bundle.crt
+    mountPath: /etc/pki/tls/certs/ca-bundle.crt
+    readOnly: true
+    name: ca-bundle
+  - path: /etc/pki/tls/certs/ca-bundle.trust.crt
+    mountPath: /etc/pki/tls/certs/ca-bundle.trust.crt
+    readOnly: true
+    name: ca-trust-bundle
+  - path: /etc/pki/tls/cert.pem
+    mountPath: /etc/pki/tls/cert.pem
+    readOnly: true
+    name: tls-cert
+  # Syslog socket
+  - path: /dev/log
+    mountPath: /dev/log
+    readOnly: false
+    name: dev-log
+
+# List of volumes included when internal tls is enabled
+edpm_container_quadlet_internal_tls_volumes:
+  - path: /etc/pki/tls/certs/httpd
+    mountPath: /etc/pki/tls/certs/httpd
+    readOnly: true
+    name: certs-httpd
+  - path: /etc/pki/tls/private/httpd
+    mountPath: /etc/pki/tls/private/httpd
+    readOnly: true
+    name: private-httpd

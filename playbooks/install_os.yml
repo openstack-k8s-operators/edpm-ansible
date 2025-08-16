@@ -33,9 +33,3 @@
           become: true
       tags:
         - dataplane_chrony
-    - name: Install edpm_logrotate_crond
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_logrotate_crond
-        tasks_from: install.yml
-      tags:
-        - edpm_logrotate_crond

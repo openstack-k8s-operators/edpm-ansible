@@ -77,7 +77,7 @@
 
 - name: Append custom.conf to config files
   ansible.builtin.set_fact:
-    configs: "{{ configs + [{ 'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf' }] }}"
+    configs: "{{ configs + [{'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf'}] }}"
   when: custom_ceilometer_conf.stat.exists
 
 - name: Copy generated ceilometer configs
@@ -113,6 +113,14 @@
   when:
     - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
   block:
+    - name: Create config file for exporters
+      ansible.builtin.include_tasks:
+        file: exporter_tls.yml
+      loop:
+        - ceilometer_prom_exporter
+      loop_control:
+        loop_var: exporter
+
     - name: Change the owner of the crt
       become: true
       ansible.builtin.file:

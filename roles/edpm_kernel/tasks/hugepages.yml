@@ -19,7 +19,7 @@
     _converted_hugepages: {}
     _nonconfig_hugepages: {}
     _hugepages_modification: false
-  when: edpm_kernel_hugepages | length
+  when: edpm_kernel_hugepages | default({}) | length > 0
   block:
     - name: Rewrite edpm_kernel_hugepages to use integers as keys
       ansible.builtin.set_fact:

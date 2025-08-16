@@ -1,0 +1,72 @@
+---
+
+- name: Stop NetworkManager from updating resolv.conf
+  when: not edpm_bootstrap_network_resolvconf_update
+  become: true
+  block:
+    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        no_extra_spaces: true
+        section: main
+        option: dns
+        value: none
+        backup: true
+        mode: '0644'
+    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        no_extra_spaces: true
+        section: main
+        option: rc-manager
+        value: unmanaged
+        backup: true
+        mode: '0644'
+
+- name: Start NetworkManager to updating resolv.conf
+  when: edpm_bootstrap_network_resolvconf_update
+  become: true
+  block:
+    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: "{{ item }}"
+        state: absent
+        no_extra_spaces: true
+        section: main
+        option: dns
+        value: none
+        backup: true
+        mode: '0644'
+      loop:
+        - /etc/NetworkManager/NetworkManager.conf
+        - /etc/NetworkManager/conf.d/99-cloud-init.conf
+    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: "{{ item }}"
+        state: absent
+        no_extra_spaces: true
+        section: main
+        option: rc-manager
+        value: unmanaged
+        backup: true
+        mode: '0644'
+      loop:
+        - /etc/NetworkManager/NetworkManager.conf
+        - /etc/NetworkManager/conf.d/99-cloud-init.conf
+
+- name: Reload NetworkManager
+  become: true
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: reloaded
+
+- name: Stop dhclient from updating resolv.conf
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/dhcp/dhclient-enter-hooks
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      make_resolv_conf() { : ; }

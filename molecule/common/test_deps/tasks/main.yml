@@ -48,34 +48,28 @@
 - name: RHEL Block
   become: true
   when:
-    - (ansible_facts['os_family'] | lower) == 'redhat'
-    - mirrors_file.stat.exists | bool
+    - ((ansible_facts['os_family'] | lower) == 'redhat') or (mirrors_file.stat.exists | bool)
   block:
     - name: Disable ubi host subscription-manager integration
       ansible.builtin.file:
         path: /etc/rhsm-host
         state: absent
 
-    - name: Disable ubi 9 repos
+    - name: Remove ubi 9 repos
       when: ansible_facts['distribution_major_version'] is version(9, '>=')
       become: true
-      ansible.builtin.yum_repository:
-        name: "{{ item }}"
+      ansible.builtin.file:
+        path: "/etc/yum.repos.d/ubi.repo"
         state: absent
-        keepcache: false
-      loop:
-        - ubi-9-appstream
-        - ubi-9-baseos
-        - ubi-9-codeready-builder
 
-- name: Block for tripleo-repos
+- name: Block for repo-setup
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
   block:
     - name: Fetch latest repo version
       ansible.builtin.uri:
-        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-tripleo/delorean.repo
+        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-podified/delorean.repo
         return_content: true
       register: edpm_packages
 
@@ -85,21 +79,36 @@
         dest: /etc/yum.repos.d/delorean.repo
         mode: 0644
 
-- name: Install tripleo-repos package
+- name: Install repo-setup pre-requirements
   become: true
   ansible.builtin.package:
-    name: "python*tripleo-repos"
+    name:
+      - git
+      - python3-pip
     state: present
 
-- name: Tripleo setup block
+- name: Repo setup block
   become: true
   when:
     - (ansible_facts['os_family'] | lower) == 'redhat'
     - test_deps_setup_edpm | bool
   block:
-    - name: Create tripleo repos
-      ansible.builtin.command: tripleo-repos -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
-          -b master current-tripleo {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
+    - name: Get repo-setup repository # noqa: latest[git]
+      ansible.builtin.git:
+        accept_hostkey: true
+        dest: "/tmp/repo-setup"
+        repo: "https://github.com/openstack-k8s-operators/repo-setup"
+
+    - name: Install repo-setup
+      ansible.builtin.shell: |
+        set -eux
+        cd /tmp/repo-setup
+        pip install -r requirements.txt
+        python3 setup.py install
+
+    - name: Create repos
+      ansible.builtin.command: /usr/local/bin/repo-setup -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
+          -b master current-podified {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
 
     - name: Look for redhat-release rpm
       ansible.builtin.shell: |
@@ -109,16 +118,8 @@
 
     - name: Workaround of redhat-release binary on ubi9
       when: rpm_found.rc == 0
-      block:
-        - name: Remove redhat-release
-          ansible.builtin.shell: |
-            rpm -e --nodeps redhat-release
-
-        - name: Install centos-stream-release
-          ansible.builtin.package:
-            name: "centos-stream-release"
-            state: latest
-            releasever: "{{ ansible_facts['distribution_major_version'] }}"
+      ansible.builtin.shell: |
+        rpm -e --nodeps redhat-release
 
     - name: Install edpm packages
       ansible.builtin.package:

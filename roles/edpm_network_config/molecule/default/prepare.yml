@@ -41,3 +41,11 @@
       register: ip_command_output
       changed_when: ip_command_output.rc == 0
       failed_when: ip_command_output.rc != 0
+    - name: Create /etc/dhcp directory
+      become: true
+      ansible.builtin.file:
+        path: '/etc/dhcp'
+        state: directory
+        owner: root
+        group: root
+        mode: 0755

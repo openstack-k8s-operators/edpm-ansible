@@ -20,10 +20,10 @@
 # All variables within this role should have a prefix of "edpm_iscsid"
 
 # seconds between retries for download tasks
-edpm_iscsid_image_download_delay: 5
+edpm_iscsid_image_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
-edpm_iscsid_image_download_retries: 5
+edpm_iscsid_image_download_retries: "{{ edpm_download_retries | default(5) }}"
 
 edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
 
