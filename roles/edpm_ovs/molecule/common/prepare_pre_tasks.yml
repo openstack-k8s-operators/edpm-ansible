@@ -8,3 +8,7 @@
     ansible_user_dir: "{{ lookup('env', 'HOME') }}"
   when:
     - ansible_user_dir is undefined
+- name: set bootc fact
+  set_fact:
+    ansible_local:
+      bootc: false

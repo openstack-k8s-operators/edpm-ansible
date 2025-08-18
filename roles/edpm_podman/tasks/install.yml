@@ -14,6 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    filter: ansible_local
+
 - name: Install block
   become: true
   block:
