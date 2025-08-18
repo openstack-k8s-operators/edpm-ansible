@@ -17,5 +17,9 @@
 
 - name: Converge
   hosts: all
+  pre_tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        filter: ansible_local
   roles:
     - role: osp.edpm.edpm_podman
