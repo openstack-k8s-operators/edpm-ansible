@@ -14,6 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    filter: ansible_local
+  when:
+    - ansible_local is not defined
+
 - name: Install role requirements
   ansible.builtin.include_tasks: install.yml
   when: edpm_download_role_install_requirements | bool
