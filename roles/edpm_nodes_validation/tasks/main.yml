@@ -64,11 +64,26 @@
     - edpm_nodes_validation_validate_controllers_icmp|bool
     - edpm_nodes_validation_ping_test_ips | length > 0
 
-- name: Verify the configured FQDN vs /etc/hosts
+- name: Verify a FQDN is set block
+  when:
+    - edpm_nodes_validation_check_for_fqdn|bool
+  block:
+    - name: Run hostname -f
+      ansible.builtin.command: hostname -f
+      register: hostname
+      changed_when: false
+
+    - name: Verify a FQDN is set
+      ansible.builtin.assert:
+        that: hostname.stdout.find(".") != -1
+        fail_msg: "{{ hostname.stdout }} does not contain . and does not appear to be an FQDN."
+        success_msg: "{{ hostname.stdout }} contains . and appears to be an FQDN."
+
+- name: Verify the configured FQDN vs {{ edpm_nodes_validation_validate_fqdn_hosts_file }}
   ansible.builtin.shell: |
     HOSTNAME=$(hostname)
     SHORT_NAME=$(hostname -s)
-    FQDN_FROM_HOSTS=$(awk '$1 !~ /#/ && $3 == "'${SHORT_NAME}'"{print $2}' /etc/hosts)
+    FQDN_FROM_HOSTS=$(awk '$1 !~ /#/ && $3 == "'${SHORT_NAME}'"{print $2}' {{ edpm_nodes_validation_validate_fqdn_hosts_file }})
     if [[ $HOSTNAME != $FQDN_FROM_HOSTS ]]; then
       echo "FAILURE"
       echo -e "System hostname: ${HOSTNAME}\nEntry from /etc/hosts: ${FQDN_FROM_HOSTS}\n"

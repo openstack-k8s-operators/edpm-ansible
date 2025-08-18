@@ -1,0 +1,49 @@
+-
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Converge
+  hosts: all
+  gather_facts: false
+  vars:
+    edpm_container_quadlet_service: test
+    edpm_container_quadlet_container_defs:
+      test:
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          annotations:
+          labels:
+            app: test
+          name: test
+        spec:
+          hostNetwork: true
+          containers:
+          - args:
+            - kolla_start
+            env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: COPY_ALWAYS
+            image: quay.io/centos/centos:stream9
+            name: test
+            securityContext:
+              privileged: true
+              procMount: Unmasked
+    edpm_container_quadlet_kolla_config_files:
+      test:
+        command: 'sleep 3600'
+  roles:
+    - "osp.edpm.edpm_container_quadlet"

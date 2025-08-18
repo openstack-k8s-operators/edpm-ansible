@@ -21,10 +21,10 @@
 edpm_neutron_sriov_service_name: neutron-sriov
 
 # seconds between retries for download tasks
-edpm_neutron_sriov_images_download_delay: 5
+edpm_neutron_sriov_images_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
-edpm_neutron_sriov_images_download_retries: 5
+edpm_neutron_sriov_images_download_retries: "{{ edpm_download_retries | default(5) }}"
 
 # All variables within this role should have a prefix of "edpm_neutron_sriov_agent"
 edpm_neutron_sriov_agent_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_sriov_service_name }}"

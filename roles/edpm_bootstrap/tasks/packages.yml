@@ -19,6 +19,7 @@
     gather_subset:
       - "!all"
       - "!min"
+      - "local"
       - "distribution"
   when: "'distribution' not in ansible_facts"
   tags:

@@ -8,6 +8,7 @@ egg
 .testrepository
 __pycache__
 build
+.ansible
 
 # Editors
 *~

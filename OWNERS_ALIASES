@@ -3,12 +3,10 @@
 aliases:
   edpm-approvers:
   - slagle
-  - bshephar
   - rabi
   - jpodivin
   ci-approvers:
   - lewisdenny
-  - frenzyfriday
   - viroel
   openstack-approvers:
   - abays

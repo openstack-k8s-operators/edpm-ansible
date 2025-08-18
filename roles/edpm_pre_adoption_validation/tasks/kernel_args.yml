@@ -41,4 +41,4 @@
   # In the other hand neither the edpm_kernel role during deployment and
   # adoption nor this adoption check enforces to list the existing kernel args
   # in edpm_kernel_args ansible variable.
-  failed_when: not (cmdline | regex_search( '^.*' + edpm_kernel_args | default('') + '.*$' | string ))
+  failed_when: not (cmdline | regex_search( '^.*' + edpm_kernel_args | default('') + '.*$' | string))

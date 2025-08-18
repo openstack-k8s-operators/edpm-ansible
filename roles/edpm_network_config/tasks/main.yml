@@ -14,6 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    filter: ansible_local
+  when:
+    - ansible_local is not defined
+
 - name: Fail when edpm_network_config_tool=nmstate unless edpm_network_config_tool_nmstate_override=true
   ansible.builtin.fail:
     msg: |
@@ -23,8 +29,8 @@
     - edpm_network_config_tool == 'nmstate'
     - not edpm_network_config_tool_nmstate_override|bool
 
-- name: Configure network with network role from system roles [nmstate]
-  when: edpm_network_config_tool == 'nmstate'
+- name: Install OVS NetworkManager plugin [nmstate and nmstate provider]
+  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
   become: true
   block:
     - name: Install OVS NetworkManager plugin [nmstate]
@@ -41,6 +47,14 @@
         name: NetworkManager
         state: restarted
       when: nm_ovs_status.changed  # noqa: no-handler
+
+- name: Import DNS NetworkManager configs tasks
+  ansible.builtin.import_tasks: dns_nm_configs.yml
+
+- name: Configure network with network role from system roles [nmstate]
+  when: edpm_network_config_tool == 'nmstate'
+  become: true
+  block:
     - name: Render network_state variable
       ansible.builtin.set_fact:
         network_state: "{{ edpm_network_config_template | from_yaml }}"
@@ -62,10 +76,12 @@
         option: no-auto-default
         value: "*"
         backup: true
+      register: nm_config_update
     - name: Restart NetworkManager
       ansible.builtin.systemd:
         name: NetworkManager
         state: restarted
+      when: nm_config_update.changed  # noqa: no-handler
     - name: Load edpm_network_config tasks for os-net-config tool
       ansible.builtin.include_tasks:
         file: network_config.yml

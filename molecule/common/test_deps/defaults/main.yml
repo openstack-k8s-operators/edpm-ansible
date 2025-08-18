@@ -16,7 +16,7 @@
 
 
 test_deps_extra_packages: []
-test_deps_setup_edpm: false
+test_deps_setup_edpm: true
 test_deps_mirrors_file_path: /etc/ci/mirror_info.sh
 test_deps_setup_stream: true
 test_deps_setup_ceph: false

@@ -14,7 +14,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Ensure firewall directory is present
+  become: true
+  ansible.builtin.file:
+    path: "/var/lib/edpm-config/firewall/"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
 - name: Inject firewall rules for Swift
+  become: true
   osp.edpm.edpm_nftables_snippet:
     dest: /var/lib/edpm-config/firewall/swift.yaml
     content: |

@@ -48,9 +48,9 @@
 
     - name: Gather facts if they don't exist
       when:
-        - ("'ssh_host_key_rsa_public' not in ansible_facts") or
-          ("'ssh_host_key_ed25519_public' not in ansible_facts") or
-          ("'ssh_host_key_ecdsa_public' not in ansible_facts")
+        - ('ssh_host_key_rsa_public' not in ansible_facts) or
+          ('ssh_host_key_ed25519_public' not in ansible_facts) or
+          ('ssh_host_key_ecdsa_public' not in ansible_facts)
       ansible.builtin.setup:
         gather_subset:
           - "!all"

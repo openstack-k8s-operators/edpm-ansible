@@ -1,0 +1,27 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: edpm-0.localdomain
+    groups:
+      - compute
+provisioner:
+  log: true
+  name: ansible
+
+scenario:
+  test_sequence:
+    - prepare
+    - converge
+    - cleanup
+    - destroy
+verifier:
+  name: ansible
