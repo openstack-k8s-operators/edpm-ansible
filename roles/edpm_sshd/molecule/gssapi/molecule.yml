@@ -25,6 +25,7 @@ scenario:
     - dependency
     - destroy
     - create
+    - prepare
     - converge
     - verify
     - destroy
