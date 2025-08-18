@@ -15,6 +15,12 @@
 # under the License.
 
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    filter: ansible_local
+  when:
+    - ansible_local is not defined
+
 # TODO(slagle): should this be in edpm-image-builder instead?
 - name: Manage /etc/localtime
   when: ansible_local.bootc
