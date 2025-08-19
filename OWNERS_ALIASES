@@ -6,7 +6,6 @@ aliases:
   - rabi
   - jpodivin
   ci-approvers:
-  - lewisdenny
   - viroel
   openstack-approvers:
   - abays
