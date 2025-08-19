@@ -1,0 +1,40 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: no
+  parallel: true
+  default_box: 'generic/centos9s'
+platforms:
+- name: edpm-iscsid
+  memory: 1024
+  cpus: 2
+  provider_options:
+    cpu_mode: 'host-passthrough'
+    nested: true
+    machine_type: 'q35'
+  groups:
+    - compute
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../default/converge.yml
+    # Choose your scenario
+    prepare: ../default/prepare.yml
+    verify: ../default/verify.yml
+    # prepare: ../adoption/prepare.yml
+    # verify: ../adoption/verify.yml
+verifier:
+  name: ansible
+scenario:
+  # The vagrant scenario is for development/debug.
+  # Disable all tests so they don't run in CI
+  test_sequence: []
+  # - destroy
+  # - create
+  # - prepare
+  # - converge
+  # - verify
