@@ -30,7 +30,7 @@ edpm_multipathd_volumes:
   - /sys:/sys
   - /lib/modules:/lib/modules:ro
   - /etc/iscsi:/etc/iscsi:ro
-  - /var/lib/iscsi:/var/lib/iscsi:z
+  - /var/lib/iscsi:/var/lib/iscsi
   - /etc/multipath:/etc/multipath:z
   - /etc/multipath.conf:/etc/multipath.conf:ro
 

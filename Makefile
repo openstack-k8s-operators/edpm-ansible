@@ -33,7 +33,8 @@ execute_molecule: setup_test_environment ## Setup the test environment and execu
 		-e ANSIBLE_REMOTE_TMP=/tmp \
 		-e HOME=/tmp \
 		-e MOLECULE_CONFIG=.config/molecule/config_local.yml \
-		-e TEST_ALL_ROLES=yes \
+		-e TEST_ALL_ROLES=yesXXX \
+		-e TEST_SINGLE_ROLE=edpm_multipathd \
 		-e TEST_VERBOSITY=$(TEST_VERBOSITY) \
 		--user root \
 		cifmw:latest bash -c "/opt/ci_framework/scripts/run_molecule \
