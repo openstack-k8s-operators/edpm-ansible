@@ -63,7 +63,3 @@ argument_specs:
         default: /etc/ipa/ca.crt
         description: Path to TLS certificate.
         type: path
-      edpm_iscsid_config_volume:
-        default: /var/lib/config-data/ansible-generated/iscsid
-        description: Path to iscsid config directory.
-        type: path
