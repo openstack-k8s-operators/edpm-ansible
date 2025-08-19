@@ -1,0 +1,56 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Run the default verify playbook
+  import_playbook: ../default/verify.yml
+
+- name: Verify the adoption scenario
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Load role vars
+      ansible.builtin.include_vars: ../../defaults/main.yml
+
+    - name: Verify the containerized iscsid config dir was renamed
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+      vars:
+        item: "{{ edpm_iscsid_tripleo_config_dir }}.adopted"
+
+    - name: Verify the containerized iscsid.conf file was adopted
+      become: true
+      ansible.builtin.command: |
+        grep -q '^node.session.foo = bar$' /etc/iscsi/iscsid.conf
+      changed_when: false
+
+    - name: Verify the IQN file was adopted
+      ansible.builtin.command: |
+        grep -q '^InitiatorName=iqn.1994-05.com.redhat:abcdef012345$' /etc/iscsi/initiatorname.iscsi
+      changed_when: false
+
+    - name: Check the status of IQN reset sentinel file
+      ansible.builtin.stat:
+        path: /etc/iscsi/.initiator_reset
+      register: sentinel_exists
+
+    - name: Assert the IQN reset sentinel file exists
+      ansible.builtin.assert:
+        that:
+          - sentinel_exists.stat.exists
+        fail_msg: "The IQN reset sentinel file does not exist"

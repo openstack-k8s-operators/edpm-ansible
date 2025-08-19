@@ -14,21 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Converge
   hosts: all
   gather_facts: false
-  become: true
-  tasks:
-    - name: Install iscsid
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: install.yml
-    - name: Configure iscsid
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: configure.yml
-    - name: Run iscsid
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_iscsid
-        tasks_from: run.yml
+  roles:
+    - role: osp.edpm.edpm_iscsid

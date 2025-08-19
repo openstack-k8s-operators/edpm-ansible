@@ -1,0 +1,51 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Run the default prepare playbook
+  import_playbook: ../default/prepare.yml
+
+- name: Prepare the adoption scenario
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Load role vars
+      ansible.builtin.include_vars: ../../defaults/main.yml
+
+    - name: Create the containerized iscsid configuration directory
+      ansible.builtin.file:
+        path: "{{ edpm_iscsid_tripleo_config_dir }}"
+        state: directory
+
+    - name: Create a dummy iscsid.conf file
+      ansible.builtin.copy:
+        content: |
+          node.session.foo = bar
+        dest: "{{ edpm_iscsid_tripleo_config_dir }}/iscsid.conf"
+
+    - name: Create a dummy IQN
+      ansible.builtin.copy:
+        content: |
+          InitiatorName=iqn.1994-05.com.redhat:abcdef012345
+        dest: "{{ edpm_iscsid_tripleo_config_dir }}/initiatorname.iscsi"
+
+    - name: Create the IQN reset sentinel
+      ansible.builtin.file:
+        path: "{{ edpm_iscsid_tripleo_config_dir }}/.initiator_reset"
+        state: touch
