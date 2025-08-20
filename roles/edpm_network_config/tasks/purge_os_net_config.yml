@@ -1,0 +1,66 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# Apply network configuration with os-net-config.
+#
+
+- name: Purge os-net-config configuration
+  become: true
+  block:
+    - name: Remove os-net-config return code file
+      become: true
+      block:
+        - name: Check if os-net-config return code file exists
+          ansible.builtin.stat:
+            path: /var/lib/edpm-config/os-net-config.returncode
+          register: os_net_config_returncode_stat
+        - name: Remove file if os-net-config return code file exists
+          ansible.builtin.file:
+            path: /var/lib/edpm-config/os-net-config.returncode
+            state: absent
+          when: os_net_config_returncode_stat.stat.exists
+    - name: Set nic_config_file fact
+      ansible.builtin.set_fact:
+        nic_config_file: "/etc/os-net-config/config.yaml"
+    - name: Render network_config from template
+      no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
+      ansible.builtin.copy:
+        content: "{{ edpm_network_config_template }}"
+        dest: "{{ nic_config_file }}"
+        mode: '0644'
+        backup: true
+    - name: Retrieve and output nic_config_file contents for debug before applying
+      when: edpm_network_config_debug|bool
+      block:
+        - name: Retrieve content of nic_config_file before applying
+          ansible.builtin.slurp:
+            path: "{{ nic_config_file }}"
+          register: os_net_config_config
+        - name: Debug print nic_config_file contents
+          ansible.builtin.debug:
+            msg: "{{ os_net_config_config['content'] | b64decode | trim }}"
+    - name: Run edpm_os_net_config_module to purge network_config
+      edpm_os_net_config:
+        config_file: "{{ nic_config_file }}"
+        purge_provider: "{{ edpm_network_config_purge_provider }}"
+        debug: "{{ edpm_network_config_debug | bool }}"
+        detailed_exit_codes: true
+        safe_defaults: "{{ edpm_network_config_safe_defaults | bool }}"
+        use_nmstate: "{{ edpm_network_config_nmstate | bool }}"
+      async: "{{ edpm_network_config_async_timeout }}"
+      poll: "{{ edpm_network_config_async_poll }}"
+      register: network_config_result
+      when: not ansible_check_mode
