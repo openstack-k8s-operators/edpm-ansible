@@ -1,0 +1,38 @@
+---
+
+- name: Install OVS NetworkManager plugin [nmstate and nmstate provider]
+  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
+  become: true
+  block:
+    - name: Install OVS NetworkManager plugin [nmstate]
+      ansible.builtin.dnf:
+        name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
+        state: present
+      register: nm_ovs_status
+      until: nm_ovs_status is succeeded
+      retries: "{{ edpm_network_config_download_retries }}"
+      delay: "{{ edpm_network_config_download_delay }}"
+    - name: Restart NetworkManager after plugin installation [nmstate]
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: restarted
+      when: nm_ovs_status.changed  # noqa: no-handler
+
+- name: Install required packages for os-net-config tool
+  when: edpm_network_config_tool == 'os-net-config'
+  become: true
+  block:
+    - name: Ensure requirements are satisfied
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: "packages.yml"
+
+    - name: Install os-net-config package
+      become: true
+      ansible.builtin.dnf:
+        name: os-net-config
+        state: present
+      register: edpm_network_config_onc_download
+      until: edpm_network_config_onc_download is succeeded
+      retries: "{{ edpm_network_config_download_retries }}"
+      delay: "{{ edpm_network_config_download_delay }}"
