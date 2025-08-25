@@ -1,0 +1,23 @@
+---
+
+- name: Migrate EDPM Network
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
+  strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
+  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
+  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
+  tasks:
+    # Purge EDPM network using os-net-config
+    - name:  Purge edpm_network_config
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_network_config
+        tasks_from: purge_os_net_config.yml
+      tags:
+        - edpm_purge_network_config
+
+    # Sets up EDPM network using os-net-config
+    - name: Import edpm_network_config
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_network_config
+      tags:
+        - edpm_network_config
