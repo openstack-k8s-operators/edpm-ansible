@@ -54,3 +54,9 @@
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_compute.json'
     edpm_container_manage_clean_orphans: false
+
+- name: Include NVMe cleaner as service
+  tags:
+    - install
+    - nova
+  ansible.builtin.include_tasks: nova_compute_nvme_cleanup.yml

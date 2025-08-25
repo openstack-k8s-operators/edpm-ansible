@@ -1,0 +1,21 @@
+---
+- name: Deploy nova_compute_nvme_cleanup systemd service
+  become: true
+  ansible.builtin.template:
+    src: nova_compute_nvme_cleanup.service.j2
+    dest: /etc/systemd/system/nova_compute_nvme_cleanup.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start nova_compute_nvme_cleanup service
+  become: true
+  ansible.builtin.systemd:
+    name: nova_compute_nvme_cleanup
+    enabled: true
+    state: started
