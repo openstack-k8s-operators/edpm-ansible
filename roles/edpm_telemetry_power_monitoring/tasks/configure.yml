@@ -98,6 +98,13 @@
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
 
+- name: Gather virtualization fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "virtual"
+
 - name: Render container config templates
   ansible.builtin.template:
     src: "{{ item }}"
@@ -108,6 +115,7 @@
   vars:
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+    running_in_vm: "{{ ansible_facts['virtualization_role'] == 'guest' }}"
 
 - name: Configure tls if present
   when:
