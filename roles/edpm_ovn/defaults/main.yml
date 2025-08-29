@@ -81,8 +81,8 @@ edpm_ovn_ovs_external_ids:
   ovn-chassis-mac-mappings: >-
     "{%- set chassis_mac_mappings = [] -%}
     {%- for physnet, mac_prefix in edpm_ovn_chassis_mac_mapping_prefixes.items() -%}
-    {{ chassis_mac_mappings.append([physnet, mac_prefix | community.general.random_mac(seed=edpm_ovn_chassis_mac_mapping_seed)] |
-      join(':')) }}{%- endfor -%}
+    {% set _ = chassis_mac_mappings.append([physnet, mac_prefix | community.general.random_mac(seed=edpm_ovn_chassis_mac_mapping_seed)] |
+      join(':')) %}{%- endfor -%}
     {{ chassis_mac_mappings | join(',') }}"
   ovn-encap-ip: "{{ edpm_ovn_encap_ip }}"
   ovn-encap-type: "{{ edpm_ovn_encap_type }}"
@@ -91,7 +91,7 @@ edpm_ovn_ovs_external_ids:
   ovn-monitor-all: "{{ ovn_monitor_all }}"
   ovn-remote: >-
     "{%- set db_addresses = [] -%}{%- for host in edpm_ovn_dbs -%}
-    {{ db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) }}{%- endfor -%}
+    {% set _ = db_addresses.append([edpm_ovn_protocol, host, edpm_ovn_sb_server_port] | join(':')) %}{%- endfor -%}
     {{ db_addresses | join(',') }}"
   ovn-remote-probe-interval: "{{ edpm_ovn_remote_probe_interval }}"
   ovn-ofctrl-wait-before-clear: "{{ edpm_ovn_ofctrl_wait_before_clear }}"
