@@ -23,6 +23,8 @@
         - iproute
         - iscsi-initiator-utils
         - podman
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
 - name: Prepare
   hosts: all
   roles:
