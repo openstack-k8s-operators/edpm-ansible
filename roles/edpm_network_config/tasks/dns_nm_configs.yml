@@ -1,5 +1,15 @@
 ---
 
+- name: Check if a dns line exists in a nm config file
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/NetworkManager.conf
+    regexp: '^dns=none$'
+    state: present
+  check_mode: true
+  ignore_errors: true
+  register: dns_line_check
+
 - name: Stop NetworkManager from updating resolv.conf
   when: not edpm_bootstrap_network_resolvconf_update
   become: true
@@ -29,7 +39,7 @@
   when: edpm_bootstrap_network_resolvconf_update
   become: true
   block:
-    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+    - name: Remove 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
@@ -42,7 +52,7 @@
       loop:
         - /etc/NetworkManager/NetworkManager.conf
         - /etc/NetworkManager/conf.d/99-cloud-init.conf
-    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+    - name: Remove 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
@@ -61,6 +71,9 @@
   ansible.builtin.systemd:
     name: NetworkManager
     state: reloaded
+  when:
+    - ((edpm_bootstrap_network_resolvconf_update and (not dns_line_check.changed)) or
+      ((not edpm_bootstrap_network_resolvconf_update) and dns_line_check.changed))
 
 - name: Stop dhclient from updating resolv.conf
   become: true
