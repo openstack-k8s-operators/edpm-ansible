@@ -1,0 +1,67 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Package management for network configuration tools
+
+- name: Install OVS NetworkManager plugin [nmstate and nmstate provider]
+  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
+  become: true
+  block:
+    - name: Install OVS NetworkManager plugin [nmstate]
+      ansible.builtin.dnf:
+        name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
+        state: present
+      register: nm_ovs_status
+      until: nm_ovs_status is succeeded
+      retries: "{{ edpm_network_config_download_retries }}"
+      delay: "{{ edpm_network_config_download_delay }}"
+    - name: Restart NetworkManager after plugin installation [nmstate]
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: restarted
+      when: nm_ovs_status.changed  # noqa: no-handler
+
+- name: Install os-net-config package
+  when: edpm_network_config_tool == 'os-net-config'
+  become: true
+  ansible.builtin.dnf:
+    name: os-net-config
+    state: present
+  register: edpm_network_config_onc_download
+  until: edpm_network_config_onc_download is succeeded
+  retries: "{{ edpm_network_config_download_retries }}"
+  delay: "{{ edpm_network_config_download_delay }}"
+
+- name: Install legacy network packages for os-net-config with ifcfg provider
+  when:
+    - edpm_network_config_tool == 'os-net-config'
+    - not edpm_network_config_nmstate|bool
+  become: true
+  block:
+    - name: Deploy network-scripts required for deprecated network service
+      ansible.builtin.dnf:
+        name: "{{ edpm_bootstrap_legacy_network_packages | default(['openstack-network-scripts']) }}"
+        state: present
+      register: edpm_legacy_network_packages_result
+      until: edpm_legacy_network_packages_result is succeeded
+      retries: "{{ edpm_network_config_download_retries }}"
+      delay: "{{ edpm_network_config_download_delay }}"
+
+    - name: Ensure network service is enabled and started
+      ansible.builtin.systemd:
+        name: "{{ edpm_bootstrap_network_service | default('network') }}"
+        enabled: true
+        state: started

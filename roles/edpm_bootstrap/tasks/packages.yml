@@ -61,21 +61,3 @@
     - "'%verify' in rpm_verify_result.stderr"
   changed_when: false
   become: true
-
-- name: Install and enable network service
-  when:
-    - (edpm_bootstrap_legacy_network_packages | length) > 0
-  become: true
-  block:
-    - name: Deploy network-scripts required for deprecated network service
-      ansible.builtin.dnf:
-        name: "{{ edpm_bootstrap_legacy_network_packages }}"
-        state: present
-      register: edpm_bootstrap_legacy_network_packages_result
-      until: edpm_bootstrap_legacy_network_packages_result is succeeded
-      retries: "{{ edpm_bootstrap_download_retries }}"
-      delay: "{{ edpm_bootstrap_download_delay }}"
-    - name: Ensure network service is enabled
-      ansible.builtin.systemd:
-        name: "{{ edpm_bootstrap_network_service }}"
-        enabled: true

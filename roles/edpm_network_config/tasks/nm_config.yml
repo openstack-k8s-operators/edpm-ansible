@@ -1,4 +1,37 @@
 ---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# NetworkManager configuration
+# Includes DNS settings and NetworkManager setup
+# Used by both os-net-config and nmstate tools
+
+- name: Configure NetworkManager base settings
+  become: true
+  block:
+    - name: Set 'no-auto-default' in /etc/NetworkManager/NetworkManager.conf
+      community.general.ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        mode: "0644"
+        no_extra_spaces: true
+        section: main
+        option: no-auto-default
+        value: "*"
+        backup: true
+      notify: Reload NetworkManager
 
 - name: Stop NetworkManager from updating resolv.conf
   when: not edpm_bootstrap_network_resolvconf_update
@@ -14,6 +47,7 @@
         value: none
         backup: true
         mode: '0644'
+      notify: Reload NetworkManager
     - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: /etc/NetworkManager/NetworkManager.conf
@@ -24,12 +58,13 @@
         value: unmanaged
         backup: true
         mode: '0644'
+      notify: Reload NetworkManager
 
 - name: Start NetworkManager to updating resolv.conf
   when: edpm_bootstrap_network_resolvconf_update
   become: true
   block:
-    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+    - name: Unset 'dns=none' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
@@ -42,7 +77,8 @@
       loop:
         - /etc/NetworkManager/NetworkManager.conf
         - /etc/NetworkManager/conf.d/99-cloud-init.conf
-    - name: Set 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
+      notify: Reload NetworkManager
+    - name: Unset 'rc-manager=unmanaged' in /etc/NetworkManager/NetworkManager.conf
       community.general.ini_file:
         path: "{{ item }}"
         state: absent
@@ -55,12 +91,7 @@
       loop:
         - /etc/NetworkManager/NetworkManager.conf
         - /etc/NetworkManager/conf.d/99-cloud-init.conf
-
-- name: Reload NetworkManager
-  become: true
-  ansible.builtin.systemd:
-    name: NetworkManager
-    state: reloaded
+      notify: Reload NetworkManager
 
 - name: Stop dhclient from updating resolv.conf
   become: true
