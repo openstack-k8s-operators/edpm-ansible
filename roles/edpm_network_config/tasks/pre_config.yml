@@ -1,0 +1,55 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Pre-configuration setup tasks
+
+- name: Gather SELinux fact if needed
+  when:
+    - "'selinux' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
+- name: Create fcontext entry for edpmconfig
+  become: true
+  when:
+    - ansible_facts.selinux.status == "enabled"
+  community.general.sefcontext:
+    target: "/var/lib/edpm-config(/.*)?"
+    setype: container_file_t
+    selevel: s0
+    state: present
+
+- name: Ensure requirements are satisfied
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_bootstrap
+    tasks_from: "packages.yml"
+
+- name: Ensure /var/lib/edpm-config directory exists
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/edpm-config
+    state: directory
+    setype: container_file_t
+    selevel: s0
+    mode: "0750"
+
+- name: Ensure we get cloud-init
+  ansible.builtin.stat:
+    path: /etc/cloud/cloud.cfg.d
+  register: cloud_init_exists
