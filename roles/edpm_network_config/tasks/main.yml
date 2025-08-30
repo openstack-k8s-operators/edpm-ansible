@@ -14,67 +14,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Fail when edpm_network_config_tool=nmstate unless edpm_network_config_tool_nmstate_override=true
-  ansible.builtin.fail:
-    msg: |
-      edpm_network_config_tool=nmstate is experimental and not supported.
-      Set edpm_network_config_tool_nmstate_override=true to continue anyway.
-  when:
-    - edpm_network_config_tool == 'nmstate'
-    - not edpm_network_config_tool_nmstate_override|bool
+# Main orchestrator for network configuration
+# Supports three scenarios:
+# 1. Direct nmstate via linux-system-roles (edpm_network_config_tool: 'nmstate')
+# 2. os-net-config with nmstate provider (tool: 'os-net-config', edpm_network_config_nmstate: true)
+# 3. os-net-config with ifcfg provider (tool: 'os-net-config', edpm_network_config_nmstate: false)
 
-- name: Install OVS NetworkManager plugin [nmstate and nmstate provider]
-  when: edpm_network_config_tool == 'nmstate' or edpm_network_config_nmstate | bool
-  become: true
-  block:
-    - name: Install OVS NetworkManager plugin [nmstate]
-      ansible.builtin.dnf:
-        name: "{{ edpm_network_config_systemrole_nmstate_dependencies }}"
-        state: present
-      register: nm_ovs_status
-      until: nm_ovs_status is succeeded
-      retries: "{{ edpm_network_config_download_retries }}"
-      delay: "{{ edpm_network_config_download_delay }}"
-    - name: Restart NetworkManager after plugin installation [nmstate]
-      ansible.builtin.systemd:
-        name: NetworkManager
-        state: restarted
-      when: nm_ovs_status.changed  # noqa: no-handler
+- name: Setup common pre-configuration
+  ansible.builtin.import_tasks: pre_config.yml
 
-- name: Import DNS NetworkManager configs tasks
-  ansible.builtin.import_tasks: dns_nm_configs.yml
+- name: Install required packages
+  ansible.builtin.import_tasks: package_management.yml
 
-- name: Configure network with network role from system roles [nmstate]
+- name: Configure network with nmstate tool
   when: edpm_network_config_tool == 'nmstate'
-  become: true
-  block:
-    - name: Render network_state variable
-      ansible.builtin.set_fact:
-        network_state: "{{ edpm_network_config_template | from_yaml }}"
-    - name: Load system-roles.network tasks [nmstate]
-      ansible.builtin.include_role:
-        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
+  ansible.builtin.include_tasks: nmstate_tool.yml
 
-- name: Disable auto-configuration of all interfaces by NetworkManager
+- name: Configure network with os-net-config tool
   when: edpm_network_config_tool == 'os-net-config'
-  become: true
-  block:
-    - name: Set 'no-auto-default' in /etc/NetworkManager/NetworkManager.conf
-      community.general.ini_file:
-        path: /etc/NetworkManager/NetworkManager.conf
-        state: present
-        mode: "0644"
-        no_extra_spaces: true
-        section: main
-        option: no-auto-default
-        value: "*"
-        backup: true
-      register: nm_config_update
-    - name: Restart NetworkManager
-      ansible.builtin.systemd:
-        name: NetworkManager
-        state: restarted
-      when: nm_config_update.changed  # noqa: no-handler
-    - name: Load edpm_network_config tasks for os-net-config tool
-      ansible.builtin.include_tasks:
-        file: network_config.yml
+  ansible.builtin.include_tasks: os_net_config_tool.yml
+
+- name: Run post-configuration tasks
+  ansible.builtin.include_tasks: post_config.yml
