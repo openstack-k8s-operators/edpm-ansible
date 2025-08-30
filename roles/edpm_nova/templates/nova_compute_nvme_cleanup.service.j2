@@ -1,0 +1,13 @@
+[Unit]
+Description=Nova NVMe cleaner instance delete (runs inside nova_compute container)
+After=edpm_libvirt.target edpm_nova_compute.service
+Wants=edpm_nova_compute.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/podman exec nova_compute /usr/share/openstack-nova/contrib/clean-on-delete --nvme
+SyslogIdentifier=nova_compute_nvme_cleanup
+
+[Install]
+WantedBy=multi-user.target
