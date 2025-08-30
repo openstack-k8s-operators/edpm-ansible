@@ -15,7 +15,6 @@
 # under the License.
 #
 # Apply network configuration with os-net-config.
-#
 
 - name: Apply os-net-config configuration
   become: true
@@ -23,6 +22,7 @@
     - name: Set nic_config_file fact
       ansible.builtin.set_fact:
         nic_config_file: "/etc/os-net-config/config.yaml"
+
     - name: Render network_config from template
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
       ansible.builtin.copy:
@@ -30,6 +30,7 @@
         dest: "{{ nic_config_file }}"
         mode: '0644'
         backup: true
+
     - name: Retrieve and output nic_config_file contents for debug before applying
       when: edpm_network_config_debug|bool
       block:
@@ -40,6 +41,7 @@
         - name: Debug print nic_config_file contents
           ansible.builtin.debug:
             msg: "{{ os_net_config_config['content'] | b64decode | trim }}"
+
     - name: Run edpm_os_net_config_module with network_config
       edpm_os_net_config:
         cleanup: "{{ edpm_network_config_nonconfigured_cleanup }}"
