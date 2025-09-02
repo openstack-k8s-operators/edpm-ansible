@@ -73,6 +73,7 @@ options:
   log_base_path:
     description:
       - Log base path directory
+      - DEPRECATED - Services now log to journald, this parameter is ignored
     type: str
     default: '/var/log/containers/stdouts'
   concurrency:
@@ -128,6 +129,15 @@ class EdpmContainerManage:
         self.config_overrides = args['config_overrides']
         self.log_base_path = args.get('log_base_path')
         self.debug = args.get('debug')
+
+        # Deprecation warning for log_base_path
+        if self.log_base_path and self.log_base_path != '/var/log/containers/stdouts':
+            self.module.deprecate(
+                "The 'log_base_path' parameter is deprecated and ignored. "
+                "Services now log to journald instead of files.",
+                version="0.0.2",
+                collection_name="osp.edpm"
+            )
 
         self.run()
 
@@ -288,7 +298,6 @@ class EdpmContainerManage:
             'debug': self.debug,
             'log_driver': 'journald',
             'log_level': 'info',
-            'log_opt': {"path": f"{self.log_base_path}/{name}.log"},
         }
         opts.update(config)
         # do horible things to convert THT format to ansible module format

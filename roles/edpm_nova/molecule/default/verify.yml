@@ -15,8 +15,6 @@
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
         - "/var/lib/openstack/config/containers"
-        - "/var/log/containers"
-        - "/var/log/containers/stdouts"
         - "/etc/ssh/ssh_known_hosts"
         # extrenal deps
         - "/var/lib/openstack/config/ceph"
@@ -25,7 +23,6 @@
         - "/var/lib/openstack/config/nova"
         - "/var/lib/_nova_secontext"
         - "/var/lib/nova/instances"
-        - "/var/log/containers/nova"
         # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
         # in molecule we create it in prepare so lets just assert it exists
         - "{{ edpm_nova_tls_ca_src_dir }}"
@@ -53,7 +50,6 @@
       loop:
         - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
         - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
-        - "Copying /var/lib/kolla/config_files/02-nova-log.conf to /etc/nova/nova.conf.d/02-nova-log.conf"
         - "Copying /var/lib/kolla/config_files/ssh-config to /var/lib/nova/.ssh/config"
         - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
         - "Copying /var/lib/kolla/config_files/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"

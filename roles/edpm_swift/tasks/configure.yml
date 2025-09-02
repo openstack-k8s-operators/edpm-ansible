@@ -64,7 +64,6 @@
   loop:
     - {"path": "/srv/node", "mode": "0750", "owner": "swift", "group": "swift"}
     - {"path": "/var/cache/swift", "mode": "0700", "owner": "swift", "group": "swift"}
-    - {"path": "/var/log/containers/swift", "mode": "0700", "owner": "swift", "group": "swift"}
 
 - name: Discover configmaps in {{ edpm_swift_config_src }}
   ansible.builtin.find:
