@@ -1,0 +1,92 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Network configuration using os-net-config as the primary tool
+# Note: os-net-config can use either ifcfg or nmstate as internal provider
+# based on edpm_network_config_nmstate variable
+
+- name: Check os-net-config return code for conditional logic
+  become: true
+  block:
+    - name: Check if os-net-config return code file exists
+      ansible.builtin.stat:
+        path: /var/lib/edpm-config/os-net-config.returncode
+      register: os_net_config_returncode_stat
+
+    - name: Read os-net-config return code file if it exists
+      ansible.builtin.slurp:
+        path: /var/lib/edpm-config/os-net-config.returncode
+      register: os_net_config_returncode_slurp
+      when: os_net_config_returncode_stat.stat.exists
+
+- name: Configure NetworkManager for os-net-config
+  ansible.builtin.import_tasks: nm_config.yml
+  when:
+    - (edpm_network_config_update) or
+      (os_net_config_returncode_stat.stat.exists and
+      ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
+      (not os_net_config_returncode_stat.stat.exists)
+
+- name: Apply network configuration using os-net-config
+  become: true
+  # The conditions here are when we want to apply the NetworkConfig:
+  # - If edpm_network_config_update is True
+  # - Or the previous run of NetworkConfig failed
+  # - Or it has never run
+  # This matches the prior behavior of when a Heat SoftwareDeployment was used
+  when:
+    - (edpm_network_config_update) or
+      (os_net_config_returncode_stat.stat.exists and
+      ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
+      (not os_net_config_returncode_stat.stat.exists)
+  block:
+    - name: Create /etc/os-net-config directory
+      ansible.builtin.file:
+        path: /etc/os-net-config
+        state: directory
+        mode: "0755"
+
+    - name: Create os-net-config mappings from lookup data
+      edpm_os_net_config_mappings:
+        net_config_data_lookup:
+          "{{ edpm_network_config_os_net_config_mappings }}"
+      when: not ansible_check_mode | bool
+      register: os_net_config_mappings_result
+
+    - name: Write os-net-config mappings file /etc/os-net-config/mapping.yaml
+      ansible.builtin.copy:
+        content: "{{ os_net_config_mappings_result.mapping | to_nice_yaml }}"
+        dest: /etc/os-net-config/mapping.yaml
+        mode: "0644"
+      when: os_net_config_mappings_result.changed | bool  # noqa: no-handler
+
+    - name: Manage NetworkConfig with edpm_os_net_config module
+      block:
+        - name: Remove /var/lib/edpm-config/scripts directory
+          ansible.builtin.file:
+            path: /var/lib/edpm-config/scripts
+            state: absent
+
+        - name: Run NetworkConfig with edpm_os_net_config
+          ansible.builtin.include_tasks: os_net_config.yml
+
+    - name: Write rc of NetworkConfig script
+      ansible.builtin.copy:
+        content: "{{ network_config_result.rc }}"
+        dest: /var/lib/edpm-config/os-net-config.returncode
+        mode: "0644"
+      when:
+        - network_config_result.rc is defined
