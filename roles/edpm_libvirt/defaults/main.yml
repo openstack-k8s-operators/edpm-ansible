@@ -72,3 +72,20 @@ edpm_libvirt_password_path: /var/lib/openstack/configs/{{ edpm_libvirt_service_n
 # certs
 edpm_libvirt_tls_certs_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_libvirt_tls_cert_src_dir: /var/lib/openstack/certs/{{ edpm_libvirt_service_name }}/default
+# logging
+# levels 1: debug, 2: info, 3:warning, 4:error
+# by default we send warning and error log to the journal
+# and do not output debug or info logs to any location
+# this is a space separated list of output <level>:<output method>
+# https://libvirt.org/logging.html
+edpm_libvirt_log_outputs: "3:journald"
+edpm_libvirt_default_log_filters: "3:qemu 3:libvirt 4:object 4:json 4:event 3:util"
+edpm_libvirt_log_filters_defaults:
+  virtqemud: "{{ edpm_libvirt_default_log_filters }}"
+  virtlogd: "{{ edpm_libvirt_default_log_filters }}"
+  virtproxyd: "{{ edpm_libvirt_default_log_filters }}"
+  virtsecretd: "{{ edpm_libvirt_default_log_filters }}"
+  virtnodedevd: "{{ edpm_libvirt_default_log_filters }}"
+
+# Merge user overrides with defaults
+edpm_libvirt_log_filters: "{{ edpm_libvirt_log_filters_defaults | combine(edpm_libvirt_log_filters_override | default({})) }}"

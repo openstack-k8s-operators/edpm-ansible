@@ -7,6 +7,14 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
+    - name: ensure libvirt socket activation drop-in directories exist
+      ansible.builtin.include_tasks: "test-helpers/verify_logging.yaml"
+      loop:
+        - {"dest": "/etc/libvirt/virtlogd.conf"}
+        - {"dest": "/etc/libvirt/virtnodedevd.conf"}
+        - {"dest": "/etc/libvirt/virtproxyd.conf"}
+        - {"dest": "/etc/libvirt/virtsecretd.conf"}
+        - {"dest": "/etc/libvirt/virtqemud.conf", "expected": "1:qemu 2:libvirt 3:object 4:json"}
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:

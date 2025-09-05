@@ -64,3 +64,28 @@ argument_specs:
         type: str
         description: The vhost user socket directory group name.
         default: ''
+      edpm_libvirt_log_outputs:
+        type: str
+        description: Libvirt log output configuration (level:destination format).
+        default: "3:journald"
+      edpm_libvirt_default_log_filters:
+        type: str
+        description: Default log filter configuration for all libvirt services.
+        default: "3:qemu 3:libvirt 4:object 4:json 4:event 3:util"
+      edpm_libvirt_log_filters_defaults:
+        type: dict
+        description: Dictionary of default log filters for each libvirt service.
+        default:
+          virtqemud: "{{ edpm_libvirt_default_log_filters }}"
+          virtlogd: "{{ edpm_libvirt_default_log_filters }}"
+          virtproxyd: "{{ edpm_libvirt_default_log_filters }}"
+          virtsecretd: "{{ edpm_libvirt_default_log_filters }}"
+          virtnodedevd: "{{ edpm_libvirt_default_log_filters }}"
+      edpm_libvirt_log_filters_override:
+        type: dict
+        description: Dictionary of log filter overrides for specific libvirt services.
+        default: {}
+      edpm_libvirt_log_filters:
+        type: dict
+        description: Combined log filters (defaults merged with overrides) for each libvirt service.
+        default: "{{ edpm_libvirt_log_filters_defaults | combine(edpm_libvirt_log_filters_override | default({})) }}"

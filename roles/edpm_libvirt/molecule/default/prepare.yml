@@ -67,6 +67,17 @@
       ansible.builtin.import_role:
         name: osp.edpm.edpm_timezone
 
+    - name: remove vagrant image packages
+      become: true
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        # NOTE(sean-k-mooney): without this network connectivity will be lost
+        # when the nft rules are applied as firewalld conflicts with the rules
+        # we set.
+        - firewalld
+
     - name: Create firewall directory
       become: true
       ansible.builtin.file:
