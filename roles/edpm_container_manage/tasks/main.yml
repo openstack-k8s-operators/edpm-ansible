@@ -14,15 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Create container logs path
-  ansible.builtin.file:
-    path: "{{ edpm_container_manage_log_path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-
 - name: Generate containers configs data
   become: true
   block:
