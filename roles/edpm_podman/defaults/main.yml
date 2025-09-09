@@ -81,6 +81,7 @@ edpm_podman_default_network_config:
 #   - prefix: registry.fedoraproject.org
 #     blocked: true
 edpm_podman_registries: []
+edpm_podman_registries_conf_file: 20-edpm-podman-registries.conf
 edpm_container_default_pids_limit: 4096
 edpm_container_events_logger_mechanism: journald
 edpm_container_default_runtime: crun
@@ -103,3 +104,4 @@ edpm_podman_auth_file: ~/.config/containers/auth.json
 
 edpm_podman_registries_conf: ""
 edpm_podman_disconnected_ocp: false
+edpm_podman_disconnected_conf_file: 10-edpm-podman-disconnected.conf
