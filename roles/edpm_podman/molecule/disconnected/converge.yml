@@ -48,7 +48,7 @@
 
     - name: Assert registries.conf matches
       ansible.builtin.lineinfile:
-        name: /etc/containers/registries.conf
+        name: /etc/containers/registries.conf.d/10-edpm-podman-disconnected.conf
         search_string: 'location = "quay.io/okd/scos-content"'
         line: 'changed'
         state: present
