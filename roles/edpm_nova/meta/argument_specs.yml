@@ -77,3 +77,24 @@ argument_specs:
           - /etc
           - /opt
           options defaults to "ro" if not specified
+      edpm_nova_enable_nvme_cleaner:
+        type: bool
+        description: |
+          Enable edpm-deployment to have NVMe cleaner agent container
+          alongside nova-compute. When false, the cleaner container is
+          disabled.
+      edpm_nova_nvme_cleaner_args:
+        type: str
+        description: |
+          Argument to append to the clean-on-delete command.
+          Clean NVMe devices with nvme format.
+      edpm_nova_nvme_cleaner_command:
+        type: str
+        description: |
+          Override the cleaner command. If empty, use the default:
+          '/usr/share/openstack-nova/contrib/clean-on-delete {{ edpm_nova_nvme_cleaner_args }}'.
+          Useful in tests (e.g. 'sleep --infinity').
+      edpm_nova_nvme_cleaner_config_dest:
+        type: str
+        description: |
+          Destination directory for the cleaner container configs.

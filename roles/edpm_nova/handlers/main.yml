@@ -20,6 +20,15 @@
     name: "edpm_nova_compute.service"
   listen: "Restart nova"
 
+- name: Restart nova nvme cleaner container
+  when: edpm_nova_enable_nvme_cleaner
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: "edpm_nova_nvme_cleaner.service"
+  listen: "Restart nova"
+
+
 - name: Restart nova init container
   become: true
   containers.podman.podman_container:
