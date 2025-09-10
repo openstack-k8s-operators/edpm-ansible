@@ -1,0 +1,80 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Make sure yum-utils is installed
+  become: true
+  ansible.builtin.dnf:
+    name: yum-utils
+
+- name: Check if reboot is required with needs-restarting
+  ansible.builtin.command: needs-restarting -r
+  register: needs_restarting_output
+  changed_when: false
+  failed_when: needs_restarting_output.rc >= 2
+
+- name: Print return information from needs-restarting
+  ansible.builtin.debug:
+    var: needs_restarting_output.stdout
+
+- name: Create reboot file for needs-restarting
+  when: needs_restarting_output.rc == 1
+  become: true
+  block:
+    - name: Create a reboot_required directory if it does not exist
+      ansible.builtin.file:
+        path: /var/lib/openstack/reboot_required/
+        state: directory
+        mode: '0755'
+
+    - name: Create file for reboot required
+      ansible.builtin.file:
+        path: /var/lib/openstack/reboot_required/needs_restarting
+        state: touch
+        mode: '0600'
+
+    - name: Save result of needs_restarting result to file
+      ansible.builtin.lineinfile:
+        dest: /var/lib/openstack/reboot_required/needs_restarting
+        line: "{{ needs_restarting_output.stdout }}"
+
+- name: Check reboot_required folder for other services that requires reboot
+  ansible.builtin.find:
+    paths: /var/lib/openstack/reboot_required/
+  register: reboot_files
+
+- name: Check if old_tripleo_node config dir exists
+  ansible.builtin.stat:
+    path: "{{ edpm_reboot_old_tripleo_node_config_dir }}"
+  register: old_tripleo_node_conf
+
+- name: Check if edpm_node config dir exists
+  ansible.builtin.stat:
+    path: "{{ edpm_reboot_edpm_node_config_dir }}"
+  register: edpm_node_conf
+
+- name: Set reboot_required fact
+  ansible.builtin.set_fact:
+    reboot_required: true
+  when: reboot_files.matched > 0
+
+- name: Print message if reboot is required, but is not going to be started
+  ansible.builtin.debug:
+    msg: "Reboot is required but was not started. Edpm_reboot_strategy is set to never or this is
+          already deployed machine. Reboot has to be planned. To start reboot set edpm_reboot_strategy
+          to force"
+  when:
+    - reboot_required|default(false)
+    - (edpm_reboot_strategy|lower == "never" or old_tripleo_node_conf.stat.exists or edpm_node_conf.stat.exists)
