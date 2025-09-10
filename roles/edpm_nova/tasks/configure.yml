@@ -188,6 +188,32 @@
     - Restart nova init
     - Restart nova
 
+- name: Create nvme dev cleaner container config dirs
+  when: edpm_nova_enable_nvme_cleaner
+  tags:
+    - configure
+    - nova
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_nova_nvme_cleaner_config_dest }}"
+    state: "directory"
+    setype: "container_file_t"
+    mode: "0755"
+
+- name: Render nvme cleaner config files
+  when: edpm_nova_enable_nvme_cleaner
+  tags:
+    - configure
+    - nova
+  become: true
+  ansible.builtin.template:
+    src: "nova_nvme_cleaner_config.json.j2"
+    dest: "{{ edpm_nova_nvme_cleaner_config_dest }}/config.json"
+    setype: "container_file_t"
+    mode: "0644"
+  notify:
+    - Restart nova
+
 - name: Create .ssh directory for the nova user on the host
   become: true
   ansible.builtin.file:
