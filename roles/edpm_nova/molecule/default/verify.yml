@@ -38,14 +38,34 @@
         - { "name": "nova_compute", "src": "/opt/vendor_integration_2",
             "dest": "/opt/vendor_integration_2", "options": "shared" }
 
+    - name: ensure nvme cleaner container has /dev mounted
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
+      loop:
+        - { "name": "nova_nvme_cleaner", "src": "/dev", "dest": "/dev", "options": "" }
+
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - { "name": "edpm_nova_compute.service" }
+        - { "name": "edpm_nova_nvme_cleaner.service", "running": false }
+
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
         - "nova_compute"
+
+    - name: ensure nvme cleaner container exists
+      become: true
+      ansible.builtin.command: podman inspect nova_nvme_cleaner
+      register: nvme_cleaner_exists
+      changed_when: false
+
+    - name: assert nvme cleaner container exists
+      ansible.builtin.assert:
+        that:
+          - nvme_cleaner_exists.rc == 0
+        fail_msg: "container nova_nvme_cleaner does not exist"
+
     - name: ensure kolla_set_configs copied the expected files
       become: true
       ansible.builtin.shell: |
