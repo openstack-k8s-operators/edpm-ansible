@@ -24,3 +24,6 @@
           - src: /opt/vendor_integration_2
             dest: /opt/vendor_integration_2
             options: "shared"
+        edpm_nova_nvme_cleaner_command: "/usr/bin/sleep"
+        edpm_nova_nvme_cleaner_args: "infinity"
+        edpm_nova_enable_nvme_cleaner: true
