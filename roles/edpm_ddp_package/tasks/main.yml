@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    filter: ansible_local
+
+- name: Fail if bootc
+  ansible.builtin.debug:
+    msg: The edpm_ddp_package role can not be used on a bootc system.
+  failed_when: ansible_local.bootc | bool
+
 - name: Apply user provided DDP package
   when: edpm_ddp_package | string != "" and edpm_ddp_package | string != "ddp"
   block:

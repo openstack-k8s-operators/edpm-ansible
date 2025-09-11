@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+BOOTC_SYSTEM="false"
+BOOTC_PACKAGE=$(rpm -qa | grep bootc)
+
+# If the system isn't using bootc, we can exit early here since the
+# RPM wont be installed.
+if [[ $BOOTC_PACKAGE == "" ]]; then
+    echo ${BOOTC_SYSTEM}
+    exit
+fi
+
+is_bootc() {
+    BOOTC_STATUS=$(sudo bootc status --json | jq .status.type)
+    if [[ "$BOOTC_STATUS" == \"bootcHost\" ]]; then
+        BOOTC_SYSTEM="true"
+    fi
+}
+
+is_bootc
+
+echo ${BOOTC_SYSTEM}
