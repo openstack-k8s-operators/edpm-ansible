@@ -22,6 +22,9 @@
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
         - edpm-ansible-molecule-edpm_update
         - openstack-k8s-operators-content-provider
+        - cifmw-crc-podified-edpm-baremetal-bootc:
+            dependencies:
+              - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
             dependencies:
               - openstack-k8s-operators-content-provider
