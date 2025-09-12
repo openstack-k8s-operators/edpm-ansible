@@ -1,5 +1,5 @@
 ---
-# Copyright 2024 Red Hat, Inc.
+# Copyright 2022 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,25 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Gather ansible_local facts
-  ansible.builtin.setup:
-    filter: ansible_local
-  when:
-    - ansible_local is not defined
-
-- name: Load nvme-fabrics
-  become: true
-  ansible.builtin.import_role:
-    name: edpm_module_load
+- ansible.builtin.import_playbook: prepare.yml
   vars:
-    modules:
-      - name: nvme-fabrics
-
-- name: Install nvme-cli
-  # The nvme-cli package is installed because it creates udev rules and some
-  # files in /etc/nvme.
-  become: true
-  ansible.builtin.package:
-    name: nvme-cli
-    state: present
-  when: not ansible_local.bootc
+    test_deps_bootc_fact: true

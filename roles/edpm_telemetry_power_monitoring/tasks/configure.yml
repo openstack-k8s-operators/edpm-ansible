@@ -77,7 +77,7 @@
 
 - name: Append custom.conf to config files
   ansible.builtin.set_fact:
-    configs: "{{ configs + [{'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf'}] }}"
+    configs: "{{ configs + [{ 'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf' }] }}"
   when: custom_ceilometer_conf.stat.exists
 
 - name: Copy generated ceilometer configs

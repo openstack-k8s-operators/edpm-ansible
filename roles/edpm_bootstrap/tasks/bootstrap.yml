@@ -14,6 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+
+- name: Include bootc tasks
+  ansible.builtin.include_tasks: bootc.yml
+
 - name: Ensure /var/log/journal exists
   ansible.builtin.file:
     path: /var/log/journal
@@ -60,8 +64,9 @@
 - name: Execute bootstrap command
   ansible.builtin.import_tasks: bootstrap_command.yml
 
-- name: Import packages tasks
-  ansible.builtin.import_tasks: packages.yml
+- name: Include packages tasks
+  ansible.builtin.include_tasks: packages.yml
+  when: not ansible_local.bootc
 
 - name: Set selinux state
   ansible.posix.selinux:
@@ -69,8 +74,8 @@
     state: "{{ edpm_bootstrap_selinux_mode }}"
   become: true
 
-- name: Configure swap
-  ansible.builtin.import_tasks: swap.yml
+- name: Include swap tasks
+  ansible.builtin.include_tasks: swap.yml
 
 - name: Check if CA cert file exists
   delegate_to: localhost

@@ -47,7 +47,7 @@
   become: true
   ansible.builtin.copy:
     src: ovn-bgp-agent-cleanup
-    dest: '/usr/libexec/ovn-bgp-agent-cleanup'
+    dest: '/var/local/libexec/ovn-bgp-agent-cleanup'
     force: true
     mode: '0755'
 
@@ -55,7 +55,7 @@
   become: true
   ansible.builtin.copy:
     src: ovn-bgp-agent-cleanup.service
-    dest: '/usr/lib/systemd/system/ovn-bgp-agent-cleanup.service'
+    dest: '/etc/systemd/system/ovn-bgp-agent-cleanup.service'
     force: true
     mode: '0644'
 

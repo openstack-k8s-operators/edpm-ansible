@@ -14,25 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Gather ansible_local facts
-  ansible.builtin.setup:
-    filter: ansible_local
-  when:
-    - ansible_local is not defined
 
-- name: Load nvme-fabrics
+- name: Update bootc image
+  ansible.builtin.shell: bootc switch "{{ edpm_bootc_os_container_image }}"
   become: true
-  ansible.builtin.import_role:
-    name: edpm_module_load
-  vars:
-    modules:
-      - name: nvme-fabrics
-
-- name: Install nvme-cli
-  # The nvme-cli package is installed because it creates udev rules and some
-  # files in /etc/nvme.
-  become: true
-  ansible.builtin.package:
-    name: nvme-cli
-    state: present
-  when: not ansible_local.bootc
+  register: bootc_result
+  changed_when: bootc_result.rc != 0
