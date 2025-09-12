@@ -29,9 +29,19 @@ edpm_sshd_packages:
   - openssh-server
 
 edpm_sshd_motd_enabled: false
-edpm_sshd_message_of_the_day: ''
+edpm_sshd_message_of_the_day: |
+  ALERT! You are entering into a secured area!
+  This service is restricted to authorized users only.
 edpm_sshd_banner_enabled: false
-edpm_sshd_banner_text: ''
+edpm_sshd_banner_text: |
+  ******************************************************************
+  * This system is for the use of authorized users only. Usage of  *
+  * this system may be monitored and recorded by system personnel. *
+  * Anyone using this system expressly consents to such monitoring *
+  * and is advised that if such monitoring reveals possible        *
+  * evidence of criminal activity, system personnel may provide    *
+  * the evidence from such monitoring to law enforcement officials.*
+  ******************************************************************
 
 # SSH configuration options
 edpm_sshd_password_authentication: 'no'
