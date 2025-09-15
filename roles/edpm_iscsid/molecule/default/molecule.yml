@@ -1,8 +1,6 @@
 ---
 dependency:
   name: galaxy
-  options:
-    role-file: collections.yml
 driver:
   name: delegated
   options:
@@ -10,17 +8,16 @@ driver:
     ansible_connection_options:
       ansible_connection: local
 platforms:
-  - name: instance
+  - name: edpm_iscsid
 provisioner:
   log: true
   name: ansible
 scenario:
   test_sequence:
-  - dependency
   - destroy
   - create
   - prepare
   - converge
-  - destroy
+  - verify
 verifier:
   name: ansible
