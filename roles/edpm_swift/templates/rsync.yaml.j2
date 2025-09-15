@@ -13,3 +13,5 @@ volumes:
   {{ edpm_swift_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+cap_add:
+  - NET_BIND_SERVICE
