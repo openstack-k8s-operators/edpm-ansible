@@ -72,12 +72,13 @@
       ansible.builtin.command: hostname -f
       register: hostname
       changed_when: false
-
-    - name: Verify a FQDN is set
-      ansible.builtin.assert:
-        that: hostname.stdout.find(".") != -1
-        fail_msg: "{{ hostname.stdout }} does not contain . and does not appear to be an FQDN."
-        success_msg: "{{ hostname.stdout }} contains . and appears to be an FQDN."
+      retries: 5
+      delay: 60
+      until: hostname.stdout.find(".") != -1
+  rescue:
+    - name: Fail if hostname is not FQDN
+      ansible.builtin.fail:
+        msg: "{{ hostname.stdout }} does not contain . and does not appear to be an FQDN."
 
 - name: Verify the configured FQDN vs {{ edpm_nodes_validation_validate_fqdn_hosts_file }}
   ansible.builtin.shell: |
