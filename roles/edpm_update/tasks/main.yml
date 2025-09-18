@@ -19,7 +19,10 @@
 
 - name: Gather ansible_local facts
   ansible.builtin.setup:
-    filter: ansible_local
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
   when:
     - ansible_local is not defined
 

@@ -9,7 +9,10 @@
   tasks:
     - name: Gather ansible_local facts
       ansible.builtin.setup:
-        filter: ansible_local
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "local"
 
     # Pings only IPv4
     - name: Import edpm_nodes_validation

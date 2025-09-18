@@ -11,7 +11,10 @@
   tasks:
     - name: Gather ansible_local facts
       ansible.builtin.setup:
-        filter: ansible_local
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "local"
 
     - name: Deploy EDPM Nova
       ansible.builtin.import_role:

@@ -5,7 +5,10 @@
   tasks:
     - name: Gather ansible_local facts
       ansible.builtin.setup:
-        filter: ansible_local
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "local"
     - name: "Download required role packages"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_bootstrap"

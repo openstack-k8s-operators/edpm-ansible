@@ -2,7 +2,10 @@
 
 - name: Re-read facts
   ansible.builtin.setup:
-    filter: ansible_local
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
 
 - name: Bootstrap command
   when:
