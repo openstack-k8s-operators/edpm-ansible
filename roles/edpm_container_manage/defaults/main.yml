@@ -28,5 +28,5 @@ edpm_container_manage_config_id: edpm
 edpm_container_manage_config_overrides: {}
 edpm_container_manage_config_patterns: '*.json'
 edpm_container_manage_healthcheck_disabled: false
-edpm_container_manage_log_path: '/var/log/containers/stdouts'
+edpm_container_manage_log_path: '/var/log/containers/stdouts'  # DEPRECATED: ignored, services log to journald
 edpm_container_manage_systemd_teardown: true

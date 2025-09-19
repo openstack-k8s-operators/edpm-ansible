@@ -103,9 +103,7 @@
   loop:
     - {"path": "/var/lib/nova", "mode": "0755"}
     - {"path": "/var/lib/_nova_secontext", "mode": "0755"}
-    - {"path": "/var/lib/nova/instances", "mode", "0755"}
-    - {"path": "/var/log/containers/nova", "mode": "0750"}
-    - {"path": "/var/log/containers/stdouts"}
+    - {"path": "/var/lib/nova/instances", "mode": "0755"}
     - {"path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root"}
     - {"path": "/etc/multipath"}
     - {"path": "/etc/iscsi"}

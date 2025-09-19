@@ -43,7 +43,6 @@ edpm_swift_storage_volumes:
   - /srv/node:/srv/node
   - /dev:/dev
   - /var/cache/swift:/var/cache/swift
-  - /var/log/containers/swift:/var/log/containers/swift
   - /var/lib/openstack/config/swift:/var/lib/kolla/config_files/src:ro
 
 edpm_swift_account_auditor_volumes:

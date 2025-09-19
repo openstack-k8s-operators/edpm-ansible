@@ -37,6 +37,7 @@ argument_specs:
       edpm_container_manage_log_path:
         type: str
         default: '/var/log/containers/stdouts'
+        description: 'DEPRECATED (will be removed in v0.0.2): Log path for containers - services now log to journald'
       edpm_container_manage_systemd_teardown:
         type: bool
         default: true
