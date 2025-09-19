@@ -107,7 +107,7 @@
     - name: Write containers registries.conf
       ansible.builtin.template:
         src: registries.conf.j2
-        dest: /etc/containers/registries.conf
+        dest: /etc/containers/registries.conf.d/{{ edpm_podman_registries_conf_file }}
         owner: root
         group: root
         setype: etc_t
@@ -117,7 +117,7 @@
     - name: Write containers registries.conf for disconnected ocp
       ansible.builtin.copy:
         content: "{{ edpm_podman_registries_conf }}"
-        dest: /etc/containers/registries.conf
+        dest: /etc/containers/registries.conf.d/{{ edpm_podman_disconnected_conf_file }}
         owner: root
         group: root
         setype: etc_t
