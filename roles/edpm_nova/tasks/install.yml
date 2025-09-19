@@ -54,3 +54,31 @@
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_compute.json'
     edpm_container_manage_clean_orphans: false
+
+- name: Render nvme cleaner container
+  when: edpm_nova_enable_nvme_cleaner
+  tags:
+    - install
+    - nova
+  ansible.builtin.template:
+    src: "nova_nvme_cleaner.json.j2"
+    dest: "/var/lib/openstack/config/containers/nova_nvme_cleaner.json"
+    setype: "container_file_t"
+    mode: "0644"
+  vars:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+  notify:
+    - Restart nova
+
+- name: Deploy nvme cleaner container
+  when: edpm_nova_enable_nvme_cleaner
+  tags:
+    - install
+    - nova
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_manage
+  vars:
+    edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_healthcheck_disabled: true
+    edpm_container_manage_config_patterns: 'nova_nvme_cleaner.json'
+    edpm_container_manage_clean_orphans: false

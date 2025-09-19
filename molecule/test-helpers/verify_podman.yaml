@@ -1,25 +1,34 @@
 
 - name: verify podman containers
+  vars:
+    verify_podman_container_name: "{{ item.name | default(item) }}"
+    verify_podman_running: "{{ item.running | default(true) }}"
   block:
-    - name: Check if podman container exists {{ item }}
+
+    - name: Check if podman container exists {{ verify_podman_container_name }}
       become: true
-      ansible.builtin.command: podman ps -a --filter name=^{{item}}\$ --format \{\{.Names\}\}
+      ansible.builtin.command: podman ps -a --filter name=^{{verify_podman_container_name}}\$ --format \{\{.Names\}\}
       register: containers
-    - name: Assert podman container exists {{ item }}
+
+    - name: Assert podman container exists {{ verify_podman_container_name }}
       ansible.builtin.assert:
         that:
           - containers.rc == 0
           - containers.stdout_lines | length == 1
-          - item in containers.stdout_lines | first
-        fail_msg: "Podman container {{ item }} does not exist"
-    - name: Check if podman container is running {{ item }}
+          - verify_podman_container_name in containers.stdout_lines | first
+        fail_msg: "Podman container {{ verify_podman_container_name }} does not exist"
+
+    - name: Check if podman container is running {{ verify_podman_container_name }}
+      when: verify_podman_running
       become: true
-      ansible.builtin.command: podman ps --filter name={{item}} --format \{\{.Status\}\}
+      ansible.builtin.command: podman ps --filter name={{verify_podman_container_name}} --format \{\{.Status\}\}
       register: running_containers
-    - name: Assert podman container is running {{ item }}
+
+    - name: Assert podman container is running {{ verify_podman_container_name }}
+      when: verify_podman_running
       ansible.builtin.assert:
         that:
           - running_containers.rc == 0
           - running_containers.stdout_lines | length == 1
           - "'Up' in running_containers.stdout_lines | first"
-        fail_msg: "Podman container {{ item }} is not running"
+        fail_msg: "Podman container {{ verify_podman_container_name }} is not running"

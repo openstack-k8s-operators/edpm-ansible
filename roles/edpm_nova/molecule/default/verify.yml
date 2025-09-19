@@ -8,6 +8,12 @@
     test_helper_dir: "../../../../molecule/test-helpers"
     edpm_nova_tls_ca_src_dir: /tmp/pki
   tasks:
+    - name: check if nvme cleaner container exists
+      become: true
+      ansible.builtin.command: podman inspect nova_nvme_cleaner
+      register: nvme_cleaner_exists
+      failed_when: false
+
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
@@ -35,14 +41,69 @@
         - { "name": "nova_compute", "src": "/opt/vendor_integration_2",
             "dest": "/opt/vendor_integration_2", "options": "shared" }
 
+    - name: ensure nvme cleaner container has /dev mounted
+      when: nvme_cleaner_exists.rc == 0
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
+      loop:
+        - { "name": "nova_nvme_cleaner", "src": "/dev", "dest": "/dev", "options": "" }
+
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - { "name": "edpm_nova_compute.service" }
+
+    - name: ensure nvme cleaner systemd service exists and is running
+      when: nvme_cleaner_exists.rc == 0
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "edpm_nova_nvme_cleaner.service", "running": true }
+
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
-        - "nova_compute"
+        - { "name": "nova_compute", "running": true }
+        - { "name": "nova_nvme_cleaner", "running": true }
+
+    - name: read nvme cleaner kolla config
+      when: nvme_cleaner_exists.rc == 0
+      become: true
+      ansible.builtin.slurp:
+        src: /var/lib/openstack/config/nova_nvme_cleaner/config.json
+      register: cleaner_kolla_cfg
+
+    - name: parse nvme cleaner kolla config
+      when: nvme_cleaner_exists.rc == 0
+      ansible.builtin.set_fact:
+        cleaner_cfg_json: "{{ cleaner_kolla_cfg.content | b64decode | from_json }}"
+
+    - name: debug nvme cleaner command
+      when: nvme_cleaner_exists.rc == 0
+      ansible.builtin.debug:
+        msg: "nvme_cleaner command: {{ cleaner_cfg_json.command }}"
+
+    - name: Assert nvme cleaner kolla command content
+      when: nvme_cleaner_exists.rc == 0
+      vars:
+        cleaner_cmd: "{{ cleaner_cfg_json.command }}"
+      ansible.builtin.assert:
+        that:
+          - "'clean-on-delete' in cleaner_cmd or '/usr/bin/sleep infinity' in cleaner_cmd"
+        fail_msg: "Cleaner kolla config missing expected command (clean-on-delete or /usr/bin/sleep infinity)"
+
+    - name: Check nvme cleaner service active state
+      when: nvme_cleaner_exists.rc == 0
+      become: true
+      ansible.builtin.command: systemctl is-active edpm_nova_nvme_cleaner.service
+      register: cleaner_unit_state
+      failed_when: false
+
+    - name: Assert nvme cleaner is active
+      when: nvme_cleaner_exists.rc == 0
+      ansible.builtin.assert:
+        that:
+          - "cleaner_unit_state.stdout == 'active'"
+        fail_msg: "Cleaner service not active: {{ cleaner_unit_state.stdout }}"
+
     - name: ensure kolla_set_configs copied the expected files
       become: true
       ansible.builtin.shell: |
