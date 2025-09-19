@@ -17,6 +17,15 @@
 
 # "edpm_kernel" will search for and load any operating system variable file
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Kernel tuning block
   become: true
   block:
@@ -25,7 +34,9 @@
         name: "{{ edpm_kernel_extra_packages }}"
         state: present
       register: _install_packages_result
-      when: edpm_kernel_extra_packages | length > 0
+      when:
+        - edpm_kernel_extra_packages | length > 0
+        - not ansible_local.bootc
       until: _install_packages_result is succeeded
       retries: "{{ edpm_kernel_download_retries }}"
       delay: "{{ edpm_kernel_download_delay }}"
@@ -34,6 +45,7 @@
       ansible.builtin.dnf:
         name: 'dracut-config-generic'
         state: absent
+      when: not ansible_local.bootc
 
     - name: Ensure the /etc/modules-load.d/ directory exists
       ansible.builtin.file:

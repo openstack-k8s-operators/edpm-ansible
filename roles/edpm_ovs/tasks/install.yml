@@ -1,4 +1,13 @@
 ---
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Install ovs packages
   tags:
     - install
@@ -11,6 +20,7 @@
   until: edpm_ovs_package_install is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
   delay: "{{ edpm_ovs_download_delay }}"
+  when: not ansible_local.bootc
 
 - name: Ensure ovs services are enabled and running
   tags:

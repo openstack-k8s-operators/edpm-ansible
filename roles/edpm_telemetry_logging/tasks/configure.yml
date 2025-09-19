@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Check rsyslog service state
   ansible.builtin.systemd:
     name: rsyslog
@@ -31,7 +40,9 @@
       ansible.builtin.dnf:
         name: rsyslog-openssl
         state: present
-      when: telemetry_test is undefined or not telemetry_test
+      when:
+        - telemetry_test is undefined or not telemetry_test
+        - not ansible_local.bootc
 
     - name: Copy Openshift CA to the node
       ansible.builtin.copy:

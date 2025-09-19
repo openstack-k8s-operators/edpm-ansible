@@ -14,10 +14,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Make sure yum-utils is installed
   become: true
   ansible.builtin.dnf:
     name: yum-utils
+  when: not ansible_local.bootc
 
 - name: Check if reboot is required with needs-restarting
   ansible.builtin.command: needs-restarting -r

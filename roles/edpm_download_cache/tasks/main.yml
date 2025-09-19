@@ -14,13 +14,24 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Install role requirements
   ansible.builtin.include_tasks: install.yml
   when: edpm_download_role_install_requirements | bool
 
 - name: Download packages
   ansible.builtin.include_tasks: packages.yml
-  when: edpm_download_cache_packages | bool
+  when:
+    - edpm_download_cache_packages | bool
+    - not ansible_local.bootc
 
 - name: Download container images
   ansible.builtin.include_tasks: container_images.yml

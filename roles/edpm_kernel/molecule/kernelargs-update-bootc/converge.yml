@@ -1,0 +1,72 @@
+---
+# Copyright 2022 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  pre_tasks:
+  tasks:
+
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "local"
+
+    - name: Create BLS entry dir
+      file:
+        dest: /boot/loader/entries/
+        state: directory
+        recurse: true
+
+    - name: Create BLS entry files
+      ansible.builtin.copy:
+        dest: /boot/loader/entries/{{ item }}
+        content: |
+          title CentOS Stream 9 (ostree:1)
+          version {{ item_index }}
+          options root=UUID=root-uuid rw boot=UUID=boot-uuid rw console=tty0 console=ttyS0 ostree=/ostree/boot.0/default/ostree-uuid/0
+          linux /boot/ostree/default-ostree-uuid/vmlinuz-5.14.0-570.el9.x86_64
+          initrd /boot/ostree/default-ostree-uuid/initramfs-5.14.0-570.el9.x86_64.img
+          aboot /ostree/deploy/default/deploy/deploy-uuid.0/usr/lib/ostree-boot/aboot.img
+          abootcfg /ostree/deploy/default/deploy/deploy-uuid.0/usr/lib/ostree-boot/aboot.cfg
+      loop:
+        - ostree-1.conf
+        - ostree-2.conf
+      loop_control:
+        index_var: item_index
+
+    - name: Set 2 new initial kernel args
+      vars:
+        test_kernelargs: "test1=1 test2=2"
+      include_tasks: test_kernelargs.yml
+
+    - name: Set 1 new additional kernel args
+      vars:
+        test_kernelargs: "test1=1 test2=2 test3=3"
+      include_tasks: test_kernelargs.yml
+
+    - name: Remove 1 kernel arg
+      vars:
+        test_kernelargs: "test1=1 test3=3"
+      include_tasks: test_kernelargs.yml
+
+    - name: Remove all kernel args
+      vars:
+        test_kernelargs: ""
+      include_tasks: test_kernelargs.yml

@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,22 +14,33 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Check if /etc/ansible/facts.d/bootc.fact exists
+  become: true
+  ansible.builtin.stat:
+    path: /etc/ansible/facts.d/bootc.fact
+  register: stat_bootc_fact
 
-- name: Deploy EDPM telemetry metrics
-  hosts: "{{ edpm_override_hosts | default('all', true) }}"
-  strategy: linear
-  gather_facts: "{{ gather_facts | default(false) }}"
-  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
-  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
-  # Doesn't handle rsyslog
-  tasks:
+- name: Ensure bootc fact
+  when: not stat_bootc_fact.stat.exists
+  become: true
+  block:
+
+    - name: Ensure /etc/ansible/facts.d exists
+      ansible.builtin.file:
+        state: directory
+        path: /etc/ansible/facts.d
+        recurse: true
+        mode: '755'
+
+    - name: Ensure /etc/ansible/facts.d/bootc.fact exists
+      ansible.builtin.copy:
+        src: facts/bootc.fact
+        dest: /etc/ansible/facts.d/bootc.fact
+        mode: '755'
+
     - name: Gather ansible_local facts
       ansible.builtin.setup:
         gather_subset:
           - "!all"
           - "!min"
           - "local"
-
-    - name: Deploy telemetry metrics
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_telemetry

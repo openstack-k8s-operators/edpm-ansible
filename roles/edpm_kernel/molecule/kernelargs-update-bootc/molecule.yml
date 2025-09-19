@@ -16,16 +16,23 @@ platforms:
   ulimits:
   - host
 provisioner:
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance:
+            ansible_connection: local
+            ansible_host: localhost
   log: true
   name: ansible
+  playbooks:
+    # cleanup: ${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/cleanup.yml
+    prepare: ${MOLECULE_SCENARIO_DIRECTORY}/../../resources/molecule/prepare-bootc.yml
 scenario:
+  name: kernelargs-update-bootc
   test_sequence:
-  - dependency
-  - destroy
-  - create
   - prepare
   - converge
-  - verify
-  - destroy
+  - cleanup
 verifier:
-  name: ansible
+  name: testinfra

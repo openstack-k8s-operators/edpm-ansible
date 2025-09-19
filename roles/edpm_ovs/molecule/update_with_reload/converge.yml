@@ -18,6 +18,10 @@
 - name: Converge
   hosts: all
   tasks:
+    - name: set bootc fact
+      set_fact:
+        ansible_local:
+          bootc: false
     - name: Call openvswitch update role with reload
       ansible.builtin.import_role:
         name: osp.edpm.edpm_ovs

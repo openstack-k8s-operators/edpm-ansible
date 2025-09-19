@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2022 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,22 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Gather ansible_local facts
-  ansible.builtin.setup:
-    gather_subset:
-      - "!all"
-      - "!min"
-      - "local"
-  when:
-    - ansible_local is not defined
-
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
-  when: not ansible_local.bootc
-
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+- ansible.builtin.import_playbook: prepare.yml
+  vars:
+    test_deps_bootc_fact: true

@@ -27,7 +27,7 @@
           - "{{ edpm_ovn_controller_tls_cacert_bundle_src }}:{{ edpm_ovn_controller_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
-- name: Ensure /usr/libexec/edpm-start-podman-container exists
+- name: Ensure /var/local/libexec/edpm-start-podman-container exists
   ansible.builtin.import_role:
     name: edpm_container_manage
     tasks_from: shutdown.yml

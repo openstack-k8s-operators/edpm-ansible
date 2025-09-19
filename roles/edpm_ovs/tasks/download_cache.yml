@@ -1,4 +1,13 @@
 ---
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Downloading required packages
   ansible.builtin.dnf:
     name: "{{ edpm_ovs_packages }}"
@@ -9,3 +18,4 @@
   until: _install_packages_result is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
   delay: "{{ edpm_ovs_download_delay }}"
+  when: not ansible_local.bootc

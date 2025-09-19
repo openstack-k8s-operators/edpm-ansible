@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Get the command line args of the node
   ansible.builtin.slurp:
     src: "/proc/cmdline"
@@ -50,25 +59,38 @@
 - name: Handle hugepages
   ansible.builtin.include_tasks: hugepages.yml
 
-- name: Check if the kernelargs entry is already present in the file
-  become: true
-  ansible.builtin.replace:
-    regexp: EDPM_KERNEL_ARGS
-    dest: /etc/default/grub
-    replace: ''
-  check_mode: true
-  register: grub_file_entry_check
-
-# Kernel Args Configuration
-- name: Kernel args configuration
-  become: true
+- name: Set set_kernel_args fact if args need to be set
+  ansible.builtin.set_fact:
+    set_kernel_args: true
   when:
     - cmdline is defined
     - edpm_kernel_args is defined
     - edpm_kernel_args | type_debug in ["AnsibleUnicode", "str"]
     - cmdline is not regex( '^.*' ~ edpm_kernel_args ~ '\\s.*$' )
+
+# Kernel Args Configuration
+- name: Kernel args configuration (package mode)
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+    - not ansible_local.bootc
   block:
-    # Leapp does not recognise grun entries starting other than GRUB
+
+    - name: Check if the kernelargs entry is already present in the file
+      become: true
+      ansible.builtin.replace:
+        regexp: EDPM_KERNEL_ARGS
+        dest: /etc/default/grub
+        replace: ''
+      check_mode: true
+      register: grub_file_entry_check
+
+    - name: Set boot_file_entry_check fact
+      ansible.builtin.set_fact:
+        boot_file_entry_present: grub_file_entry_check is changed
+
+    # Leapp does not recognise grub entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
     # In order to fix it for FFU (queens to train), EDPM_KERNEL_ARGS has been renamed
     # Ensure the fresh deployment is also alinged with the same name
@@ -108,6 +130,50 @@
       changed_when: _grub2_mkconfig.rc == 0
       failed_when: _grub2_mkconfig.rc != 0
 
+
+- name: Kernel args configuration (image mode)
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+    - ansible_local.bootc
+  block:
+
+    - name: Check if the kernelargs entry is already present in the file
+      become: true
+      ansible.builtin.shell: |
+        grep EDPM_KERNEL_ARGS /boot/loader/entries/*.conf
+      failed_when: false
+      register: grep_edpm_kernel_args
+      changed_when: grep_edpm_kernel_args.rc != 0
+
+    - name: Set boot_file_entry_check fact
+      ansible.builtin.set_fact:
+        boot_file_entry_present: grep_edpm_kernel_args.rc == 0
+
+    - name: Add kernel args to boot entries  # noqa: risky-shell-pipe
+      ansible.builtin.shell: |
+        set -eux
+        for f in /boot/loader/entries/*.conf; do
+          # Get the previously set kernel args from the commented line
+          old_edpm_kernel_args=$(grep EDPM_KERNEL_ARGS ${f} | cut -d= -f2-)
+          # Delete the commented line
+          unshare -m /bin/bash -c "mount -o remount,rw /boot; sed -i \"/EDPM_KERNEL_ARGS/d\" ${f}"
+          # Delete the previously set kernel args from the options line
+          unshare -m /bin/bash -c "mount -o remount,rw /boot; sed -i \"s/ ${old_edpm_kernel_args}$//\" ${f}"
+          # Set the new kernel args to the options line
+          unshare -m /bin/bash -c "mount -o remount,rw /boot; sed -i \"s/\(^options.*\)/\1 {{ edpm_kernel_args }}/\" ${f}"
+          # Add the commented line
+          unshare -m /bin/bash -c "mount -o remount,rw /boot; echo \"# EDPM_KERNEL_ARGS={{ edpm_kernel_args }}\" >> ${f}"
+        done
+      changed_when: not boot_file_entry_present
+
+- name: Kernel args post configuration
+  become: true
+  when:
+    - set_kernel_args is defined
+    - set_kernel_args is true
+  block:
     - name: Check for active tuned profile
       ansible.builtin.stat:
         path: "/etc/tuned/active_profile"
@@ -147,10 +213,10 @@
     - name: Reboot tasks
       ansible.builtin.include_tasks: reboot.yaml
       when:
-        - grub_file_entry_check is not changed
+        - not boot_file_entry_present
 
     - name: Skipping reboot for deployed node
       ansible.builtin.debug:  # noqa: no-handler
         msg: "Reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
       when:
-        - grub_file_entry_check is changed
+        - boot_file_entry_present

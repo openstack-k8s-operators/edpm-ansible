@@ -13,23 +13,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
-- name: Gather ansible_local facts
-  ansible.builtin.setup:
-    gather_subset:
-      - "!all"
-      - "!min"
-      - "local"
-  when:
-    - ansible_local is not defined
-
-- name: Install packages
-  ansible.builtin.include_tasks: install.yml
-  when: not ansible_local.bootc
-
-- name: Configure tuned
-  ansible.builtin.include_tasks: configure.yml
-
-- name: Start tuned
-  ansible.builtin.include_tasks: run.yml
+- name: Prepare test_deps
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: ../../../../molecule/common/test_deps

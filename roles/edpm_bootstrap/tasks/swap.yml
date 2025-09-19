@@ -14,27 +14,40 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Configure swap file
   when:
     - not edpm_bootstrap_swap_partition_enabled|bool
     - edpm_bootstrap_swap_size_megabytes|int > 0
   become: true
   block:
+    - name: Set swap path
+      ansible.builtin.set_fact:
+        edpm_bootstrap_swap_path_value: |-
+          {% if ansible_local.bootc | bool %}{{ edpm_bootstrap_swap_path_bootc }}{% else %}{{ edpm_bootstrap_swap_path }}{% endif %}
     - name: Create swapfile if needed
       ansible.builtin.command:
-        cmd: dd if=/dev/zero of={{ edpm_bootstrap_swap_path }} count={{ edpm_bootstrap_swap_size_megabytes }} bs=1M
-        creates: "{{ edpm_bootstrap_swap_path }}"
+        cmd: dd if=/dev/zero of={{ edpm_bootstrap_swap_path_value }} count={{ edpm_bootstrap_swap_size_megabytes }} bs=1M
+        creates: "{{ edpm_bootstrap_swap_path_value }}"
       notify: "create and activate swap"
     - name: Set permission on swapfile
       ansible.builtin.file:
-        path: "{{ edpm_bootstrap_swap_path }}"
+        path: "{{ edpm_bootstrap_swap_path_value }}"
         owner: root
         group: root
         mode: "0600"
     - name: Enable swapfile on fstab
       ansible.posix.mount:
         name: none
-        src: "{{ edpm_bootstrap_swap_path }}"
+        src: "{{ edpm_bootstrap_swap_path_value }}"
         fstype: swap
         opts: sw
         state: present

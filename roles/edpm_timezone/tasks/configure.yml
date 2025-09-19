@@ -15,6 +15,32 @@
 # under the License.
 
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
+# TODO(slagle): should this be in edpm-image-builder instead?
+- name: Manage /etc/localtime
+  when: ansible_local.bootc
+  block:
+    - name: Check for /etc/localtime
+      ansible.builtin.stat:
+        path: /etc/localtime
+      register: localtime_stat
+
+    - name: Symlink /etc/localtime to timezone file if it doesn't exist
+      become: true
+      ansible.builtin.file:
+        state: link
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/{{ edpm_timezone }}
+      when: not localtime_stat.stat.exists
+
 - name: Set timezone
   become: true
   community.general.timezone:

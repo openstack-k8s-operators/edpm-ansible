@@ -22,6 +22,13 @@
   any_errors_fatal: true
   # Only enables rsyslog
   tasks:
+    - name: Gather ansible_local facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "local"
+
     - name: Deploy logging
       ansible.builtin.import_role:
         name: osp.edpm.edpm_telemetry_logging

@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Check FIPS status
   become: true
   ansible.builtin.command: fips-mode-setup --is-enabled
@@ -21,9 +30,17 @@
   changed_when: false
   failed_when: false
 
+- name: Warn for changing FIPS status for bootc
+  ansible.builtin.debug:
+    msg: FIPS status can not be changed for bootc
+  when:
+    - edpm_bootstrap_fips_mode != 'check'
+    - ansible_local.bootc
+
 - name: Change FIPS status
   when:
     - edpm_bootstrap_fips_mode != 'check'
+    - not ansible_local.bootc
     - >
       edpm_bootstrap_fips_mode !=
       edpm_bootstrap_fips_fms_status |

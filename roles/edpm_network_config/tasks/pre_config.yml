@@ -25,6 +25,15 @@
       - "!min"
       - "selinux"
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Create fcontext entry for edpmconfig
   become: true
   when:
@@ -39,6 +48,8 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_bootstrap
     tasks_from: "packages.yml"
+  when:
+    - not ansible_local.bootc
 
 - name: Ensure /var/lib/edpm-config directory exists
   become: true
