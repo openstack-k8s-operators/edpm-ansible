@@ -20,7 +20,7 @@
   until: edpm_ovs_package_install is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
   delay: "{{ edpm_ovs_download_delay }}"
-  when: not ansible_local.bootc
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Ensure ovs services are enabled and running
   tags:

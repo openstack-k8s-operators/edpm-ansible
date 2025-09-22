@@ -74,7 +74,7 @@
   when:
     - set_kernel_args is defined
     - set_kernel_args is true
-    - not ansible_local.bootc
+    - ansible_local.bootc is not defined or not ansible_local.bootc
   block:
 
     - name: Check if the kernelargs entry is already present in the file

@@ -66,7 +66,7 @@
 
 - name: Include packages tasks
   ansible.builtin.include_tasks: packages.yml
-  when: not ansible_local.bootc
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Set selinux state
   ansible.posix.selinux:

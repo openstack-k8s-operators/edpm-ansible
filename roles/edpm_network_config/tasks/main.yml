@@ -26,7 +26,7 @@
 - name: Install required packages
   ansible.builtin.import_tasks: package_management.yml
   when:
-    - not ansible_local.bootc
+    - ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Configure network with nmstate tool
   when: edpm_network_config_tool == 'nmstate'
