@@ -27,7 +27,7 @@
   become: true
   ansible.builtin.dnf:
     name: yum-utils
-  when: not ansible_local.bootc
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Check if reboot is required with needs-restarting
   ansible.builtin.command: needs-restarting -r

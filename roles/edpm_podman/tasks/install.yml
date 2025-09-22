@@ -32,7 +32,7 @@
       until: edpm_podman_package_download is succeeded
       retries: "{{ edpm_podman_download_retries }}"
       delay: "{{ edpm_podman_download_delay }}"
-      when: not ansible_local.bootc
+      when: ansible_local.bootc is not defined or not ansible_local.bootc
 
     - name: Ensure we get the ansible interfaces facts
       when:

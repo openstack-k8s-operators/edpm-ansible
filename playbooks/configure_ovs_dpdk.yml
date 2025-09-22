@@ -17,7 +17,7 @@
       ansible.builtin.dnf:
         name: openvswitch
         state: present
-      when: not ansible_local.bootc
+      when: ansible_local.bootc is not defined or not ansible_local.bootc
 
     - name: Configure OvS DPDK configs
       ansible.builtin.import_role:

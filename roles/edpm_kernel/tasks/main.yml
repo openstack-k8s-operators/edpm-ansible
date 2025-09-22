@@ -36,7 +36,7 @@
       register: _install_packages_result
       when:
         - edpm_kernel_extra_packages | length > 0
-        - not ansible_local.bootc
+        - ansible_local.bootc is not defined or not ansible_local.bootc
       until: _install_packages_result is succeeded
       retries: "{{ edpm_kernel_download_retries }}"
       delay: "{{ edpm_kernel_download_delay }}"
@@ -45,7 +45,7 @@
       ansible.builtin.dnf:
         name: 'dracut-config-generic'
         state: absent
-      when: not ansible_local.bootc
+      when: ansible_local.bootc is not defined or not ansible_local.bootc
 
     - name: Ensure the /etc/modules-load.d/ directory exists
       ansible.builtin.file:

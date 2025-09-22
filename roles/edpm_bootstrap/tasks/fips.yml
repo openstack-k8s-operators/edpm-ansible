@@ -40,7 +40,7 @@
 - name: Change FIPS status
   when:
     - edpm_bootstrap_fips_mode != 'check'
-    - not ansible_local.bootc
+    - ansible_local.bootc is not defined or not ansible_local.bootc
     - >
       edpm_bootstrap_fips_mode !=
       edpm_bootstrap_fips_fms_status |

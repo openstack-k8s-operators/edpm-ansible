@@ -49,7 +49,7 @@
     name: osp.edpm.edpm_bootstrap
     tasks_from: "packages.yml"
   when:
-    - not ansible_local.bootc
+    - ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Ensure /var/lib/edpm-config directory exists
   become: true
