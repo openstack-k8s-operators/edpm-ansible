@@ -7,7 +7,6 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
     edpm_nova_tls_ca_src_dir: /tmp/pki
-    nvme_cleaner_template_path: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/templates/nova_nvme_cleaner_config.json.j2"
     edpm_nova_config_dest: /var/lib/openstack/config/nova
   tasks:
     - name: ensure expected directories exist
@@ -75,11 +74,6 @@
     - name: parse nvme cleaner kolla config
       ansible.builtin.set_fact:
         cleaner_cfg_json: "{{ cleaner_kolla_cfg.content | b64decode | from_json }}"
-
-    # auniyal: will remove it once CI is good
-    - name: debug nvme cleaner command
-      ansible.builtin.debug:
-        msg: "nvme_cleaner command: {{ cleaner_cfg_json.command }}"
 
     - name: Assert nvme cleaner kolla command content
       vars:

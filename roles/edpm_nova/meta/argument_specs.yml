@@ -91,9 +91,10 @@ argument_specs:
       edpm_nova_nvme_cleaner_command:
         type: str
         description: |
-          Override the cleaner command. If empty, use the default:
-          '/usr/share/openstack-nova/contrib/clean-on-delete {{ edpm_nova_nvme_cleaner_args }}'.
-          Useful in tests (e.g. 'sleep --infinity').
+          Base NVMe cleaner command.
+          Defaults to '/usr/share/openstack-nova/contrib/clean-on-delete'
+          and is concatenated with edpm_nova_nvme_cleaner_args.
+          Override only for testing (e.g. cmd '/usr/bin/sleep' with args 'infinity').
       edpm_nova_nvme_cleaner_config_dest:
         type: str
         description: |
