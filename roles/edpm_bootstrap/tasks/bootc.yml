@@ -29,7 +29,6 @@
       ansible.builtin.file:
         state: directory
         path: /etc/ansible/facts.d
-        recurse: true
         mode: '755'
 
     - name: Ensure /etc/ansible/facts.d/bootc.fact exists
