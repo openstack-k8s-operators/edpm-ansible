@@ -57,6 +57,7 @@
         mode: "0644"
       when:
         - edpm_sshd_banner_enabled | bool
+      register: sshd_banner_result
 
     - name: Configure the motd banner
       become: true
@@ -83,11 +84,14 @@
         src: sshd_config_block.j2
         mode: "0600"
         validate: '/usr/sbin/sshd -T -f %s'
-      register: _sshd_config_result
+      register: sshd_config_result
 
-    - name: Set sshd config changed fact
-      ansible.builtin.set_fact:
-        _sshd_config_result_changed: _sshd_config_result.changed
+    - name: Reload sshd due to config change
+      ansible.builtin.systemd:
+        name: sshd
+        state: reloaded
+      when:
+        - sshd_config_result.changed or sshd_banner_result.changed|default(false)
 
     - name: Configure firewall for the service
       become: true
