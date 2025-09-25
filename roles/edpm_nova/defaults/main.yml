@@ -56,3 +56,10 @@ edpm_nova_old_tripleo_compute_sevices:
 
 # a list of addtional host mounts
 edpm_nova_extra_bind_mounts: []
+
+# NVMe cleaner config
+edpm_nova_nvme_cleaner_config_dest: /var/lib/openstack/config/nova_nvme_cleaner
+edpm_nova_nvme_cleaner_command: "/usr/share/openstack-nova/contrib/clean-on-delete"
+edpm_nova_nvme_cleaner_args: "--nvme"
+# make cleaner optional
+edpm_nova_enable_nvme_cleaner: false

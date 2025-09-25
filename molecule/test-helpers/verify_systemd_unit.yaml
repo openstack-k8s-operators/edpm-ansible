@@ -36,5 +36,5 @@
       when: item.running | default(true)
       ansible.builtin.assert:
         that:
-          - unit_running.stdout in "{{ item.active | default(['active']) | list }}"
+          - unit_running.stdout in (item.active | default(['active']) | list)
         fail_msg: "Systemd unit {{ item.name }} is not running"
