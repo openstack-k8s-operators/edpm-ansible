@@ -82,3 +82,15 @@
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_nvme_cleaner.json'
     edpm_container_manage_clean_orphans: false
+
+- name: Remove nvme cleaner when disabled
+  when: not edpm_nova_enable_nvme_cleaner
+  tags:
+    - install
+    - nova
+    - cleanup
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_rm
+  vars:
+    edpm_containers_to_rm:
+      - nova_nvme_cleaner
