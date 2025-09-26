@@ -14,10 +14,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Apply kernel patch via kpatch
   ansible.builtin.include_tasks: kpatch.yml
-  when: edpm_update_system_enable_kpatch
+  when:
+    - edpm_update_system_enable_kpatch
+    - ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Update packages
   ansible.builtin.include_tasks: packages.yml
-  when: edpm_update_system_enable_packages_update
+  when:
+    - edpm_update_system_enable_packages_update
+    - ansible_local.bootc is not defined or not ansible_local.bootc
+
+- name: Update OS (bootc)
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_update
+    tasks_from: bootc.yml
+  when: ansible_local is defined and ansible_local.bootc

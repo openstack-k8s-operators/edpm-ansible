@@ -14,10 +14,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
 
 - name: Update packages
   ansible.builtin.include_tasks: packages.yml
-  when: edpm_update_services_enable_packages_update
+  when:
+    - edpm_update_services_enable_packages_update
+    - ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Update containers
   ansible.builtin.include_tasks: containers.yml
