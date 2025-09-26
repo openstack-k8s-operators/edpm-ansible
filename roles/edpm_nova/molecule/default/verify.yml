@@ -186,3 +186,29 @@
       ansible.builtin.assert:
         that:
           - "not nova_host_specific_conf.stat.exists"
+
+    - name: Disable nova nvme cleaner
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_nova
+      vars:
+        edpm_nova_enable_nvme_cleaner: false
+
+    - name: Assert nvme cleaner container is unavailable or deleted
+      become: true
+      ansible.builtin.command: podman inspect nova_nvme_cleaner
+      register: nvme_cleaner_exists
+      # this will fail as container is deleted
+      failed_when: false
+      changed_when: false
+
+    - name: Check service file presence after disable
+      become: true
+      ansible.builtin.stat:
+        path: /etc/systemd/system/edpm_nova_nvme_cleaner.service
+      register: nvme_cleaner_service_unit_exists
+
+    - name: Assert nvme cleaner removed
+      ansible.builtin.assert:
+        that:
+          - nvme_cleaner_exists.rc != 0
+          - not nvme_cleaner_service_unit_exists.stat.exists
