@@ -26,10 +26,3 @@
       ansible.builtin.systemd:
         name: sshd
         state: started
-
-    - name: Restart sshd due to config change
-      ansible.builtin.systemd:
-        name: sshd
-        state: reloaded
-      when:
-        - _sshd_config_result_changed | default(false)
