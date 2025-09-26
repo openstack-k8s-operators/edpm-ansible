@@ -1,7 +1,7 @@
 ---
 
 - name: Deploy EDPM Swift
-  hosts: all
+  hosts: "{{ edpm_override_hosts | default('all') }}"
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
