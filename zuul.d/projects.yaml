@@ -3,6 +3,7 @@
     name: openstack-k8s-operators/edpm-ansible
     templates:
       - podified-multinode-edpm-baremetal-pipeline
+      - podified-multinode-edpm-baremetal-bootc-pipeline
     github-check:
       jobs:
         - noop
