@@ -29,3 +29,7 @@ edpm_update_system_include_packages:
 
 # List of packages to exclude from the update
 edpm_update_system_exclude_packages: []
+
+# The bootc container image is provided by the OpenStackVersion
+# CR using the bootcOsContainerImage parameter
+edpm_update_system_bootc_os_container_image: ""

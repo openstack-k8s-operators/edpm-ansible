@@ -16,7 +16,7 @@
 
 
 - name: Update bootc image
-  ansible.builtin.shell: bootc switch "{{ edpm_bootc_os_container_image }}"
+  ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
   register: bootc_result
   changed_when: bootc_result.rc != 0
