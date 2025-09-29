@@ -72,10 +72,10 @@ options:
 EXAMPLES = """
 - name: Generate containers configs data
   container_config_data:
-    config_path: /var/lib/edpm-config/container-startup-config/step_1
+    config_path: /var/lib/openstack/config/containers/nova
 - name: Generate containers configs data for HAproxy and override image
   container_config_data:
-    config_path: /var/lib/edpm-config/container-startup-config/step_1
+    config_path: /var/lib/openstack/config/containers/haproxy
     config_pattern: 'haproxy.json'
     config_overrides:
       haproxy:

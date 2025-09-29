@@ -13,13 +13,13 @@ argument_specs:
         default: 5
         description: The number of retries for failed download tasks
       edpm_neutron_dhcp_agent_config_src:
-        default: "/var/lib/openstack/configs/neutron-dhcp"
+        default: "/var/lib/openstack/config"
         description: |
           The path to the directory containing source of the Neutron DHCP
           agent configs.
         type: str
       edpm_neutron_dhcp_agent_config_dir:
-        default: "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"
+        default: "/var/lib/config-data/neutron-dhcp-agent"
         description: |
           The path to the directory containing Neutron DHCP agent config
           files.

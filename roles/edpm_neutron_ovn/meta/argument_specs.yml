@@ -89,12 +89,12 @@ argument_specs:
           Should TLS certs be configured for neutron ovn agent
         type: bool
       edpm_neutron_ovn_agent_config_src:
-        default: "/var/lib/openstack/configs/neutron-ovn"
+        default: "/var/lib/openstack/config"
         description: |
           The path to the directory containing source of the Neutron OVN
           agent configs.
         type: str
       edpm_neutron_ovn_agent_config_dir:
-        default: /var/lib/config-data/ansible-generated/neutron-ovn-agent
+        default: /var/lib/config-data/neutron-ovn-agent
         description: 'The directory that contains configuration files for Neutron OVN Agent.'
         type: str

@@ -63,14 +63,14 @@ This Ansible role allows to do the following tasks:
 
 .. code-block:: YAML
 
-    - name: Manage step_1 containers using edpm-ansible
+    - name: Manage containers using edpm-ansible
       block:
-        - name: "Manage containers for step 1 with edpm-ansible"
+        - name: "Manage containers with edpm-ansible"
           include_role:
             name: edpm_container_manage
           vars:
-            edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
-            edpm_container_manage_config_id: "edpm_step1"
+            edpm_container_manage_config: "/var/lib/openstack/config/containers"
+            edpm_container_manage_config_id: "nova"
 
 
 Healthchecks
@@ -120,13 +120,11 @@ This can be used to:
 * Output the container commands that are run to to manage containers lifecycle.
 * Output the changes that would have been made on containers by Ansible.
 
-.. note:: To manage a single container, you need to know 2 things:
-
-   * At which step the container is deployed.
+.. note:: To manage a single container, you need to know:
 
    * The name of the generated JSON file for container config.
 
-Here is an example of a playbook to manage HAproxy container at step 1 which
+Here is an example of a playbook to manage HAproxy container which
 overrides the image setting in one-off.
 
 .. code-block:: YAML
@@ -134,15 +132,15 @@ overrides the image setting in one-off.
     - hosts: localhost
       become: true
       tasks:
-        - name: Manage step_1 containers using edpm-ansible
+        - name: Manage containers using edpm-ansible
           block:
-            - name: "Manage HAproxy container at step 1 with edpm-ansible"
+            - name: "Manage HAproxy container with edpm-ansible"
               include_role:
                 name: edpm_container_manage
               vars:
                 edpm_container_manage_config_patterns: 'haproxy.json'
-                edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
-                edpm_container_manage_config_id: "edpm_step1"
+                edpm_container_manage_config: "/var/lib/openstack/config/containers"
+                edpm_container_manage_config_id: "haproxy"
                 edpm_container_manage_clean_orphans: false
                 edpm_container_manage_config_overrides:
                   haproxy:

@@ -87,6 +87,7 @@
   loop:
     - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
     - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
+    - {"path": "/var/lib/openstack/config/containers/nova", "mode": "0755"}
     - {"path": "{{ edpm_nova_nvme_cleaner_config_dest }}", "mode": "0755"}
 
 - name: Create persistent directories

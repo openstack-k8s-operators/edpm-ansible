@@ -35,6 +35,8 @@
     recurse: true
   loop:
     - {"path": "{{ edpm_telemetry_config_dest }}"}
+    - {"path": "/var/lib/openstack/config/containers"}
+    - {"path": "/var/lib/openstack/config/containers/telemetry_power_monitoring"}
 
 - name: Determine if cacert file exists
   ansible.builtin.stat:
@@ -101,7 +103,7 @@
 - name: Render container config templates
   ansible.builtin.template:
     src: "{{ item }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    dest: "/var/lib/openstack/config/containers/telemetry_power_monitoring/{{ item | basename | regex_replace('\\.j2$', '') }}"
     mode: 0644
   with_fileglob:
     - ../templates/*.j2

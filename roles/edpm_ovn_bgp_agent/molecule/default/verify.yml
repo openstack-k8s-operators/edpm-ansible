@@ -8,8 +8,8 @@
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
-        - "/var/lib/config-data/ansible-generated/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf"
-        - "/var/lib/edpm-config/container-startup-config/ovn_bgp_agent"
+        - "/var/lib/config-data/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf"
+        - "/var/lib/openstack/config/containers/ovn_bgp_agent/ovn_bgp_agent.json"
 
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"

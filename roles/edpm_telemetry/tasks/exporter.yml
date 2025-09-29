@@ -14,7 +14,8 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_manage
   vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
+    edpm_container_manage_config: "/var/lib/openstack/config/containers"
+    edpm_container_manage_config_id: telemetry
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: "{{ exporter }}.json"
     edpm_container_manage_clean_orphans: false

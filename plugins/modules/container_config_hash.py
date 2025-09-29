@@ -63,7 +63,7 @@ EXAMPLES = """
   container_config_hash:
 """
 
-CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
+CONTAINER_STARTUP_CONFIG = '/var/lib/openstack/config/containers'
 BUF_SIZE = 65536
 
 
@@ -86,7 +86,7 @@ class ContainerConfigHashManager:
         # Set parameters
         self.config_vol_prefix = args['config_vol_prefix']
 
-        # Update container-startup-config with new config hashes
+        # Update containers config with new config hashes
         self._update_hashes()
 
         self.module.exit_json(**self.results)

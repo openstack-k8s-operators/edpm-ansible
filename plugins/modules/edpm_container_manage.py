@@ -50,7 +50,7 @@ requirements:
 options:
   config_id:
     description:
-      - Config id for the label
+      - Service name for container labeling and isolation
     type: str
     required: True
   config_dir:
@@ -91,8 +91,8 @@ options:
 EXAMPLES = """
 - name: Run containers
   edpm_container_manage:
-    config_id: edpm_step1
-    config_dir: /var/lib/edpm-config/container-startup-config/step_1
+    config_id: edpm
+    config_dir: /var/lib/openstack/config/containers
 """
 
 
@@ -124,7 +124,9 @@ class EdpmContainerManage:
         # Set parameters
         self.concurrency = args.get('concurrency', 4)
         self.config_id = args.get('config_id')
-        self.config_dir = args.get('config_dir')
+        base_config_dir = args.get('config_dir')
+        # Create service-specific subdirectory based on config_id
+        self.config_dir = os.path.join(base_config_dir, self.config_id)
         self.config_patterns = args.get('config_patterns')
         self.config_overrides = args['config_overrides']
         self.log_base_path = args.get('log_base_path')

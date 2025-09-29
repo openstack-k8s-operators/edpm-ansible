@@ -21,7 +21,7 @@ argument_specs:
           where all configmaps containing nova config files are mounted.
       edpm_nova_config_dest:
         type: str
-        default: /var/lib/openstack/config/nova
+        default: /var/lib/config-data/nova
         description: |
           The path to the directory where the nova config files
           will be rendered on the compute node.
