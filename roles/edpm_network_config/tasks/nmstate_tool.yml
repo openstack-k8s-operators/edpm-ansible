@@ -34,9 +34,26 @@
 - name: Configure network with network role from system roles [nmstate]
   become: true
   block:
-    - name: Render network_state variable
+    - name: Create temporary file for network_state
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .yaml
+      register: network_state_tempfile
+
+    - name: Render edpm_network_config_template to temporary file
+      ansible.builtin.copy:
+        content: "{{ edpm_network_config_template }}"
+        dest: "{{ network_state_tempfile.path }}"
+        mode: '0600'
+
+    - name: Slurp network_state from temporary file
+      ansible.builtin.slurp:
+        path: "{{ network_state_tempfile.path }}"
+      register: network_state_slurp
+
+    - name: Set network_state variable from slurped file
       ansible.builtin.set_fact:
-        network_state: "{{ edpm_network_config_template | from_yaml }}"
+        network_state: "{{ network_state_slurp.content | b64decode | from_yaml }}"
 
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
