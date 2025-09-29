@@ -60,8 +60,7 @@
       retries: "{{ edpm_network_config_download_retries }}"
       delay: "{{ edpm_network_config_download_delay }}"
 
-    - name: Ensure network service is enabled and started
+    - name: Ensure network service is enabled
       ansible.builtin.systemd:
-        name: "{{ edpm_bootstrap_network_service | default('network') }}"
+        name: network
         enabled: true
-        state: started
