@@ -16,6 +16,8 @@
 
 - name: Setup Swift disks
   become: true
+  tags: swiftdisk
+  when: hostvars[inventory_hostname]['edpm_swift_disks'] is defined
   block:
     - name: Create partitions for Swift
       community.general.parted:
