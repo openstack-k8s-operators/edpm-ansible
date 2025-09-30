@@ -81,8 +81,16 @@ argument_specs:
         default: nic1
       edpm_network_config_nonconfigured_cleanup:
         type: bool
-        description: "Cleanup network interfaces not in network config"
-        default: true
+        description: >
+          Cleanup interfaces not defined in the network configa.
+          Usage:
+          - If there are any ifcfg/nm interfaces which you need to clean
+            before applying the desired config, set this flag to 'true'
+          - During network_update, if cleanup is needed for any interfaces
+          Warning!
+          - Cleanup of ssh interface might result in connectivity loss
+          - Cleanup of DPDK/SR-IOV interfaces is not supported
+        default: false
       edpm_bootstrap_network_resolvconf_update:
         type: bool
         default: true
