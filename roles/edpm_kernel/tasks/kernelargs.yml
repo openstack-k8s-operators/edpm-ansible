@@ -49,7 +49,7 @@
         - name: Warn operator about workload protection
           ansible.builtin.debug:
             msg: |
-              Automated reboot for this node has been defered because it is already provisionned.
+              Automated reboot for this node has been deferred because it is already provisionned.
               Please schedule a manual reboot after this deployment is completed.
 
         - name: Setting workload protection fact
@@ -93,7 +93,7 @@
     # Leapp does not recognise grub entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
     # In order to fix it for FFU (queens to train), EDPM_KERNEL_ARGS has been renamed
-    # Ensure the fresh deployment is also alinged with the same name
+    # Ensure the fresh deployment is also aligned with the same name
     - name: Delete older name EDPM_KERNEL_ARGS entries if present
       ansible.builtin.lineinfile:
         dest: /etc/default/grub

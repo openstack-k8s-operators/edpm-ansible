@@ -12,20 +12,20 @@ Using roles in playbooks
 ++++++++++++++++++++++++
 
 Plabyooks should import roles whole, not only import specific subset of tasks.
-Situations when this is neccessary indicate inappropriate problem decomposition
+Situations when this is necessary indicate inappropriate problem decomposition
 and could point towards need for refactoring.
 
-Roles must be invoked using their FQN, in order to preven potential collisions
+Roles must be invoked using their FQN, in order to prevent potential collisions
 and to clarify collection dependencies.
 
 Only variables that don't have appropriate defaults should be set explicitly
-in the role invokation. The notable exception being repeated use of the same
+in the role invocation. The notable exception being repeated use of the same
 role within the playbook, when it may be more beneficial, from the maintenance perspective,
 to explicitly set other variables.
 
-The role invokation in a playbook is analogous to call of function in other languages.
+The role invocation in a playbook is analogous to call of function in other languages.
 However, output of one role shouldn't impact operations of other roles, not including
-cases when role exectuion fails.
+cases when role execution fails.
 
 Roles must not be imported using the plain `include`_ module, as it has been deprecated.
 Instead the `roles`_ keyword should be used on the playbook level when possible.

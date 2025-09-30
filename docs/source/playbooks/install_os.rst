@@ -9,7 +9,7 @@ Uses external `timesync` role from `system roles collection`_ to both install an
 Time service configuration
 --------------------------
 
-Variables of the `timesync`_ system role can be overriden in a standard ansible way,
+Variables of the `timesync`_ system role can be overridden in a standard ansible way,
 while respecting resolution order. Default values are set in the `install_os` playbook,
 while allowing for override.
 

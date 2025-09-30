@@ -6,9 +6,9 @@ argument_specs:
     options:
       edpm_reboot_strategy:
         description: |
-          Default strategy is auto. In auto mode reboot for deployed nodes is by default defered as it can
-          impact running vms or openstack services. Only on initial run when nova related files are not yet created reboot is not defered.
-          When edpm_reboot_force_reboot is set to force, reboot is allowed and will be perfomed always.
+          Default strategy is auto. In auto mode reboot for deployed nodes is by default deferred as it can
+          impact running vms or openstack services. Only on initial run when nova related files are not yet created reboot is not deferred.
+          When edpm_reboot_force_reboot is set to force, reboot is allowed and will be performed always.
         type: str
         default: auto
       edpm_reboot_old_tripleo_node_config_dir:

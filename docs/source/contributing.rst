@@ -6,14 +6,14 @@ Contributors to the collection should take their time to read these guidelines,
 in order to avoid certain common pitfalls and needless frustration during code review.
 
 These guidelines may change, depending on evolution of the project.
-However, all changes should be perfomed with consideration for other developers
+However, all changes should be performed with consideration for other developers
 workflow and for projects using edpm-ansible collection.
 
 General recommendation
 ++++++++++++++++++++++
 
 Test your code locally, if it is at all possible, to shorten the development loop
-and minimize unnecessary use of CI. Before commiting your changes, run `pre-commit`_
+and minimize unnecessary use of CI. Before committing your changes, run `pre-commit`_
 check to avoid needless issues with style, such as indentation.
 
 .. note::

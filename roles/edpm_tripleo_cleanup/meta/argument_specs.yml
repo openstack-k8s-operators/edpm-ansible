@@ -37,7 +37,7 @@ argument_specs:
         type: "list"
         description: |
           List of services to be kept during cleanup.
-          By default these are services related to Swift storag.
+          By default these are services related to Swift storage.
         default:
           - tripleo_swift_account_auditor
           - tripleo_swift_account_reaper

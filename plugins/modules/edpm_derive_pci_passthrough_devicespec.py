@@ -51,7 +51,7 @@ options:
     required: true
   sriov_phydev_map:
     description:
-      -  Comma seperated SR-IOV <-> phydev mappings
+      -  Comma separated SR-IOV <-> phydev mappings
     type: str
     required: false
     default: ''
@@ -114,9 +114,9 @@ def get_pci_field_val(prop, maxval, hex_value):
     try:
         v = int(prop, 16)
     except ValueError:
-        raise InvalidConfigException('Invalid PCI address specififed {!r}'.format(prop))
+        raise InvalidConfigException('Invalid PCI address specified {!r}'.format(prop))
     if v > maxval:
-        raise InvalidConfigException('PCI address specififed {!r} is out of range'.format(prop))
+        raise InvalidConfigException('PCI address specified {!r} is out of range'.format(prop))
     return hex_value % v
 
 
@@ -133,7 +133,7 @@ def get_pciaddr_dict_from_usraddr(pci_addr):
     if dbs:
         dbs_fields = dbs.split(':')
         if len(dbs_fields) > 3:
-            raise InvalidConfigException('Invalid PCI address specififed {!r}'.format(pci_addr))
+            raise InvalidConfigException('Invalid PCI address specified {!r}'.format(pci_addr))
         # If we got a partial address like ":00.", we need to turn this
         # into a domain of ANY, a bus of ANY, and a slot of 00. This code
         # allows the address,bus and/or domain to be left off
