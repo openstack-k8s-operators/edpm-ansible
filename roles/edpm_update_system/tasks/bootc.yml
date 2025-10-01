@@ -16,7 +16,25 @@
 
 
 - name: Update bootc image
-  ansible.builtin.shell: bootc switch "{{ edpm_bootc_os_container_image }}"
+  ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
   register: bootc_result
   changed_when: bootc_result.rc != 0
+
+- name: Create directory required by edpm-reboot role
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/openstack/reboot_required/
+    state: directory
+    mode: "0755"
+  when:
+    - bootc_result.changed
+
+- name: Create required file to enforce a reboot
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/openstack/reboot_required/bootc_reboot
+    state: touch
+    mode: "0600"
+  when:
+    - bootc_result.changed

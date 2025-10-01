@@ -36,7 +36,5 @@
     - ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Update OS (bootc)
-  ansible.builtin.import_role:
-    name: osp.edpm.edpm_update
-    tasks_from: bootc.yml
+  ansible.builtin.include_tasks: bootc.yml
   when: ansible_local is defined and ansible_local.bootc

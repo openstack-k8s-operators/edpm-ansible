@@ -31,7 +31,3 @@ edpm_update_exclude_packages:
   - openvswitch
 
 edpm_update_running_services: "{{ edpm_service_types }}"
-
-# The bootc container image is provided by the OpenStackVersion
-# CR using the bootcOsContainerImage parameter
-edpm_bootc_os_container_image: ""
