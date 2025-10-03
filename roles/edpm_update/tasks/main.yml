@@ -42,7 +42,9 @@
   ansible.builtin.import_role:
     name: osp.edpm.edpm_update_system
     tasks_from: bootc.yml
-  when: ansible_local is defined and ansible_local.bootc
+  when:
+    - ansible_local.bootc is defined
+    - ansible_local.bootc
 
 - name: Update containers
   ansible.builtin.include_tasks: containers.yml
