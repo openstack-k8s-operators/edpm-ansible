@@ -1,0 +1,4 @@
+# edpm-ansible repo uses molecule config file from ci-framework repo.
+# That config file reads group_vars from group_vars dir. This keep file
+# will help keeping group_vars dir in edpm-ansible role, and make
+# molecule config file happy.
