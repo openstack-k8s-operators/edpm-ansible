@@ -55,7 +55,7 @@
         name: "{{ item }}"
         state: present
       loop:
-        # NOTE(gibi): this is done by the boostrap role in a real deployment
+        # NOTE(gibi): this is done by the bootstrap role in a real deployment
         - openstack-selinux
         # NOTE(sean-k-mooney): this is needed to generate certs for tls testing
         - python3-cryptography
@@ -216,8 +216,8 @@
         content: "correct horse battery staple"
       # FIXME(sean-k-mooney): this is a hack to work around
       # the fact that the playbook uses a lookup plugin which always
-      # executes on the ansible contoller. This is needed to ensure
-      # the password is available locally when runing under vagrant.
+      # executes on the ansible controller. This is needed to ensure
+      # the password is available locally when running under vagrant.
       delegate_to: localhost
 
     - name: Gather required facts
@@ -229,7 +229,7 @@
           -  "system"
 
     # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
-    # currently manage the hostname on the DUT via boostrap or a dedicated role
+    # currently manage the hostname on the DUT via bootstrap or a dedicated role
     # in the molecule test. This is needed to ensure the hostname is resolvable
     # when executing virsh commands. remove this when we have a proper solution
     - name: Ensure hostname is resolvable in /etc/hosts

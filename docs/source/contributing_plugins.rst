@@ -47,7 +47,7 @@ Therefore, we will use the term **plugin** to denote the general set of auxiliar
 and **module** for those plugins which can be used to perform operations on the target machine.
 
 Before developing plugins first check if the use case isn't already supported by
-an existing plugin in either the `ansible` or `commmunity` name space. Alternatively, it may be possible
+an existing plugin in either the `ansible` or `community` name space. Alternatively, it may be possible
 to derive a new plugin, from an existing counterpart. However, this may cause issues with long term maintenance,
 as the parent plugin characteristics may change over time.
 
@@ -96,7 +96,7 @@ Check mode
 ~~~~~~~~~~
 
 Modules which do not affect the target machine must be marked as available for `check mode`_.
-At the same time, a module running in check mode is resposible for not performing any
+At the same time, a module running in check mode is responsible for not performing any
 actions that may affect the target machine.
 
 Plugin testing

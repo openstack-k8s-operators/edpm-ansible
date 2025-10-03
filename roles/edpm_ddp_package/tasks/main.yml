@@ -78,7 +78,7 @@
             package_filename: "ice.pkg.xz"
           when: ice_pkg_xz.stat.exists
 
-        - name: Confiure ddp/ice.pkg
+        - name: Configure ddp/ice.pkg
           ansible.builtin.file:
             src: '{{ ddp_last_package_file }}'
             dest: "{{ edpm_ddp_package_path }}/ddp/{{ package_filename }}"

@@ -31,7 +31,7 @@ argument_specs:
       edpm_ovs_dpdk_emc_insertion_probablity:
         type: str
         default: ""
-        description: OvS DPDK EMAC insertion probablity
+        description: OvS DPDK EMAC insertion probability
       edpm_ovs_dpdk_enable_tso:
         type: bool
         default: false

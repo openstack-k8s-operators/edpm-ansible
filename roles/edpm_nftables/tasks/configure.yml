@@ -25,7 +25,7 @@
         group: root
         mode: "0750"
 
-    - name: Push default ruleset snipet
+    - name: Push default ruleset snippet
       ansible.builtin.template:
         dest: "{{ edpm_nftables_src }}/edpm-nftables-base.yaml"
         src: base-rules.yaml.j2

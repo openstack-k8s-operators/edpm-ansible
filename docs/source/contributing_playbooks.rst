@@ -23,7 +23,7 @@ Playbook must not duplicate other playbooks.
 If a newly developed playbook requires functionality not already present in existing
 roles, a new role should be submitted in the same PR implementing it.
 
-If possible, playbooks should not use tasks directly, only trough a role.
+If possible, playbooks should not use tasks directly, only through a role.
 
 Playbooks must use following basic layout. Exposing variables, `edpm_override_hosts`,
 `edpm_max_fail_percentage` and `edpm_any_errors_fatal`.

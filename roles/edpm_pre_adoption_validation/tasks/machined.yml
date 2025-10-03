@@ -35,5 +35,5 @@
       You must have the systemd-container package installed.
       Do not install it manually as that stops VM instances.
       Complete a minor update of the source cloud and reboot
-      your Nova Compute hypervisors ony by one. To reboot
+      your Nova Compute hypervisors one by one. To reboot
       a hypervisor, firstly live-migrate its VM instances.
