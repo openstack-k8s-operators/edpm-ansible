@@ -33,12 +33,13 @@
     mode: "0600"
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
-- name: "Create config file {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
+- name: "Ensure container config directory exists: {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
   become: true
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
     mode: "0755"
+    setype: "container_file_t"
 
 - name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
   become: true
@@ -55,6 +56,6 @@
   ansible.builtin.include_role:
     name: edpm_container_manage
   vars:
-    edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
+    edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}"
     edpm_container_manage_config_patterns: "*.json"
     edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"

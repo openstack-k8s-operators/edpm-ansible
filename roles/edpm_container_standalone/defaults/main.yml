@@ -23,8 +23,8 @@
 edpm_container_standalone_service: ""
 # Directory for kolla config files
 edpm_container_standalone_kolla_config_dir: /var/lib/kolla/config_files
-# Directory for container startup configs
-edpm_container_standalone_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
+# Directory for container startup configs (service-specific subdirectory will be created)
+edpm_container_standalone_container_startup_config_dir: /var/lib/openstack/config/containers
 # Hash with keys of container name and value of YAML kolla config file.
 edpm_container_standalone_kolla_config_files: {}
 # Hash with keys of container name and value of YAML container definition
@@ -64,4 +64,4 @@ edpm_container_standalone_volumes: "{{
   }}"
 
 edpm_deploy_identifier: ''
-edpm_iscsid_config_volume: /var/lib/config-data/ansible-generated/iscsid
+edpm_iscsid_config_volume: /var/lib/config-data/iscsid

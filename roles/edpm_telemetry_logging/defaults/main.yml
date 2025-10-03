@@ -19,6 +19,6 @@
 # Service name this role manages
 edpm_telemetry_logging_service_name: logging
 # Directory in the ansibleEE container
-edpm_telemetry_logging_config_src: "/var/lib/openstack/configs/{{ edpm_telemetry_logging_service_name }}"
+edpm_telemetry_logging_config_src: "/var/lib/openstack/config"
 # Directory of rsyslog config in the compute node
 edpm_telemetry_rsyslog_config_dest: /etc/rsyslog.d

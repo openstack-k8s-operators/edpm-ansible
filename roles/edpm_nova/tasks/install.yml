@@ -11,7 +11,7 @@
     - nova
   ansible.builtin.template:
     src: "nova_compute.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_compute.json"
+    dest: "/var/lib/openstack/config/containers/nova/nova_compute.json"
     setype: "container_file_t"
     mode: "0644"
   vars:
@@ -25,7 +25,7 @@
     - nova
   ansible.builtin.template:
     src: "nova_compute_init.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_compute_init.json"
+    dest: "/var/lib/openstack/config/containers/nova/nova_compute_init.json"
     setype: "container_file_t"
     mode: "0700"
   notify:
@@ -39,6 +39,7 @@
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_config_id: nova
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_compute_init.json'
     edpm_container_manage_clean_orphans: false
@@ -51,6 +52,7 @@
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_config_id: nova
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_compute.json'
     edpm_container_manage_clean_orphans: false
@@ -62,7 +64,7 @@
     - nova
   ansible.builtin.template:
     src: "nova_nvme_cleaner.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_nvme_cleaner.json"
+    dest: "/var/lib/openstack/config/containers/nova/nova_nvme_cleaner.json"
     setype: "container_file_t"
     mode: "0644"
   vars:
@@ -79,6 +81,7 @@
     name: osp.edpm.edpm_container_manage
   vars:
     edpm_container_manage_config: '/var/lib/openstack/config/containers'
+    edpm_container_manage_config_id: nova
     edpm_container_manage_healthcheck_disabled: true
     edpm_container_manage_config_patterns: 'nova_nvme_cleaner.json'
     edpm_container_manage_clean_orphans: false

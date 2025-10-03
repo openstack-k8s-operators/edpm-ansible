@@ -29,7 +29,7 @@
   tasks:
     - name: Prepare the container configs directory
       file:
-        path: '/tmp/container-configs'
+        path: '/tmp/container-configs/edpm'
         state: directory
     - name: Create a configuration file for a centos container
       # ipc mode added as WA for podman 4.1.x
@@ -43,7 +43,7 @@
             "restart": "always",
             "check_interval": "500s"
           }
-        dest: '/tmp/container-configs/centos.json'
+        dest: '/tmp/container-configs/edpm/centos.json'
     - name: Create a secondary configuration file for a centos container
       copy:
         content: |
@@ -53,7 +53,7 @@
             "ipc": "shareable",
             "command": "sleep 5"
           }
-        dest: '/tmp/container-configs/centos_bis.json'
+        dest: '/tmp/container-configs/edpm/centos_bis.json'
     - name: Create a third configuration file for a centos container
       copy:
         content: |
@@ -63,4 +63,4 @@
             "ipc": "shareable",
             "command": "sleep 5"
           }
-        dest: '/tmp/container-configs/centos_three.json'
+        dest: '/tmp/container-configs/edpm/centos_three.json'

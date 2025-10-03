@@ -271,7 +271,7 @@
             "net": "host",
             "command": "sleep 10"
           }
-        dest: '/tmp/container-configs/centos_bis.json'
+        dest: '/tmp/container-configs/edpm/centos_bis.json'
     - include_role:
         name: osp.edpm.edpm_container_manage
   post_tasks:

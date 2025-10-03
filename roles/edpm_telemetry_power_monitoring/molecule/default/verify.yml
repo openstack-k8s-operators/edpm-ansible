@@ -24,8 +24,8 @@
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
-        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_ipmi.json"
-        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-ipmi.json"
+        - "/var/lib/openstack/config/containers/telemetry_power_monitoring/ceilometer_agent_ipmi.json"
+        - "/var/lib/openstack/config/containers/telemetry_power_monitoring/kepler.json"
         - "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
         - "{{ edpm_telemetry_config_dest }}/polling.yaml"
 
