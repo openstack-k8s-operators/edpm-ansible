@@ -22,6 +22,21 @@
   when:
     - ansible_user is undefined
 
+- name: Ensure /var/lib/config-data and /var/lib/config-data/ansible-generated exist
+  when:
+    - edpm_frr_config_basedir is match('/var/lib/config-data/ansible-generated')
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    setype: container_file_t
+  loop:
+    - "/var/lib/config-data"
+    - "/var/lib/config-data/ansible-generated"
+
 - name: Create persistent directories
   become: true
   ansible.builtin.file:
@@ -54,9 +69,12 @@
       - "selinux"
 
 - name: Create directory {{ edpm_frr_config_basedir }}
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_frr_config_basedir }}/etc/frr"
     recurse: true
     state: directory
     selevel: s0
     setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
