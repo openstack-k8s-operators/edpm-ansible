@@ -35,6 +35,7 @@
     - {'path': "{{ edpm_ovn_bgp_agent_config_basedir }}", 'setype': container_file_t, 'mode': '0750'}
 
 - name: Create directory {{ edpm_ovn_bgp_agent_config_basedir }}
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent"
     recurse: true
