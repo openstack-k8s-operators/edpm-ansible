@@ -1,0 +1,10 @@
+web:
+   listenAddresses:
+       - :8888
+{% if running_in_vm|bool %}
+# WARN DO NOT ENABLE THIS IN PRODUCTION - for CI testing only
+dev:
+   fake-cpu-meter:
+       enabled: true
+       zones: ["package", "core", "dram"]
+{% endif %}
