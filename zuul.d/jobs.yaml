@@ -16,6 +16,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_bootstrap/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_bootstrap
 - job:
@@ -23,6 +24,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_podman/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_podman
 - job:
@@ -30,6 +32,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_module_load/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_module_load
 - job:
@@ -37,6 +40,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_kernel/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_kernel
 - job:
@@ -44,6 +48,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_libvirt/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_libvirt
 - job:
@@ -51,6 +56,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_nova/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_nova
 - job:
@@ -58,6 +64,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_frr/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_frr
 - job:
@@ -65,6 +72,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_iscsid/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_iscsid
 - job:
@@ -72,6 +80,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_ovn_bgp_agent/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_ovn_bgp_agent
 - job:
@@ -79,6 +88,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_ovs/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_ovs
 - job:
@@ -86,6 +96,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_tripleo_cleanup/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_tripleo_cleanup
 - job:
@@ -93,6 +104,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_tuned/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_tuned
 - job:
@@ -100,6 +112,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_telemetry_power_monitoring/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_telemetry_power_monitoring
 - job:
@@ -107,6 +120,7 @@
     parent: edpm-ansible-molecule-base
     files:
      - ^roles/edpm_update/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+     - ^molecule-requirements.txt$
     vars:
       TEST_RUN: edpm_update
 - job:
