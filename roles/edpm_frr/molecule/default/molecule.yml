@@ -17,9 +17,8 @@ provisioner:
   log: true
   name: ansible
   inventory:
-    host_vars:
-      compute-1:
-        ctlplane_ip: "10.0.0.1"
+    links:
+      host_vars: ./inventory/host_vars/
 
 scenario:
   test_sequence:

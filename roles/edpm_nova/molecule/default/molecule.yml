@@ -14,12 +14,8 @@ platforms:
 provisioner:
   name: ansible
   inventory:
-    hosts:
-      all:
-        hosts:
-          compute-1:
-            ctlplane_ip: 10.0.0.3
-            canonical_hostname: edpm-0.localdomain
+    links:
+      hosts: ./inventory/hosts
 
 verifier:
   name: ansible
