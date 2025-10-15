@@ -112,3 +112,16 @@ argument_specs:
         default: /var/lib/openstack/reboot_required
         description: |
           Path of the reboot_required folder used by `edpm_reboot` role
+
+      edpm_bootstrap_lvm_devices_file:
+        type: path
+        default: /etc/lvm/devices/system.devices
+        description: |
+          Full path name of LVM's default "devicesfile" (see /etc/lvm/lvm.conf)
+
+      edpm_bootstrap_lvm_import_devices:
+        type: bool
+        default: true
+        description: |
+          Specifies whether to import existing LVM devices into the devices file.
+          This is overridden (set false) when updating nova compute nodes.

@@ -9,3 +9,9 @@
         path: /tmp/edpm_bootstrap_command
       register: bootstrap_stat
       failed_when: not bootstrap_stat.stat.exists
+
+    - name: Verify the LVM devices file exists
+      stat:
+        path: "{{ edpm_bootstrap_lvm_devices_file }}"
+      register: lvm_devices_stat
+      failed_when: not lvm_devices_stat.stat.exists
