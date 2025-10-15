@@ -1,4 +1,5 @@
 ---
+
 edpm_container_quadlet_kolla_config_dir: /var/lib/kolla/config_files
 edpm_container_quadlet_systemd_config_dir: "/etc/containers/systemd/"
 edpm_container_quadlet_service: ""
