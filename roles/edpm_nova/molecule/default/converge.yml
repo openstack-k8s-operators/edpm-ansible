@@ -14,6 +14,7 @@
   roles:
     - role: osp.edpm.edpm_nova
       vars:
+        ctlplane_ip: 10.0.0.3
         edpm_nova_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"
         edpm_nova_tls_ca_src_dir: /tmp/pki
         edpm_nova_live_migration_tls: true
