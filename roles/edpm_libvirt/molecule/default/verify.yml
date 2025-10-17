@@ -21,7 +21,7 @@
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
-        # extrenal deps
+        # external deps
         - "/var/lib/openstack/config/ceph"
         # libvirt directories
         - "/var/lib/libvirt"
@@ -31,7 +31,7 @@
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        # rhel installed services have service units defiend via rpm in
+        # rhel installed services have service units defined via rpm in
         # /usr/lib/systemd/system so disable the check for them them in
         # /etc/systemd/system
         - { "name": "virtlogd.service", "osp_service": false, "enabled": "enabled" }
@@ -117,11 +117,11 @@
         - {"path": "/run/libvirt/virtsecretd-sock", "user": "root", "group": "libvirt" }
         - {"path": "/run/libvirt/virtsecretd-sock-ro", "user": "root", "group": "libvirt" }
 
-    - name: ensure container_file_t selinux lable is not set on /run/libvirt
+    - name: ensure container_file_t selinux label is not set on /run/libvirt
       ansible.builtin.shell: "ls -lZ /run/libvirt | grep container_file_t"
       register: run_libvirt
       failed_when: run_libvirt.rc not in [0, 1]
-    - name: Assert that container_file_t selinux lable is not set on /run/libvirt
+    - name: Assert that container_file_t selinux label is not set on /run/libvirt
       ansible.builtin.assert:
         that:
           - "run_libvirt.rc != 0"

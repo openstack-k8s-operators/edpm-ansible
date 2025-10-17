@@ -49,7 +49,7 @@
         ./venv/bin/repo-setup -d centos9 current-podified -b antelope
         popd
         rm -rf repo-setup-main
-    # NOTE(gibi): this is done by the boostrap role in a real deployment
+    # NOTE(gibi): this is done by the bootstrap role in a real deployment
     - name: Install openstack-selinux
       become: true
       ansible.builtin.dnf:
@@ -158,7 +158,7 @@
           -  "system"
 
     # FIXME(sean-k-mooney): this is a hack to work around the fact that we dont
-    # currently manage the hostname on the DUT via boostrap or a dedicated role
+    # currently manage the hostname on the DUT via bootstrap or a dedicated role
     # in the molecule test. This is needed to ensure the hostname is resolvable
     # when executing virsh commands. remove this when we have a proper solution
     - name: Ensure hostname is resolvable in /etc/hosts
