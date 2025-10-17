@@ -21,8 +21,8 @@ argument_specs:
         description: Parsed container definitions.
         type: dict
       edpm_container_standalone_container_startup_config_dir:
-        default: /var/lib/edpm-config/container-startup-config
-        description: Path to configuration directory.
+        default: /var/lib/openstack/config/containers
+        description: Base path to configuration directory. Service-specific subdirectory will be created.
         type: path
       edpm_container_standalone_internal_tls_volumes:
         default:
@@ -64,6 +64,6 @@ argument_specs:
         description: Path to TLS certificate.
         type: path
       edpm_iscsid_config_volume:
-        default: /var/lib/config-data/ansible-generated/iscsid
+        default: /var/lib/config-data/iscsid
         description: Path to iscsid config directory.
         type: path

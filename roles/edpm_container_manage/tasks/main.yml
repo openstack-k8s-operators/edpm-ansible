@@ -19,7 +19,7 @@
   block:
     - name: "Find all matching configs configs for in {{ edpm_container_manage_config }}"
       container_config_data:
-        config_path: "{{ edpm_container_manage_config }}"
+        config_path: "{{ edpm_container_manage_config }}/{{ edpm_container_manage_config_id }}"
         config_pattern: "{{ edpm_container_manage_config_patterns }}"
         config_overrides: "{{ edpm_container_manage_config_overrides }}"
       register: container_configuration
