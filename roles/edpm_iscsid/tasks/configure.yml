@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Check if the iSCSI initiator name (IQN) has been reset
+  become: true
   ansible.builtin.stat:
     path: /etc/iscsi/.initiator_reset
   register: initiator_reset_state
@@ -29,16 +29,10 @@
   when: not initiator_reset_state.stat.exists
   become: true
   block:
-
     - name: Generate a unique IQN
-      containers.podman.podman_container:
-        name: iscsid_config
-        image: "{{ edpm_iscsid_image }}"
-        rm: true
-        tty: true
-        detach: false
-        command: /usr/sbin/iscsi-iname
+      ansible.builtin.command: /usr/sbin/iscsi-iname
       register: iscsi_iname
+      changed_when: true
 
     - name: Save the new IQN
       ansible.builtin.copy:
@@ -51,21 +45,8 @@
         path: /etc/iscsi/.initiator_reset
         mode: "0600"
         state: touch
-
-- name: Check if /etc/iscsi/iscsid.conf exists on the host
-  ansible.builtin.stat:
-    path: /etc/iscsi/iscsid.conf
-  register: result
-
-- name: Copy iscsid.conf from the iscsid container to the host
-  when: not result.stat.exists
-  containers.podman.podman_container:
-    name: iscsid_config
-    image: "{{ edpm_iscsid_image }}"
-    rm: true
-    command: cp /etc/iscsi/iscsid.conf /host/etc/iscsi/
-    volume:
-      - /etc/iscsi:/host/etc/iscsi
+      notify:
+        - Restart the iscsid service
 
 - name: Write CHAP algorithms
   become: true
@@ -74,4 +55,5 @@
     line: "node.session.auth.chap_algs = {{ edpm_iscsid_chap_algs }}"
     regexp: "^node.session.auth.chap_algs"
     insertafter: "^#node.session.auth.chap.algs"
-  notify: Record the iscsid container restart is required
+  notify:
+    - Restart the iscsid service

@@ -107,8 +107,6 @@
     - {"path": "/var/lib/nova/instances", "mode": "0755"}
     - {"path": "/etc/ceph", "mode": "0750", "owner": "root", "group": "root"}
     - {"path": "/etc/multipath"}
-    - {"path": "/etc/iscsi"}
-    - {"path": "/var/lib/iscsi"}
     - {"path": "/etc/nvme"}
     - {"path": "/run/openvswitch"}
 
@@ -183,6 +181,7 @@
     # https://blueprints.launchpad.net/nova/+spec/libvirt-migrate-with-hostname-instead-of-ip
     - {"src": "02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
+    - {"src": "run-on-host", "dest": "run-on-host"}
   notify:
     - Restart nova init
     - Restart nova
