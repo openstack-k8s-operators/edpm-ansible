@@ -10,3 +10,15 @@
     mode: "0644"
   loop:
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
+
+- name: Run LVM bootstrap tasks
+  tags:
+    - update
+    - nova
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_bootstrap
+    tasks_from: lvm.yml
+  vars:
+    # Don't import existing LVM devices in case there are "rogue" ones associated
+    # with an attached cinder volume.
+    edpm_bootstrap_lvm_import_devices: false

@@ -1,0 +1,41 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check if the LVM devices file exists
+  become: true
+  ansible.builtin.stat:
+    path: "{{ edpm_bootstrap_lvm_devices_file }}"
+  register: lvm_devices_file
+
+- name: Create the LVM devices file
+  become: true
+  when: not (lvm_devices_file.stat.exists | bool)
+  block:
+    - name: Import any existing LVM devices
+      ansible.builtin.command: /usr/sbin/vgimportdevices --all
+      register: vgimportdevices
+      changed_when: true
+      failed_when: vgimportdevices.rc not in [0, 5]
+      when: (edpm_bootstrap_lvm_import_devices | bool)
+
+    - name: Create an empty LVM devices file
+      ansible.builtin.file:
+        path: "{{ edpm_bootstrap_lvm_devices_file }}"
+        state: touch
+        mode: '0600'
+        owner: root
+        group: root
+      when: not (edpm_bootstrap_lvm_import_devices | bool) or vgimportdevices.rc == 5
