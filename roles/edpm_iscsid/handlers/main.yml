@@ -1,8 +1,7 @@
 ---
 
-- name: Record the iscsid container restart is required
+- name: Restart the iscsid service
   become: true
-  ansible.builtin.file:
-    path: /etc/iscsi/.iscsid_restart_required
-    state: touch
-    mode: "0600"
+  ansible.builtin.systemd_service:
+    name: iscsid
+    state: restarted

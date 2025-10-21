@@ -1,5 +1,5 @@
 ---
-# Copyright 2022 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,16 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Start the iscsid socket
-  become: true
-  ansible.builtin.systemd_service:
-    name: iscsid.socket
-    state: started
-    enabled: true
+- name: Ensure iscsid is running on the EDPM host
+  ansible.builtin.include_tasks: install.yml
 
-- name: Start the iscsid service
-  become: true
-  ansible.builtin.systemd_service:
-    name: iscsid
-    state: started
-    enabled: true
+- name: Run iscsid
+  ansible.builtin.include_tasks: run.yml
