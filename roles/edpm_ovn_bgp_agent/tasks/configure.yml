@@ -23,7 +23,7 @@
   block:
     - name: Render OVN BGP agent config files
       ansible.builtin.template:
-        src: ovn-bgp-agent.conf.j2
+        src: config/ovn-bgp-agent.conf.j2
         dest: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent/bgp-agent.conf"
         mode: "0644"
         selevel: s0

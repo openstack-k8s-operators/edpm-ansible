@@ -19,7 +19,7 @@
 # All variables within this role should have a prefix of "edpm_derive_pci_device_spec"
 
 # Defaults for PCI derive script (nic-partitioning is enabled)
-edpm_derive_pci_device_spec_conf_dir: '/var/lib/config-data/ansible-generated/derive_devicespec'
+edpm_derive_pci_device_spec_conf_dir: '/var/lib/openstack/derive_devicespec'
 
 edpm_derive_sriov_device_spec_list: ''
 edpm_derive_pci_device_spec_conf_file: 20-sriov-device-spec.conf

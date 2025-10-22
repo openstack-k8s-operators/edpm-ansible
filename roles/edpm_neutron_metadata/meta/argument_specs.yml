@@ -114,7 +114,7 @@ argument_specs:
         elements: str
         type: list
       edpm_neutron_metadata_agent_config_dir:
-        default: /var/lib/config-data/ansible-generated/neutron-ovn-metadata-agent
+        default: /var/lib/openstack/neutron-ovn-metadata-agent
         description: 'The directory that contains configuration files for Neutron OVN Metadata Agent.'
         type: str
       edpm_neutron_metadata_agent_sidecar_debug:

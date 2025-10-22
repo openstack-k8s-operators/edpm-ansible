@@ -135,7 +135,7 @@ argument_specs:
         description: ''
         type: str
       edpm_frr_config_basedir:
-        default: /var/lib/config-data/ansible-generated/frr
+        default: /var/lib/openstack/frr
         description: Path to FRR configuration directory.
         type: path
       edpm_frr_defaults:
@@ -181,7 +181,7 @@ argument_specs:
           - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
           - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
           - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
-          - /var/lib/config-data/ansible-generated/frr:/var/lib/kolla/config_files/src:ro
+          - /var/lib/openstack/frr:/var/lib/kolla/config_files/src:ro
           - /run/frr:/run/frr:shared,z
         description: List of FRR volumes in a mountpoint form.
         type: list

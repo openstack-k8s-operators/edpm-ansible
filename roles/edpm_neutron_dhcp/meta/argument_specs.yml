@@ -19,7 +19,7 @@ argument_specs:
           agent configs.
         type: str
       edpm_neutron_dhcp_agent_config_dir:
-        default: "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"
+        default: "/var/lib/openstack/neutron-dhcp-agent"
         description: |
           The path to the directory containing Neutron DHCP agent config
           files.

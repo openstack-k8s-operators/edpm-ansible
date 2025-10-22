@@ -86,9 +86,7 @@
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
-    - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
     - {"path": "{{ edpm_nova_nvme_cleaner_config_dest }}", "mode": "0755"}
-
 - name: Create persistent directories
   tags:
     - configure
@@ -165,9 +163,8 @@
     setype: "container_file_t"
     mode: "0644"
   loop:
-    - {"src": "config.json.j2", "dest": "config.json"}
-    - {"src": "nova-blank.conf", "dest": "nova-blank.conf"}
-    - {"src": "ssh-config", "dest": "ssh-config"}
+    - {"src": "files/nova-blank.conf", "dest": "nova-blank.conf"}
+    - {"src": "files/ssh-config", "dest": "ssh-config"}
     # NOTE(gibi): This is unfortunate as we would like to avoid config
     # generation in ansible. This config is only needed to specify the IP
     # address of the node nova-compute should use. Right now this is hardcoded
@@ -179,25 +176,11 @@
     # remove this host specific configuration in the future (not earlier than
     # openstack Caracal)
     # https://blueprints.launchpad.net/nova/+spec/libvirt-migrate-with-hostname-instead-of-ip
-    - {"src": "02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
-    - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
-    - {"src": "run-on-host", "dest": "run-on-host"}
+    - {"src": "config/02-nova-host-specific.conf.j2", "dest": "02-nova-host-specific.conf"}
+    - {"src": "files/nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
+    - {"src": "files/run-on-host", "dest": "run-on-host"}
   notify:
     - Restart nova init
-    - Restart nova
-
-
-- name: Render nvme cleaner config files
-  when: edpm_nova_enable_nvme_cleaner
-  tags:
-    - configure
-    - nova
-  ansible.builtin.template:
-    src: "nova_nvme_cleaner_config.json.j2"
-    dest: "{{ edpm_nova_nvme_cleaner_config_dest }}/config.json"
-    setype: "container_file_t"
-    mode: "0644"
-  notify:
     - Restart nova
 
 - name: Create .ssh directory for the nova user on the host

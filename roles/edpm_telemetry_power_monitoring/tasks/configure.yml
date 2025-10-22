@@ -41,16 +41,23 @@
     path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
-- name: Render ceilometer config files
+- name: Render ceilometer config template
   tags:
     - edpm_telemetry_power_monitoring
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
+    src: "config/ceilometer-host-specific.conf.j2"
+    dest: "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf"
     setype: "container_file_t"
     mode: "0644"
-  loop:
-    - {"src": "ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
+
+- name: Copy static config files
+  tags:
+    - edpm_telemetry_power_monitoring
+  ansible.builtin.copy:
+    src: firewall.yaml
+    dest: "{{ edpm_telemetry_config_dest }}/firewall.yaml"
+    setype: "container_file_t"
+    mode: "0644"
 
 - name: Configure ceilometer user and group on the host
   ansible.builtin.import_role:
@@ -77,7 +84,7 @@
 
 - name: Append custom.conf to config files
   ansible.builtin.set_fact:
-    configs: "{{ configs + [{ 'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf' }] }}"
+    configs: "{{ configs + [{'src': edpm_telemetry_config_src + '/custom.conf', 'dest': edpm_telemetry_config_dest + '/custom.conf'}] }}"
   when: custom_ceilometer_conf.stat.exists
 
 - name: Copy generated ceilometer configs
@@ -98,28 +105,16 @@
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
 
-- name: Render container config templates
-  ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    mode: 0644
-  with_fileglob:
-    - ../templates/*.j2
-  vars:
-    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
-    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
 - name: Configure tls if present
   when:
     - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
   block:
-    - name: Create config file for exporters
-      ansible.builtin.include_tasks:
-        file: exporter_tls.yml
-      loop:
-        - ceilometer_prom_exporter
-      loop_control:
-        loop_var: exporter
+    - name: Copy TLS config for ceilometer_prom_exporter
+      ansible.builtin.copy:
+        src: ceilometer_prom_exporter.yaml
+        dest: "{{ edpm_telemetry_config_dest }}/ceilometer_prom_exporter.yaml"
+        mode: 0644
 
     - name: Change the owner of the crt
       become: true

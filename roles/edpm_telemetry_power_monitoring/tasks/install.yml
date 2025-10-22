@@ -35,23 +35,27 @@
   become: true
   loop: "{{ edpm_telemetry_power_monitoring_healthcheck_sources | dict2items }}"
 
-- name: Deploy ceilometer containers
+- name: Deploy ceilometer ipmi container
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "ceilometer_agent_ipmi.json"
-    edpm_container_manage_clean_orphans: false
+    edpm_container_standalone_service: "ceilometer_agent_ipmi"
+    edpm_container_standalone_container_defs:
+      ceilometer_agent_ipmi: "{{ lookup('template', 'container_defs/ceilometer_agent_ipmi.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_kolla_config_files:
+      ceilometer_agent_ipmi: "{{ lookup('file', 'files/kolla_config/ceilometer_agent_ipmi.yaml') | from_yaml }}"
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
 - name: Deploy Kepler container
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "kepler.json"
-    edpm_container_manage_clean_orphans: false
+    edpm_container_standalone_service: "kepler"
+    edpm_container_standalone_container_defs:
+      kepler: "{{ lookup('template', 'container_defs/kepler.yaml.j2') | from_yaml }}"
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
 - name: Restart ceilometer ipmi
   become: true

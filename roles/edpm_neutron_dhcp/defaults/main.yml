@@ -28,7 +28,7 @@ edpm_neutron_dhcp_images_download_delay: "{{ edpm_download_delay | default(60) }
 edpm_neutron_dhcp_images_download_retries: "{{ edpm_download_retries | default(5) }}"
 
 edpm_neutron_dhcp_agent_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_dhcp_service_name }}"
-edpm_neutron_dhcp_agent_config_dir: "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"
+edpm_neutron_dhcp_agent_config_dir: "/var/lib/openstack/neutron-dhcp-agent"
 edpm_neutron_dhcp_agent_lib_dir: "/var/lib/neutron"
 edpm_neutron_dhcp_image: "quay.io/podified-antelope-centos9/openstack-neutron-dhcp-agent:current-podified"
 

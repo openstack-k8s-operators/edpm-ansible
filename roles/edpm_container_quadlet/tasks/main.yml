@@ -43,7 +43,7 @@
 - name: "Render container definitions: [{{ edpm_container_quadlet_service }} ]"
   become: true
   ansible.builtin.template:
-    src: "templates/service-quadlet-template.yaml.j2"
+    src: "service-quadlet-template.yaml.j2"
     dest: "{{ edpm_container_quadlet_systemd_config_dir }}/{{ edpm_container_quadlet_service }}.yaml"
     mode: "0644"
   # NOTE(tkajinam): Some containers can contain secrets in their environments.

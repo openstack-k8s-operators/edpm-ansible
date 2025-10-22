@@ -11,7 +11,7 @@
         - name: ovn-agent config file exists
           become: true
           ansible.builtin.stat:
-            path: "/var/lib/config-data/ansible-generated/neutron-ovn-agent/10-neutron-ovn.conf"
+            path: "/var/lib/openstack/neutron-ovn-agent/10-neutron-ovn.conf"
           register: ovn_agent_config
 
         - name: assert that the config exists
@@ -26,7 +26,7 @@
 
     - name: Slurp host specific config
       ansible.builtin.slurp:
-        src: /var/lib/config-data/ansible-generated/neutron-ovn-agent/01-neutron-ovn-agent.conf
+        src: /var/lib/openstack/neutron-ovn-agent/01-neutron-ovn-agent.conf
       register: host_specific_config
 
     - name: Assert that host is rendered into the host specific config
