@@ -39,7 +39,7 @@ argument_specs:
         description: |
           The container image to use for the nova compute container.
           This image is used to create the nova compute container
-          on the compute node and generaly will be set via the container
+          on the compute node and generally will be set via the container
           bundle by the dataplane operator.
       edpm_nova_old_tripleo_compute_sevices:
         type: list
@@ -59,7 +59,7 @@ argument_specs:
         default: []
         description: |
           A list of additional host mounts to be added to the nova compute container
-          This enabled vendor integration to pass addtional data files to the nova compute
+          This enabled vendor integration to pass additional data files to the nova compute
           container. The list should be in the form of a list of dictionaries with the
           following keys:
           - src: The path to the file or directory on the host

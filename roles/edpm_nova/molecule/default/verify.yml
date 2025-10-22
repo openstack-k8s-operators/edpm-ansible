@@ -17,14 +17,14 @@
         - "/var/lib/openstack"
         - "/var/lib/openstack/config/containers"
         - "/etc/ssh/ssh_known_hosts"
-        # extrenal deps
+        # external deps
         - "/var/lib/openstack/config/ceph"
          # nova directories
         - "/var/lib/nova"
         - "/var/lib/openstack/config/nova"
         - "/var/lib/_nova_secontext"
         - "/var/lib/nova/instances"
-        # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
+        # NOTE(sean-k-mooney): this directory is normally created by the edpm_install_cert role
         # in molecule we create it in prepare so lets just assert it exists
         - "{{ edpm_nova_tls_ca_src_dir }}"
 
