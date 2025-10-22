@@ -1,0 +1,20 @@
+command: /usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout
+config_files:
+  - source: /var/lib/kolla/config_files/src/ceilometer.conf
+    dest: /etc/ceilometer/ceilometer.conf
+    owner: ceilometer
+    perm: "0600"
+  - source: /var/lib/kolla/config_files/src/polling.yaml
+    dest: /etc/ceilometer/polling.yaml
+    owner: ceilometer
+    perm: "0600"
+  - source: /var/lib/kolla/config_files/src/custom.conf
+    dest: /etc/ceilometer/ceilometer.conf.d/01-ceilometer-custom.conf
+    owner: ceilometer
+    perm: "0600"
+    optional: true
+  - source: /var/lib/kolla/config_files/src/ceilometer-host-specific.conf
+    dest: /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf
+    owner: ceilometer
+    perm: "0600"
+    optional: true

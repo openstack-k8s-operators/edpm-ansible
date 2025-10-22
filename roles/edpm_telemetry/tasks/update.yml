@@ -23,14 +23,21 @@
         path: "{{ edpm_telemetry_certs }}/tls.key"
       register: tls_key_stat
 
-    - name: Render container config templates
+    - name: Render openstack_network_exporter config
       ansible.builtin.template:
-        src: "{{ item }}"
-        dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        src: "config/openstack_network_exporter.yaml.j2"
+        dest: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml"
         mode: 0644
-      with_items:
-        - ../templates/openstack_network_exporter.json.j2
-        - ../templates/openstack_network_exporter.yaml.j2
       vars:
+        ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+        tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+    - name: Deploy openstack_network_exporter container
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: "openstack_network_exporter"
+        edpm_container_standalone_container_defs:
+          openstack_network_exporter: "{{ lookup('template', 'container_defs/openstack_network_exporter.yaml.j2') | from_yaml }}"
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"

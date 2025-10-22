@@ -54,7 +54,7 @@ edpm_frr_bgp_peers: []
 edpm_frr_bgp_asn: 64999
 edpm_frr_bgp_uplinks: []
 edpm_frr_bgp_uplinks_scope: internal
-edpm_frr_config_basedir: "/var/lib/config-data/ansible-generated/frr"
+edpm_frr_config_basedir: "/var/lib/openstack/frr"
 edpm_frr_defaults: traditional
 edpm_frr_hostname: "{{ ansible_facts['hostname'] | default('') }}"
 edpm_frr_log_level: informational
