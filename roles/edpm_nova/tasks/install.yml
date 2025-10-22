@@ -5,70 +5,31 @@
     path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
-- name: Render nova container
-  tags:
-    - install
-    - nova
-  ansible.builtin.template:
-    src: "nova_compute.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_compute.json"
-    setype: "container_file_t"
-    mode: "0644"
-  vars:
-    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
-  notify:
-    - Restart nova
-
-- name: Render nova init container
-  tags:
-    - install
-    - nova
-  ansible.builtin.template:
-    src: "nova_compute_init.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_compute_init.json"
-    setype: "container_file_t"
-    mode: "0700"
-  notify:
-    - Restart nova init
-
 - name: Deploy nova init container
   tags:
     - install
     - nova
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: '/var/lib/openstack/config/containers'
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: 'nova_compute_init.json'
-    edpm_container_manage_clean_orphans: false
+    edpm_container_standalone_service: "nova_compute_init"
+    edpm_container_standalone_container_defs:
+      nova_compute_init: "{{ lookup('template', 'container_defs/nova_compute_init.yaml.j2') | from_yaml }}"
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
 
-- name: Deploy nova container
+- name: Deploy nova compute container
   tags:
     - install
     - nova
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: '/var/lib/openstack/config/containers'
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: 'nova_compute.json'
-    edpm_container_manage_clean_orphans: false
-
-- name: Render nvme cleaner container
-  when: edpm_nova_enable_nvme_cleaner
-  tags:
-    - install
-    - nova
-  ansible.builtin.template:
-    src: "nova_nvme_cleaner.json.j2"
-    dest: "/var/lib/openstack/config/containers/nova_nvme_cleaner.json"
-    setype: "container_file_t"
-    mode: "0644"
-  vars:
+    edpm_container_standalone_service: "nova_compute"
+    edpm_container_standalone_container_defs:
+      nova_compute: "{{ lookup('template', 'container_defs/nova_compute.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_kolla_config_files:
+      nova_compute: "{{ lookup('file', 'files/kolla_config/nova_compute.yaml') | from_yaml }}"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
-  notify:
-    - Restart nova
 
 - name: Deploy nvme cleaner container
   when: edpm_nova_enable_nvme_cleaner
@@ -76,12 +37,14 @@
     - install
     - nova
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: '/var/lib/openstack/config/containers'
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: 'nova_nvme_cleaner.json'
-    edpm_container_manage_clean_orphans: false
+    edpm_container_standalone_service: "nova_nvme_cleaner"
+    edpm_container_standalone_container_defs:
+      nova_nvme_cleaner: "{{ lookup('template', 'container_defs/nova_nvme_cleaner.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_kolla_config_files:
+      nova_nvme_cleaner: "{{ lookup('template', 'kolla_config/nova_nvme_cleaner.yaml.j2') | from_yaml }}"
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
 
 - name: Remove nvme cleaner when disabled
   when: not edpm_nova_enable_nvme_cleaner

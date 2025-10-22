@@ -14,14 +14,14 @@ argument_specs:
         description: The number of retries for failed download tasks
       edpm_nova_config_src:
         type: str
-        default: /var/lib/openstack/config
+        default: /var/lib/openstack/configs/{{ edpm_nova_service_name }}
         description: |
           The path to the directory containing the nova config files
           in the ansibleEE container. This is the directory
           where all configmaps containing nova config files are mounted.
       edpm_nova_config_dest:
         type: str
-        default: /var/lib/openstack/config/nova
+        default: /var/lib/openstack/{{ edpm_nova_service_name }}
         description: |
           The path to the directory where the nova config files
           will be rendered on the compute node.
