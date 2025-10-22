@@ -100,7 +100,7 @@
       block:
         - name: Ensure directory is present
           ansible.builtin.file:
-            path: '/var/lib/edpm-config/firewall'
+            path: '/var/lib/openstack/firewall'
             state: directory
             owner: root
             group: root
@@ -108,7 +108,7 @@
 
         - name: Inject firewall configuration for sshd opening
           ansible.builtin.template:
-            dest: '/var/lib/edpm-config/firewall/sshd-networks.yaml'
+            dest: '/var/lib/openstack/firewall/sshd-networks.yaml'
             src: 'firewall.yaml.j2'
             owner: root
             group: root

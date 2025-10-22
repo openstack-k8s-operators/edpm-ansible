@@ -30,7 +30,7 @@
     mode: "{{ item.mode | default(omit) }}"
   loop:
     - {"path": "/etc/tmpfiles.d/", "owner": "root", "group": "root"}
-    - {"path": "/var/lib/edpm-config/firewall", "owner": "root", "group": "root"}
+    - {"path": "/var/lib/openstack/firewall", "owner": "root", "group": "root"}
     - {"path": "/etc/pki/libvirt", "owner": "root", "group": "root", "mode": "0755"}
     - {"path": "/etc/pki/libvirt/private", "owner": "root", "group": "root", "mode": "0755"}
     - {"path": "/etc/pki/CA", "owner": "root", "group": "root", "mode": "0755"}

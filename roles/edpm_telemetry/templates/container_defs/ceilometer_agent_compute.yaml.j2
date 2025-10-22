@@ -1,0 +1,30 @@
+image: {{ edpm_telemetry_ceilometer_compute_image }}
+user: ceilometer
+restart: always
+command: kolla_start
+security_opt: label:type:ceilometer_polling_t
+net: host
+environment:
+  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+  OS_ENDPOINT_TYPE: internal
+{% if edpm_telemetry_healthcheck %}
+healthcheck:
+  test: /openstack/healthcheck compute
+  mount: /var/lib/openstack/healthchecks/ceilometer_agent_compute
+{% endif %}
+volumes:
+  - "{{ edpm_telemetry_config_dest }}:/var/lib/kolla/config_files/src:z"
+  - /var/lib/kolla/config_files/ceilometer_agent_compute.json:/var/lib/kolla/config_files/config.json:z
+  - /run/libvirt:/run/libvirt:shared,ro
+  - /etc/hosts:/etc/hosts:ro
+  - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+  - /etc/localtime:/etc/localtime:ro
+  - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+{% if ca_bundle_exists|bool %}
+  - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+{% endif %}
+{% if tls_cert_exists|bool %}
+  - "{{ edpm_telemetry_config_dest }}/ceilometer_prom_exporter.yaml:/etc/ceilometer/ceilometer_prom_exporter.yaml:z"
+  - "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z"
+{% endif %}
+  - /dev/log:/dev/log

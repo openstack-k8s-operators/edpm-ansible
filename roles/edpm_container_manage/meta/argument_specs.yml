@@ -21,7 +21,7 @@ argument_specs:
         default: 1
       edpm_container_manage_config:
         type: str
-        default: "/var/lib/edpm-config/"
+        default: "/var/lib/openstack/"
       edpm_container_manage_config_id:
         type: str
         default: edpm

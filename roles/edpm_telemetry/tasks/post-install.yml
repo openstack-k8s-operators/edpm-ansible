@@ -17,7 +17,7 @@
 - name: Ensure firewall directory is present
   become: true
   ansible.builtin.file:
-    path: "/var/lib/edpm-config/firewall/"
+    path: "/var/lib/openstack/firewall/"
     state: directory
     owner: root
     group: root
@@ -25,9 +25,9 @@
 
 - name: Copy telemetry firewall config
   become: true
-  ansible.builtin.template:
-    src: "firewall.yaml.j2"
-    dest: "/var/lib/edpm-config/firewall/telemetry.yaml"
+  ansible.builtin.copy:
+    src: "firewall.yaml"
+    dest: "/var/lib/openstack/firewall/telemetry.yaml"
     mode: "0640"
 
 - name: Configure firewall for the libvirt

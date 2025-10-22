@@ -7,13 +7,13 @@
   vars_files:
     - ../../defaults/main.yml
   tasks:
-    - name: ensure expected directories exist
+    - name: ensure expected config files exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
-        - "{{ edpm_telemetry_config_dest }}/ceilometer_agent_compute.json"
-        - "{{ edpm_telemetry_config_dest }}/ceilometer-agent-compute.json"
         - "{{ edpm_telemetry_config_dest }}/ceilometer.conf"
         - "{{ edpm_telemetry_config_dest }}/polling.yaml"
+        - "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf"
+        - "{{ edpm_telemetry_config_dest }}/firewall.yaml"
 
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
@@ -32,10 +32,10 @@
       ansible.builtin.shell: |
         podman logs ceilometer_agent_compute 2>&1 | grep "{{item}}" > /dev/null
       loop:
-        - "Copying /var/lib/openstack/config/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
-        - "Copying /var/lib/openstack/config/polling.yaml to /etc/ceilometer/polling.yaml"
+        - "Copying /var/lib/kolla/config_files/src/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
+        - "Copying /var/lib/kolla/config_files/src/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
-        - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
+        - "Copying /var/lib/kolla/config_files/src/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
 
     - name: ensure that the correcty binary started with TLS
       become: true

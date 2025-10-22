@@ -29,9 +29,9 @@
   vars:
     edpm_container_standalone_service: iscsid
     edpm_container_standalone_container_defs:
-      iscsid: "{{ lookup('template', 'iscsid.yaml.j2') | from_yaml }}"
+      iscsid: "{{ lookup('template', 'container_defs/iscsid.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      iscsid: "{{ lookup('file', 'files/iscsid.yaml') | from_yaml }}"
+      iscsid: "{{ lookup('file', 'files/kolla_config/iscsid.yaml') | from_yaml }}"
   register: manage_iscsid_stat
 
 - name: Check if the iscsid container restart is required

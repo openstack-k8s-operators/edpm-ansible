@@ -7,7 +7,7 @@ argument_specs:
       edpm_nftables_src:
         description: Location of the snippets directory.
         type: path
-        default: /var/lib/edpm-config/firewall
+        default: /var/lib/openstack/firewall
       edpm_nftables_default_chains_prefix:
         description: Default NFT chain prefix
         type: str

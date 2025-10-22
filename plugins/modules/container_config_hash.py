@@ -55,7 +55,7 @@ options:
     description:
       - Config volume prefix
     type: str
-    default: '/var/lib/config-data'
+    default: '/var/lib/openstack'
 """
 
 EXAMPLES = """
@@ -63,7 +63,7 @@ EXAMPLES = """
   container_config_hash:
 """
 
-CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
+CONTAINER_STARTUP_CONFIG = '/var/lib/openstack/container-startup-config'
 BUF_SIZE = 65536
 
 

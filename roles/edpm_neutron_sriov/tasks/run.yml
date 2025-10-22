@@ -39,6 +39,6 @@
   vars:
     edpm_container_standalone_service: neutron_sriov_agent
     edpm_container_standalone_container_defs:
-      neutron_sriov_agent: "{{ lookup('template', 'neutron_sriov_agent.yaml.j2') | from_yaml }}"
+      neutron_sriov_agent: "{{ lookup('template', 'container_defs/neutron_sriov_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      neutron_sriov_agent: "{{ lookup('template', 'kolla_config/neutron_sriov_agent.yaml.j2') | from_yaml }}"
+      neutron_sriov_agent: "{{ lookup('file', 'files/kolla_config/kolla_neutron_sriov_agent.yaml') | from_yaml }}"

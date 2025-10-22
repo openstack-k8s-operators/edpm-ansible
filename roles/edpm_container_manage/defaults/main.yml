@@ -23,7 +23,7 @@ edpm_container_manage_clean_orphans: true
 edpm_container_manage_update_config_hash: true
 edpm_container_manage_cli: podman
 edpm_container_manage_concurrency: 1
-edpm_container_manage_config: "/var/lib/edpm-config/"
+edpm_container_manage_config: "/var/lib/openstack/"
 edpm_container_manage_config_id: edpm
 edpm_container_manage_config_overrides: {}
 edpm_container_manage_config_patterns: '*.json'

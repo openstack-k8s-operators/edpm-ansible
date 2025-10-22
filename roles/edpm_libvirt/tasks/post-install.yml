@@ -97,7 +97,7 @@
   become: true
   ansible.builtin.template:
     src: "firewall.yaml.j2"
-    dest: "/var/lib/edpm-config/firewall/libvirt.yaml"
+    dest: "/var/lib/openstack/firewall/libvirt.yaml"
     mode: "0640"
 - name: Configure firewall for the libvirt
   tags:

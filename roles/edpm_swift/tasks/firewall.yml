@@ -17,7 +17,7 @@
 - name: Ensure firewall directory is present
   become: true
   ansible.builtin.file:
-    path: "/var/lib/edpm-config/firewall/"
+    path: "/var/lib/openstack/firewall/"
     state: directory
     owner: root
     group: root
@@ -26,7 +26,7 @@
 - name: Inject firewall rules for Swift
   become: true
   osp.edpm.edpm_nftables_snippet:
-    dest: /var/lib/edpm-config/firewall/swift.yaml
+    dest: /var/lib/openstack/firewall/swift.yaml
     content: |
       - rule_name: 100 swift account server
         rule:

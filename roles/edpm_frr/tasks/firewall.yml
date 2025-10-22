@@ -17,7 +17,7 @@
 - name: Inject firewall rules for frr BGP and BFD
   become: true
   osp.edpm.edpm_nftables_snippet:
-    dest: /var/lib/edpm-config/firewall/frr.yaml
+    dest: /var/lib/openstack/firewall/frr.yaml
     content: |
       - rule_name: 121 frr bgp port
         rule:

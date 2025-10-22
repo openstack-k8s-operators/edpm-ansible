@@ -32,7 +32,7 @@
     owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
     group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
   loop:
-    - {'path': /var/lib/edpm-config/firewall, 'mode': '0750'}
+    - {'path': /var/lib/openstack/firewall, 'mode': '0750'}
     - {'path': /var/lib/openvswitch/ovn, "owner": "openvswitch", "group": "openvswitch"}
 
 - name: Gather SELinux fact if needed
