@@ -26,7 +26,7 @@ argument_specs:
         description: Additional sysctl settings.
       edpm_nova_compute_config_dir:
         type: path
-        default: /var/lib/config-data/ansible-generated/nova_libvirt
+        default: /var/lib/openstack/nova_libvirt
         description: This should be synced with edpm_nova_compute role
       edpm_kernel_args:
         type: str

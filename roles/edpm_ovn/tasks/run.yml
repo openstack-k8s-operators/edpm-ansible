@@ -42,6 +42,6 @@
   vars:
     edpm_container_standalone_service: ovn_controller
     edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'ovn_controller.yaml.j2') | from_yaml }}"
+      ovn_controller: "{{ lookup('template', 'container_defs/ovn_controller.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_ovn_controller.yaml.j2') | from_yaml }}"
+      ovn_controller: "{{ lookup('template', 'kolla_config/kolla_ovn_controller.yaml.j2') | from_yaml }}"

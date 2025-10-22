@@ -19,6 +19,6 @@
 
 edpm_reboot_strategy: auto
 edpm_reboot_old_tripleo_node_config_dir: /var/lib/config-data/puppet-generated
-edpm_reboot_edpm_node_config_dir: /var/lib/openstack/config
+edpm_reboot_edpm_node_config_dir: /var/lib/openstack
 edpm_reboot_timeout_reboot: 3600
 edpm_reboot_post_reboot_delay: 60

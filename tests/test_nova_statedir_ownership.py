@@ -34,7 +34,7 @@ class FakeSelinux(object):
         pass
 
 
-sys.path.append('roles/edpm_nova/templates')
+sys.path.append('roles/edpm_nova/templates/')
 sys.modules["selinux"] = FakeSelinux
 
 from nova_statedir_ownership import get_exclude_paths  # noqa: E402

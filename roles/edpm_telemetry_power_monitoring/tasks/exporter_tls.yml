@@ -1,6 +1,0 @@
----
-- name: Create config file for exporter
-  ansible.builtin.template:
-    dest: "{{ edpm_telemetry_config_dest }}/{{ exporter }}.yaml"
-    mode: "0644"
-    src: "{{ exporter }}.yaml.j2"

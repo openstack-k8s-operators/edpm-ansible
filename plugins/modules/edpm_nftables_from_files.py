@@ -50,7 +50,7 @@ EXAMPLES = """
 - name: Get nftables rules
   register: edpm_nftables_rules
   edpm_nftables_from_files:
-    src: /var/lib/edpm-config/firewall
+    src: /var/lib/openstack/firewall
 """
 
 RETURN = """
