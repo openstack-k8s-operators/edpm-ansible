@@ -12,9 +12,9 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
         - "/var/lib/neutron"
-        - "/var/lib/openstack/config/containers"
+        - "/var/lib/edpm-config/container-startup-config"
         - "/var/lib/kolla/config_files/neutron_sriov_agent.json"
-        - "/var/lib/config-data/ansible-generated/neutron-sriov-agent"
+        - "/var/lib/openstack/neutron-sriov-agent"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
@@ -31,7 +31,7 @@
         - name: sriov config file exists
           become: true
           ansible.builtin.stat:
-            path: "/var/lib/config-data/ansible-generated/neutron-sriov-agent/10-neutron-sriov.conf"
+            path: "/var/lib/openstack/neutron-sriov-agent/10-neutron-sriov.conf"
           register: sriov_config
 
         - name: assert that the config exists
@@ -46,7 +46,7 @@
 
     - name: Slurp host specific config
       ansible.builtin.slurp:
-        src: /var/lib/config-data/ansible-generated/neutron-sriov-agent/01-neutron-sriov-agent.conf
+        src: /var/lib/openstack/neutron-sriov-agent/01-neutron-sriov-agent.conf
       register: host_specific_config
 
     - name: Assert that host is rendered into the host specific config

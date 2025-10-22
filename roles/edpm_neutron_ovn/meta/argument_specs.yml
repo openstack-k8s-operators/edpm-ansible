@@ -95,6 +95,6 @@ argument_specs:
           agent configs.
         type: str
       edpm_neutron_ovn_agent_config_dir:
-        default: /var/lib/config-data/ansible-generated/neutron-ovn-agent
+        default: /var/lib/openstack/neutron-ovn-agent
         description: 'The directory that contains configuration files for Neutron OVN Agent.'
         type: str
