@@ -39,6 +39,12 @@
             "owner": "nova",
             "perm": "0600",
             "optional": true
+        },
+        {
+          "source": "/var/lib/kolla/config_files/run-on-host",
+          "dest": "/usr/sbin/iscsiadm",
+          "owner": "root:root",
+          "perm": "0755"
         }
     ],
     "permissions": [

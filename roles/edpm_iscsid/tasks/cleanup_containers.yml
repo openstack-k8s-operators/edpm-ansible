@@ -1,0 +1,40 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Gather services facts
+  ansible.builtin.service_facts:
+
+- name: Identify legacy iscsid containerized services
+  ansible.builtin.set_fact:
+    legacy_iscsid_services: "{{ edpm_iscsid_legacy_services | intersect(ansible_facts.services.keys()) }}"
+
+- name: Clean up legacy iscsid containerized services
+  become: true
+  when: legacy_iscsid_services | default([]) | length > 0
+  block:
+    - name: Stop and disable legacy iscsid containerized services
+      # The edpm_tripleo_cleanup role works for stopping and disabling the
+      # legacy tripleo_iscsid.service (adoption scenario) or edpm_iscsid.service
+      # (update scenario).
+      ansible.builtin.include_role:
+        role: osp.edpm.edpm_tripleo_cleanup
+      vars:
+        edpm_old_tripleo_services: "{{ legacy_iscsid_services }}"
+
+    - name: Delete containerized healthcheck script
+      ansible.builtin.file:
+        path: /var/lib/openstack/healthchecks/iscsid
+        state: absent

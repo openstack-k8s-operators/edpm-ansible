@@ -5,6 +5,7 @@
     "restart": "always",
     "command": "kolla_start",
     "net": "host",
+    "pid": "host",
     "environment": {
         "KOLLA_CONFIG_STRATEGY":"COPY_ALWAYS"
     },
@@ -19,7 +20,7 @@
         "/var/lib/libvirt:/var/lib/libvirt",
         "/run/libvirt:/run/libvirt:shared",
         "/var/lib/nova:/var/lib/nova:shared",
-        "/var/lib/iscsi:/var/lib/iscsi:z",
+        "/var/lib/iscsi:/var/lib/iscsi",
         "/etc/multipath:/etc/multipath:z",
         "/etc/multipath.conf:/etc/multipath.conf:ro",
         "/etc/iscsi:/etc/iscsi:ro",

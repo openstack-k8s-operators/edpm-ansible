@@ -13,48 +13,64 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
+- name: Clean up legacy containerized iscsid
+  ansible.builtin.include_tasks: cleanup_containers.yml
+
 - name: Run iscsid install tasks with root privileges
   become: true
   block:
-    - name: Create persistent directories
-      ansible.builtin.file:
-        path: "{{ item.path }}"
-        state: directory
-        setype: "{{ item.setype | default(omit) }}"
-        selevel: "{{ item.selevel | default(omit) }}"
-        recurse: "{{ item.recurse | default(omit) }}"
-        mode: "{{ item.mode | default(omit) }}"
-      loop:
-        - {'path': /etc/iscsi, 'setype': container_file_t, 'mode': '0755'}
-        - {'path': /etc/target, 'setype': container_file_t}
-        - {'path': /var/lib/iscsi, 'setype': container_file_t}
-        - {'path': /var/lib/config-data, 'setype': container_file_t, 'selevel': s0, 'mode': '0755'}
-        - {'path': /var/lib/config-data/ansible-generated/iscsid, 'setype': container_file_t, 'mode': '0755'}
+    - name: Install iscsid packages
+      tags:
+        - install
+        - edpm_iscsid
+      ansible.builtin.dnf:
+        name: "{{ edpm_iscsid_packages }}"
+        state: present
+      register: edpm_iscsid_packages_install
+      until: edpm_iscsid_packages_install is succeeded
+      retries: "{{ edpm_iscsid_download_retries }}"
+      delay: "{{ edpm_iscsid_download_delay }}"
+      when: ansible_local.bootc is not defined or not ansible_local.bootc
 
-    - name: Stat /lib/systemd/system/iscsid.socket
+    - name: Detect whether the data plane is being adopted
       ansible.builtin.stat:
-        path: /lib/systemd/system/iscsid.socket
-      register: stat_iscsid_socket
+        path: "{{ edpm_iscsid_tripleo_config_dir }}"
+      register: tripleo_iscsid_config_dir
 
-    - name: Stop and disable iscsid.socket service
-      ansible.builtin.systemd:
-        name: iscsid.socket
-        state: stopped
-        enabled: false
-      when: stat_iscsid_socket.stat.exists
-
-    - name: Gather services facts
-      ansible.builtin.service_facts:
-
-    - name: Stop and disable iscsi.service and iscsi-starter.service
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: stopped
-        enabled: false
+    - name: Adopt the iscsid configuration
       when:
-        - ansible_facts.services[item] is defined
-        - ansible_facts.services[item]["status"] != "not-found"
-        - ansible_facts.services[item]["status"] == "enabled"
-      loop:
-        - iscsi.service
-        - iscsi-starter.service
+        - tripleo_iscsid_config_dir.stat.exists
+        - tripleo_iscsid_config_dir.stat.isdir
+      block:
+        - name: Copy the containerized iscsid configuration to the host
+          ansible.builtin.copy:
+            src: "{{ edpm_iscsid_tripleo_config_dir }}/"
+            dest: /etc/iscsi
+            remote_src: true
+            mode: preserve
+
+        - name: Mark the iscsid adoption complete
+          ansible.builtin.command: |
+            mv "{{ edpm_iscsid_tripleo_config_dir }}" "{{ edpm_iscsid_tripleo_config_dir }}.adopted"
+          changed_when: true
+
+    - name: Check SELinux context of iSCSI directories
+      ansible.builtin.command: "/usr/sbin/restorecon -nvr /etc/iscsi /var/lib/iscsi"
+      changed_when: false
+      register: iscsi_selinux_status
+
+    - name: Restore SELinux context of iSCSI directories
+      ansible.builtin.command: "/usr/sbin/restorecon -rF /etc/iscsi /var/lib/iscsi"
+      when:
+        - iscsi_selinux_status.stdout_lines | length > 0
+      changed_when: true
