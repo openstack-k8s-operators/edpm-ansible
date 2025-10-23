@@ -54,9 +54,12 @@
       - "selinux"
 
 - name: Create directory {{ edpm_frr_config_basedir }}
+  become: true
   ansible.builtin.file:
     path: "{{ edpm_frr_config_basedir }}/etc/frr"
     recurse: true
     state: directory
     selevel: s0
     setype: container_file_t
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
