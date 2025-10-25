@@ -38,6 +38,6 @@
   vars:
     edpm_container_standalone_service: ovn_agent
     edpm_container_standalone_container_defs:
-      ovn_agent: "{{ lookup('template', 'ovn_agent.yaml.j2') | from_yaml }}"
+      ovn_agent: "{{ lookup('template', 'container_defs/ovn_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      ovn_agent: "{{ lookup('template', 'kolla_ovn_agent.yaml.j2') | from_yaml }}"
+      ovn_agent: "{{ lookup('file', 'kolla_config/kolla_ovn_agent.yaml') | from_yaml }}"

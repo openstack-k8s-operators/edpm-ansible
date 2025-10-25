@@ -69,7 +69,7 @@ This Ansible role allows to do the following tasks:
           include_role:
             name: edpm_container_manage
           vars:
-            edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
+            edpm_container_manage_config: "/var/lib/openstack/container-startup-config/step_1"
             edpm_container_manage_config_id: "edpm_step1"
 
 
@@ -141,7 +141,7 @@ overrides the image setting in one-off.
                 name: edpm_container_manage
               vars:
                 edpm_container_manage_config_patterns: 'haproxy.json'
-                edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
+                edpm_container_manage_config: "/var/lib/openstack/container-startup-config/step_1"
                 edpm_container_manage_config_id: "edpm_step1"
                 edpm_container_manage_clean_orphans: false
                 edpm_container_manage_config_overrides:

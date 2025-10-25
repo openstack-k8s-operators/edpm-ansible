@@ -146,4 +146,4 @@ argument_specs:
           The absolute path to a YAML file on the EDPM node which will be
           created by the role. The file will be parsed by the edpm_nftables
           role which creates the actual firewall rule.
-        default: /var/lib/edpm-config/firewall/ceph-networks.yaml
+        default: /var/lib/openstack/firewall/ceph-networks.yaml

@@ -18,7 +18,7 @@
 # All variables intended for modification should be placed in this file.
 
 # All variables within this role should have a prefix of "edpm_nftables_"
-edpm_nftables_src: /var/lib/edpm-config/firewall
+edpm_nftables_src: /var/lib/openstack/firewall
 edpm_nftables_default_chains_prefix: EDPM
 edpm_nftables_debug: false
 edpm_nftables_user_rules: []

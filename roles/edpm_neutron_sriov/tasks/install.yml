@@ -38,15 +38,3 @@
   tags:
     - install
     - neutron
-
-- name: Render neutron-sriov-agent container
-  ansible.builtin.template:
-    src: "neutron_sriov_agent.yaml.j2"
-    dest: "/var/lib/openstack/config/containers/neutron_sriov_agent.yaml"
-    setype: "container_file_t"
-    mode: "0644"
-  notify:
-    - Restart neutron-sriov-agent
-  tags:
-    - install
-    - neutron

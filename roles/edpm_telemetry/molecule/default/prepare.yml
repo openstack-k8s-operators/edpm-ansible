@@ -53,7 +53,7 @@
     - name: Create firewall directory
       become: true
       ansible.builtin.file:
-        path: "/var/lib/edpm-config/firewall"
+        path: "/var/lib/openstack/firewall"
         state: directory
         owner: root
         group: root

@@ -54,7 +54,7 @@ edpm_frr_bgp_peers: []
 edpm_frr_bgp_asn: 64999
 edpm_frr_bgp_uplinks: []
 edpm_frr_bgp_uplinks_scope: internal
-edpm_frr_config_basedir: "/var/lib/config-data/ansible-generated/frr"
+edpm_frr_config_dest: "/var/lib/openstack/frr"
 edpm_frr_defaults: traditional
 edpm_frr_hostname: "{{ ansible_facts['hostname'] | default('') }}"
 edpm_frr_log_level: informational
@@ -82,7 +82,7 @@ edpm_frr_volumes:
   - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
   - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
   - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
-  - "{{ edpm_frr_config_basedir }}:/var/lib/kolla/config_files/src:ro"
+  - "{{ edpm_frr_config_dest }}:/var/lib/kolla/config_files/src:ro"
   - /run/frr:/run/frr:shared,z
 
 # seconds between retries for download tasks

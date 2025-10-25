@@ -17,7 +17,7 @@
 - name: Inject firewall rules for OVN
   become: true
   osp.edpm.edpm_nftables_snippet:
-    dest: /var/lib/edpm-config/firewall/ovn.yaml
+    dest: /var/lib/openstack/firewall/ovn.yaml
     content: |
       - rule_name: 118 neutron vxlan networks
         rule:

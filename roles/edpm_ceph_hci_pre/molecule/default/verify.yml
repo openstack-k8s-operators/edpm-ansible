@@ -19,7 +19,7 @@
   gather_facts: false
   tasks:
     - name: Read generated file from defaults
-      command: cat /var/lib/edpm-config/firewall/ceph-networks.yaml
+      command: cat /var/lib/openstack/firewall/ceph-networks.yaml
       register: ceph_networks
 
     - name: Assert that default generated file is correct
@@ -32,7 +32,7 @@
       loop: "{{ ceph_networks.stdout | from_yaml }}"
 
     - name: Read generated file from overrides
-      command: cat /var/lib/edpm-config/firewall/ceph-networks-overrides.yaml
+      command: cat /var/lib/openstack/firewall/ceph-networks-overrides.yaml
       register: ceph_networks_overrides
 
     - name: Assert that overridden generated file is correct

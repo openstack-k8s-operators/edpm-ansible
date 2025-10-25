@@ -1,7 +1,7 @@
 - name: libvirt rule source file exists
   become: true
   ansible.builtin.stat:
-    path: "/var/lib/edpm-config/firewall/libvirt.yaml"
+    path: "/var/lib/openstack/firewall/libvirt.yaml"
   register: libvirt_rule_source_exists
 - name: Assert libvirt rule source file exists
   ansible.builtin.assert:

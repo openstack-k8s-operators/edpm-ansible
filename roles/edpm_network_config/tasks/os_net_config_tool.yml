@@ -23,12 +23,12 @@
   block:
     - name: Check if os-net-config return code file exists
       ansible.builtin.stat:
-        path: /var/lib/edpm-config/os-net-config.returncode
+        path: /var/lib/openstack/os-net-config.returncode
       register: os_net_config_returncode_stat
 
     - name: Read os-net-config return code file if it exists
       ansible.builtin.slurp:
-        path: /var/lib/edpm-config/os-net-config.returncode
+        path: /var/lib/openstack/os-net-config.returncode
       register: os_net_config_returncode_slurp
       when: os_net_config_returncode_stat.stat.exists
 
@@ -75,9 +75,9 @@
 
     - name: Manage NetworkConfig with edpm_os_net_config module
       block:
-        - name: Remove /var/lib/edpm-config/scripts directory
+        - name: Remove /var/lib/openstack/scripts directory
           ansible.builtin.file:
-            path: /var/lib/edpm-config/scripts
+            path: /var/lib/openstack/scripts
             state: absent
 
         - name: Run NetworkConfig with edpm_os_net_config
@@ -86,7 +86,7 @@
     - name: Write rc of NetworkConfig script
       ansible.builtin.copy:
         content: "{{ network_config_result.rc }}"
-        dest: /var/lib/edpm-config/os-net-config.returncode
+        dest: /var/lib/openstack/os-net-config.returncode
         mode: "0644"
       when:
         - network_config_result.rc is defined

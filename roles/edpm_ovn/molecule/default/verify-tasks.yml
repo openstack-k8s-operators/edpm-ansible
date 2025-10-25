@@ -24,7 +24,7 @@
     - name: Rule source file exists
       become: true
       ansible.builtin.stat:
-        path: "/var/lib/edpm-config/firewall/ovn.yaml"
+        path: "/var/lib/openstack/firewall/ovn.yaml"
       register: rule_source_exists
 
     - name: Assert ovn rule source file exists

@@ -7,7 +7,7 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
     edpm_nova_tls_ca_src_dir: /tmp/pki
-    edpm_nova_config_dest: /var/lib/openstack/config/nova
+    edpm_nova_config_dest: /var/lib/openstack/nova
   tasks:
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
@@ -15,13 +15,12 @@
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
-        - "/var/lib/openstack/config/containers"
         - "/etc/ssh/ssh_known_hosts"
         # extrenal deps
         - "/var/lib/openstack/config/ceph"
          # nova directories
         - "/var/lib/nova"
-        - "/var/lib/openstack/config/nova"
+        - "{{ edpm_nova_config_dest }}"
         - "/var/lib/_nova_secontext"
         - "/var/lib/nova/instances"
         # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
@@ -68,7 +67,7 @@
     - name: read nvme cleaner kolla config
       become: true
       ansible.builtin.slurp:
-        src: /var/lib/openstack/config/nova_nvme_cleaner/config.json
+        src: /var/lib/kolla/config_files/nova_nvme_cleaner.json
       register: cleaner_kolla_cfg
 
     - name: parse nvme cleaner kolla config
@@ -99,16 +98,16 @@
       ansible.builtin.shell: |
         podman logs nova_compute 2>&1 | grep "{{item}}" > /dev/null
       loop:
-        - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
-        - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
-        - "Copying /var/lib/kolla/config_files/ssh-config to /var/lib/nova/.ssh/config"
-        - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
-        - "Copying /var/lib/kolla/config_files/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
-        - "Copying /var/lib/kolla/config_files/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
+        - "Copying /var/lib/kolla/config_files/src/nova-blank.conf to /etc/nova/nova.conf"
+        - "Copying /var/lib/kolla/config_files/src/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
+        - "Copying /var/lib/kolla/config_files/src/ssh-config to /var/lib/nova/.ssh/config"
+        - "Copying /var/lib/kolla/config_files/src/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
+        - "Copying /var/lib/kolla/config_files/src/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
+        - "Copying /var/lib/kolla/config_files/src/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
 
     - name: slurp host specific config
       ansible.builtin.slurp:
-        src: /var/lib/openstack/config/nova/02-nova-host-specific.conf
+        src: "{{ edpm_nova_config_dest }}/02-nova-host-specific.conf"
       register: host_specific_config
 
     - name: Assert that my_ip is rendered into the host specific config

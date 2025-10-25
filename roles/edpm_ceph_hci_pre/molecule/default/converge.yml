@@ -25,7 +25,7 @@
   hosts: all
   gather_facts: false
   vars:
-    edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/edpm-config/firewall/ceph-networks-overrides.yaml
+    edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/openstack/firewall/ceph-networks-overrides.yaml
     edpm_ceph_hci_pre_storage_ranges: [172.18.0.0/24]
     edpm_ceph_hci_pre_rgw_frontend_ranges: [172.18.0.0/24]
     edpm_ceph_hci_pre_nfs_frontend_ranges: [172.18.0.0/24]

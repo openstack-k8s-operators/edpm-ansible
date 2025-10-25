@@ -39,7 +39,7 @@
   when:
     - ansible_facts.selinux.status == "enabled"
   community.general.sefcontext:
-    target: "/var/lib/edpm-config(/.*)?"
+    target: "/var/lib/openstack(/.*)?"
     setype: container_file_t
     selevel: s0
     state: present
@@ -51,10 +51,10 @@
   when:
     - ansible_local.bootc is not defined or not ansible_local.bootc
 
-- name: Ensure /var/lib/edpm-config directory exists
+- name: Ensure /var/lib/openstack directory exists
   become: true
   ansible.builtin.file:
-    path: /var/lib/edpm-config
+    path: /var/lib/openstack
     state: directory
     setype: container_file_t
     selevel: s0

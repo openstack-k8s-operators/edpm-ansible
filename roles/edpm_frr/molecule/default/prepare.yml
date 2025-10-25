@@ -53,7 +53,7 @@
     - name: Create firewall directory
       become: true
       ansible.builtin.file:
-        path: '/var/lib/edpm-config/firewall'
+        path: '/var/lib/openstack/firewall'
         state: directory
         owner: root
         group: root
@@ -62,7 +62,7 @@
     - name: open port 22 (edpm_nftables will active this later)
       become: true
       copy:
-        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
+        dest: /var/lib/openstack/firewall/sshd-networks.yaml
         content: |
           - rule_name: 003 Allow SSH
             rule:

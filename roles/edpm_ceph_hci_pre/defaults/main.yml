@@ -23,7 +23,7 @@
 edpm_ceph_hci_pre_configure_firewall: true
 
 # Name of file to be created on EDPM nodes with ceph firewall rules
-edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/edpm-config/firewall/ceph-networks.yaml
+edpm_ceph_hci_pre_firewall_yaml_file: /var/lib/openstack/firewall/ceph-networks.yaml
 
 # List of IP ranges which can connect to Ceph RBD/Mon ports
 # If list is empty, the firewall rule will not specify a source address
