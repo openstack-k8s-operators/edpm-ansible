@@ -10,10 +10,10 @@
     - edpm_podman
     - edpm_update
 
-- name: Updates containers for edpm_iscsid role
+- name: Updates iscsid service for edpm_iscsid role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_iscsid
-    tasks_from: run.yml
+    tasks_from: update.yml
     apply:
       become: true
   tags:

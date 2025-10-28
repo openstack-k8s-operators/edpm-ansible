@@ -20,23 +20,13 @@
 # All variables within this role should have a prefix of "edpm_iscsid"
 
 # seconds between retries for download tasks
-edpm_iscsid_image_download_delay: "{{ edpm_download_delay | default(60) }}"
+edpm_iscsid_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
-edpm_iscsid_image_download_retries: "{{ edpm_download_retries | default(5) }}"
+edpm_iscsid_download_retries: "{{ edpm_download_retries | default(5) }}"
 
-edpm_iscsid_debug: "{{ (ansible_verbosity | int) >= 2 | bool }}"
-
-edpm_iscsid_image: "quay.io/podified-antelope-centos9/openstack-iscsid:current-podified"
-edpm_iscsid_volumes:
-  - /var/lib/kolla/config_files/iscsid.json:/var/lib/kolla/config_files/config.json:ro
-  - /dev:/dev
-  - /run:/run
-  - /sys:/sys
-  - /lib/modules:/lib/modules:ro
-  - /etc/iscsi:/etc/iscsi:z
-  - /etc/target:/etc/target:z
-  - /var/lib/iscsi:/var/lib/iscsi:z
+edpm_iscsid_packages:
+  - iscsi-initiator-utils
 
 edpm_iscsid_chap_algs: >-
   {{
@@ -45,5 +35,9 @@ edpm_iscsid_chap_algs: >-
     default('check', true) == 'enabled') |
     ternary('', ',SHA1,MD5')
   }}
-# if container health check should be enabled
-edpm_iscsid_healthcheck: true
+
+edpm_iscsid_legacy_services:
+  - tripleo_iscsid.service
+  - edpm_iscsid.service
+
+edpm_iscsid_tripleo_config_dir: '/var/lib/config-data/puppet-generated/iscsid/etc/iscsi'
