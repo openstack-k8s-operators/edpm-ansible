@@ -17,10 +17,20 @@
 
 # "edpm_container_standalone" will search for and load any operating system variable file
 
-- name: "Ensure directory exists: {{ edpm_container_standalone_kolla_config_dir }}"
+- name: Ensure /var/lib/edpm-config exists with correct ownership
   become: true
   ansible.builtin.file:
-    path: "{{ edpm_container_standalone_kolla_config_dir }}"
+    path: /var/lib/edpm-config
+    state: directory
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "0755"
+    recurse: true
+
+- name: "Ensure directory exists: {{ edpm_container_kolla_config_dir }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_container_kolla_config_dir }}"
     state: directory
     recurse: true
     setype: container_file_t
@@ -29,22 +39,20 @@
   become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
-    dest: "{{ edpm_container_standalone_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
+    dest: "{{ edpm_container_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
     mode: "0600"
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
-- name: "Create config file {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
-  become: true
+- name: "Create config file {{ edpm_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
   ansible.builtin.file:
-    path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
+    path: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
     mode: "0755"
 
 - name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
-  become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
-    dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
+    dest: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
     mode: "0644"
   # NOTE(tkajinam): Some containers can contain secrets in their environments.
   #                 Hide the output to avoid dumping these to output.
@@ -55,6 +63,14 @@
   ansible.builtin.include_role:
     name: edpm_container_manage
   vars:
-    edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
+    edpm_container_manage_config: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     edpm_container_manage_config_patterns: "*.json"
     edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"
+    edpm_container_manage_containers: "{{ edpm_container_standalone_container_defs.keys() | list }}"
+
+- name: Update service state file
+  ansible.builtin.include_tasks: state_file_update.yml
+  when:
+    - edpm_container_track_state | bool
+    - edpm_container_standalone_service is defined
+    - edpm_container_standalone_service != ""

@@ -41,6 +41,7 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: ovn_metadata_agent
+    edpm_service_name: "{{ edpm_neutron_metadata_service_name }}"
     edpm_container_standalone_container_defs:
       ovn_metadata_agent: "{{ lookup('template', 'container_defs/ovn_metadata_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
