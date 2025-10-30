@@ -13,18 +13,18 @@
       loop:
         # "osp_service": false, disable check for unit files in /etc/systemd/system
         # OVS systemd unit files are located in /usr/lib/systemd/system
-        - { "name": "openvswitch.service",
+        - {"name": "openvswitch.service",
             "osp_service": false,
             "enabled": "enabled",
-            "active":  ["active"] }
-        - { "name": "ovs-vswitchd.service",
+            "active":  ["active"]}
+        - {"name": "ovs-vswitchd.service",
             "osp_service": false,
             "enabled": "static",
-            "active":  ["active"] }
-        - { "name": "ovsdb-server.service",
+            "active":  ["active"]}
+        - {"name": "ovsdb-server.service",
             "osp_service": false,
             "enabled": "static",
-            "active": ["active"] }
+            "active": ["active"]}
 
     - name: Verify OpenFlows
       block:
