@@ -34,5 +34,18 @@
     edpm_network_config_manage_service: false
     edpm_network_config_hide_sensitive_logs: false
     edpm_network_config_nmstate: false
+  pre_tasks:
+    - name: Gather user fact
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "user"
+
+    - name: set basic user fact
+      ansible.builtin.set_fact:
+        ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
+      when:
+        - ansible_user is undefined
   roles:
     - role: "osp.edpm.edpm_network_config"

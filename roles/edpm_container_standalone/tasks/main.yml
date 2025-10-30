@@ -17,6 +17,16 @@
 
 # "edpm_container_standalone" will search for and load any operating system variable file
 
+- name: Ensure /var/lib/edpm-config exists with correct ownership
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/edpm-config
+    state: directory
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "0755"
+    recurse: true
+
 - name: "Ensure directory exists: {{ edpm_container_standalone_kolla_config_dir }}"
   become: true
   ansible.builtin.file:
@@ -34,14 +44,12 @@
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
 - name: "Create config file {{ edpm_container_standalone_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
-  become: true
   ansible.builtin.file:
     path: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     state: directory
     mode: "0755"
 
 - name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
-  become: true
   ansible.builtin.copy:
     content: "{{ item.value | to_nice_json }}"
     dest: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
@@ -58,3 +66,17 @@
     edpm_container_manage_config: "{{ edpm_container_standalone_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
     edpm_container_manage_config_patterns: "*.json"
     edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"
+
+- name: Update service state file
+  ansible.builtin.include_tasks: state_file_update.yml
+  when:
+    - edpm_container_standalone_track_state | bool
+    - edpm_container_standalone_service is defined
+    - edpm_container_standalone_service != ""
+
+- name: Cleanup specified services
+  ansible.builtin.include_tasks: cleanup_services.yml
+  when:
+    - edpm_services_to_cleanup is defined
+    - edpm_services_to_cleanup | length > 0
+  run_once: true

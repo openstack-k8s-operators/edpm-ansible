@@ -63,3 +63,50 @@ argument_specs:
         default: /etc/ipa/ca.crt
         description: Path to TLS certificate.
         type: path
+      edpm_container_standalone_track_state:
+        default: true
+        description: Enable state file tracking of deployed services
+        type: bool
+      edpm_container_standalone_state_file:
+        default: /var/lib/edpm-config/deployed_services.yaml
+        description: Path to state file tracking deployed services
+        type: path
+      edpm_container_standalone_state_append:
+        default: false
+        description: |
+          If true, append containers to existing service entry in state file.
+          If false (default), replace the entire container list for the service.
+          Set to true when deploying multiple containers under same service name in separate calls (e.g., looping).
+        type: bool
+      edpm_service_name:
+        description: |
+          Service name for grouping containers.
+          If set, containers will be registered under this service name.
+          Used to group multiple containers (e.g., nova, iscsid, multipathd) under one service.
+          If not set, defaults to edpm_container_standalone_service.
+        type: str
+        required: false
+      edpm_services_to_cleanup:
+        default: []
+        description: List of service names to cleanup and remove
+        type: list
+        elements: str
+      edpm_cleanup_remove_config_dirs:
+        default: true
+        description: |
+          Remove container startup config directories during cleanup.
+          Deletes /var/lib/edpm-config/container-startup-config/<service>/
+          including all *.json container definition files within it.
+        type: bool
+      edpm_cleanup_orphaned_containers:
+        default: false
+        description: |
+          Remove containers with managed_by=edpm_ansible label that are not tracked in state file.
+          Use with caution - only enable if you want to clean up orphaned containers.
+        type: bool
+      edpm_cleanup_generic_paths:
+        default:
+          - "{% raw %}/var/lib/openstack/healthchecks/{{ service_name }}{% endraw %}"
+        description: List of generic file/directory paths to clean up per service
+        type: list
+        elements: str
