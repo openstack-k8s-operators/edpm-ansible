@@ -1,0 +1,73 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Get containers for service from state file
+  ansible.builtin.set_fact:
+    _edpm_cleanup_service_containers: "{{ _edpm_cleanup_state_data.services[_edpm_cleanup_service_name].containers | default([]) }}"
+
+- name: Query and verify containers before removal
+  become: true
+  containers.podman.podman_container_info:
+    name: "{{ _edpm_cleanup_service_containers }}"
+  register: _edpm_cleanup_container_info
+  failed_when: false
+
+- name: Remove each container
+  ansible.builtin.include_role:
+    name: edpm_container_rm
+  vars:
+    edpm_containers_to_rm: ["{{ item.Name }}"]
+  loop: "{{ _edpm_cleanup_container_info.containers | default([]) }}"
+  when:
+    - item['Config'] is defined
+    - item['Config']['Labels'] is defined
+    - item['Config']['Labels']['managed_by'] is defined
+    - item['Config']['Labels']['managed_by'] == 'edpm_ansible'
+
+- name: Remove container startup config directory and all JSON files
+  ansible.builtin.file:
+    path: "{{ edpm_container_startup_config_dir }}/{{ _edpm_cleanup_service_name }}"
+    state: absent
+  when: edpm_cleanup_remove_config_dirs | bool
+  # This removes /var/lib/edpm-config/container-startup-config/<service>/
+  # including all *.json container definition files within it
+
+- name: Remove generic service files and directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ item | replace('__SERVICE_NAME__', _edpm_cleanup_service_name) }}"
+    state: absent
+  loop: "{{ edpm_cleanup_generic_paths }}"
+
+- name: Remove kolla config files for each container
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_container_kolla_config_dir }}/{{ item }}.json"
+    state: absent
+  loop: "{{ _edpm_cleanup_service_containers }}"
+
+- name: Check for service-specific cleanup tasks
+  ansible.builtin.stat:
+    path: "{{ role_path }}/../edpm_{{ _edpm_cleanup_service_name }}/tasks/cleanup.yml"
+  register: _edpm_service_cleanup_task
+  delegate_to: localhost
+
+- name: Run service-specific cleanup if available
+  ansible.builtin.include_role:
+    name: "osp.edpm.edpm_{{ _edpm_cleanup_service_name }}"
+    tasks_from: cleanup.yml
+  when:
+    - _edpm_service_cleanup_task.stat.exists

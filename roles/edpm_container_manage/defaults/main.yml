@@ -17,6 +17,9 @@
 
 # All variables intended for modification should place placed in this file.
 edpm_container_manage_hide_sensitive_logs: "{{ hide_sensitive_logs | default(true) }}"
+# DEPRECATED: This functionality still works but is deprecated.
+# Orphan cleanup should now be done via edpm_cleanup_orphaned_containers in edpm_container_standalone role.
+# This variable will be removed in a future release.
 edpm_container_manage_clean_orphans: true
 
 # All variables within this role should have a prefix of "edpm_container_manage"
@@ -27,6 +30,7 @@ edpm_container_manage_config: "/var/lib/edpm-config/"
 edpm_container_manage_config_id: edpm
 edpm_container_manage_config_overrides: {}
 edpm_container_manage_config_patterns: '*.json'
+edpm_container_manage_containers: []  # If set, only manage these specific containers
 edpm_container_manage_healthcheck_disabled: false
 edpm_container_manage_log_path: '/var/log/containers/stdouts'  # DEPRECATED: ignored, services log to journald
 edpm_container_manage_systemd_teardown: true
