@@ -56,9 +56,11 @@
   ansible.builtin.file:
     path: /var/lib/edpm-config
     state: directory
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
     setype: container_file_t
     selevel: s0
-    mode: "0750"
+    mode: "0755"
 
 - name: Ensure we get cloud-init
   ansible.builtin.stat:

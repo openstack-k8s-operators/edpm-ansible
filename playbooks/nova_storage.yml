@@ -23,6 +23,8 @@
     - name: Deploy multipath daemon
       ansible.builtin.import_role:
         name: osp.edpm.edpm_multipathd
+      vars:
+        edpm_service_name: nova
       tags:
         - edpm_multipathd
     - name: Support NVMe-oF protocols

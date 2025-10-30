@@ -34,5 +34,7 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: "{{ exporter }}"
+    edpm_service_name: "{{ edpm_telemetry_service_name }}"
+    edpm_container_state_append: "{{ exporter != edpm_telemetry_enabled_exporters[0] }}"  # Replace on first, append on rest
     edpm_container_standalone_container_defs: "{{ _exporter_container_defs }}"
     edpm_container_standalone_kolla_config_files: "{{ _exporter_kolla_config_dict | default({}) }}"

@@ -1,5 +1,5 @@
 ---
-# Copyright 2020 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -99,6 +99,62 @@
         fail_msg: "Both services should be tracked in state file"
         success_msg: "Both services are properly tracked"
 
+- name: Cleanup first service (keep only test_service2)
+  hosts: all
+  gather_facts: false
+  vars:
+    edpm_services:
+      - test_service2
+  roles:
+    - role: osp.edpm.edpm_cleanup
+
+- name: Verify cleanup worked correctly
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if test_service1_container still exists
+      command: podman container exists test_service1_container
+      register: _service1_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check if test_service2_container still exists
+      command: podman container exists test_service2_container
+      register: _service2_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify test_service1_container was removed
+      ansible.builtin.assert:
+        that:
+          - _service1_check.rc != 0
+        fail_msg: "test_service1_container should have been removed"
+        success_msg: "test_service1_container was successfully removed"
+
+    - name: Verify test_service2_container still exists
+      ansible.builtin.assert:
+        that:
+          - _service2_check.rc == 0
+        fail_msg: "test_service2_container should still exist"
+        success_msg: "test_service2_container still exists as expected"
+
+    - name: Read state file after cleanup
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/deployed_services.yaml
+      register: _state_file_after
+
+    - name: Parse state data after cleanup
+      ansible.builtin.set_fact:
+        _state_data_after: "{{ _state_file_after.content | b64decode | from_yaml }}"
+
+    - name: Verify state file was updated
+      ansible.builtin.assert:
+        that:
+          - "'test_service1' not in _state_data_after.services"
+          - "'test_service2' in _state_data_after.services"
+        fail_msg: "State file should have test_service1 removed but test_service2 present"
+        success_msg: "State file correctly updated after cleanup"
+
 - name: Deploy service with multiple containers
   hosts: all
   gather_facts: false
@@ -183,10 +239,53 @@
         command: 'sleep 3600'
   roles:
     - role: osp.edpm.edpm_container_standalone
+  tasks:
+    - name: Cleanup orphaned containers (will remove container_b)
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_cleanup
+      vars:
+        edpm_services:
+          - test_service3
+        edpm_cleanup_orphaned_containers: true
   post_tasks:
-    - name: Verify container_c was created
-      command: podman container exists test_service3_container_c
+    - name: Check if container_a still exists
+      command: podman container exists test_service3_container_a
+      register: _container_a_check
+      failed_when: false
       changed_when: false
+
+    - name: Check if container_b still exists (should be removed)
+      command: podman container exists test_service3_container_b
+      register: _container_b_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check if container_c exists (should be new)
+      command: podman container exists test_service3_container_c
+      register: _container_c_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify container_a still exists
+      ansible.builtin.assert:
+        that:
+          - _container_a_check.rc == 0
+        fail_msg: "test_service3_container_a should still exist"
+        success_msg: "test_service3_container_a exists as expected"
+
+    - name: Verify container_b was removed
+      ansible.builtin.assert:
+        that:
+          - _container_b_check.rc != 0
+        fail_msg: "test_service3_container_b should have been removed"
+        success_msg: "test_service3_container_b was successfully removed"
+
+    - name: Verify container_c was created
+      ansible.builtin.assert:
+        that:
+          - _container_c_check.rc == 0
+        fail_msg: "test_service3_container_c should exist"
+        success_msg: "test_service3_container_c exists as expected"
 
     - name: Read state file after update
       ansible.builtin.slurp:

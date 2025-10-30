@@ -41,6 +41,7 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: ovn_controller
+    edpm_service_name: "{{ edpm_ovn_service_name }}"
     edpm_container_standalone_container_defs:
       ovn_controller: "{{ lookup('template', 'container_defs/ovn_controller.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
