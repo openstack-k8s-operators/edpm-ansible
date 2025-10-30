@@ -4,7 +4,7 @@ DOCUMENTATION:
   name: haskey
   author: "EDPM team"
   version_added: 2.9
-  short_description: Retrun dictionaries with given key
+  short_description: Return dictionaries with given key
   description: |
     This filter will take a list of dictionaries (data)
     and will return the dictionaries which have a certain key given

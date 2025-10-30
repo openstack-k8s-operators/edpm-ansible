@@ -23,7 +23,7 @@
 edpm_ovs_download_delay: "{{ edpm_download_delay | default(60) }}"
 # number of retries for download tasks
 edpm_ovs_download_retries: "{{ edpm_download_retries | default(5) }}"
-# this sould map to the ovs
+# this should map to the ovs
 edpm_ovs_services:
   - openvswitch
 edpm_ovs_packages:

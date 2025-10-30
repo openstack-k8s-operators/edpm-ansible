@@ -9,6 +9,6 @@
           ansible.builtin.include_role:
             name: osp.edpm.edpm_pre_adoption_validation
       rescue:
-        - name: Assert that the validaton passed
+        - name: Assert that the validation passed
           ansible.builtin.fail:
             msg: "validation should pass as the old and new configs are matching"

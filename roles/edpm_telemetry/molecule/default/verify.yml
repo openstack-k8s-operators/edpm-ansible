@@ -37,7 +37,7 @@
         - "/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout"
         - "Copying /var/lib/openstack/config/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
 
-    - name: ensure that the correcty binary started with TLS
+    - name: ensure that the correct binary started with TLS
       become: true
       ansible.builtin.shell: |
         podman logs node_exporter 2>&1 | grep "{{item}}" > /dev/null
