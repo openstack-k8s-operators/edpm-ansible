@@ -13,6 +13,8 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: "nova_compute_init"
+    edpm_service_name: "{{ edpm_nova_service_name }}"
+    edpm_container_state_append: false  # First container - replace existing state
     edpm_container_standalone_container_defs:
       nova_compute_init: "{{ lookup('template', 'container_defs/nova_compute_init.yaml.j2') | from_yaml }}"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
@@ -25,6 +27,8 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: "nova_compute"
+    edpm_service_name: "{{ edpm_nova_service_name }}"
+    edpm_container_state_append: true  # Append to nova service
     edpm_container_standalone_container_defs:
       nova_compute: "{{ lookup('template', 'container_defs/nova_compute.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
@@ -40,6 +44,8 @@
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: "nova_nvme_cleaner"
+    edpm_service_name: "{{ edpm_nova_service_name }}"
+    edpm_container_state_append: true  # Append to nova service
     edpm_container_standalone_container_defs:
       nova_nvme_cleaner: "{{ lookup('template', 'container_defs/nova_nvme_cleaner.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:

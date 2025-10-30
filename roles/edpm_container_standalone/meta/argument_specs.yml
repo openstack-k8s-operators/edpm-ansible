@@ -20,7 +20,7 @@ argument_specs:
         default: {}
         description: Parsed container definitions.
         type: dict
-      edpm_container_standalone_container_startup_config_dir:
+      edpm_container_startup_config_dir:
         default: /var/lib/edpm-config/container-startup-config
         description: Path to configuration directory.
         type: path
@@ -30,7 +30,7 @@ argument_specs:
           - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
         description: List of TLS volumes in a mount point format.
         type: list
-      edpm_container_standalone_kolla_config_dir:
+      edpm_container_kolla_config_dir:
         default: /var/lib/kolla/config_files
         description: Path to Kolla configuration directory.
         type: path
@@ -63,3 +63,26 @@ argument_specs:
         default: /etc/ipa/ca.crt
         description: Path to TLS certificate.
         type: path
+      edpm_container_track_state:
+        default: true
+        description: Enable state file tracking of deployed services
+        type: bool
+      edpm_container_state_file:
+        default: /var/lib/edpm-config/deployed_services.yaml
+        description: Path to state file tracking deployed services
+        type: path
+      edpm_container_state_append:
+        default: false
+        description: |
+          If true, append containers to existing service entry in state file.
+          If false (default), replace the entire container list for the service.
+          Set to true when deploying multiple containers under same service name in separate calls (e.g., looping).
+        type: bool
+      edpm_service_name:
+        description: |
+          Service name for grouping containers.
+          If set, containers will be registered under this service name.
+          Used to group multiple containers (e.g., nova, iscsid, multipathd) under one service.
+          If not set, defaults to edpm_container_standalone_service.
+        type: str
+        required: false

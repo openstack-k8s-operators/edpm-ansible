@@ -14,6 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+# DEPRECATED: This functionality is deprecated and will be removed in a future release.
+# Use edpm_cleanup_orphaned_containers in edpm_container_standalone role instead.
+
 - name: Gather podman infos
   containers.podman.podman_container_info: {}
   register: podman_containers
