@@ -55,7 +55,7 @@ options:
     description:
       - Config volume prefix
     type: str
-    default: '/var/lib/config-data'
+    default: '/var/lib/openstack'
 """
 
 EXAMPLES = """

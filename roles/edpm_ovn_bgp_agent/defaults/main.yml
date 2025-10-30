@@ -31,7 +31,7 @@ edpm_ovn_bgp_agent_private_key: /etc/pki/tls/private/ovndb.key
 edpm_ovn_bgp_agent_certificate: /etc/pki/tls/certs/ovndb.crt
 edpm_ovn_bgp_agent_ca_cert: /etc/pki/tls/certs/ovndbca.crt
 edpm_ovn_bgp_agent_internal_tls_enable: "{{ edpm_tls_certs_enabled | default(False) }}"
-edpm_ovn_bgp_agent_config_basedir: "/var/lib/config-data/ansible-generated/ovn-bgp-agent"
+edpm_ovn_bgp_agent_config_basedir: "/var/lib/openstack/ovn-bgp-agent"
 edpm_ovn_bgp_agent_config_src: "/var/lib/openstack/configs/{{ edpm_ovn_bgp_agent_service_name }}"
 edpm_ovn_bgp_agent_bgp_as: 64999
 edpm_ovn_bgp_agent_clear_vrf_routes_on_startup: false

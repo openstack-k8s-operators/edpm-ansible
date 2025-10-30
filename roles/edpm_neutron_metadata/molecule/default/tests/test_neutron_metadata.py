@@ -98,7 +98,7 @@ class TestNeutronMetadata(unittest.TestCase):
 
     def test_neutron_metadata_conf_was_copied_into_container(self):
         assert self.host.file(
-            "/var/lib/config-data/ansible-generated/"
+            "/var/lib/openstack/"
             "neutron-ovn-metadata-agent/10-neutron-metadata.conf"
         ).exists
 
