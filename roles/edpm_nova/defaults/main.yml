@@ -28,8 +28,8 @@ edpm_nova_image_download_retries: "{{ edpm_download_retries | default(5) }}"
 
 # Note that the src dir is in the AEE container but the
 # dest dir is on the target host
-edpm_nova_config_src: /var/lib/openstack/configs
-edpm_nova_config_dest: /var/lib/openstack/config/nova
+edpm_nova_config_src: /var/lib/openstack/configs/{{ edpm_nova_service_name }}
+edpm_nova_config_dest: /var/lib/openstack/{{ edpm_nova_service_name }}
 edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
 
 # Libvirt TLS
@@ -58,8 +58,9 @@ edpm_nova_old_tripleo_compute_sevices:
 edpm_nova_extra_bind_mounts: []
 
 # NVMe cleaner config
-edpm_nova_nvme_cleaner_config_dest: /var/lib/openstack/config/nova_nvme_cleaner
 edpm_nova_nvme_cleaner_command: "/usr/share/openstack-nova/contrib/clean-on-delete"
 edpm_nova_nvme_cleaner_args: "--nvme"
 # make cleaner optional
 edpm_nova_enable_nvme_cleaner: false
+
+edpm_nova_nvme_cleaner_config_dest: /var/lib/openstack/nova_nvme_cleaner

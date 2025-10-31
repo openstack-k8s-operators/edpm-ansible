@@ -10,6 +10,10 @@ argument_specs:
       edpm_container_manage_clean_orphans:
         type: bool
         default: true
+        description: >-
+          DEPRECATED: Still functional but deprecated.
+          Use edpm_cleanup_orphaned_containers in edpm_container_standalone role instead.
+          Will be removed in future release.
       edpm_container_manage_update_config_hash:
         type: bool
         default: true

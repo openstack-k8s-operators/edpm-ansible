@@ -18,6 +18,19 @@
 - name: Converge
   hosts: all
   gather_facts: false
+  pre_tasks:
+    - name: Gather user fact
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "user"
+
+    - name: Set basic user fact
+      ansible.builtin.set_fact:
+        ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
+      when:
+        - ansible_user is undefined
   vars:
     edpm_container_standalone_service: test
     edpm_container_standalone_container_defs:
