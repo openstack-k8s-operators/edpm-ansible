@@ -66,3 +66,10 @@ argument_specs:
         type: list
         required: true
         description: "List of exporters to be deployed in the compute node"
+      edpm_telemetry_node_exporter_cmd:
+        type: list
+        required: false
+        description: >
+          List of command-line options passed to the node_exporter container.
+          Each item should be a single string representing one option/argument.
+          Override this list to enable/disable collectors or add extra flags.
