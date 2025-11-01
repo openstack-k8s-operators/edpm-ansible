@@ -31,8 +31,27 @@
     # For nmstate, always enable NetworkManager DNS management
     edpm_bootstrap_network_resolvconf_update: true
 
+- name: Check nmstate return code for conditional logic
+  become: true
+  block:
+    - name: Check if nmstate return code file exists
+      ansible.builtin.stat:
+        path: /var/lib/edpm-config/nmstate.returncode
+      register: nmstate_returncode_stat
+
+    - name: Read nmstate return code file if it exists
+      ansible.builtin.slurp:
+        path: /var/lib/edpm-config/nmstate.returncode
+      register: nmstate_returncode_slurp
+      when: nmstate_returncode_stat.stat.exists
+
 - name: Configure network with network role from system roles [nmstate]
   become: true
+  when:
+    - (edpm_network_config_update) or
+      (nmstate_returncode_stat.stat.exists and
+      ((nmstate_returncode_slurp.content | b64decode | int) != 0)) or
+      (not nmstate_returncode_stat.stat.exists)
   block:
     - name: Render network_state variable
       ansible.builtin.set_fact:
@@ -42,3 +61,17 @@
       ansible.builtin.include_role:
         name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
       register: nmstate_result
+
+    - name: Ensure /var/lib/edpm-config exists
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        mode: "0755"
+
+    - name: Write rc of nmstate run
+      ansible.builtin.copy:
+        content: "{{ nmstate_result.rc if nmstate_result.rc is defined else (1 if (nmstate_result.failed|default(false)) else 0) }}"
+        dest: /var/lib/edpm-config/nmstate.returncode
+        mode: "0644"
+      when:
+        - nmstate_result is defined
