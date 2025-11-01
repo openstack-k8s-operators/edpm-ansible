@@ -7,25 +7,11 @@
     "ports": ["9100:9100"],
     "command": [
 {% if tls_cert_exists|bool %}
-        "--web.config.file=/etc/node_exporter/node_exporter.yaml",
+    "--web.config.file=/etc/node_exporter/node_exporter.yaml",
 {% endif %}
-        "--web.disable-exporter-metrics",
-        "--collector.systemd",
-        "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service",
-        "--no-collector.dmi",
-        "--no-collector.entropy",
-        "--no-collector.thermal_zone",
-        "--no-collector.time",
-        "--no-collector.timex",
-        "--no-collector.uname",
-        "--no-collector.stat",
-        "--no-collector.hwmon",
-        "--no-collector.os",
-        "--no-collector.selinux",
-        "--no-collector.textfile",
-        "--no-collector.powersupplyclass",
-        "--no-collector.pressure",
-        "--no-collector.rapl"
+{% for arg in edpm_telemetry_node_exporter_cmd %}
+    {{ arg | to_json }}{% if not loop.last %},{% endif %}
+{% endfor %}
     ],
     "net": "host",
     "environment": {
