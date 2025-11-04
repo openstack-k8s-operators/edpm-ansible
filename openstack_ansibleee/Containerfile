@@ -27,10 +27,12 @@ COPY --from=builder /usr/share/ansible /usr/share/ansible
 COPY $REMOTE_SOURCE/openstack_ansibleee/settings /runner/env/settings
 COPY $REMOTE_SOURCE/openstack_ansibleee/edpm_entrypoint.sh /opt/builder/bin/edpm_entrypoint
 
-RUN sed '1d' /usr/local/lib/python${PYV}/site-packages/ansible_builder/_target_scripts/entrypoint >> /opt/builder/bin/edpm_entrypoint
-RUN mkdir /runner/project && chmod -R 775 /runner && chmod +x /opt/builder/bin/edpm_entrypoint && chmod ug+rw /etc/passwd
+RUN sed '1d' /usr/local/lib/python${PYV}/site-packages/ansible_builder/_target_scripts/entrypoint >> /opt/builder/bin/edpm_entrypoint && \
+    mkdir /runner/project && \
+    chmod -R 775 /runner && chmod +x /opt/builder/bin/edpm_entrypoint && chmod ug+rw /etc/passwd
 
 ENV EDPM_SYSTEMROLES='fedora.linux_system_roles'
+ENV ANSIBLE_CALLBACK_RESULT_FORMAT=yaml
 WORKDIR /runner
 LABEL ansible-execution-environment=true
 ENTRYPOINT ["/opt/builder/bin/edpm_entrypoint", "dumb-init"]
