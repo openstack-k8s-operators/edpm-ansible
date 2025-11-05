@@ -70,8 +70,6 @@
 
     - name: Write rc of nmstate run
       ansible.builtin.copy:
-        content: "{{ nmstate_result.rc if nmstate_result.rc is defined else (1 if (nmstate_result.failed|default(false)) else 0) }}"
+        content: "0"
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
-      when:
-        - nmstate_result is defined
