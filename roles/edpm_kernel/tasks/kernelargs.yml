@@ -136,7 +136,7 @@
   when:
     - set_kernel_args is defined
     - set_kernel_args is true
-    - ansible_local.bootc
+    - ansible_local.bootc is defined and ansible_local.bootc
   block:
 
     - name: Check if the kernelargs entry is already present in the file
@@ -213,10 +213,10 @@
     - name: Reboot tasks
       ansible.builtin.include_tasks: reboot.yaml
       when:
-        - not boot_file_entry_present
+        - boot_file_entry_present is defined and not boot_file_entry_present
 
     - name: Skipping reboot for deployed node
       ansible.builtin.debug:  # noqa: no-handler
         msg: "Reboot is skipped for kernel arg change, user has to plan the reboot with migration and downtime"
       when:
-        - boot_file_entry_present
+        - boot_file_entry_present is defined and boot_file_entry_present
