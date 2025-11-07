@@ -1,0 +1,68 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+- name: Ensure new config directory exists
+  tags:
+    - update
+    - telemetry_power_monitoring
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_telemetry_config_dest }}"
+    state: directory
+    setype: "container_file_t"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "0755"
+
+- name: Check if old config directory exists
+  tags:
+    - update
+    - telemetry_power_monitoring
+  ansible.builtin.stat:
+    path: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+  register: edpm_telemetry_power_monitoring_old_config_dir
+
+- name: Move config files from old location to new location
+  tags:
+    - update
+    - telemetry_power_monitoring
+  become: true
+  when:
+    - edpm_telemetry_power_monitoring_old_config_dir.stat.exists
+    - edpm_telemetry_power_monitoring_old_config_dir.stat.isdir
+  block:
+    - name: Find config files in old location
+      ansible.builtin.find:
+        paths: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+        file_type: file
+        recurse: true
+      register: edpm_telemetry_power_monitoring_old_config_files
+
+    - name: Copy config files to new location
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ edpm_telemetry_config_dest }}/{{ item.path | regex_replace('^.*/config/' + edpm_telemetry_service_name + '/', '') }}"
+        remote_src: true
+        setype: "container_file_t"
+        mode: "0644"
+      loop: "{{ edpm_telemetry_power_monitoring_old_config_files.files }}"
+      when:
+        - edpm_telemetry_power_monitoring_old_config_files.files is defined
+        - edpm_telemetry_power_monitoring_old_config_files.files | length > 0
+
+    - name: Remove old config directory
+      ansible.builtin.file:
+        path: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+        state: absent
