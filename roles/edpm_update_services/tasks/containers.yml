@@ -33,6 +33,15 @@
     - edpm_update_services
   when: '"ovn" in edpm_update_services_running_services'
 
+- name: Apply updates for edpm_frr role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_frr
+    tasks_from: update.yml
+  tags:
+    - edpm_frr
+    - edpm_update_services
+  when: '"frr" in edpm_update_services_running_services'
+
 - name: Updates containers for edpm_frr role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_frr
@@ -43,6 +52,15 @@
     - edpm_frr
     - edpm_update_services
   when: '"frr" in edpm_update_services_running_services'
+
+- name: Apply updates for edpm_ovn_bgp_agent role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovn_bgp_agent
+    tasks_from: update.yml
+  tags:
+    - edpm_ovn_bgp_agent
+    - edpm_update_services
+  when: '"ovn-bgp-agent" in edpm_update_services_running_services'
 
 - name: Updates containers for edpm_ovn_bgp_agent role
   ansible.builtin.include_role:
@@ -55,6 +73,15 @@
     - edpm_update_services
   when: '"ovn-bgp-agent" in edpm_update_services_running_services'
 
+- name: Apply updates for edpm_neutron_metadata role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_metadata
+    tasks_from: update.yml
+  tags:
+    - edpm_neutron_metadata
+    - edpm_update_services
+  when: '"neutron-metadata" in edpm_update_services_running_services'
+
 - name: Updates containers for edpm_neutron_metadata role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_metadata
@@ -65,6 +92,15 @@
     - edpm_neutron_metadata
     - edpm_update_services
   when: '"neutron-metadata" in edpm_update_services_running_services'
+
+- name: Apply updates for edpm_neutron_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_ovn
+    tasks_from: update.yml
+  tags:
+    - edpm_neutron_ovn
+    - edpm_update_services
+  when: '"neutron-ovn" in edpm_update_services_running_services'
 
 - name: Updates containers for edpm_neutron_ovn role
   ansible.builtin.include_role:
@@ -109,6 +145,15 @@
     - edpm_update_services
   when: '"nova" in edpm_update_services_running_services'
 
+- name: Apply updates for edpm_neutron_sriov role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_sriov
+    tasks_from: update.yml
+  tags:
+    - edpm_neutron_sriov
+    - edpm_update_services
+  when: '"neutron-sriov" in edpm_update_services_running_services'
+
 - name: Updates containers for edpm_neutron_sriov role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_sriov
@@ -119,6 +164,15 @@
     - edpm_neutron_sriov
     - edpm_update_services
   when: '"neutron-sriov" in edpm_update_services_running_services'
+
+- name: Apply updates for edpm_neutron_dhcp role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_dhcp
+    tasks_from: update.yml
+  tags:
+    - edpm_neutron_dhcp
+    - edpm_update_services
+  when: '"neutron-dhcp" in edpm_update_services_running_services'
 
 - name: Updates containers for edpm_neutron_dhcp role
   ansible.builtin.include_role:
