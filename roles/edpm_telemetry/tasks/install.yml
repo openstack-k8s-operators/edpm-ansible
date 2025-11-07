@@ -14,6 +14,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Determine if cacert file exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
+  register: ca_bundle_stat_res
+
+- name: Check that tls.crt exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.crt"
+  register: tls_crt_stat
+
+- name: Check that tls.key exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.key"
+  register: tls_key_stat
+
 - name: Create a directory for container health checks
   ansible.builtin.file:
     path: /var/lib/openstack/healthchecks
