@@ -17,8 +17,14 @@
 - name: Verify
   hosts: all
   gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
+    - name: Load role vars
+      ansible.builtin.include_vars: ../../defaults/main.yml
+
     - name: Check /etc/multipath.conf settings
+      become: true
       lineinfile:
         name: /etc/multipath.conf
         regexp: "^\\s+{{ item.var }}"
@@ -39,3 +45,17 @@
         - multipath_result.changed
       failed_when:
         - true
+
+    - name: Ensure multipathd service is enabled and running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "multipathd.service", "osp_service": false }
+
+    - name: Ensure legacy services are disabled and not running
+      become: true
+      ansible.builtin.shell: |
+        ! systemctl is-enabled "{{ legacy_service }}" && ! systemctl is-active "{{ legacy_service }}"
+      changed_when: false
+      loop: "{{ edpm_multipathd_legacy_services }}"
+      loop_control:
+        loop_var: legacy_service
