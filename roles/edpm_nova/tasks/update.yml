@@ -118,6 +118,7 @@
     mode: "0644"
   loop:
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
+    - {"src": "run-on-host", "dest": "run-on-host"}
 
 - name: Run LVM bootstrap tasks
   tags:
