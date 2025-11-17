@@ -1,4 +1,22 @@
 ---
+# NOTE(auniyal): Ensure container config directories exist
+# during minor-update for nvme cleaner. bug: OSPRH-21712
+- name: Ensure container config directories exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    setype: "container_file_t"
+    mode: "{{ item.mode }}"
+  loop:
+    - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
+    - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
+    - {"path": "{{ edpm_nova_nvme_cleaner_config_dest }}", "mode": "0755", "when_enabled": true}
+  when: not (item.when_enabled | default(false)) or edpm_nova_enable_nvme_cleaner
+  tags:
+    - update
+    - nova
+
 - name: Render newly introduced nova config files
   tags:
     - update
