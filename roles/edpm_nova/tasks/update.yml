@@ -9,7 +9,11 @@
     setype: "container_file_t"
     mode: "0644"
   loop:
+    - {"src": "config.json.j2", "dest": "config.json"}
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
+    - {"src": "run-on-host", "dest": "run-on-host"}
+  notify:
+    - Restart nova
 
 - name: Run LVM bootstrap tasks
   tags:
