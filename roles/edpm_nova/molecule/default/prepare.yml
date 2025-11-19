@@ -178,12 +178,12 @@
         group: "{{ item.group | default(ansible_user) }}"
         mode: "{{ item.mode | default(omit) }}"
       loop:
-        - {"path": "/var/lib/openstack/config/nova", "mode": "0755"}
+        - {"path": "/var/lib/openstack/nova", "mode": "0755"}
 
     - name: Create a test file to be deleted
       become: true
       ansible.builtin.file:
-        path: '/var/lib/openstack/config/nova/test.conf'
+        path: '/var/lib/openstack/nova/test.conf'
         state: touch
         mode: 0644
 

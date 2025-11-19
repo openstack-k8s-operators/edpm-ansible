@@ -22,9 +22,9 @@
 # Service name. Use for creating directories, container labels, etc
 edpm_container_standalone_service: ""
 # Directory for kolla config files
-edpm_container_standalone_kolla_config_dir: /var/lib/kolla/config_files
+edpm_container_kolla_config_dir: /var/lib/kolla/config_files
 # Directory for container startup configs
-edpm_container_standalone_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
+edpm_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
 # Hash with keys of container name and value of YAML kolla config file.
 edpm_container_standalone_kolla_config_files: {}
 # Hash with keys of container name and value of YAML container definition
@@ -64,3 +64,8 @@ edpm_container_standalone_volumes: "{{
   }}"
 
 edpm_deploy_identifier: ''
+
+# State file tracking
+edpm_container_track_state: true
+edpm_container_state_file: /var/lib/edpm-config/deployed_services.yaml
+edpm_container_state_append: false  # Set true when deploying multiple containers in a loop

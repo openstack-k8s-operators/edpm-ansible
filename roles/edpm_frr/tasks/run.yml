@@ -25,6 +25,6 @@
   vars:
     edpm_container_standalone_service: frr
     edpm_container_standalone_container_defs:
-      frr: "{{ lookup('template', 'frr.yaml.j2') | from_yaml }}"
+      frr: "{{ lookup('template', 'container_defs/frr.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      frr: "{{ lookup('template', 'templates/kolla_config/frr.yaml.j2') | from_yaml }}"
+      frr: "{{ lookup('file', 'kolla_config/frr.yaml') | from_yaml }}"

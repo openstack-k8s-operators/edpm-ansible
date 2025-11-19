@@ -38,6 +38,6 @@
   vars:
     edpm_container_standalone_service: ovn_bgp_agent
     edpm_container_standalone_container_defs:
-      ovn_bgp_agent: "{{ lookup('template', 'ovn_bgp_agent.yaml.j2') | from_yaml }}"
+      ovn_bgp_agent: "{{ lookup('template', 'container_defs/ovn_bgp_agent.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      ovn_bgp_agent: "{{ lookup('template', 'templates/kolla_config/ovn_bgp_agent.yaml.j2') | from_yaml }}"
+      ovn_bgp_agent: "{{ lookup('file', 'kolla_config/ovn_bgp_agent.yaml') | from_yaml }}"

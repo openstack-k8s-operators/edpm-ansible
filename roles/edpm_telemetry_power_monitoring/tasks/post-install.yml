@@ -10,8 +10,8 @@
 
 - name: Copy kepler firewall config
   become: true
-  ansible.builtin.template:
-    src: "firewall.yaml.j2"
+  ansible.builtin.copy:
+    src: "firewall.yaml"
     dest: "/var/lib/edpm-config/firewall/kepler.yaml"
     mode: "0640"
 
