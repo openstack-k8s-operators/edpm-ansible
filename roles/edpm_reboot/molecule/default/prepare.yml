@@ -29,13 +29,13 @@
   tasks:
     - name: Create nova config directory
       ansible.builtin.file:
-        path: /var/lib/openstack/config/nova
+        path: /var/lib/openstack/nova
         state: directory
         mode: "0775"
 
     - name: Create nova.conf
       ansible.builtin.copy:
-        dest: /var/lib/openstack/config/nova/01-nova.conf
+        dest: /var/lib/openstack/nova/01-nova.conf
         mode: "0644"
         owner: root
         group: root

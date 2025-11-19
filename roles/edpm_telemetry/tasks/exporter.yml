@@ -10,17 +10,29 @@
     mode: '0700'
   become: true
 
+- name: Set cert existence facts for template
+  ansible.builtin.set_fact:
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+- name: Load container definition for exporter
+  ansible.builtin.set_fact:
+    _exporter_container_def: "{{ lookup('template', 'container_defs/{{ exporter }}.yaml.j2') | from_yaml }}"
+
+- name: Build container defs dict dynamically
+  ansible.builtin.set_fact:
+    _exporter_container_defs: "{{ {} | combine({(exporter | string): _exporter_container_def}) }}"
+
+- name: Build kolla config dict for exporters that need them
+  ansible.builtin.set_fact:
+    _exporter_kolla_config_dict:
+      ceilometer_agent_compute: "{{ lookup('file', 'files/kolla_config/ceilometer_agent_compute.yaml') | from_yaml }}"
+  when: exporter == 'ceilometer_agent_compute'
+
 - name: Deploy exporter container
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_manage
+    name: osp.edpm.edpm_container_standalone
   vars:
-    edpm_container_manage_config: "{{ edpm_telemetry_config_dest }}"
-    edpm_container_manage_healthcheck_disabled: true
-    edpm_container_manage_config_patterns: "{{ exporter }}.json"
-    edpm_container_manage_clean_orphans: false
-
-- name: Restart exporter container
-  become: true
-  ansible.builtin.systemd:
-    state: restarted
-    name: "edpm_{{ exporter }}.service"
+    edpm_container_standalone_service: "{{ exporter }}"
+    edpm_container_standalone_container_defs: "{{ _exporter_container_defs }}"
+    edpm_container_standalone_kolla_config_files: "{{ _exporter_kolla_config_dict | default({}) }}"

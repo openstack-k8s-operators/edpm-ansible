@@ -23,9 +23,9 @@
         setype: "container_file_t"
         mode: "0644"
       loop:
-        - {"src": "neutron.conf.j2", "dest": "01-neutron.conf"}
-        - {"src": "rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
-        - {"src": "neutron-dhcp-agent.conf.j2", "dest": "01-neutron-dhcp-agent.conf"}
+        - {"src": "config/neutron.conf.j2", "dest": "01-neutron.conf"}
+        - {"src": "config/rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
+        - {"src": "config/neutron-dhcp-agent.conf.j2", "dest": "01-neutron-dhcp-agent.conf"}
       tags:
         - configure
         - neutron

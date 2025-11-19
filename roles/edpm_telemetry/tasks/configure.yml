@@ -40,17 +40,6 @@
     path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
-- name: Render ceilometer config files
-  tags:
-    - edpm_telemetry
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
-    setype: "container_file_t"
-    mode: "0644"
-  loop:
-    - {"src": "ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
-
 - name: Ensure group libvirt always exists
   become: true
   ansible.builtin.group:
@@ -103,16 +92,27 @@
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
 
-- name: Render container config templates
+- name: Render telemetry config files
+  tags:
+    - edpm_telemetry
   ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    mode: 0644
-  with_fileglob:
-    - ../templates/*.j2
+    src: "{{ item.src }}"
+    dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0644"
+  loop:
+    - {"src": "config/ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
+    - {"src": "config/openstack_network_exporter.yaml.j2", "dest": "openstack_network_exporter.yaml"}
   vars:
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+- name: Copy static config files
+  ansible.builtin.copy:
+    src: firewall.yaml
+    dest: "{{ edpm_telemetry_config_dest }}/firewall.yaml"
+    setype: "container_file_t"
+    mode: "0644"
 
 - name: Configure tls if present
   when:
