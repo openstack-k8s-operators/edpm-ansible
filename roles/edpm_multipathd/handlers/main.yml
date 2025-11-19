@@ -1,0 +1,4 @@
+---
+
+- name: Restart the multipath subsystem
+  ansible.builtin.include_tasks: restart_multipath.yml
