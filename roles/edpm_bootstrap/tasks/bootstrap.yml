@@ -128,3 +128,6 @@
 - name: FIPS tasks
   ansible.builtin.import_tasks: fips.yml
   when: edpm_bootstrap_fips_mode != 'check'
+
+- name: LVM tasks
+  ansible.builtin.import_tasks: lvm.yml

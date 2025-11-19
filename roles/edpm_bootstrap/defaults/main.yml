@@ -94,3 +94,10 @@ edpm_bootstrap_fips_fms_status:
   - {exit_code: 0, state: 'enabled', message: 'FIPS is enabled'}
   - {exit_code: 1, state: 'inconsistent', message: 'FIPS setup is inconsistent'}
   - {exit_code: 2, state: 'disabled', message: 'FIPS is disabled'}
+
+# Full path name of LVM's default "devicesfile" (see /etc/lvm/lvm.conf)
+edpm_bootstrap_lvm_devices_file: /etc/lvm/devices/system.devices
+
+# Specifies whether to import existing LVM devices into the devices file. This
+# is overridden (set false) when updating nova compute nodes.
+edpm_bootstrap_lvm_import_devices: true
