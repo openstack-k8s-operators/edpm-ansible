@@ -4,9 +4,8 @@ aliases:
   edpm-approvers:
   - slagle
   - rabi
-  - jpodivin
   ci-approvers:
-  - viroel
+  - rebtoor
   openstack-approvers:
   - abays
   - dprince
