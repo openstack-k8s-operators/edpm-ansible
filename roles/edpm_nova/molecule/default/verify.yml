@@ -213,3 +213,32 @@
         that:
           - nvme_cleaner_exists.rc != 0
           - not nvme_cleaner_service_unit_exists.stat.exists
+
+    - name: Remove nvme_cleaner config directory to simulate update-only scenario
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/openstack/config/nova_nvme_cleaner
+        state: absent
+
+    - name: Run updates to simulate minor update
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_nova
+        tasks_from: update.yml
+      vars:
+        edpm_nova_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"
+        edpm_nova_nvme_cleaner_command: "/usr/bin/sleep"
+        edpm_nova_nvme_cleaner_args: "infinity"
+        edpm_nova_enable_nvme_cleaner: true
+
+    - name: Verify nvme_cleaner config directory exists after minor update
+      become: true
+      ansible.builtin.stat:
+        path: /var/lib/openstack/config/nova_nvme_cleaner
+      register: nvme_cleaner_dir_after_update
+
+    - name: Assert nvme_cleaner directory exists after update
+      ansible.builtin.assert:
+        that:
+          - nvme_cleaner_dir_after_update.stat.exists
+          - nvme_cleaner_dir_after_update.stat.isdir
+        fail_msg: "nvme_cleaner config directory does not exist after update"
