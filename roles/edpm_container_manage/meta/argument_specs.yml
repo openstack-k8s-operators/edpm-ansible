@@ -10,6 +10,10 @@ argument_specs:
       edpm_container_manage_clean_orphans:
         type: bool
         default: true
+        description: >-
+          DEPRECATED: Still functional but deprecated.
+          Use edpm_cleanup_orphaned_containers in edpm_cleanup role instead.
+          Will be removed in future release.
       edpm_container_manage_update_config_hash:
         type: bool
         default: true
@@ -31,6 +35,13 @@ argument_specs:
       edpm_container_manage_config_patterns:
         type: str
         default: '*.json'
+      edpm_container_manage_containers:
+        type: list
+        elements: str
+        default: []
+        description: >-
+          List of specific container names to manage.
+          If empty, all containers matching the pattern will be managed.
       edpm_container_manage_healthcheck_disabled:
         type: bool
         default: false

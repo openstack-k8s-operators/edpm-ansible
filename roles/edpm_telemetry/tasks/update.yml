@@ -1,4 +1,58 @@
 ---
+- name: Ensure new config directory exists
+  tags:
+    - update
+    - telemetry
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_telemetry_config_dest }}"
+    state: directory
+    setype: "container_file_t"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "0755"
+
+- name: Check if old config directory exists
+  tags:
+    - update
+    - telemetry
+  ansible.builtin.stat:
+    path: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+  register: edpm_telemetry_old_config_dir
+
+- name: Move config files from old location to new location
+  tags:
+    - update
+    - telemetry
+  become: true
+  when:
+    - edpm_telemetry_old_config_dir.stat.exists
+    - edpm_telemetry_old_config_dir.stat.isdir
+  block:
+    - name: Find config files in old location
+      ansible.builtin.find:
+        paths: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+        file_type: file
+        recurse: true
+      register: edpm_telemetry_old_config_files
+
+    - name: Copy config files to new location
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ edpm_telemetry_config_dest }}/{{ item.path | regex_replace('^.*/config/' + edpm_telemetry_service_name + '/', '') }}"
+        remote_src: true
+        setype: "container_file_t"
+        mode: "0644"
+      loop: "{{ edpm_telemetry_old_config_files.files }}"
+      when:
+        - edpm_telemetry_old_config_files.files is defined
+        - edpm_telemetry_old_config_files.files | length > 0
+
+    - name: Remove old config directory
+      ansible.builtin.file:
+        path: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
+        state: absent
+
 - name: Check for openstack_network_exporter config
   ansible.builtin.stat:
     path: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.json"
@@ -23,14 +77,21 @@
         path: "{{ edpm_telemetry_certs }}/tls.key"
       register: tls_key_stat
 
-    - name: Render container config templates
+    - name: Render openstack_network_exporter config
       ansible.builtin.template:
-        src: "{{ item }}"
-        dest: "{{ edpm_telemetry_config_dest }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        src: "config/openstack_network_exporter.yaml.j2"
+        dest: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml"
         mode: 0644
-      with_items:
-        - ../templates/openstack_network_exporter.json.j2
-        - ../templates/openstack_network_exporter.yaml.j2
       vars:
+        ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
+        tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+    - name: Deploy openstack_network_exporter container
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: "openstack_network_exporter"
+        edpm_container_standalone_container_defs:
+          openstack_network_exporter: "{{ lookup('template', 'container_defs/openstack_network_exporter.yaml.j2') | from_yaml }}"
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"

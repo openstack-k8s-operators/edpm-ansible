@@ -1,0 +1,41 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Cleanup EDPM Services
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
+  strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
+  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
+  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
+  environment: "{{ edpm_playbook_environment | default({}) }}"
+  tasks:
+    - name: Display cleanup information
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Services to keep (from edpm_services):"
+          - "{{ edpm_services | default([]) | join(', ') }}"
+          - "=========================================="
+          - "This will clean up all services NOT in edpm_services:"
+          - "  - Stop and disable systemd services"
+          - "  - Remove containers"
+          - "  - Remove configuration directories"
+          - "  - Update state file"
+          - "=========================================="
+
+    - name: Cleanup services
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_cleanup

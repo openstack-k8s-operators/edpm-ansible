@@ -58,7 +58,7 @@ options:
 EXAMPLES = """
 - name: Inject snippet for CI
   edpm_nftables_snippet:
-    dest: /var/lib/edpm-config/firewall/ci-rules.yaml
+    dest: /var/lib/openstack/firewall/ci-rules.yaml
     content: |
       - rule_name: 010 Allow SSH from everywhere
         rule:

@@ -9,9 +9,9 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
       loop:
         - "/var/lib/edpm-config/container-startup-config/frr"
-        - "/var/lib/config-data/ansible-generated/frr"
+        - "/var/lib/openstack/frr"
         - "/etc/tmpfiles.d/"
-        - "/var/lib/config-data/ansible-generated/frr/etc/frr"
+        - "/var/lib/openstack/frr/etc/frr"
 
     - name: ensure that /etc/tmpfiles.d/run-frr.conf file for frr exist
       become: true
@@ -26,31 +26,31 @@
               - check_frr_file.stat.exists
             fail_msg: "File /etc/tmpfiles.d/run-frr.conf does not exist"
 
-    - name: ensure that /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf file exist
+    - name: ensure that /var/lib/openstack/frr/etc/frr/frr.conf file exist
       become: true
       block:
-        - name: Check if file /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf exist
+        - name: Check if file /var/lib/openstack/frr/etc/frr/frr.conf exist
           ansible.builtin.stat:
-            path: /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf
+            path: /var/lib/openstack/frr/etc/frr/frr.conf
           register: check_frr_conf_file
-        - name: Assert file /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf exist
+        - name: Assert file /var/lib/openstack/frr/etc/frr/frr.conf exist
           ansible.builtin.assert:
             that:
               - check_frr_conf_file.stat.exists
-            fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/frr.conf does not exist"
+            fail_msg: "File /var/lib/openstack/frr/etc/frr/frr.conf does not exist"
 
-    - name: ensure that /var/lib/config-data/ansible-generated/frr/etc/frr/daemons file exist
+    - name: ensure that /var/lib/openstack/frr/etc/frr/daemons file exist
       become: true
       block:
-        - name: Check if file /var/lib/config-data/ansible-generated/frr/etc/frr/daemons exist
+        - name: Check if file /var/lib/openstack/frr/etc/frr/daemons exist
           ansible.builtin.stat:
-            path: /var/lib/config-data/ansible-generated/frr/etc/frr/daemons
+            path: /var/lib/openstack/frr/etc/frr/daemons
           register: check_frr_daemons_file
-        - name: Assert file /var/lib/config-data/ansible-generated/frr/etc/frr/daemons exist
+        - name: Assert file /var/lib/openstack/frr/etc/frr/daemons exist
           ansible.builtin.assert:
             that:
               - check_frr_daemons_file.stat.exists
-            fail_msg: "File /var/lib/config-data/ansible-generated/frr/etc/frr/daemons does not exist"
+            fail_msg: "File /var/lib/openstack/frr/etc/frr/daemons does not exist"
 
     - name: verify frr BGP and BFD firewall rules are applied
       block:

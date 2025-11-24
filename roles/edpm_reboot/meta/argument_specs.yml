@@ -17,7 +17,7 @@ argument_specs:
         description: Path to check for tripleo pre-adopted nodes
       edpm_reboot_edpm_node_config_dir:
         type: path
-        default: /var/lib/openstack/config
+        default: /var/lib/openstack
         description: Path for storing configuration of edpm nodes. This should be synced with edpm-ansible roles.
       edpm_reboot_timeout_reboot:
         type: int

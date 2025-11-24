@@ -47,7 +47,7 @@ argument_specs:
       edpm_ovn_bgp_agent_config_basedir:
         description: Location of BGP agent configuration base directory.
         type: path
-        default: "/var/lib/config-data/ansible-generated/ovn-bgp-agent"
+        default: "/var/lib/openstack/ovn-bgp-agent"
       edpm_ovn_bgp_agent_bgp_as:
         description: BGP Autonomous System number
         type: int
@@ -134,7 +134,7 @@ argument_specs:
           - /dev/log:/dev/log
           - /etc/iproute2:/etc/iproute2
           - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
-          - /var/lib/config-data/ansible-generated/ovn-bgp-agent:/var/lib/kolla/config_files/src:ro
+          - /var/lib/openstack/ovn-bgp-agent:/var/lib/kolla/config_files/src:ro
           - /run/frr:/run/frr:shared,z
           - /run/openvswitch:/run/openvswitch:shared,z
 
