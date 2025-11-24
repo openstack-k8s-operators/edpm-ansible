@@ -1,0 +1,10 @@
+---
+
+- name: Get running kernel version
+  ansible.builtin.command: uname -r
+  register: _edpm_accel_drivers_kernel_version_result
+  changed_when: false
+
+- name: Set kernel version fact
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_kernel_version: "{{ _edpm_accel_drivers_kernel_version_result.stdout | replace('.x86_64', '') }}"

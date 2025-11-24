@@ -13,6 +13,13 @@
 
 # non-containerized role jobs
 - job:
+    name: edpm-ansible-molecule-edpm_accel_drivers
+    parent: edpm-ansible-molecule-base
+    files:
+      - ^roles/edpm_accel_drivers/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_accel_drivers
+- job:
     name: edpm-ansible-molecule-edpm_bootstrap
     parent: edpm-ansible-molecule-base
     files:
