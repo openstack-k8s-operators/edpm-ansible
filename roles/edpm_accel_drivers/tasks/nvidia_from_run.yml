@@ -1,0 +1,29 @@
+---
+
+# NOTE: Compiling on the host is not supported, but it enables testing vGPU drivers on CS9 nodes
+- name: Print debug message for unsupported .run file installation
+  ansible.builtin.debug:
+    msg: >
+      Installing NVIDIA drivers from a .run file is UNSUPPORTED and may result in unexpected behavior.
+
+- ansible.builtin.import_tasks: nvidia_kernel_version.yml  # noqa: name[missing]
+
+- name: Install dependencies for .run driver installation (UNSUPPORTED)
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - pciutils
+      - gcc
+      - "kernel-headers-{{ _edpm_accel_drivers_kernel_version }}"
+      - "kernel-devel-{{ _edpm_accel_drivers_kernel_version }}"
+    state: present
+  register: _install_packages_result
+  until: _install_packages_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"
+
+- name: Execute .run file (UNSUPPORTED)
+  become: true
+  ansible.builtin.command: "{{ _edpm_accel_drivers_nvidia_temp_path }} --no-dkms --no-disable-nouveau --silent"
+  args:
+    creates: /usr/bin/nvidia-smi

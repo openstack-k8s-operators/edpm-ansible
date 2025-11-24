@@ -1,0 +1,38 @@
+---
+- name: Download NVIDIA driver package from repository
+  when: edpm_accel_drivers_nvidia_custom_url == ""
+  block:
+    - name: Import NVIDIA repos tasks
+      ansible.builtin.import_tasks: nvidia_repos.yml
+
+    - name: Download NVIDIA driver package
+      ansible.builtin.dnf:
+        name: "{{ edpm_accel_drivers_nvidia_package_name }}"
+        download_only: true
+      become: true
+      register: _edpm_accel_drivers_nvidia_package_download_result
+      until: _edpm_accel_drivers_nvidia_package_download_result is succeeded
+      retries: "{{ edpm_accel_drivers_download_retries }}"
+      delay: "{{ edpm_accel_drivers_download_delay }}"
+
+- name: Download NVIDIA driver package from custom URL
+  when: edpm_accel_drivers_nvidia_custom_url != ""
+  ansible.builtin.import_tasks: nvidia_custom_url.yml
+
+- name: Download requirements for .run driver installation (UNSUPPORTED)
+  when: (edpm_accel_drivers_nvidia_custom_url != "" | bool) and (_edpm_accel_drivers_is_run_file | bool)
+  block:
+    - ansible.builtin.import_tasks: nvidia_kernel_version.yml  # noqa: name[missing]
+    - name: Download requirements for .run driver installation (UNSUPPORTED)
+      ansible.builtin.dnf:
+        name:
+          - pciutils
+          - gcc
+          - "kernel-headers-{{ _edpm_accel_drivers_kernel_version }}"
+          - "kernel-devel-{{ _edpm_accel_drivers_kernel_version }}"
+        download_only: true
+      become: true
+      register: _edpm_accel_drivers_nvidia_deps_download_result
+      until: _edpm_accel_drivers_nvidia_deps_download_result is succeeded
+      retries: "{{ edpm_accel_drivers_download_retries }}"
+      delay: "{{ edpm_accel_drivers_download_delay }}"
