@@ -47,17 +47,17 @@ def set_molecule_tags(role_path, scenario='default'):
         if ('test_skip_tags' in data.keys() and data['test_skip_tags']
            and data.get('molecule_skip_tags_enforce', True)):
             mol_tags.append('--skip-tags')
-            if type(data['test_skip_tags']) == str:
+            if type(data['test_skip_tags']) is str:
                 mol_tags.append(data['test_skip_tags'])
-            elif type(data['test_skip_tags']) == list:
+            elif type(data['test_skip_tags']) is list:
                 mol_tags.append(",".join(data['test_skip_tags']))
 
         if ('test_tags' in data.keys() and data['test_tags']
            and data.get('molecule_tags_enforce', True)):
             mol_tags.append('--tags')
-            if type(data['test_tags']) == str:
+            if type(data['test_tags']) is str:
                 mol_tags.append(data['test_tags'])
-            elif type(data['test_tags']) == list:
+            elif type(data['test_tags']) is list:
                 mol_tags.append(",".join(data['test_tags']))
         return mol_tags
 

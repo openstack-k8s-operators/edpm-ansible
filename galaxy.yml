@@ -15,8 +15,8 @@ tags:
   - tools
   - networking
   - security
-  - RHOSP
-  - EDPM
+  - rhosp
+  - edpm
 dependencies:
   ansible.posix: '*'
   community.general: '*'

@@ -23,3 +23,4 @@ skip_list:
   - command-instead-of-shell
   - galaxy[version-incorrect]
   - no-handler
+  - var-naming
