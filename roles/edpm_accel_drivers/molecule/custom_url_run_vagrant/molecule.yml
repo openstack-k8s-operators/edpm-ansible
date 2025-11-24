@@ -1,0 +1,32 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: no
+  parallel: true
+  default_box: 'generic/centos9s'
+platforms:
+- name: compute-1
+  memory: 8192
+  cpus: 8
+  provider_options:
+    cpu_mode: 'host-passthrough'
+    nested: true
+    machine_type: 'q35'
+  groups:
+    - compute
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../custom_url_run/converge.yml
+    prepare: ../custom_url_run/prepare.yml
+    verify: ../custom_url_run/verify.yml
+verifier:
+  name: ansible
+scenario:
+  # we disable all tests so that we dont
+  # run this in ci.
+  test_sequence: []

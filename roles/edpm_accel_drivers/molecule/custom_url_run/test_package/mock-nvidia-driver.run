@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "#!/bin/sh" > /usr/bin/nvidia-smi
+echo "echo 'This is a mock version of nvidia-smi'" >> /usr/bin/nvidia-smi
+chmod a+x /usr/bin/nvidia-smi

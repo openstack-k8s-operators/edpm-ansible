@@ -1,0 +1,12 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Copy mock nvidia driver .run file into system under test
+      ansible.builtin.copy:
+        src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') | regex_replace('_vagrant$', '') }}/test_package/mock-nvidia-driver.run"
+        dest: /tmp/mock-nvidia-driver.run
+        mode: '0644'

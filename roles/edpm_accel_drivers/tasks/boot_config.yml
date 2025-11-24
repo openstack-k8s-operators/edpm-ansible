@@ -1,0 +1,20 @@
+---
+
+- name: Check if grub2-mkconfig has --update-bls-cmdline option
+  ansible.builtin.shell:
+    cmd: grub2-mkconfig --help | grep '\-\-update-bls-cmdline'
+  ignore_errors: true
+  register: _edpm_accel_drivers_check_update_bls_cmdline
+  changed_when: false
+
+- name: Regenerate initramfs
+  become: true
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - 'dracut --force'
+    - >-
+      grub2-mkconfig -o /boot/grub2/grub.cfg
+      {{ '--update-bls-cmdline'
+      if _edpm_accel_drivers_check_update_bls_cmdline.rc == 0
+      else '' }}
+  changed_when: true

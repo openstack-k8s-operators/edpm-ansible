@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_install_nvidia: true
+        edpm_accel_drivers_nvidia_custom_url: "file:///tmp/mock-nvidia-driver.rpm"
+        edpm_accel_drivers_nvidia_rpm_disable_gpg_check: true
