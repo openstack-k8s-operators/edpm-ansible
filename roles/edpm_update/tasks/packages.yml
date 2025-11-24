@@ -12,7 +12,7 @@
     _exclude_packages: >-
       {{
         _exclude_packages | default([]) +
-        edpm_update_exclude_packages +
+        edpm_update_exclude_packages | default([]) +
         ['openvswitch'] |
         ansible.builtin.unique
       }}
