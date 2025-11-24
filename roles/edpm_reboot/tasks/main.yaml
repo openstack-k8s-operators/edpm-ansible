@@ -34,13 +34,17 @@
   register: needs_restarting_output
   changed_when: false
   failed_when: needs_restarting_output.rc >= 2
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Print return information from needs-restarting
   ansible.builtin.debug:
     var: needs_restarting_output.stdout
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
 
 - name: Create reboot file for needs-restarting
-  when: needs_restarting_output.rc == 1
+  when:
+    - ansible_local.bootc is not defined or not ansible_local.bootc
+    - needs_restarting_output.rc == 1
   become: true
   block:
     - name: Create a reboot_required directory if it does not exist

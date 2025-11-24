@@ -18,8 +18,31 @@
 - name: Update bootc image
   ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
-  register: bootc_result
-  changed_when: bootc_result.rc != 0
+  register: bootc_switch_result
+  failed_when: bootc_switch_result.rc != 0
+  changed_when: false
+
+- name: Get bootc status after switch
+  ansible.builtin.shell: bootc status --format json
+  become: true
+  register: bootc_status
+  changed_when: false
+
+- name: Determine if update was applied
+  ansible.builtin.set_fact:
+    bootc_result:
+      changed: "{{
+        (bootc_status.stdout | from_json).status.staged is not none and
+        (bootc_status.stdout | from_json).status.staged.image.imageDigest != (bootc_status.stdout | from_json).status.booted.image.imageDigest }}"
+
+- name: Log bootc update status and reboot required information
+  ansible.builtin.debug:
+    msg: >-
+      {% if bootc_result.changed %}
+      Change/Update detected. Ready to reboot. Plan your reboot strategy before the reboot. Reboot can be disruptive and cannot be undone.
+      {% else %}
+      No change detected. Already running desired image. No reboot required.
+      {% endif %}
 
 - name: Create directory required by edpm-reboot role
   become: true
