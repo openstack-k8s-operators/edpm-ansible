@@ -1,20 +1,14 @@
 ---
 dependency:
   name: galaxy
-  options:
-    role-file: collections.yml
 driver:
-  name: podman
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
 platforms:
-- command: /sbin/init
-  dockerfile: ../../../../molecule/common/Containerfile.j2
-  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
-  name: instance
-  privileged: true
-  registry:
-    url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
-  volumes:
-  - /run/udev:/run/udev
+  - name: edpm_multipathd
 provisioner:
   name: ansible
   log: true

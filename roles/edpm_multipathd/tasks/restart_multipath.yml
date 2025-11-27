@@ -1,0 +1,36 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Run multipath restart tasks with root privileges
+  become: true
+  block:
+    - name: Restart the multipathd service
+      ansible.builtin.systemd_service:
+        name: multipathd
+        state: restarted
+
+    - name: Identify containers using /etc/multipath.conf
+      ansible.builtin.command: "{{ edpm_container_cli }} ps --filter volume=/etc/multipath.conf --format {{ '{{' }}.Names{{ '}}' }}"
+      register: multipath_conf_containers
+      changed_when: false
+
+    - name: "Restart container to refresh its /etc/multipath.conf"
+      ansible.builtin.systemd:
+        name: "edpm_{{ multipath_container }}"
+        state: restarted
+      loop: "{{ multipath_conf_containers.stdout_lines | default([]) }}"
+      loop_control:
+        loop_var: multipath_container
