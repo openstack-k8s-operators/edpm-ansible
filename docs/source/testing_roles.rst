@@ -40,7 +40,7 @@ Creating a VM to run molecule
 
 The
 `edpm_libvirt <https://github.com/openstack-k8s-operators/edpm-ansible/tree/main/roles/edpm_libvirt>`_
-molecule senario uses the delegated driver to run against localhost.
+molecule scenario uses the delegated driver to run against localhost.
 Thus, it's better to run it inside an ephemeral virtual machine as
 it cannot be run insider of a container.
 
@@ -94,7 +94,7 @@ following.
 Writing molecule tests
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Molecule scenario configutration is made up of several files, all
+Molecule scenario configuration is made up of several files, all
 stored in the `molecule/<scenario>/` directory.
 
 * `molecule/default/molecule.yml` (mandatory):

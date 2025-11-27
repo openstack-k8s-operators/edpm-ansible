@@ -2,7 +2,7 @@
 edpm_libvirt
 ************
 
-The edpm_libvirt default molecule senario uses
+The edpm_libvirt default molecule scenario uses
 the delegated driver to run against localhost.
 
 As such this should only be executed on a disposable host.

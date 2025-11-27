@@ -1,6 +1,6 @@
 ---
 
-- name: Install addditional packages
+- name: Install additional packages
   ansible.builtin.dnf:
     name: "{{ edpm_kernel_extra_packages }}"
     download_only: true
