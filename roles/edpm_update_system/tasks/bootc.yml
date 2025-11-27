@@ -18,23 +18,31 @@
 - name: Update bootc image
   ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
-  register: bootc_result
-  changed_when: bootc_result.rc != 0
+  register: _bootc_switch_result
+  changed_when: "'unchanged' not in _bootc_switch_result.stdout"
 
-- name: Create directory required by edpm-reboot role
+- name: Check bootc status to see if a reboot is required
+  ansible.builtin.command: bootc status --format=json
+  become: true
+  register: _bootc_status_result
+  changed_when: false
+
+- name: Parse bootc status output
+  ansible.builtin.set_fact:
+    bootc_status_json: "{{ _bootc_status_result.stdout | from_json }}"
+
+- name: Create reboot_required directory if a deployment is staged
   become: true
   ansible.builtin.file:
     path: /var/lib/openstack/reboot_required/
     state: directory
     mode: "0755"
-  when:
-    - bootc_result.changed
+  when: bootc_status_json.status.staged is not none
 
-- name: Create required file to enforce a reboot
+- name: Create bootc_reboot file if a deployment is staged
   become: true
   ansible.builtin.file:
     path: /var/lib/openstack/reboot_required/bootc_reboot
     state: touch
     mode: "0600"
-  when:
-    - bootc_result.changed
+  when: bootc_status_json.status.staged is not none
