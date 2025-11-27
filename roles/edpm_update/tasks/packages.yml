@@ -28,3 +28,13 @@
     exclude: "{{ _exclude_packages }}"
   tags:
     - edpm_update
+
+- name: Add system reboot required message
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_reboot
+    tasks_from: needsreboot
+  vars:
+    edpm_reboot_strategy: "never"
+  become: true
+  tags:
+    - edpm_update
