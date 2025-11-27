@@ -15,6 +15,11 @@
 # under the License.
 
 
+- name: Fail if edpm_update_system_bootc_os_container_image is not provided
+  ansible.builtin.fail:
+    msg: The 'edpm_update_system_bootc_os_container_image' variable is not set. Please set the value to the bootc OS image to update to.
+  when: not edpm_update_system_bootc_os_container_image
+
 - name: Update bootc image
   ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
