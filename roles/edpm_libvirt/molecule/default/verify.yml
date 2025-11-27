@@ -34,22 +34,22 @@
         # rhel installed services have service units defiend via rpm in
         # /usr/lib/systemd/system so disable the check for them them in
         # /etc/systemd/system
-        - { "name": "virtlogd.service", "osp_service": false, "enabled": "enabled" }
-        - { "name": "virtnodedevd.service" , "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
-        - { "name": "virtproxyd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
-        - { "name": "virtqemud.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
-        - { "name": "virtsecretd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"] }
-        - { "name": "libvirtd.service", "osp_service": false, "enabled": "masked", "active": ["inactive"] }
-        - { "name": "libvirtd-tcp.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"] }
-        - { "name": "libvirtd-tls.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"] }
-        - { "name": "virtproxyd-tcp.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"] }
+        - {"name": "virtlogd.service", "osp_service": false, "enabled": "enabled"}
+        - {"name": "virtnodedevd.service" , "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"]}
+        - {"name": "virtproxyd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"]}
+        - {"name": "virtqemud.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"]}
+        - {"name": "virtsecretd.service", "osp_service": false, "enabled": "enabled", "active": ["active", "inactive"]}
+        - {"name": "libvirtd.service", "osp_service": false, "enabled": "masked", "active": ["inactive"]}
+        - {"name": "libvirtd-tcp.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"]}
+        - {"name": "libvirtd-tls.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"]}
+        - {"name": "virtproxyd-tcp.socket", "osp_service": false, "enabled": "masked", "active": ["inactive"]}
 
     - name: ensure libvirt.target exist and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "edpm_libvirt.target", "enabled": "static"}
-        - { "name": "edpm_libvirt_guests.service", "running":false }
-        - { "name": "virt-guest-shutdown.target", "enabled": "static", "running":false }
+        - {"name": "edpm_libvirt.target", "enabled": "static"}
+        - {"name": "edpm_libvirt_guests.service", "running":false}
+        - {"name": "virt-guest-shutdown.target", "enabled": "static", "running":false}
     - name: Check if user exists
       ansible.builtin.getent:
         database: passwd
@@ -87,20 +87,20 @@
     - name: ensure libvirt sockets are enabled
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "virtlogd-admin.socket", "osp_service": false }
-        - { "name": "virtlogd.socket", "osp_service": false }
-        - { "name": "virtnodedevd-admin.socket", "osp_service": false }
-        - { "name": "virtnodedevd-ro.socket", "osp_service": false }
-        - { "name": "virtnodedevd.socket", "osp_service": false }
-        - { "name": "virtproxyd-admin.socket", "osp_service": false }
-        - { "name": "virtproxyd-ro.socket", "osp_service": false }
-        - { "name": "virtproxyd.socket", "osp_service": false }
-        - { "name": "virtqemud-admin.socket", "osp_service": false }
-        - { "name": "virtqemud-ro.socket", "osp_service": false }
-        - { "name": "virtqemud.socket", "osp_service": false }
-        - { "name": "virtsecretd-admin.socket", "osp_service": false }
-        - { "name": "virtsecretd-ro.socket", "osp_service": false }
-        - { "name": "virtsecretd.socket", "osp_service": false }
+        - {"name": "virtlogd-admin.socket", "osp_service": false}
+        - {"name": "virtlogd.socket", "osp_service": false}
+        - {"name": "virtnodedevd-admin.socket", "osp_service": false}
+        - {"name": "virtnodedevd-ro.socket", "osp_service": false}
+        - {"name": "virtnodedevd.socket", "osp_service": false}
+        - {"name": "virtproxyd-admin.socket", "osp_service": false}
+        - {"name": "virtproxyd-ro.socket", "osp_service": false}
+        - {"name": "virtproxyd.socket", "osp_service": false}
+        - {"name": "virtqemud-admin.socket", "osp_service": false}
+        - {"name": "virtqemud-ro.socket", "osp_service": false}
+        - {"name": "virtqemud.socket", "osp_service": false}
+        - {"name": "virtsecretd-admin.socket", "osp_service": false}
+        - {"name": "virtsecretd-ro.socket", "osp_service": false}
+        - {"name": "virtsecretd.socket", "osp_service": false}
 
     - name: ensure libvirt socket activation drop-in directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_sockets_exits.yaml"
