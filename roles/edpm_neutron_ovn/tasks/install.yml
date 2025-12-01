@@ -33,3 +33,25 @@
     group: "{{ ansible_user | default(ansible_user_id) }}"
   loop:
     - {'path': "{{ edpm_neutron_ovn_agent_config_dir }}"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/kill_scripts", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/ovn-agent-proxy", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/external/pids", "mode": "0755"}
+
+- name: Configure sidecar containers scripts
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_ovn_agent_lib_dir }}/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  loop:
+    - {"src": "wrappers/haproxy.j2", "dest": "ovn_agent_haproxy_wrapper"}
+
+- name: Configure kill_scripts for sidecar containers
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ edpm_neutron_ovn_agent_lib_dir }}/kill_scripts/{{ item.dest }}"
+    setype: "container_file_t"
+    mode: "0755"
+  loop:
+    - {"src": "wrappers/kill-script.j2", "dest": "haproxy-kill"}

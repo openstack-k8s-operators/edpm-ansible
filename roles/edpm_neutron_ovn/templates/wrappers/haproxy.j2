@@ -1,0 +1,21 @@
+#!/bin/bash
+
+{% if edpm_neutron_ovn_agent_sidecar_debug -%}
+set -x
+{%- endif %}
+
+ARGS="$@"
+
+IMAGE_NAME={{ edpm_neutron_ovn_agent_sidecar_haproxy_image_name }}
+NEUTRON_CONFIG_DIR={{ edpm_neutron_ovn_agent_config_dir }}
+NEUTRON_LIB_DIR={{ edpm_neutron_ovn_agent_lib_dir }}
+
+{% raw -%}
+# Extract the network namespace UUID from the process started by neutron.
+NETNS=$(ip netns identify)
+NAME_PREFIX=neutron-haproxy
+NAME="${NAME_PREFIX}-${NETNS}"
+CMD=(/bin/bash -c "exec /usr/sbin/haproxy -Ws $ARGS")
+{%- endraw %}
+
+{% include 'common_part.j2' %}

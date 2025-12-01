@@ -12,13 +12,22 @@ edpm_neutron_ovn_images_download_retries: "{{ edpm_download_retries | default(5)
 
 edpm_neutron_ovn_config_src: "/var/lib/openstack/configs/{{ edpm_neutron_ovn_service_name }}"
 edpm_neutron_ovn_agent_config_dir: /var/lib/config-data/ansible-generated/neutron-ovn-agent
+edpm_neutron_ovn_agent_lib_dir: "/var/lib/neutron"
 
 edpm_neutron_ovn_agent_image: "quay.io/podified-antelope-centos9/openstack-neutron-ovn-agent:current-podified"
 
 edpm_neutron_ovn_common_volumes:
   - /run/openvswitch:/run/openvswitch:z
   - "{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z"
+  - /run/netns:/run/netns:shared
   - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
+  - "{{ edpm_neutron_ovn_agent_lib_dir }}:/var/lib/neutron:shared,z"
+  - "{{ edpm_neutron_ovn_agent_lib_dir }}/ovn_agent_haproxy_wrapper:/usr/local/bin/haproxy:ro"
+  - "{{ edpm_neutron_ovn_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
+
+# Sidecar containers settings
+edpm_neutron_ovn_agent_sidecar_debug: false
+edpm_neutron_ovn_agent_sidecar_haproxy_image_name: "{{ edpm_neutron_ovn_agent_image }}"
 
 edpm_neutron_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_neutron_ovn_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_neutron_ovn_service_name }}/tls-ca-bundle.pem"
@@ -36,7 +45,7 @@ edpm_neutron_ovn_agent_DEFAULT_host: '{{ ansible_facts["nodename"] }}'  # also i
 
 # rootwrap.conf
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_filters_path: '/usr/share/neutron/rootwrap'
-edpm_neutron_ovn_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin'
+edpm_neutron_ovn_agent_rootwrap_DEFAULT_exec_dirs: '/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin,/etc/neutron/kill_scripts'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_use_syslog: 'False'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_syslog_log_facility: 'syslog'
 edpm_neutron_ovn_agent_rootwrap_DEFAULT_syslog_log_level: 'ERROR'
