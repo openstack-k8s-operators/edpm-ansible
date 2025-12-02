@@ -26,7 +26,7 @@ roles, a new role should be submitted in the same PR implementing it.
 If possible, playbooks should not use tasks directly, only trough a role.
 
 Playbooks must use following basic layout. Exposing variables, `edpm_override_hosts`,
-`edpm_max_fail_percentage` and `edpm_any_errors_fatal`.
+`edpm_max_fail_percentage`, `edpm_any_errors_fatal`, and `edpm_playbook_environment`.
 
 .. code-block:: YAML
 
@@ -36,8 +36,33 @@ Playbooks must use following basic layout. Exposing variables, `edpm_override_ho
       become: true
       any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
       max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
+      environment: "{{ edpm_playbook_environment | default({}) }}"
 
 This allows for more granular error handling and playbook application by operators.
+
+Environment Variables
+++++++++++++++++++++++
+
+All playbooks must include the `environment` key at the top level (play level) that
+references the `edpm_playbook_environment` variable. This variable allows operators
+to set environment variables (such as proxy settings) that will be applied to all
+tasks within the playbook.
+
+The `edpm_playbook_environment` variable should be a dictionary containing
+environment variable key-value pairs. If not defined, it defaults to an empty
+dictionary, ensuring backward compatibility.
+
+Example usage:
+
+.. code-block:: YAML
+
+    edpm_playbook_environment:
+      HTTP_PROXY: "http://proxy.example.com:8080"
+      HTTPS_PROXY: "http://proxy.example.com:8080"
+      NO_PROXY: "localhost,127.0.0.1"
+      http_proxy: "http://proxy.example.com:8080"
+      https_proxy: "http://proxy.example.com:8080"
+      no_proxy: "localhost,127.0.0.1"
 
 Error handling
 ++++++++++++++
