@@ -49,3 +49,18 @@
         owner: root
         group: root
         mode: 0755
+
+    - name: Create a second dummy network interface (for remove-config test)
+      ansible.builtin.command: "ip link add dummy1 type dummy"
+      register: ip_command_output_1
+      changed_when: ip_command_output_1.rc == 0
+      failed_when: ip_command_output_1.rc != 0
+    - name: Write a stale ifcfg for dummy1 (should be removed)
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/sysconfig/network-scripts/ifcfg-dummy1
+        mode: '0644'
+        content: |
+          DEVICE=dummy1
+          BOOTPROTO=none
+          ONBOOT=yes
