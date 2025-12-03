@@ -131,6 +131,13 @@ edpm_cleanup_remove_config_dirs: true
 # Remove containers with managed_by=edpm_ansible label that are not tracked in state file
 edpm_cleanup_orphaned_containers: false
 
+# List of container names to exclude from orphaned container cleanup
+# These containers use edpm_container_manage which doesn't track state
+edpm_cleanup_excluded_containers:
+  - nova_compute
+  - nova_compute_init
+  - nova_nvme_cleaner
+
 # Generic paths to clean up per service
 # Use __SERVICE_NAME__ as a placeholder that will be replaced during cleanup
 edpm_cleanup_generic_paths:
@@ -187,8 +194,12 @@ edpm_cleanup_orphaned_containers: true
 **How it works:**
 1. Queries all containers with `managed_by=edpm_ansible` label
 2. Compares against containers tracked in state file
-3. Removes any containers not found in state file
-4. Logs the list of orphaned containers before removal
+3. Excludes containers listed in `edpm_cleanup_excluded_containers`
+4. Removes any containers not found in state file
+5. Logs the list of orphaned containers before removal
+
+**Excluded Containers:**
+Some containers (like nova_compute) use `edpm_container_manage` which adds the `managed_by=edpm_ansible` label but doesn't track containers in the state file. These are excluded by default via `edpm_cleanup_excluded_containers` to prevent accidental removal.
 
 **Use Cases:**
 - Cleaning up after failed migrations
@@ -258,6 +269,26 @@ Benefits of the new approach:
     edpm_services:
       - nova
     edpm_cleanup_orphaned_containers: true
+  roles:
+    - osp.edpm.edpm_cleanup
+```
+
+### Customize Excluded Containers
+
+By default, nova containers are excluded from orphaned cleanup because they use `edpm_container_manage` which doesn't track state. You can customize this list:
+
+```yaml
+- hosts: edpm_nodes
+  vars:
+    edpm_services:
+      - nova
+    edpm_cleanup_orphaned_containers: true
+    # Add or remove containers from exclusion list
+    edpm_cleanup_excluded_containers:
+      - nova_compute
+      - nova_compute_init
+      - nova_nvme_cleaner
+      - my_custom_container
   roles:
     - osp.edpm.edpm_cleanup
 ```

@@ -120,7 +120,12 @@
 
     - name: Identify orphaned containers
       ansible.builtin.set_fact:
-        _edpm_orphaned_containers: "{{ _edpm_all_managed_containers | difference(_edpm_tracked_containers) }}"
+        _edpm_orphaned_containers: >-
+          {{
+            _edpm_all_managed_containers |
+            difference(_edpm_tracked_containers) |
+            difference(edpm_cleanup_excluded_containers | default([]))
+          }}
 
     - name: Remove orphaned containers
       ansible.builtin.include_role:

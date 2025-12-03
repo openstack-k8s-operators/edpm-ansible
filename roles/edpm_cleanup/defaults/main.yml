@@ -29,6 +29,13 @@ edpm_cleanup_remove_config_dirs: true
 # Remove containers with managed_by=edpm_ansible label that are not tracked in state file
 edpm_cleanup_orphaned_containers: false
 
+# List of container names to exclude from orphaned container cleanup
+# These containers use edpm_container_manage which doesn't track state
+edpm_cleanup_excluded_containers:
+  - nova_compute
+  - nova_compute_init
+  - nova_nvme_cleaner
+
 # Generic paths to clean up per service
 # Use __SERVICE_NAME__ as a placeholder that will be replaced during cleanup
 edpm_cleanup_generic_paths:
