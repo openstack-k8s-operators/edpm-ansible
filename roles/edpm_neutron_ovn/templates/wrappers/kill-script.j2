@@ -1,0 +1,6 @@
+#!/bin/bash
+{% if edpm_neutron_ovn_agent_sidecar_debug -%}
+set -x
+{%- endif %}
+
+{% include 'kill-script_common_part.j2' %}
