@@ -48,6 +48,18 @@ argument_specs:
           Remove containers with managed_by=edpm_ansible label that are not tracked in state file.
           Use with caution - only enable if you want to clean up orphaned containers.
         type: bool
+      edpm_cleanup_excluded_containers:
+        default:
+          - nova_compute
+          - nova_compute_init
+          - nova_nvme_cleaner
+        description: |
+          List of container names to exclude from orphaned container cleanup.
+          These containers use edpm_container_manage which doesn't track state in the
+          deployed_services.yaml file. Without this exclusion, they would be incorrectly
+          identified as orphaned when edpm_cleanup_orphaned_containers is enabled.
+        type: list
+        elements: str
       edpm_cleanup_generic_paths:
         default:
           - "/var/lib/openstack/healthchecks/__SERVICE_NAME__"
