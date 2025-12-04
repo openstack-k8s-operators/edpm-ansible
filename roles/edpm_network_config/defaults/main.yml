@@ -61,5 +61,5 @@ edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: true
 # Control resolv.conf management by NetworkManager
 # false = disable NetworkManager resolv.conf update (default)
-# true = enable NetworkManager resolv.conf updat
+# true = enable NetworkManager resolv.conf update
 edpm_bootstrap_network_resolvconf_update: "{{ edpm_network_config_nmstate | default(True) }}"

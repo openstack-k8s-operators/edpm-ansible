@@ -36,7 +36,7 @@ All roles must have an `argument specification`_ metadata, for all of their endp
 in the `roles/<NEWROLENAME>/meta/argument_specs.yml` file.
 
 Argument specs allow for validity checks on arguments passed to the role in playbooks,
-while also providing bulk of the information neccessary for automated doc build.
+while also providing bulk of the information necessary for automated doc build.
 This both prevents unnecessary bugs, and simplifies documentation upkeep.
 
 Argument specification must contain definition of argument types, defaults and descriptions.
@@ -119,7 +119,7 @@ Tasks
 
 All tasks of the role must accurately report whether or not they have performed
 changes on the target machine. This is especially important when tasks invoke
-modules which do not properly implement change reporting, for example `ansible.buildin.cmd`.
+modules which do not properly implement change reporting, for example `ansible.builtin.cmd`.
 
 In these cases, `changed_when`_ and `failed_when`_ constructs must be used.
 Just like other `conditionals`_, the conditionals used to define change and failure should
@@ -144,7 +144,7 @@ like dictionaries or lists, in order to strain on human parser.
 Privilege escalation
 ++++++++++++++++++++
 
-`Privilege escalation`_, or `become`, must be used only when neccessary.
+`Privilege escalation`_, or `become`, must be used only when necessary.
 Only tasks that have to be executed under root privileges should receive them.
 Even if there are multiple tasks requiring root privileges, separated by others that can operate
 under normal user, the entire role must not operate under them.

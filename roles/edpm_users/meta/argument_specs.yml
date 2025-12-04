@@ -27,6 +27,6 @@ argument_specs:
           - {"path": "/var/lib/vhost_sockets", "owner": "qemu", "group": "qemu", "setype": "virt_cache_t", "seuser": "system_u", "mode": "0755"}
         description: |
           The list of directories to create on the compute node for communication with host processes.
-          This shoudl only be used for directories that are required to be shared between containers and host processes.
+          This should only be used for directories that are required to be shared between containers and host processes.
           Where the host directories are created solely for the purpose of sharing content between containers or
           to persist data this should not be used.

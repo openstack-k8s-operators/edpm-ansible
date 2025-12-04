@@ -317,7 +317,7 @@ class EdpmContainerManage:
         if 'remove' in opts:
             opts['rm'] = opts.pop('remove')
         if 'restart' in opts:
-            # NOTE(mwhahaha): converation from edpm format to podman as
+            # NOTE(mwhahaha): conversion from edpm format to podman as
             # systemd handles this restart config
             opts['restart'] = False
             opts['state'] = 'created'

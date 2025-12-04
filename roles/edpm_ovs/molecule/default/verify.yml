@@ -16,7 +16,7 @@
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        # rhel installed services have service units defiend via rpm in
+        # rhel installed services have service units defined via rpm in
         # /usr/lib/systemd/system so disable the check for them them in
         # /etc/systemd/system
         - { "name": "openvswitch.service", "osp_service": false, "enabled": "enabled" }

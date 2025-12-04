@@ -1,5 +1,5 @@
 ---
-- name: Install addditional packages
+- name: Install additional packages
   ansible.builtin.dnf:
     name: "{{ edpm_libvirt_packages }}"
     download_only: true

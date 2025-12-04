@@ -25,7 +25,7 @@ edpm_libvirt_service_name: libvirt
 edpm_libvirt_download_delay: "{{ edpm_download_delay | default(60) }}"
 # number of retries for download tasks
 edpm_libvirt_download_retries: "{{ edpm_download_retries | default(5) }}"
-# this sould map to the libvirt
+# this should map to the libvirt
 edpm_libvirt_services:
   - virtlogd
   - virtnodedevd
@@ -33,7 +33,7 @@ edpm_libvirt_services:
   - virtqemud
   - virtsecretd
 # List of services to stop during adoption
-# (container nova_virtlod is handled separetly)
+# (container nova_virtlod is handled separately)
 edpm_libvirt_old_tripleo_compute_sevices:
   - tripleo_nova_libvirt.target
   - tripleo_nova_virtlogd_wrapper.service
@@ -50,7 +50,7 @@ edpm_libvirt_packages:
   - libvirt-admin {{ edpm_libvirt_range }}
   - libvirt-client {{ edpm_libvirt_range }}
   - libvirt-daemon {{ edpm_libvirt_range }}
-  # qemu pakcages
+  # qemu packages
   - qemu-kvm
   - qemu-img
   # libguestfs is need for config drive and ephermeral disks
