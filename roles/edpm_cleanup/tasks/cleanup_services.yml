@@ -1,0 +1,138 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check if state file exists
+  ansible.builtin.stat:
+    path: "{{ edpm_container_state_file }}"
+  register: _edpm_cleanup_state_file_stat
+
+- name: Fail if state file doesn't exist
+  ansible.builtin.fail:
+    msg: "State file {{ edpm_container_state_file }} not found. Cannot proceed with cleanup."
+  when: not _edpm_cleanup_state_file_stat.stat.exists
+
+- name: Read state file
+  ansible.builtin.slurp:
+    src: "{{ edpm_container_state_file }}"
+  register: _edpm_cleanup_state_file_content
+
+- name: Parse state file data
+  ansible.builtin.set_fact:
+    _edpm_cleanup_state_data: >-
+      {{
+        (_edpm_cleanup_state_file_content.content | b64decode | from_yaml | default({})) |
+        combine({'services': {}}, recursive=True)
+      }}
+
+- name: Determine services to clean up (services in state file not in edpm_services)
+  ansible.builtin.set_fact:
+    _edpm_services_to_cleanup: >-
+      {{
+        _edpm_cleanup_state_data.services.keys() | default([]) |
+        difference(edpm_services | default([])) |
+        list
+      }}
+
+- name: Cleanup each service
+  ansible.builtin.include_tasks: cleanup_single_service.yml
+  loop: "{{ _edpm_services_to_cleanup }}"
+  loop_control:
+    loop_var: _edpm_cleanup_service_name
+  when:
+    - _edpm_services_to_cleanup | length > 0
+    - _edpm_cleanup_service_name in _edpm_cleanup_state_data.services.keys()
+
+- name: Remove services from state file
+  when:
+    - _edpm_services_to_cleanup | length > 0
+  block:
+    - name: Initialize filtered services dict
+      ansible.builtin.set_fact:
+        _edpm_cleanup_services_filtered: {}
+
+    - name: Add services to filtered dict (exclude services to remove)
+      ansible.builtin.set_fact:
+        _edpm_cleanup_services_filtered: >-
+          {{
+            _edpm_cleanup_services_filtered | combine({
+              item.key: item.value
+            })
+          }}
+      loop: "{{ _edpm_cleanup_state_data.services | dict2items }}"
+      when: item.key not in _edpm_services_to_cleanup
+
+    - name: Update state data with filtered services
+      ansible.builtin.set_fact:
+        _edpm_cleanup_state_data:
+          services: "{{ _edpm_cleanup_services_filtered }}"
+
+    - name: Write updated state file
+      become: true
+      ansible.builtin.copy:
+        content: "{{ _edpm_cleanup_state_data | to_nice_yaml }}"
+        dest: "{{ edpm_container_state_file }}"
+        mode: '0644'
+
+- name: Cleanup orphaned containers
+  when: edpm_cleanup_orphaned_containers | bool
+  block:
+    - name: Get all edpm_ansible managed containers
+      become: true
+      containers.podman.podman_container_info:
+      register: _edpm_all_containers
+
+    - name: Build list of tracked container names
+      ansible.builtin.set_fact:
+        _edpm_tracked_containers: >-
+          {{
+            _edpm_cleanup_state_data.services.values() |
+            map(attribute='containers') |
+            flatten |
+            list
+          }}
+
+    - name: Build list of managed containers
+      ansible.builtin.set_fact:
+        _edpm_all_managed_containers: []
+
+    - name: Filter managed containers
+      ansible.builtin.set_fact:
+        _edpm_all_managed_containers: "{{ _edpm_all_managed_containers + [item.Name] }}"
+      loop: "{{ _edpm_all_containers.containers | default([]) }}"
+      when:
+        - item['Config'] is defined
+        - item['Config']['Labels'] is defined
+        - item['Config']['Labels']['managed_by'] is defined
+        - item['Config']['Labels']['managed_by'] == 'edpm_ansible'
+
+    - name: Identify orphaned containers
+      ansible.builtin.set_fact:
+        _edpm_orphaned_containers: >-
+          {{
+            _edpm_all_managed_containers |
+            difference(_edpm_tracked_containers) |
+            difference(edpm_cleanup_excluded_containers | default([]))
+          }}
+
+    - name: Remove orphaned containers
+      ansible.builtin.include_role:
+        name: edpm_container_rm
+      vars:
+        edpm_containers_to_rm: ["{{ _edpm_orphaned_container }}"]
+      loop: "{{ _edpm_orphaned_containers }}"
+      loop_control:
+        loop_var: _edpm_orphaned_container
+      when: _edpm_orphaned_containers | length > 0

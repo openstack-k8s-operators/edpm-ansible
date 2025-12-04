@@ -60,7 +60,7 @@
 
 - name: Configure FRR
   ansible.builtin.template:
-    src: frr.conf.j2
+    src: config/frr.conf.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
     mode: '0644'
     selevel: s0
@@ -69,7 +69,7 @@
 
 - name: Configure FRR daemons
   ansible.builtin.template:
-    src: daemons.j2
+    src: config/daemons.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/daemons"
     mode: '0644'
     selevel: s0

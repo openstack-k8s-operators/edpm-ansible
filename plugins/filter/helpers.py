@@ -41,7 +41,7 @@ class FilterModule:
         :param container_infos: list
         :param config: dict
         :param config_id: string
-        :param clean_orphans: bool
+        :param clean_orphans: bool (DEPRECATED - use edpm_cleanup_orphaned_containers instead)
         :param check_config: bool to whether or not check if config changed
         :returns: list
         """

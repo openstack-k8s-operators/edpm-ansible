@@ -1,0 +1,43 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# All variables intended for modification should be placed in this file.
+# All variables within this role should have a prefix of "edpm_cleanup"
+
+# Generic container variables (shared across roles)
+# These defaults ensure the cleanup role can work independently
+edpm_container_state_file: /var/lib/edpm-config/deployed_services.yaml
+edpm_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
+edpm_container_kolla_config_dir: /var/lib/kolla/config_files
+
+# Remove container startup config directories during cleanup
+edpm_cleanup_remove_config_dirs: true
+
+# Remove containers with managed_by=edpm_ansible label that are not tracked in state file
+edpm_cleanup_orphaned_containers: false
+
+# List of container names to exclude from orphaned container cleanup
+# These containers use edpm_container_manage which doesn't track state
+edpm_cleanup_excluded_containers:
+  - nova_compute
+  - nova_compute_init
+  - nova_nvme_cleaner
+
+# Generic paths to clean up per service
+# Use __SERVICE_NAME__ as a placeholder that will be replaced during cleanup
+edpm_cleanup_generic_paths:
+  - "/var/lib/openstack/healthchecks/__SERVICE_NAME__"
+  - "/var/lib/openstack/__SERVICE_NAME__"
