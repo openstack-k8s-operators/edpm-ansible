@@ -1,0 +1,13 @@
+---
+
+- name: Blacklist nouveau driver
+  when: edpm_accel_drivers_blacklist_nouveau | bool
+  ansible.builtin.import_tasks: blacklist_nouveau.yml
+
+- name: NVIDIA Driver installation
+  when: edpm_accel_drivers_install_nvidia | bool
+  ansible.builtin.import_tasks: nvidia_drivers.yml
+
+- name: Run boot configuration tasks
+  when: edpm_accel_drivers_install_nvidia | bool or _edpm_accel_drivers_blacklist_nouveau_result.changed | bool
+  ansible.builtin.import_tasks: boot_config.yml

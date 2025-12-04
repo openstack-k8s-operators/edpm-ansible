@@ -76,3 +76,12 @@
   tags:
     - edpm_iscsid
     - download_cache
+
+- name: Download packages for edpm_accel_drivers role
+  when: '"accel_drivers" in edpm_download_cache_running_services'
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_accel_drivers
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_accel_drivers
+    - download_cache
