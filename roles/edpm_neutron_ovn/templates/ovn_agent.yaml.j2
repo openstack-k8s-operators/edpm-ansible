@@ -1,5 +1,7 @@
 image: "{{ edpm_neutron_ovn_agent_image }}"
 net: host
+pid: host
+cgroupns: host
 privileged: true
 user: root
 restart: always
