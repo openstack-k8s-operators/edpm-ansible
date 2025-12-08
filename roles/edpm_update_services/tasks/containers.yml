@@ -113,10 +113,10 @@
     - edpm_update_services
   when: '"neutron-ovn" in edpm_update_services_running_services'
 
-- name: Updates containers for edpm_multipathd role
+- name: Updates multipathd service for edpm_multipathd role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_multipathd
-    tasks_from: run.yml
+    tasks_from: update.yml
     apply:
       become: true
   tags:

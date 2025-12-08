@@ -1,11 +1,11 @@
 ---
 
-- name: Download needed container
-  containers.podman.podman_image:
-    name: "{{ edpm_multipathd_image }}"
-    auth_file: "{{ edpm_download_cache_podman_auth_file }}"
+- name: Download multipathd packages
+  ansible.builtin.dnf:
+    name: "{{ edpm_multipathd_packages }}"
+    download_only: true
   become: true
-  register: edpm_multipathd_image_download
-  until: edpm_multipathd_image_download.failed == false
-  retries: "{{ edpm_multipathd_image_download_retries }}"
-  delay: "{{ edpm_multipathd_image_download_delay }}"
+  register: edpm_multipathd_packages_install
+  until: edpm_multipathd_packages_install is succeeded
+  retries: "{{ edpm_multipathd_download_retries }}"
+  delay: "{{ edpm_multipathd_download_delay }}"

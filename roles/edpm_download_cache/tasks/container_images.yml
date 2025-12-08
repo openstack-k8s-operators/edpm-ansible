@@ -52,15 +52,6 @@
     - edpm_neutron_ovn
     - download_cache
 
-- name: Download images for edpm_multipathd role
-  when: '"nova" in edpm_download_cache_running_services'
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_multipathd
-    tasks_from: download_cache.yml
-  tags:
-    - edpm_multipathd
-    - download_cache
-
 - name: Download images for edpm_nova role
   when: '"nova" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
