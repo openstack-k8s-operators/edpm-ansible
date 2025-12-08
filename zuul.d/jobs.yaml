@@ -76,6 +76,13 @@
     vars:
       TEST_RUN: edpm_iscsid
 - job:
+    name: edpm-ansible-molecule-edpm_multipathd
+    parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_multipathd/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_multipathd
+- job:
     name: edpm-ansible-molecule-edpm_ovn_bgp_agent
     parent: edpm-ansible-molecule-base
     files:

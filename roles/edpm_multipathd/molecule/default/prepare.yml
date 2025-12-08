@@ -14,25 +14,58 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Prepare test deps
+- name: Prepare
   hosts: all
   gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
-        - iproute
-        - iscsi-initiator-utils
         - podman
-      test_deps_setup_edpm: true
-      test_deps_setup_stream: true
-- name: Prepare
-  hosts: all
-  roles:
     - role: osp.edpm.env_data
+
+- name: Setup DUT
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
-    - name: set /etc/localtime
+    - name: Load role vars
+      ansible.builtin.include_vars: ../../defaults/main.yml
+
+    - name: Create systemd unit file for mocked legacy containerized services
       become: true
-      ansible.builtin.file:
-        path: /etc/localtime
-        src: /usr/share/zoneinfo/UTC
-        state: link
+      ansible.builtin.copy:
+        dest: "/etc/systemd/system/{{ legacy_service }}"
+        content: |
+          [Unit]
+          Description=Mock containerized multipathd service
+
+          [Service]
+          ExecStart=sleep 9999
+
+          [Install]
+          WantedBy=multi-user.target
+        mode: '0644'
+      loop: "{{ edpm_multipathd_legacy_services }}"
+      loop_control:
+        loop_var: legacy_service
+
+    - name: Enable and start mocked legacy services
+      become: true
+      ansible.builtin.systemd_service:
+        name: "{{ legacy_service }}"
+        enabled: true
+        state: started
+        daemon_reload: true
+      loop: "{{ edpm_multipathd_legacy_services }}"
+      loop_control:
+        loop_var: legacy_service
+
+    - name: Verify mocked legacy services are running
+      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+      vars:
+        item:
+          name: "{{ legacy_service }}"
+      loop: "{{ edpm_multipathd_legacy_services }}"
+      loop_control:
+        loop_var: legacy_service
