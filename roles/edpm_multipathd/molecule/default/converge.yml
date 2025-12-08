@@ -17,21 +17,5 @@
 - name: Converge
   hosts: all
   gather_facts: false
-  vars:
-    # We cannot use the real multipathd command because the daemon needs
-    # privileges that are not available in a rootless molecule container,
-    # even with "privileged: true".
-    edpm_multipathd_command: "/usr/bin/sleep 3600"
-  tasks:
-    - name: Install multipathd
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_multipathd
-        tasks_from: install.yml
-    - name: Configure multipathd
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_multipathd
-        tasks_from: configure.yml
-    - name: Run multipathd
-      ansible.builtin.import_role:
-        name: osp.edpm.edpm_multipathd
-        tasks_from: run.yml
+  roles:
+    - role: osp.edpm.edpm_multipathd
