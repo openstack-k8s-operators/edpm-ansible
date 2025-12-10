@@ -48,6 +48,17 @@ Make sure nfs-server and firewalld are started:
 
    % nft add rule inet firewalld filter_IN_libvirt_pre accept
 
+.. note::
+
+  If using NFSv4, ensure your edpm-ansible directory has a minimum permission
+  of ``2775`` (or ``2777`` for testing). The ansibleee runner container runs as
+  a non-root user, so it requires "others" read and execute permissions to
+  access the directory contents.
+
+    .. code-block:: console
+
+       % chmod 2775 ${HOME}/edpm-
+
 Create edpm-ansible PV and PVC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
