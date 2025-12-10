@@ -21,7 +21,6 @@ import uuid
 import testinfra
 
 
-HAPROXY_CONFIG_DIR = "/var/lib/neutron/ovn-agent-proxy"
 EDPM_OVN_AGENT_SERVICE = "edpm_ovn_agent.service"
 OVN_AGENT_CONTAINER = "ovn_agent"
 HAPROXY_CONFIG = """
@@ -97,14 +96,25 @@ class TestNeutronOvn(unittest.TestCase):
                 return p
 
     def test_neutron_ovn_conf_was_copied_into_container(self):
+        ansible_vars = self.host.ansible(
+            "include_vars",
+            os.path.join(
+                os.environ["MOLECULE_PROJECT_DIRECTORY"],
+                "defaults/main.yml"))["ansible_facts"]
+        config_dir = ansible_vars["edpm_neutron_ovn_agent_config_dir"]
         assert self.host.file(
-            "/var/lib/config-data/ansible-generated/"
-            "neutron-ovn-agent/10-neutron-ovn.conf"
+            f"{config_dir}/10-neutron-ovn.conf"
         ).exists
 
     def test_sidecar_container_wrapper_script_was_created(self):
+        ansible_vars = self.host.ansible(
+            "include_vars",
+            os.path.join(
+                os.environ["MOLECULE_PROJECT_DIRECTORY"],
+                "defaults/main.yml"))["ansible_facts"]
+        lib_dir = ansible_vars["edpm_neutron_ovn_agent_lib_dir"]
         assert self.host.file(
-            "/var/lib/neutron/ovn_agent_haproxy_wrapper").exists
+            f"{lib_dir}/ovn_agent_haproxy_wrapper").exists
 
     def test_ovn_agent_container_is_running(self):
         assert self.host.podman(OVN_AGENT_CONTAINER).is_running
@@ -123,9 +133,16 @@ class TestNeutronOvn(unittest.TestCase):
             (OVN_AGENT_CONTAINER, root_helper))
 
     def test_sidecar_container(self):
+        ansible_vars = self.host.ansible(
+            "include_vars",
+            os.path.join(
+                os.environ["MOLECULE_PROJECT_DIRECTORY"],
+                "defaults/main.yml"))["ansible_facts"]
+        lib_dir = ansible_vars["edpm_neutron_ovn_agent_lib_dir"]
+        haproxy_config_dir = f"{lib_dir}/ovn-agent-proxy"
         network_id = str(uuid.uuid4())
         namespace_name = "ovn-%s" % network_id
-        haproxy_config_file = "%s/%s.conf" % (HAPROXY_CONFIG_DIR, network_id)
+        haproxy_config_file = "%s/%s.conf" % (haproxy_config_dir, network_id)
         haproxy_container_name = "neutron-haproxy-%s" % namespace_name
         # Create example haproxy config file
         self.host.run_test(
