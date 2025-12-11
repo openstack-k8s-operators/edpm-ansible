@@ -22,6 +22,12 @@ router bgp {{ edpm_frr_bgp_asn }}
 {% if edpm_frr_bgp_neighbor_password|length %}
   neighbor uplink password {{ edpm_frr_bgp_neighbor_password }}
 {% endif %}
+{% if edpm_frr_bgp_neighbor_keepalive is defined and edpm_frr_bgp_neighbor_holdtime is defined %}
+  neighbor uplink timers {{ edpm_frr_bgp_neighbor_keepalive }} {{ edpm_frr_bgp_neighbor_holdtime }}
+{% endif %}
+{% if edpm_frr_bgp_neighbor_timers_connect is defined %}
+  neighbor uplink timers connect {{ edpm_frr_bgp_neighbor_timers_connect }}
+{% endif %}
   ! neighbor uplink capability extended-nexthop
 {% if edpm_frr_bfd %}
   neighbor uplink bfd
@@ -45,6 +51,12 @@ router bgp {{ edpm_frr_bgp_asn }}
   neighbor evpn-peer remote-as {{ edpm_frr_bgp_l2vpn_peers_scope }}
 {% if edpm_frr_bgp_l2vpn_ebgp_multihop | int > 0 %}
   neighbor evpn-peer ebgp-multihop {{ edpm_frr_bgp_l2vpn_ebgp_multihop }}
+{% endif %}
+{% if edpm_frr_bgp_l2vpn_neighbor_keepalive is defined and edpm_frr_bgp_l2vpn_neighbor_holdtime is defined %}
+  neighbor evpn-peer timers {{ edpm_frr_bgp_l2vpn_neighbor_keepalive }} {{ edpm_frr_bgp_l2vpn_neighbor_holdtime }}
+{% endif %}
+{% if edpm_frr_bgp_l2vpn_neighbor_timers_connect is defined %}
+  neighbor evpn-peer timers connect {{ edpm_frr_bgp_l2vpn_neighbor_timers_connect }}
 {% endif %}
 {% endif %}
 
