@@ -36,9 +36,9 @@
         state: stopped
         enabled: false
       when:
-        - ansible_facts.services["multipathd"] is defined
-        - ansible_facts.services["multipathd"]["status"] != "not-found"
-        - ansible_facts.services["multipathd"]["status"] == "enabled"
+        - ansible_facts.services["multipathd.service"] is defined
+        - ansible_facts.services["multipathd.service"]["status"] != "not-found"
+        - ansible_facts.services["multipathd.service"]["status"] == "enabled"
       failed_when: false
       loop:
         - multipathd.service
