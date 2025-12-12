@@ -43,6 +43,27 @@ edpm_telemetry_image_download_retries: "{{ edpm_download_retries | default(5) }}
 # list of tripleo telemetry services to stop during EDPM adoption
 edpm_telemetry_old_tripleo_compute_sevices:
   - tripleo_ceilometer_agent_compute.service
+
+# Command options for node_exporter. This can be overridden to enable/disable collectors
+# Keep this as a list of strings which will be rendered into the container JSON command.
+edpm_telemetry_node_exporter_cmd:
+  - "--web.disable-exporter-metrics"
+  - "--collector.systemd"
+  - "--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service"
+  - "--no-collector.dmi"
+  - "--no-collector.entropy"
+  - "--no-collector.thermal_zone"
+  - "--no-collector.time"
+  - "--no-collector.timex"
+  - "--no-collector.uname"
+  - "--no-collector.stat"
+  - "--no-collector.hwmon"
+  - "--no-collector.os"
+  - "--no-collector.selinux"
+  - "--no-collector.textfile"
+  - "--no-collector.powersupplyclass"
+  - "--no-collector.pressure"
+  - "--no-collector.rapl"
 # Instruction for distribution of container health check scripts
 edpm_telemetry_healthcheck_sources:
   ceilometer_agent_compute: ceilometer_agent
