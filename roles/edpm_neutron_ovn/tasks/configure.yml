@@ -31,8 +31,8 @@
         setype: "container_file_t"
         mode: "0644"
       loop:
-        - {"src": "rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
-        - {"src": "neutron-ovn-agent.conf.j2", "dest": "01-neutron-ovn-agent.conf"}
+        - {"src": "config/rootwrap.conf.j2", "dest": "01-rootwrap.conf"}
+        - {"src": "config/neutron-ovn-agent.conf.j2", "dest": "01-neutron-ovn-agent.conf"}
 
     - name: Discover secrets in {{ edpm_neutron_ovn_config_src }}
       ansible.builtin.find:

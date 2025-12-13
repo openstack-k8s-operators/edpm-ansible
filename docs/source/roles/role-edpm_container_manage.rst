@@ -143,7 +143,6 @@ overrides the image setting in one-off.
                 edpm_container_manage_config_patterns: 'haproxy.json'
                 edpm_container_manage_config: "/var/lib/edpm-config/container-startup-config/step_1"
                 edpm_container_manage_config_id: "edpm_step1"
-                edpm_container_manage_clean_orphans: false
                 edpm_container_manage_config_overrides:
                   haproxy:
                     image: quay.io/edpmmastercentos9/centos-binary-haproxy:hotfix
@@ -164,10 +163,11 @@ containers by Ansible.
 
     $ ansible-playbook haproxy.yaml --check --diff
 
-The ``edpm_container_manage_clean_orphans`` parameter is optional
-and can be set to `false` to not clean orphaned containers for a
-config_id. It can be used to manage a single container without
-impacting other running containers with same config_id.
+.. warning::
+
+    The ``edpm_container_manage_clean_orphans`` parameter is **deprecated** and will be removed in a future release.
+    While it still functions, users should migrate to using ``edpm_cleanup_orphaned_containers`` in the
+    ``edpm_cleanup`` role instead, which provides better state-file aware orphan cleanup.
 
 The ``edpm_container_manage_config_overrides`` parameter is optional
 and can be used to override a specific container attribute like the image

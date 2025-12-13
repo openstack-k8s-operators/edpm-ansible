@@ -81,6 +81,13 @@ options:
       - Number of podman actions to run at the same time
     type: int
     default: 1
+  containers:
+    description:
+      - List of specific container names to manage
+      - If empty, all containers matching the pattern will be managed
+    type: list
+    elements: str
+    default: []
   debug:
     description:
       - Enable debug
@@ -127,6 +134,7 @@ class EdpmContainerManage:
         self.config_dir = args.get('config_dir')
         self.config_patterns = args.get('config_patterns')
         self.config_overrides = args['config_overrides']
+        self.containers = args.get('containers', [])
         self.log_base_path = args.get('log_base_path')
         self.debug = args.get('debug')
 
@@ -155,6 +163,11 @@ class EdpmContainerManage:
                                          self.config_patterns))
         for match in matches:
             name = os.path.splitext(os.path.basename(match))[0]
+            # Skip if specific containers list provided and this isn't in it
+            if self.containers and name not in self.containers:
+                if self.debug:
+                    self.module.debug(f'Skipping {name} - not in containers list')
+                continue
             with open(match, 'r') as data:
                 config = json.loads(data.read())
             if self.debug:

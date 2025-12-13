@@ -104,8 +104,8 @@ class TestNeutronDHCP(unittest.TestCase):
                 "/var/lib/neutron",
                 "/var/lib/neutron/external/pids/",
                 "/var/lib/neutron/ns-metadata-proxy/",
-                "/var/lib/openstack/config/containers",
-                "/var/lib/config-data/ansible-generated/neutron-dhcp-agent"]:
+                "/var/lib/edpm-config/container-startup-config",
+                "/var/lib/openstack/neutron-dhcp-agent"]:
             assert self.host.file(directory).is_directory
 
     def test_kolla_config_file_was_created(self):
@@ -114,7 +114,7 @@ class TestNeutronDHCP(unittest.TestCase):
 
     def test_neutron_dhcp_agent_conf_was_copied_into_container(self):
         assert self.host.file(
-            "/var/lib/config-data/ansible-generated/neutron-dhcp-agent/"
+            "/var/lib/openstack/neutron-dhcp-agent/"
             "10-neutron-dhcp.conf"
         ).exists
 
@@ -234,6 +234,6 @@ class TestNeutronDHCP(unittest.TestCase):
 
     def test_service_host_is_fqdn(self):
         assert "edpm-0.localdomain" in self.host.run(
-            "cat /var/lib/config-data/ansible-generated/"
+            "cat /var/lib/openstack/"
             "neutron-dhcp-agent/01-neutron-dhcp-agent.conf"
         ).stdout

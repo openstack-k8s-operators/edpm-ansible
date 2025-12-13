@@ -29,9 +29,9 @@
   vars:
     edpm_container_standalone_service: multipathd
     edpm_container_standalone_container_defs:
-      multipathd: "{{ lookup('template', 'multipathd.yaml.j2') | from_yaml }}"
+      multipathd: "{{ lookup('template', 'container_defs/multipathd.yaml.j2') | from_yaml }}"
     edpm_container_standalone_kolla_config_files:
-      multipathd: "{{ lookup('template', 'kolla_multipathd.yaml.j2') | from_yaml }}"
+      multipathd: "{{ lookup('template', 'kolla_config/kolla_multipathd.yaml.j2') | from_yaml }}"
   register: manage_multipathd_stat
 
 - name: Check if the multipathd container restart is required

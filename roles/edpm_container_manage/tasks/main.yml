@@ -23,9 +23,24 @@
         config_pattern: "{{ edpm_container_manage_config_patterns }}"
         config_overrides: "{{ edpm_container_manage_config_overrides }}"
       register: container_configuration
-    - name: Finalise hashes for all containers
+
+    - name: Initialize all_containers_hash for this invocation
+      ansible.builtin.set_fact:
+        all_containers_hash: {}
+      when: edpm_container_manage_containers | length > 0
+
+    - name: Filter configs if container list provided
+      ansible.builtin.set_fact:
+        all_containers_hash: "{{ all_containers_hash | combine({item: container_configuration.configs[item]}) }}"
+      loop: "{{ edpm_container_manage_containers }}"
+      when:
+        - edpm_container_manage_containers | length > 0
+        - item in container_configuration.configs
+
+    - name: Use all configs if no filter
       ansible.builtin.set_fact:
         all_containers_hash: "{{ container_configuration.configs }}"
+      when: edpm_container_manage_containers | length == 0
 
 - name: "Manage containers from {{ edpm_container_manage_config }}"
   when:
@@ -37,7 +52,7 @@
       container_config_hash:
       when:
         - edpm_container_manage_update_config_hash|bool
-    - name: "Delete orphan containers from {{ edpm_container_manage_config }}"
+    - name: Delete orphan containers (DEPRECATED)
       ansible.builtin.include_tasks: delete_orphan.yml
       when:
         - edpm_container_manage_clean_orphans|bool
