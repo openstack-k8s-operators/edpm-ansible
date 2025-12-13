@@ -1,0 +1,41 @@
+---
+
+- name: Extract filename from URL
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_filename: "{{ edpm_accel_drivers_nvidia_custom_url.split('/')[-1] }}"
+
+- name: Check if custom driver URL has allowable extension
+  ansible.builtin.assert:
+    that: _edpm_accel_drivers_filename | regex_search('\\.(rpm|run)$') is not none
+    fail_msg: "edpm_accel_drivers_nvidia_custom_url must end with .rpm or .run extension. Current URL: {{ edpm_accel_drivers_nvidia_custom_url }}"
+
+- name: Check if custom driver URL is a .run file
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_run_file: "{{ _edpm_accel_drivers_filename | regex_search('\\.run$') is not none }}"
+
+- name: Assert .run file is not allowed on RHEL systems
+  ansible.builtin.assert:
+    that:
+      - not (_edpm_accel_drivers_is_run_file and ansible_facts['distribution'] | lower == 'redhat')
+    fail_msg: "Installing a .run driver file is not supported on RHEL. Please provide a .rpm file instead."
+
+- name: Create cache directory for driver download
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_accel_drivers_nvidia_cache_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set temporary file path
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_temp_path: "{{ edpm_accel_drivers_nvidia_cache_dir }}/{{ _edpm_accel_drivers_filename }}"
+
+- name: Download NVIDIA driver from custom URL
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ edpm_accel_drivers_nvidia_custom_url }}"
+    dest: "{{ _edpm_accel_drivers_nvidia_temp_path }}"
+    mode: "{{ '0755' if _edpm_accel_drivers_is_run_file else '0644' }}"
+    validate_certs: "{{ not edpm_accel_drivers_nvidia_custom_url_ssl_no_verify }}"
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"

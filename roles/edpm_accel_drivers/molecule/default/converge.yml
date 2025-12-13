@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_install_nvidia: true
+        edpm_accel_drivers_nvidia_repo_url: "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/"
+        edpm_accel_drivers_nvidia_repo_gpgkey: "{{ edpm_accel_drivers_nvidia_repo_url }}/$basearch/D42D0685.pub"
+        # Using unsupported dkms package for molecule beacuse these are the only packages available in a dnf repo that will install on CS9 nodes
+        edpm_accel_drivers_nvidia_dnf_module_stream: "open-dkms"
+        edpm_accel_drivers_nvidia_package_name: "nvidia-open"
