@@ -1,0 +1,23 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Install rpm-build package
+      become: true
+      ansible.builtin.package:
+        name: rpm-build
+        state: present
+
+    - name: Copy spec file into system under test
+      ansible.builtin.copy:
+        src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') | regex_replace('_vagrant$', '') }}/test_package/mock-nvidia-driver.spec"
+        dest: /tmp/mock-nvidia-driver.spec
+        mode: '0644'
+
+    - name: Build mock nvidia driver RPM
+      ansible.builtin.command:
+        cmd: rpmbuild -bb mock-nvidia-driver.spec
+        chdir: /tmp

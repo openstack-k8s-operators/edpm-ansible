@@ -1,0 +1,17 @@
+---
+
+- name: Remove nouveau kernel module if loaded
+  become: true
+  ansible.builtin.command: modprobe -r nouveau
+  register: _edpm_accel_drivers_modprobe_result
+  changed_when: false
+
+- name: Blacklist nouveau kernel module
+  become: true
+  ansible.builtin.blockinfile:
+    block: |
+      blacklist nouveau
+    path: /etc/modprobe.d/blacklist.conf
+    mode: "0644"
+    create: true
+  register: _edpm_accel_drivers_blacklist_nouveau_result
