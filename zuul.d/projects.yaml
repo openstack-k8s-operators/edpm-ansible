@@ -10,6 +10,7 @@
         - edpm-ansible-tempest-multinode
         - edpm-ansible-baremetal-minor-update
         - edpm-ansible-molecule-edpm_bootstrap
+        - edpm-ansible-molecule-edpm_cleanup
         - edpm-ansible-molecule-edpm_podman
         - edpm-ansible-molecule-edpm_module_load
         - edpm-ansible-molecule-edpm_kernel

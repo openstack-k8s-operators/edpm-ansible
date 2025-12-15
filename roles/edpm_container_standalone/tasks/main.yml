@@ -67,6 +67,8 @@
     edpm_container_manage_config_patterns: "*.json"
     edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"
     edpm_container_manage_containers: "{{ edpm_container_standalone_container_defs.keys() | list }}"
+    # Disable deprecated orphan cleanup - use edpm_cleanup role instead
+    edpm_container_manage_clean_orphans: false
 
 - name: Update service state file
   ansible.builtin.include_tasks: state_file_update.yml
