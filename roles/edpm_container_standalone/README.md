@@ -305,3 +305,27 @@ All containers managed by this role include the following labels:
 - `managed_by=edpm_ansible` - Identifies containers managed by EDPM Ansible
 - `container_name=<container_name>`
 - `config_data=<container_definition>` (full definition)
+
+## Removing Containers from State File
+
+To remove a container from the state file, use `state_file_update.yml` with `edpm_container_state_remove: true`:
+
+```yaml
+# Remove a container from a service (e.g., multipathd from nova)
+- name: Remove multipathd from nova service in state file
+  ansible.builtin.include_tasks: state_file_update.yml
+  vars:
+    edpm_container_state_remove: true
+    edpm_service_name: nova                         # Service name
+    edpm_container_standalone_service: multipathd   # Container to remove
+```
+
+**Note:** When the last container is removed from a service, the service is automatically removed from the state file.
+
+### Required Variables for Removal
+
+- `edpm_container_state_remove: true`: Enable removal mode
+- `edpm_service_name`: Service name (e.g., `nova`, `telemetry`, `neutron-metadata`)
+- `edpm_container_standalone_service`: Container name to remove from the service
+
+**Note:** If service or container doesn't exist, removal is silently ignored.
