@@ -24,6 +24,10 @@ argument_specs:
         default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
         description: Neutron OVN agent root_helper command
         type: str
+      edpm_neutron_ovn_agent_agent_extensions:
+        default: ''
+        description: Neutron OVN agent loaded extensions
+        type: str
       edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout:
         default: '180'
         description: Timeout in seconds for the OVSDB connection transaction
