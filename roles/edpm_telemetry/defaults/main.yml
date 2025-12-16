@@ -58,3 +58,20 @@ edpm_telemetry_enabled_exporters:
   - node_exporter
   - podman_exporter
   - openstack_network_exporter
+# List of collectors to be enabled in openstack_network_exporter
+# Default excludes control-plane-only collectors (ovnnorthd, ovsdbserver)
+# Set to empty list [] to enable all collectors
+edpm_telemetry_openstack_network_exporter_collectors:
+  - bridge
+  - coverage
+  - datapath
+  - interface
+  - memory
+  - ovn
+  - pmd-perf
+  - pmd-rxq
+  - vswitch
+# Log level for openstack_network_exporter
+# Supported levels are: debug info notice warning error critical
+# Default: info
+edpm_telemetry_openstack_network_exporter_log_level: info
