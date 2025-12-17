@@ -41,7 +41,8 @@ execute_molecule: setup_test_environment ## Setup the test environment and execu
 
 .PHONY: openstack_ansibleee_build
 openstack_ansibleee_build: ## Build the openstack-ansibleee-runner image
-	podman build --no-cache . -f openstack_ansibleee/Containerfile -t ${IMG}
+	# Temporary hack until https://issues.redhat.com/browse/RHEL-136313 fixed
+	podman build --network host --no-cache . -f openstack_ansibleee/Containerfile -t ${IMG}
 
 .PHONY: openstack_ansibleee_push
 openstack_ansibleee_push: ## Push the openstack-ansibleee-runner image
