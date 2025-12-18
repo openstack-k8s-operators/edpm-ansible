@@ -66,3 +66,14 @@ argument_specs:
         type: list
         required: true
         description: "List of exporters to be deployed in the compute node"
+      edpm_telemetry_openstack_network_exporter_collectors:
+        type: list
+        required: false
+        description: >
+          List of collectors to be enabled in openstack_network_exporter. Defaults to
+          EDPM-compatible collectors (excludes ovnnorthd, ovsdbserver). Set to
+          empty list [] to enable all collectors.
+      edpm_telemetry_openstack_network_exporter_log_level:
+        type: str
+        required: false
+        description: "Log level for openstack_network_exporter. Supported levels: debug, info, notice, warning, error, critical. Default: info"
