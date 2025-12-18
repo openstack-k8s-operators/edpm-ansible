@@ -1,0 +1,10 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify nouveau is blacklisted
+      ansible.builtin.command: grep -q "^blacklist nouveau" /etc/modprobe.d/blacklist.conf
+      register: nouveau_blacklisted
+      changed_when: false
+      failed_when: nouveau_blacklisted.rc != 0

@@ -1,0 +1,10 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify nvidia-smi binary exists
+      ansible.builtin.stat:
+        path: /usr/bin/nvidia-smi
+      register: nvidia_smi_binary
+      failed_when: not nvidia_smi_binary.stat.exists

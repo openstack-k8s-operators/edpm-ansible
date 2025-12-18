@@ -9,6 +9,7 @@
         - noop
         - edpm-ansible-tempest-multinode
         - edpm-ansible-baremetal-minor-update
+        - edpm-ansible-molecule-edpm_accel_drivers
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_podman
         - edpm-ansible-molecule-edpm_module_load

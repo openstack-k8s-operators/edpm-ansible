@@ -1,0 +1,17 @@
+---
+
+- name: Set package name or path for installation
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_install_package: >-
+      {{ _edpm_accel_drivers_nvidia_temp_path if edpm_accel_drivers_nvidia_custom_url != "" else edpm_accel_drivers_nvidia_package_name }}
+
+- name: Install the nvidia driver package
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ _edpm_accel_drivers_nvidia_install_package }}"
+    state: present
+    disable_gpg_check: "{{ edpm_accel_drivers_nvidia_rpm_disable_gpg_check }}"
+  register: _install_packages_result
+  until: _install_packages_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"
