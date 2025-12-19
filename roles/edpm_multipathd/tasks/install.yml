@@ -14,37 +14,33 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Gather user fact
+- name: Gather ansible_local facts
   ansible.builtin.setup:
     gather_subset:
       - "!all"
       - "!min"
-      - "user"
-      - "user_id"
+      - "local"
   when:
-    - ansible_user is undefined
+    - ansible_local is not defined
+
+- name: Clean up legacy containerized multipathd
+  ansible.builtin.include_tasks: cleanup_containers.yml
 
 - name: Run multipathd install tasks with root privileges
   become: true
   block:
-    - name: Gather services facts
-      ansible.builtin.service_facts:
-
-    - name: Stop multipathd service on the host
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: stopped
-        enabled: false
-      when:
-        - ansible_facts.services["multipathd.service"] is defined
-        - ansible_facts.services["multipathd.service"]["status"] != "not-found"
-        - ansible_facts.services["multipathd.service"]["status"] == "enabled"
-      failed_when: false
-      loop:
-        - multipathd.service
-        - multipathd.socket
-      loop_control:
-        index_var: multipath_service_index
+    - name: Install multipathd packages
+      tags:
+        - install
+        - edpm_multipathd
+      ansible.builtin.dnf:
+        name: "{{ edpm_multipathd_packages }}"
+        state: present
+      register: edpm_multipathd_packages_install
+      until: edpm_multipathd_packages_install is succeeded
+      retries: "{{ edpm_multipathd_download_retries }}"
+      delay: "{{ edpm_multipathd_download_delay }}"
+      when: ansible_local.bootc is not defined or not ansible_local.bootc
 
     - name: Load dm-multipath
       when:
@@ -55,9 +51,13 @@
         modules:
           - name: dm-multipath
 
-    - name: Prepare /etc/multipath directory
-      ansible.builtin.file:
-        path: /etc/multipath
-        state: directory
-        mode: "0755"
-        setype: container_file_t
+    - name: Check SELinux context of /etc/multipath directory
+      ansible.builtin.command: "/usr/sbin/restorecon -nvr /etc/multipath"
+      changed_when: false
+      register: multipath_selinux_status
+
+    - name: Restore SELinux context of /etc/multipath directory
+      ansible.builtin.command: "/usr/sbin/restorecon -rF /etc/multipath"
+      when:
+        - multipath_selinux_status.stdout_lines | length > 0
+      changed_when: true

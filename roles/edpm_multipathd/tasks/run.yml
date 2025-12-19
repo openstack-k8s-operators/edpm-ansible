@@ -14,59 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
-
-- name: Update multipathd health check script
-  ansible.builtin.include_tasks:
-    file: healthchecks.yml
-
-- name: Manage multipathd containers
-  ansible.builtin.include_role:
-    name: edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: multipathd
-    edpm_container_standalone_container_defs:
-      multipathd: "{{ lookup('template', 'container_defs/multipathd.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      multipathd: "{{ lookup('template', 'kolla_config/kolla_multipathd.yaml.j2') | from_yaml }}"
-  register: manage_multipathd_stat
-
-- name: Check if the multipathd container restart is required
-  ansible.builtin.stat:
-    path: "{{ edpm_multipathd_restart_sentinel }}"
-  register: multipath_restart_stat
-
-# Existence the edpm_multipathd_restart_sentinel file on the host
-# indicates that restart of the multipathd container is needed to refresh
-# /etc/multipathd.conf
-# sentinel file will exist on an initial deployment, but the restart is
-# actually needed only if the service is already running, so we check if
-# the manage_multipathd_stat changed.
-
-- name: Restart containers when the multipath configuration changes
-  when:
-    - not manage_multipathd_stat.changed|bool
-    - multipath_restart_stat.stat.exists|bool
+- name: Start the multipathd socket
   become: true
-  block:
-    - name: Identify containers using /etc/multipath.conf
-      ansible.builtin.command: "{{ edpm_container_cli }} ps --filter volume=/etc/multipath.conf --format {{ '{{' }}.Names{{ '}}' }}"
-      register: multipath_conf_containers
-      changed_when: false
+  ansible.builtin.systemd_service:
+    name: multipathd.socket
+    state: started
+    enabled: true
 
-    - name: "Restart container to refresh its /etc/multipath.conf"
-      ansible.builtin.systemd:
-        name: "edpm_{{ multipath_container }}"
-        state: restarted
-      loop: "{{ multipath_conf_containers.stdout_lines | default([]) }}"
-      loop_control:
-        loop_var: multipath_container
-
-- name: Remove multipathd container restart sentinel file
+- name: Start the multipathd service
   become: true
-  ansible.builtin.file:
-    path: "{{ edpm_multipathd_restart_sentinel }}"
-    state: absent
+  ansible.builtin.systemd_service:
+    name: multipathd
+    state: started
+    enabled: true

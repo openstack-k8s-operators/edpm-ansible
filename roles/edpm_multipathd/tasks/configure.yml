@@ -31,22 +31,14 @@
       when:
         - edpm_multipathd_custom_config_file|length > 0
 
-    - name: Ensure /etc/multipath.conf exists
+    - name: Create /etc/multipath.conf if file is missing
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/multipath.conf"
+        dest: /etc/multipath.conf
+        mode: "0644"
       when:
         - edpm_multipathd_custom_config_file|length == 0
-      block:
-        - name: Check for existing /etc/multipath.conf
-          ansible.builtin.stat:
-            path: /etc/multipath.conf
-          register: result
-          check_mode: false
-        - name: Create /etc/multipath.conf if file is missing
-          ansible.builtin.copy:
-            src: "{{ role_path }}/files/multipath.conf"
-            dest: /etc/multipath.conf
-            mode: "0644"
-          when:
-            - not result.stat.exists or result.stat.size == 0
+        - not stat_before.stat.exists or stat_before.stat.size == 0
 
     - name: Check if a blacklist section is present
       ansible.builtin.shell: grep -q '^blacklist\s*{' /etc/multipath.conf
@@ -67,7 +59,6 @@
             path: /etc/multipath.conf
             regexp: '^(blacklist {)'
             replace: '\1\n}'
-
 
     - name: Remove global blacklist if multipathd is enabled
       ansible.builtin.replace:
@@ -107,10 +98,11 @@
       register: stat_after
       check_mode: false
 
-    - name: Record multipath containers require a restart
+    - name: Restart multipathd when the multipath configuration changes
       when:
         - not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum
-      ansible.builtin.file:
-        path: "{{ edpm_multipathd_restart_sentinel }}"
-        state: touch
-        mode: "0644"
+      # Use 'true' as a no-op command for what's essentially a conditional notify
+      ansible.builtin.command: /usr/bin/true
+      changed_when: true
+      notify:
+        - Restart multipathd

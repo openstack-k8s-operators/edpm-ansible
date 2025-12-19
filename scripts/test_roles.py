@@ -13,6 +13,7 @@ SKIP_LIST = [
     "edpm_ovn",
     "edpm_nova",
     "edpm_module_load",
+    "edpm_multipathd",
     "edpm_podman",
     "edpm_ceph_client_files",
     "edpm_frr",
