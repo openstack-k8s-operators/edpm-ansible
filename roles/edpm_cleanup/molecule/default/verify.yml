@@ -1,0 +1,164 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Verify service cleanup
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if test_service1_container exists (should be removed)
+      command: podman container exists test_service1_container
+      register: _service1_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify test_service1_container was removed
+      ansible.builtin.assert:
+        that:
+          - _service1_check.rc != 0
+        fail_msg: "test_service1_container should have been removed"
+        success_msg: "test_service1_container was successfully removed"
+
+    - name: Check if test_service2_container exists (should still exist)
+      command: podman container exists test_service2_container
+      register: _service2_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify test_service2_container still exists
+      ansible.builtin.assert:
+        that:
+          - _service2_check.rc == 0
+        fail_msg: "test_service2_container should still exist"
+        success_msg: "test_service2_container still exists as expected"
+
+- name: Verify orphaned container cleanup
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if container_a still exists
+      command: podman container exists test_service3_container_a
+      register: _container_a_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check if container_b still exists (should be removed)
+      command: podman container exists test_service3_container_b
+      register: _container_b_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check if container_c exists (should be new)
+      command: podman container exists test_service3_container_c
+      register: _container_c_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify container_a still exists
+      ansible.builtin.assert:
+        that:
+          - _container_a_check.rc == 0
+        fail_msg: "test_service3_container_a should still exist"
+        success_msg: "test_service3_container_a exists as expected"
+
+    - name: Verify container_b was removed
+      ansible.builtin.assert:
+        that:
+          - _container_b_check.rc != 0
+        fail_msg: "test_service3_container_b should have been removed"
+        success_msg: "test_service3_container_b was successfully removed"
+
+    - name: Verify container_c was created
+      ansible.builtin.assert:
+        that:
+          - _container_c_check.rc == 0
+        fail_msg: "test_service3_container_c should exist"
+        success_msg: "test_service3_container_c exists as expected"
+
+- name: Verify orphaned container config cleanup
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if kolla config for container_b exists
+      ansible.builtin.stat:
+        path: /var/lib/kolla/config_files/test_service3_container_b.json
+      register: _container_b_kolla_config
+
+    - name: Verify kolla config for container_b does not exist
+      ansible.builtin.assert:
+        that:
+          - not _container_b_kolla_config.stat.exists
+        fail_msg: "Kolla config for test_service3_container_b should not exist"
+        success_msg: "Kolla config for test_service3_container_b does not exist as expected"
+
+    - name: Check if startup config for container_b exists
+      ansible.builtin.stat:
+        path: /var/lib/edpm-config/container-startup-config/test_service3/test_service3_container_b.json
+      register: _container_b_startup_config
+
+    - name: Verify startup config for container_b does not exist
+      ansible.builtin.assert:
+        that:
+          - not _container_b_startup_config.stat.exists
+        fail_msg: "Startup config for test_service3_container_b should not exist"
+        success_msg: "Startup config for test_service3_container_b does not exist as expected"
+
+    - name: Check if kolla config for container_a still exists
+      ansible.builtin.stat:
+        path: /var/lib/kolla/config_files/test_service3_container_a.json
+      register: _container_a_kolla_config
+
+    - name: Verify kolla config for container_a still exists
+      ansible.builtin.assert:
+        that:
+          - _container_a_kolla_config.stat.exists
+        fail_msg: "Kolla config for test_service3_container_a should still exist"
+        success_msg: "Kolla config for test_service3_container_a still exists as expected"
+
+- name: Verify state file
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Read state file
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/deployed_services.yaml
+      register: _state_file
+
+    - name: Parse state data
+      ansible.builtin.set_fact:
+        _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
+
+    - name: Verify test_service1 was removed from state file
+      ansible.builtin.assert:
+        that:
+          - "'test_service1' not in _state_data.services"
+        fail_msg: "test_service1 should have been removed from state file"
+        success_msg: "test_service1 correctly removed from state file"
+
+    - name: Verify test_service3 state reflects the update
+      ansible.builtin.assert:
+        that:
+          - "'test_service3' in _state_data.services"
+          - "'test_service3_container_a' in _state_data.services.test_service3.containers"
+          - "'test_service3_container_b' not in _state_data.services.test_service3.containers"
+          - "'test_service3_container_c' in _state_data.services.test_service3.containers"
+        fail_msg: >-
+          State file should have container_a and container_c but not container_b
+        success_msg: "State file correctly reflects the updated service"
