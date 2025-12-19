@@ -69,3 +69,4 @@ edpm_deploy_identifier: ''
 edpm_container_track_state: true
 edpm_container_state_file: /var/lib/edpm-config/deployed_services.yaml
 edpm_container_state_append: false  # Set true when deploying multiple containers in a loop
+edpm_container_state_remove: false  # Set true to remove service from state file

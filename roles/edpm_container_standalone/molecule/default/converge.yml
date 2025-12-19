@@ -15,7 +15,7 @@
 # under the License.
 
 
-- name: Deploy first service
+- name: Deploy services and verify state tracking
   hosts: all
   gather_facts: false
   pre_tasks:
@@ -31,55 +31,68 @@
         ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
       when:
         - ansible_user is undefined
-  vars:
-    edpm_container_standalone_service: test_service1
-    edpm_container_standalone_container_defs:
-      test_service1_container:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service1_container:
-        command: 'sleep 3600'
-  roles:
-    - role: "osp.edpm.edpm_container_standalone"
-  post_tasks:
-    - name: Verify test_service1_container is running
-      command: podman container exists test_service1_container
-      changed_when: false
-
-- name: Deploy second service
-  hosts: all
-  gather_facts: false
-  vars:
-    edpm_container_standalone_service: test_service2
-    edpm_container_standalone_container_defs:
-      test_service2_container:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service2_container:
-        command: 'sleep 3600'
-  roles:
-    - role: "osp.edpm.edpm_container_standalone"
-  post_tasks:
-    - name: Verify test_service2_container is running
-      command: podman container exists test_service2_container
-      changed_when: false
-
-- name: Verify both services are in state file
-  hosts: all
-  gather_facts: false
   tasks:
+    # Deploy a service with single container
+    - name: Deploy service1
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: service1_container
+        edpm_service_name: service1
+        edpm_container_standalone_container_defs:
+          service1_container:
+            image: quay.io/centos/centos:stream9
+            net: host
+            privileged: true
+            restart: always
+            command: sleep 3600
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_kolla_config_files:
+          service1_container:
+            command: 'sleep 3600'
+
+    # Deploy a service with multiple containers (like telemetry)
+    - name: Deploy telemetry with first container
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: exporter_a
+        edpm_service_name: telemetry
+        edpm_container_standalone_container_defs:
+          exporter_a:
+            image: quay.io/centos/centos:stream9
+            net: host
+            privileged: true
+            restart: always
+            command: sleep 3600
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_kolla_config_files:
+          exporter_a:
+            command: 'sleep 3600'
+
+    - name: Deploy telemetry with second container (append)
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: exporter_b
+        edpm_service_name: telemetry
+        edpm_container_state_append: true
+        edpm_container_standalone_container_defs:
+          exporter_b:
+            image: quay.io/centos/centos:stream9
+            net: host
+            privileged: true
+            restart: always
+            command: sleep 3600
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_kolla_config_files:
+          exporter_b:
+            command: 'sleep 3600'
+
+    # Verify state file
     - name: Read deployed services state file
       ansible.builtin.slurp:
         src: /var/lib/edpm-config/deployed_services.yaml
@@ -89,103 +102,53 @@
       ansible.builtin.set_fact:
         _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
 
-    - name: Verify both services are tracked
+    - name: Verify services are tracked
       ansible.builtin.assert:
         that:
-          - "'test_service1' in _state_data.services"
-          - "'test_service2' in _state_data.services"
-          - "'test_service1_container' in _state_data.services.test_service1.containers"
-          - "'test_service2_container' in _state_data.services.test_service2.containers"
-        fail_msg: "Both services should be tracked in state file"
-        success_msg: "Both services are properly tracked"
+          - "'service1' in _state_data.services"
+          - "'telemetry' in _state_data.services"
+          - "'service1_container' in _state_data.services.service1.containers"
+          - "'exporter_a' in _state_data.services.telemetry.containers"
+          - "'exporter_b' in _state_data.services.telemetry.containers"
+        fail_msg: "Services should be tracked in state file"
+        success_msg: "Services are properly tracked"
 
-- name: Deploy service with multiple containers
+- name: Test service update - remove container_b and add container_c
   hosts: all
   gather_facts: false
-  vars:
-    edpm_container_standalone_service: test_service3
-    edpm_container_standalone_container_defs:
-      test_service3_container_a:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-      test_service3_container_b:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service3_container_a:
-        command: 'sleep 3600'
-      test_service3_container_b:
-        command: 'sleep 3600'
-  roles:
-    - role: osp.edpm.edpm_container_standalone
-  post_tasks:
-    - name: Verify both containers are running
-      command: "podman container exists {{ item }}"
-      changed_when: false
-      loop:
-        - test_service3_container_a
-        - test_service3_container_b
+  tasks:
+    # Update telemetry: keep exporter_a, remove exporter_b, add exporter_c
+    - name: Update telemetry - replace exporter_b with exporter_c
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: exporter_c
+        edpm_service_name: telemetry
+        edpm_container_standalone_container_defs:
+          exporter_a:
+            image: quay.io/centos/centos:stream9
+            net: host
+            privileged: true
+            restart: always
+            command: sleep 3600
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+          exporter_c:
+            image: quay.io/centos/centos:stream9
+            net: host
+            privileged: true
+            restart: always
+            command: sleep 3600
+            environment:
+              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_kolla_config_files:
+          exporter_a:
+            command: 'sleep 3600'
+          exporter_c:
+            command: 'sleep 3600'
 
-    - name: Read state file
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_initial
-
-    - name: Parse state data
-      ansible.builtin.set_fact:
-        _state_data_initial: "{{ _state_file_initial.content | b64decode | from_yaml }}"
-
-    - name: Verify both containers are tracked
-      ansible.builtin.assert:
-        that:
-          - "'test_service3' in _state_data_initial.services"
-          - "'test_service3_container_a' in _state_data_initial.services.test_service3.containers"
-          - "'test_service3_container_b' in _state_data_initial.services.test_service3.containers"
-        fail_msg: "Both containers should be tracked in state file"
-        success_msg: "Both containers are properly tracked"
-
-- name: Update service - remove container_b and add container_c
-  hosts: all
-  gather_facts: false
-  vars:
-    edpm_container_standalone_service: test_service3
-    edpm_container_standalone_container_defs:
-      test_service3_container_a:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-      test_service3_container_c:
-        image: quay.io/centos/centos:stream9
-        net: host
-        privileged: true
-        restart: always
-        command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service3_container_a:
-        command: 'sleep 3600'
-      test_service3_container_c:
-        command: 'sleep 3600'
-  roles:
-    - role: osp.edpm.edpm_container_standalone
-  post_tasks:
-    - name: Verify container_c was created
-      command: podman container exists test_service3_container_c
+    - name: Verify exporter_c was created
+      command: podman container exists exporter_c
       changed_when: false
 
     - name: Read state file after update
@@ -200,10 +163,68 @@
     - name: Verify state file reflects the update
       ansible.builtin.assert:
         that:
-          - "'test_service3' in _state_data_updated.services"
-          - "'test_service3_container_a' in _state_data_updated.services.test_service3.containers"
-          - "'test_service3_container_b' not in _state_data_updated.services.test_service3.containers"
-          - "'test_service3_container_c' in _state_data_updated.services.test_service3.containers"
-        fail_msg: >-
-          State file should have container_a and container_c but not container_b
+          - "'telemetry' in _state_data_updated.services"
+          - "'exporter_a' in _state_data_updated.services.telemetry.containers"
+          - "'exporter_b' not in _state_data_updated.services.telemetry.containers"
+          - "'exporter_c' in _state_data_updated.services.telemetry.containers"
+        fail_msg: "State file should have exporter_a and exporter_c but not exporter_b"
         success_msg: "State file correctly reflects the updated service"
+
+- name: Test state file removal
+  hosts: all
+  gather_facts: false
+  tasks:
+    # Remove one container from multi-container service
+    - name: Remove exporter_c from telemetry
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+        tasks_from: state_file_update.yml
+      vars:
+        edpm_container_state_remove: true
+        edpm_service_name: telemetry
+        edpm_container_standalone_service: exporter_c
+
+    - name: Read state file after container removal
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/deployed_services.yaml
+      register: _state_file_after_remove
+
+    - name: Parse state data
+      ansible.builtin.set_fact:
+        _state_data_after_remove: "{{ _state_file_after_remove.content | b64decode | from_yaml }}"
+
+    - name: Verify container was removed but service remains
+      ansible.builtin.assert:
+        that:
+          - "'telemetry' in _state_data_after_remove.services"
+          - "'exporter_a' in _state_data_after_remove.services.telemetry.containers"
+          - "'exporter_c' not in _state_data_after_remove.services.telemetry.containers"
+        fail_msg: "exporter_c should be removed but telemetry and exporter_a should remain"
+        success_msg: "Container was successfully removed from service"
+
+    # Remove last container - service should be auto-removed
+    - name: Remove last container from telemetry
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+        tasks_from: state_file_update.yml
+      vars:
+        edpm_container_state_remove: true
+        edpm_service_name: telemetry
+        edpm_container_standalone_service: exporter_a
+
+    - name: Read state file after last container removal
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/deployed_services.yaml
+      register: _state_file_final
+
+    - name: Parse state data
+      ansible.builtin.set_fact:
+        _state_data_final: "{{ _state_file_final.content | b64decode | from_yaml }}"
+
+    - name: Verify service was auto-removed when last container removed
+      ansible.builtin.assert:
+        that:
+          - "'telemetry' not in _state_data_final.services"
+          - "'service1' in _state_data_final.services"
+        fail_msg: "telemetry should be auto-removed when last container is removed"
+        success_msg: "Service was automatically removed when last container was removed"
