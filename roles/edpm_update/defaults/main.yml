@@ -25,6 +25,8 @@ edpm_update_enable_packages_update: true
 
 # Toggle to enable/disable containers updates
 edpm_update_enable_containers_update: true
+# Toggle to enable/disable podman cleanup during containers updates
+edpm_update_enable_containers_update_cleanup: true
 
 # List of packages to exclude from the update
 edpm_update_exclude_packages:
