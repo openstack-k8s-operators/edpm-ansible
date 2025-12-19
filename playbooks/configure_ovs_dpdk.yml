@@ -4,6 +4,7 @@
   hosts: "{{ edpm_override_hosts | default('all', true) }}"
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
+  environment: "{{ edpm_playbook_environment | default({}) }}"
   tasks:
     - name: Gather ansible_local facts
       ansible.builtin.setup:
