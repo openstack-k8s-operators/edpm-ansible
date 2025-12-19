@@ -68,7 +68,7 @@ tls-key: "/etc/openstack_network_exporter/tls/tls.key"
 # Env: OPENSTACK_NETWORK_EXPORTER_LOG_LEVEL
 # Default: notice
 #
-log-level: info
+log-level: {{ edpm_telemetry_openstack_network_exporter_log_level }}
 
 # The absolute path to the runtime directory of ovn-controller. This folder is
 # expected to contain the the ovn-controller pid file "ovn-controller.pid" and
@@ -103,10 +103,7 @@ ovs-procdir: /host/proc
 #
 # Default: []
 #
-#collectors: []
-#collectors:
-#  - bridge
-#  - counters
+collectors: {{ edpm_telemetry_openstack_network_exporter_collectors }}
 # List of metric sets to export. This is cumulative with the collectors option.
 # The "openstack-network-exporter -l" flag will list all supported metrics along
 # with their set name. If the list is empty (default) all metrics from enabled
