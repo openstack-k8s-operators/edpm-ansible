@@ -31,20 +31,33 @@
       ansible.builtin.service_facts:
 
     - name: Stop multipathd service on the host
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: stopped
-        enabled: false
       when:
         - ansible_facts.services["multipathd.service"] is defined
         - ansible_facts.services["multipathd.service"]["status"] != "not-found"
         - ansible_facts.services["multipathd.service"]["status"] == "enabled"
-      failed_when: false
-      loop:
-        - multipathd.service
-        - multipathd.socket
-      loop_control:
-        index_var: multipath_service_index
+      block:
+        - name: Stop multipathd service and socket on the host
+          ansible.builtin.systemd:
+            name: "{{ item }}"
+            state: stopped
+            enabled: false
+          failed_when: false
+          loop:
+            - multipathd.service
+            - multipathd.socket
+          loop_control:
+            index_var: multipath_service_index
+        # If EDPM node runs host side multipathd service and containerized service,
+        # edpm_multipathd.service needs restarting the service after stopping
+        # multipathd.
+        # This step prevents a failure of 'multipathd show status' command.
+        - name: Restart edpm_multipathd.service if running
+          ansible.builtin.systemd:
+            name: "edpm_multipathd.service"
+            state: restarted
+          when:
+            - ansible_facts.services["edpm_multipathd.service"] is defined
+            - ansible_facts.services["edpm_multipathd.service"]["state"] == "running"
 
     - name: Load dm-multipath
       when:
