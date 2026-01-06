@@ -20,6 +20,7 @@
   strategy: linear
   gather_facts: "{{ gather_facts | default(false) }}"
   any_errors_fatal: true
+  environment: "{{ edpm_playbook_environment | default({}) }}"
   # Only enables rsyslog
   tasks:
     - name: Gather ansible_local facts
