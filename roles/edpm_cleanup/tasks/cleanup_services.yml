@@ -128,3 +128,30 @@
       loop_control:
         loop_var: _edpm_orphaned_container
       when: _edpm_orphaned_containers | length > 0
+
+    - name: Remove kolla config files for orphaned containers
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_container_kolla_config_dir }}/{{ item }}.json"
+        state: absent
+      loop: "{{ _edpm_orphaned_containers }}"
+      when: _edpm_orphaned_containers | length > 0
+
+    - name: Find startup config files for orphaned containers
+      ansible.builtin.find:
+        paths: "{{ edpm_container_startup_config_dir }}"
+        patterns: "{{ item }}.json"
+        recurse: true
+      loop: "{{ _edpm_orphaned_containers }}"
+      register: _edpm_orphaned_startup_configs
+      when: _edpm_orphaned_containers | length > 0
+
+    - name: Remove startup config files for orphaned containers
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.1.path }}"
+        state: absent
+      loop: "{{ _edpm_orphaned_startup_configs.results | default([]) | subelements('files', skip_missing=True) }}"
+      when:
+        - _edpm_orphaned_containers | length > 0
+        - _edpm_orphaned_startup_configs.results is defined

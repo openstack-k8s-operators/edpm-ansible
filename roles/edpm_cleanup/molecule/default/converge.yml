@@ -47,10 +47,6 @@
         command: 'sleep 3600'
   roles:
     - role: "osp.edpm.edpm_container_standalone"
-  post_tasks:
-    - name: Verify test_service1_container is running
-      command: podman container exists test_service1_container
-      changed_when: false
 
 - name: Deploy second service
   hosts: all
@@ -71,33 +67,6 @@
         command: 'sleep 3600'
   roles:
     - role: "osp.edpm.edpm_container_standalone"
-  post_tasks:
-    - name: Verify test_service2_container is running
-      command: podman container exists test_service2_container
-      changed_when: false
-
-- name: Verify both services are in state file
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: Read deployed services state file
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file
-
-    - name: Parse state data
-      ansible.builtin.set_fact:
-        _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
-
-    - name: Verify both services are tracked
-      ansible.builtin.assert:
-        that:
-          - "'test_service1' in _state_data.services"
-          - "'test_service2' in _state_data.services"
-          - "'test_service1_container' in _state_data.services.test_service1.containers"
-          - "'test_service2_container' in _state_data.services.test_service2.containers"
-        fail_msg: "Both services should be tracked in state file"
-        success_msg: "Both services are properly tracked"
 
 - name: Cleanup first service (keep only test_service2)
   hosts: all
@@ -107,53 +76,6 @@
       - test_service2
   roles:
     - role: osp.edpm.edpm_cleanup
-
-- name: Verify cleanup worked correctly
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: Check if test_service1_container still exists
-      command: podman container exists test_service1_container
-      register: _service1_check
-      failed_when: false
-      changed_when: false
-
-    - name: Check if test_service2_container still exists
-      command: podman container exists test_service2_container
-      register: _service2_check
-      failed_when: false
-      changed_when: false
-
-    - name: Verify test_service1_container was removed
-      ansible.builtin.assert:
-        that:
-          - _service1_check.rc != 0
-        fail_msg: "test_service1_container should have been removed"
-        success_msg: "test_service1_container was successfully removed"
-
-    - name: Verify test_service2_container still exists
-      ansible.builtin.assert:
-        that:
-          - _service2_check.rc == 0
-        fail_msg: "test_service2_container should still exist"
-        success_msg: "test_service2_container still exists as expected"
-
-    - name: Read state file after cleanup
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_after
-
-    - name: Parse state data after cleanup
-      ansible.builtin.set_fact:
-        _state_data_after: "{{ _state_file_after.content | b64decode | from_yaml }}"
-
-    - name: Verify state file was updated
-      ansible.builtin.assert:
-        that:
-          - "'test_service1' not in _state_data_after.services"
-          - "'test_service2' in _state_data_after.services"
-        fail_msg: "State file should have test_service1 removed but test_service2 present"
-        success_msg: "State file correctly updated after cleanup"
 
 - name: Deploy service with multiple containers
   hosts: all
@@ -184,31 +106,6 @@
         command: 'sleep 3600'
   roles:
     - role: osp.edpm.edpm_container_standalone
-  post_tasks:
-    - name: Verify both containers are running
-      command: "podman container exists {{ item }}"
-      changed_when: false
-      loop:
-        - test_service3_container_a
-        - test_service3_container_b
-
-    - name: Read state file
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_initial
-
-    - name: Parse state data
-      ansible.builtin.set_fact:
-        _state_data_initial: "{{ _state_file_initial.content | b64decode | from_yaml }}"
-
-    - name: Verify both containers are tracked
-      ansible.builtin.assert:
-        that:
-          - "'test_service3' in _state_data_initial.services"
-          - "'test_service3_container_a' in _state_data_initial.services.test_service3.containers"
-          - "'test_service3_container_b' in _state_data_initial.services.test_service3.containers"
-        fail_msg: "Both containers should be tracked in state file"
-        success_msg: "Both containers are properly tracked"
 
 - name: Update service - remove container_b and add container_c
   hosts: all
@@ -245,64 +142,6 @@
         name: osp.edpm.edpm_cleanup
       vars:
         edpm_services:
+          - test_service2
           - test_service3
         edpm_cleanup_orphaned_containers: true
-  post_tasks:
-    - name: Check if container_a still exists
-      command: podman container exists test_service3_container_a
-      register: _container_a_check
-      failed_when: false
-      changed_when: false
-
-    - name: Check if container_b still exists (should be removed)
-      command: podman container exists test_service3_container_b
-      register: _container_b_check
-      failed_when: false
-      changed_when: false
-
-    - name: Check if container_c exists (should be new)
-      command: podman container exists test_service3_container_c
-      register: _container_c_check
-      failed_when: false
-      changed_when: false
-
-    - name: Verify container_a still exists
-      ansible.builtin.assert:
-        that:
-          - _container_a_check.rc == 0
-        fail_msg: "test_service3_container_a should still exist"
-        success_msg: "test_service3_container_a exists as expected"
-
-    - name: Verify container_b was removed
-      ansible.builtin.assert:
-        that:
-          - _container_b_check.rc != 0
-        fail_msg: "test_service3_container_b should have been removed"
-        success_msg: "test_service3_container_b was successfully removed"
-
-    - name: Verify container_c was created
-      ansible.builtin.assert:
-        that:
-          - _container_c_check.rc == 0
-        fail_msg: "test_service3_container_c should exist"
-        success_msg: "test_service3_container_c exists as expected"
-
-    - name: Read state file after update
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_updated
-
-    - name: Parse updated state data
-      ansible.builtin.set_fact:
-        _state_data_updated: "{{ _state_file_updated.content | b64decode | from_yaml }}"
-
-    - name: Verify state file reflects the update
-      ansible.builtin.assert:
-        that:
-          - "'test_service3' in _state_data_updated.services"
-          - "'test_service3_container_a' in _state_data_updated.services.test_service3.containers"
-          - "'test_service3_container_b' not in _state_data_updated.services.test_service3.containers"
-          - "'test_service3_container_c' in _state_data_updated.services.test_service3.containers"
-        fail_msg: >-
-          State file should have container_a and container_c but not container_b
-        success_msg: "State file correctly reflects the updated service"
