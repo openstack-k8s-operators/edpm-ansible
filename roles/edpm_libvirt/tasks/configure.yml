@@ -36,6 +36,15 @@
     - {"path": "/etc/pki/CA", "owner": "root", "group": "root", "mode": "0755"}
     - {"path": "/etc/pki/qemu", "owner": "root", "group": "qemu"}
 
+- name: Gather SELinux fact if needed
+  when:
+    - "'selinux' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "selinux"
+
 - name: Render libvirt config files
   tags:
     - configure
@@ -125,6 +134,9 @@
   register: run_libvirt
   failed_when: run_libvirt.rc not in [0, 1]
   changed_when: false
+  when:
+    - ansible_facts.selinux is defined
+    - ansible_facts.selinux.status == "enabled"
 
 - name: Restore selinux label for /run/libvirt to virt_var_run_t
   tags:
@@ -133,7 +145,10 @@
   become: true
   ansible.builtin.command: "restorecon -R /run/libvirt"
   changed_when: true
-  when: run_libvirt.rc == 0
+  when:
+    - ansible_facts.selinux is defined
+    - ansible_facts.selinux.status == "enabled"
+    - run_libvirt.rc == 0
 
 - name: Enable os_enable_vtpm SELinux boolean for vTPM
   tags:
@@ -144,6 +159,9 @@
     name: os_enable_vtpm
     persistent: true
     state: true
+  when:
+    - ansible_facts.selinux is defined
+    - ansible_facts.selinux.status == "enabled"
 
 - name: Move libvirt TLS files to the right location on the compute node
   tags:
