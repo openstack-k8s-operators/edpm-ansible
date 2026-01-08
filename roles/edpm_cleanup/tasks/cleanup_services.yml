@@ -59,15 +59,11 @@
   when:
     - _edpm_services_to_cleanup | length > 0
   block:
-    - name: Initialize filtered services dict
-      ansible.builtin.set_fact:
-        _edpm_cleanup_services_filtered: {}
-
     - name: Add services to filtered dict (exclude services to remove)
       ansible.builtin.set_fact:
         _edpm_cleanup_services_filtered: >-
           {{
-            _edpm_cleanup_services_filtered | combine({
+            _edpm_cleanup_services_filtered | default({}) | combine({
               item.key: item.value
             })
           }}
@@ -104,13 +100,9 @@
             list
           }}
 
-    - name: Build list of managed containers
-      ansible.builtin.set_fact:
-        _edpm_all_managed_containers: []
-
     - name: Filter managed containers
       ansible.builtin.set_fact:
-        _edpm_all_managed_containers: "{{ _edpm_all_managed_containers + [item.Name] }}"
+        _edpm_all_managed_containers: "{{ _edpm_all_managed_containers | default([]) + [item.Name] }}"
       loop: "{{ _edpm_all_containers.containers | default([]) }}"
       when:
         - item['Config'] is defined

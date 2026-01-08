@@ -14,6 +14,24 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+# This task file handles both adding/updating and removing containers from the state file.
+#
+# For adding/updating services (default behavior):
+#   - name: Update service state file
+#     ansible.builtin.include_tasks: state_file_update.yml
+#
+# For removing a container from a service:
+#   - name: Remove container from service
+#     ansible.builtin.include_tasks: state_file_update.yml
+#     vars:
+#       edpm_container_state_remove: true
+#       edpm_service_name: nova  # service name (e.g., nova, telemetry, neutron-metadata)
+#       edpm_container_standalone_service: multipathd  # container to remove
+#
+# Note: When the last container is removed from a service, the service is
+#       automatically removed from the state file.
+# Note: If service or container doesn't exist, removal is silently ignored.
+
 - name: Read current state file
   ansible.builtin.slurp:
     src: "{{ edpm_container_state_file }}"
@@ -26,25 +44,72 @@
     _edpm_state_data: >-
       {{
         (_edpm_state_file_content.content | default('') | b64decode | from_yaml) |
-        default({'services': {}})
+        default({'services': {}}, true)
       }}
-  when: _edpm_state_file_content.content is defined
 
-- name: Initialize empty state data if file doesn't exist
+- name: Determine service name for state file
   ansible.builtin.set_fact:
-    _edpm_state_data:
-      services: {}
-  when: _edpm_state_file_content.content is not defined
+    _edpm_state_service_name: "{{ edpm_service_name | default(edpm_container_standalone_service) }}"
 
+# Remove container from service
+- name: Remove container from service
+  when:
+    - edpm_container_state_remove | bool
+    - _edpm_state_service_name in _edpm_state_data.services
+  block:
+    - name: Remove container from service containers list
+      ansible.builtin.set_fact:
+        _edpm_updated_containers: >-
+          {{
+            _edpm_state_data.services[_edpm_state_service_name].containers |
+            default([]) |
+            difference([edpm_container_standalone_service])
+          }}
+
+    - name: Update service with remaining containers
+      when: _edpm_updated_containers | length > 0
+      ansible.builtin.set_fact:
+        _edpm_state_data: >-
+          {{
+            _edpm_state_data | combine({
+              'services': _edpm_state_data.services | combine({
+                _edpm_state_service_name: {
+                  'containers': _edpm_updated_containers,
+                  'updated_at': lookup('pipe', 'date -Iseconds')
+                }
+              }, recursive=True)
+            }, recursive=True)
+          }}
+
+    - name: Remove service if no containers remain
+      when: _edpm_updated_containers | length == 0
+      block:
+        - name: Build filtered services dict (exclude empty service)
+          ansible.builtin.set_fact:
+            _edpm_filtered_services: >-
+              {{
+                _edpm_filtered_services | default({}) | combine({
+                  item.key: item.value
+                })
+              }}
+          loop: "{{ _edpm_state_data.services | dict2items }}"
+          when: item.key != _edpm_state_service_name
+
+        - name: Update state data without empty service
+          ansible.builtin.set_fact:
+            _edpm_state_data:
+              services: "{{ _edpm_filtered_services | default({}) }}"
+
+# Add/update service in state file
 - name: Update service in state data
   ansible.builtin.set_fact:
     _edpm_state_data: >-
       {{
         _edpm_state_data | combine({
           'services': _edpm_state_data.services | combine({
-            (edpm_service_name | default(edpm_container_standalone_service)): {
+            _edpm_state_service_name: {
               'containers': (
-                _edpm_state_data.services.get(edpm_service_name | default(edpm_container_standalone_service), {}).get('containers', []) +
+                _edpm_state_data.services.get(_edpm_state_service_name, {}).get('containers', []) +
                 edpm_container_standalone_container_defs.keys() | list
               ) if edpm_container_state_append else (edpm_container_standalone_container_defs.keys() | list),
               'updated_at': lookup('pipe', 'date -Iseconds')
@@ -52,6 +117,7 @@
           }, recursive=True)
         }, recursive=True)
       }}
+  when: not (edpm_container_state_remove | bool)
 
 - name: Write updated state file
   become: true

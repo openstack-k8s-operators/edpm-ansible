@@ -86,3 +86,9 @@ argument_specs:
           If not set, defaults to edpm_container_standalone_service.
         type: str
         required: false
+      edpm_container_state_remove:
+        default: false
+        description: |
+          If true, remove the container from the state file instead of adding/updating.
+          Used when a container needs to be removed from state tracking.
+        type: bool
