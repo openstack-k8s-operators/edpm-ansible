@@ -8,7 +8,7 @@
 {%     set rule=ruleset['rule'] %}
 {%     set chain_key = rule.get('chain', 'INPUT') ~ rule.get('table', 'filter') %}
 {%     if chain_key not in chains.chains %}
-{%       if '{{ edpm_nftables_chains_prefix }}_'~rule.get('chain', 'INPUT') not in ( existing | osp.edpm.jump_chain_targets(rule=rule) ) %}
+{%       if edpm_nftables_chains_prefix ~ '_' ~ rule.get('chain', 'INPUT') not in ( existing | osp.edpm.jump_chain_targets(rule=rule) ) %}
 insert rule inet {{ rule.get('table', 'filter') }} {{ rule.get('chain', 'INPUT') }} position 0 jump {{ edpm_nftables_chains_prefix }}_{{ rule.get('chain', 'INPUT') }}
 {%       endif %}
 {%       set _ = chains.chains.append(chain_key) %}
