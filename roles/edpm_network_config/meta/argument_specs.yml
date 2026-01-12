@@ -82,7 +82,7 @@ argument_specs:
       edpm_network_config_nonconfigured_cleanup:
         type: bool
         description: "Cleanup network interfaces not in network config"
-        default: true
+        default: false
       edpm_bootstrap_network_resolvconf_update:
         type: bool
         default: true
