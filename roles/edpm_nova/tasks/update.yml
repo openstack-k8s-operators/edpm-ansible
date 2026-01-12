@@ -44,3 +44,45 @@
     # Don't import existing LVM devices in case there are "rogue" ones associated
     # with an attached cinder volume.
     edpm_bootstrap_lvm_import_devices: false
+
+- name: Clean nova podman images
+  when:
+    - edpm_update_enable_containers_update is defined
+    - edpm_update_enable_containers_update
+    - edpm_update_enable_containers_update_cleanup is defined
+    - edpm_update_enable_containers_update_cleanup
+  tags:
+    - nova
+    - update
+  become: true
+  block:
+    - name: Clean nova podman images
+      tags: podman_purge
+      # NOTE: This copies logic of edpm_podman/tasks/purge.yml
+      ansible.builtin.shell: |
+        set -o pipefail
+        podman image list --format '{% raw %}{{ .Repository }}:{{ .Tag }}{% endraw %}' | \
+        eval $( basename -a "{{ edpm_nova_compute_image }}" | awk -F: '
+        {
+            if (NR == 1) {
+                imgs = "-e " $1
+                tags = "-e " $2
+            } else {
+                # For subsequent lines, append with a space
+                imgs = imgs " -e " $1
+                tags = tags " -e " $2
+            }
+        }
+        END {
+            # Print the accumulated images, the separator flag, and the accumulated tags
+            print "grep " imgs " -v " tags
+        }' ) | xargs --no-run-if-empty -I % sh -c '{ podman rmi %; sleep 1; }'
+      register: clean_podman_image
+      changed_when: clean_podman_image.rc == 0
+      args:
+        executable: /bin/bash
+  rescue:
+    - name: Image cleanup failed
+      ansible.builtin.fail:
+        msg: "Failed to clean up  nova_compute contianer images. Please do manual cleanup."
+      failed_when: false

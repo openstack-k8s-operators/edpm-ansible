@@ -17,10 +17,50 @@
 
 - name: Clean podman images
   become: true
-  ansible.builtin.command: podman image prune -a -f
-  register: clean_podman_image
-  changed_when: clean_podman_image.rc == 0
-  failed_when: clean_podman_image.rc != 0
+  block:
+    - name: Clean podman images
+      tags: podman_purge
+      # NOTE: OSPRH-22122 - we cannot use podman image prune -a -f or just simply list
+      #       images and remove unused ones. Services might be temporarly down while we
+      #       run cleanup and we would remove image before starting back up. Instead
+      #       we simply check what images are configured by us and filter only for
+      #       them. We remove everything that is not having the tag we used to deploy.
+      # NOTE: OSPRH-12950 - on some environments we had issue with podman prune triggering
+      #       pacemaker outage by simply taking down podman for several minutes and
+      #       pacemaker thinking that services are down. Because of this we remove the images
+      #       in a loop with sleep 1 inbetween.
+      ansible.builtin.shell: |
+        set -o pipefail
+        {% raw %}
+        podman image list --format '{{ .Repository }}:{{ .Tag }}' | \
+        eval $( basename -a \
+                `find /var/lib/edpm-config -type f -name '*.json' \
+                  -exec jq -r .image {} ';' | \
+                 grep -v null | sort | uniq  ` | awk -F: '
+        {
+            if (NR == 1) {
+                imgs = "-e " $1
+                tags = "-e " $2
+            } else {
+                # For subsequent lines, append with a space
+                imgs = imgs " -e " $1
+                tags = tags " -e " $2
+            }
+        }
+        END {
+            # Print the accumulated images, the separator flag, and the accumulated tags
+            print "grep " imgs " -v " tags
+        }' ) | xargs --no-run-if-empty -I % sh -c '{ podman rmi %; sleep 1; }'
+        {% endraw %}
+      register: clean_podman_image
+      changed_when: clean_podman_image.rc == 0
+      args:
+        executable: /bin/bash
+  rescue:
+    - name: Image cleanup failed
+      ansible.builtin.fail:
+        msg: "Failed to clean up contianer images. Please do manual cleanup."
+      failed_when: false
 
 - name: Clean podman volumes
   become: true

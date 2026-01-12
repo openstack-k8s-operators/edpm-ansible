@@ -50,3 +50,13 @@
   ansible.builtin.include_tasks: containers.yml
   when:
     - edpm_update_enable_containers_update
+
+- name: Cleanup podman after update
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: purge.yml
+  when:
+    - edpm_update_enable_containers_update
+    - edpm_update_enable_containers_update_cleanup
+  tags:
+    - update
