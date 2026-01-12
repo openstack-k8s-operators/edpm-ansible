@@ -24,8 +24,8 @@
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "edpm_ceilometer_agent_compute.service" }
-        - { "name": "edpm_node_exporter.service" }
+        - {"name": "edpm_ceilometer_agent_compute.service"}
+        - {"name": "edpm_node_exporter.service"}
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
