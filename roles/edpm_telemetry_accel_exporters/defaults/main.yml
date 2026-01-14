@@ -1,0 +1,27 @@
+---
+
+# NVIDIA exporter
+edpm_telemetry_accel_exporters_install_nvidia: true
+edpm_telemetry_accel_exporters_nvidia_configure_container_runtime: true
+
+# NVIDIA repository URL
+edpm_telemetry_accel_exporters_nvidia_repo_url: "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/"
+edpm_telemetry_accel_exporters_nvidia_repo_gpgkey: "{{ edpm_telemetry_accel_exporters_nvidia_repo_url }}/x86_64/D42D0685.pub"
+
+# NVIDIA Management Library version
+edpm_telemetry_accel_exporters_install_nvidia_management_library: false
+edpm_telemetry_accel_exporters_nvidia_management_library_version: ""  # eg "580.126.08-1"
+
+# NVIDIA Container Tools RPM version
+edpm_telemetry_accel_exporters_libnvidia_container_toolkit_version: ""  # eg "1.17.8-1"
+
+# NVIDIA DCGM Exporter container image tag
+edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_repo: "nvcr.io/nvidia/k8s/dcgm-exporter"
+edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_tag: "latest"  # eg "4.3.1-4.4.0-ubi9"
+
+# NVIDIA Device list for container configuration
+edpm_telemetry_accel_exporters_nvidia_device_list:
+  - nvidia.com/gpu=all
+
+# Should only be true for molecule testing (since no GPU is available, the container will not start)
+_edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_skip_container_check: false

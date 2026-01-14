@@ -1,0 +1,52 @@
+---
+- name: Set NVIDIA Container Tools package version suffix
+  ansible.builtin.set_fact:
+    _edpm_telemetry_accel_exporters_nvidia_container_toolkit_ver: >-
+      {{ '-%s' % edpm_telemetry_accel_exporters_libnvidia_container_toolkit_version
+      if edpm_telemetry_accel_exporters_libnvidia_container_toolkit_version | length > 0 else '' }}
+
+- name: Set NVIDIA CUDA libs package version suffix
+  ansible.builtin.set_fact:
+    _edpm_telemetry_accel_exporters_cuda_libs_ver: >-
+      {{ '-%s' % edpm_telemetry_accel_exporters_nvidia_management_library_version
+      if edpm_telemetry_accel_exporters_nvidia_management_library_version | length > 0 else '' }}
+
+- name: Install NVIDIA Container Tools RPM
+  become: true
+  ansible.builtin.dnf:
+    name: "nvidia-container-toolkit{{ _edpm_telemetry_accel_exporters_nvidia_container_toolkit_ver }}"
+    state: present
+
+- name: Configure NVIDIA container runtime
+  when: edpm_telemetry_accel_exporters_nvidia_configure_container_runtime | bool
+  block:
+    - name: Configure NVIDIA container runtime
+      become: true
+      ansible.builtin.command: nvidia-ctk runtime configure --runtime=containerd
+      changed_when: true
+
+    - name: Get nvidia-ml library version from ldconfig
+      become: true
+      ansible.builtin.shell:
+        cmd: set -o pipefail && ldconfig -v | grep nvidia-ml | awk '{print $3}'
+      register: _edpm_telemetry_accel_exporters_ldconfig_nvidia_ml
+      changed_when: false
+
+    - name: Extract nvidia-ml version for libcuda dummy file
+      ansible.builtin.set_fact:
+        _edpm_telemetry_accel_exporters_nvidia_ml_version: >-
+          {{ _edpm_telemetry_accel_exporters_ldconfig_nvidia_ml.stdout_lines[0]
+          | regex_replace('libnvidia-ml\.so\.([0-9\.]+)', '\1') }}
+
+    # CUDA is not needed for the exporter, and generally not useful on an EDPM node, but the toolkit insists it be there.
+    - name: Create dummy /usr/lib64/libcuda.so file
+      become: true
+      ansible.builtin.file:
+        path: /usr/lib64/libcuda.so.{{ _edpm_telemetry_accel_exporters_nvidia_ml_version }}
+        state: touch
+        mode: '0755'
+
+    - name: Generate NVIDIA CDI configuration
+      become: true
+      ansible.builtin.command: nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+      changed_when: true

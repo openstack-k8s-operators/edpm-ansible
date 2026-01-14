@@ -1,0 +1,17 @@
+---
+
+- name: Install NVIDIA components
+  when: edpm_telemetry_accel_exporters_install_nvidia | bool
+  block:
+    - name: Import NVIDIA repo tasks
+      ansible.builtin.import_tasks: nvidia-repo.yml
+
+    - name: Import management library tasks
+      when: edpm_telemetry_accel_exporters_install_nvidia_management_library | bool
+      ansible.builtin.import_tasks: nvidia-management-library.yml
+
+    - name: Import container tools tasks
+      ansible.builtin.import_tasks: nvidia-container-tools.yml
+
+    - name: Import container deployment tasks
+      ansible.builtin.import_tasks: nvidia-dcgm-exporter-container.yml

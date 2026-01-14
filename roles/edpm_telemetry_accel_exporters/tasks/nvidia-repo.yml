@@ -1,0 +1,9 @@
+---
+- name: Add nvidia CUDA repo
+  become: true
+  ansible.builtin.yum_repository:
+    name: nvidia-rhel
+    description: nvidia drivers for rhel
+    baseurl: "{{ edpm_telemetry_accel_exporters_nvidia_repo_url }}/$basearch/"
+    gpgcheck: true
+    gpgkey: "{{ edpm_telemetry_accel_exporters_nvidia_repo_gpgkey }}"

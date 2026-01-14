@@ -1,0 +1,21 @@
+---
+- name: Load container definition for dcgm-exporter
+  ansible.builtin.set_fact:
+    _dcgm_exporter_container_def: "{{ lookup('template', 'container_defs/dcgm-exporter.yaml.j2') | from_yaml }}"
+
+- name: Build container defs dict
+  ansible.builtin.set_fact:
+    _dcgm_exporter_container_defs: "{{ {} | combine({'dcgm-exporter': _dcgm_exporter_container_def}) }}"
+
+- name: Deploy dcgm-exporter container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_service: dcgm-exporter
+    edpm_container_standalone_container_defs: "{{ _dcgm_exporter_container_defs }}"
+
+- name: Wait for dcgm-exporter service to be ready
+  when: not _edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_skip_container_check | bool
+  ansible.builtin.wait_for:
+    port: 9400
+    timeout: 300

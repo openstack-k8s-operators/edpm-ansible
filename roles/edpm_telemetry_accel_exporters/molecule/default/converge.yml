@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  vars:
+    _edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_skip_container_check: true
+  tasks:
+    - name: Test edpm_telemetry_accel_exporters role
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_telemetry_accel_exporters"

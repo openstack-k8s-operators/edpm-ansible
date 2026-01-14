@@ -1,0 +1,13 @@
+image: "{{ edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_repo }}:{{ edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_tag }}"
+restart: always
+recreate: true
+privileged: true
+net: host
+ports:
+  - "9400:9400"
+{% if edpm_telemetry_accel_exporters_nvidia_device_list | length > 0 %}
+device:
+{% for device in edpm_telemetry_accel_exporters_nvidia_device_list %}
+  - {{ device }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,12 @@
+---
+- name: Set NVIDIA Management Library package version suffix
+  ansible.builtin.set_fact:
+    _edpm_telemetry_accel_exporters_nvidia_management_library_ver: >-
+      {{ '-%s' % edpm_telemetry_accel_exporters_nvidia_management_library_version
+      if edpm_telemetry_accel_exporters_nvidia_management_library_version | length > 0 else '' }}
+
+- name: Install NVIDIA Management Library RPM
+  become: true
+  ansible.builtin.dnf:
+    name: "libnvidia-ml{{ _edpm_telemetry_accel_exporters_nvidia_management_library_ver }}"
+    state: present

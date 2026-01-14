@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  vars_files:
+    - ../../defaults/main.yml
+  tasks:
+    - name: Ensure systemd service exists
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
+      loop:
+        - name: "edpm_dcgm-exporter.service"

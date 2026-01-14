@@ -1,0 +1,49 @@
+---
+argument_specs:
+  # roles/edpm_telemetry_accel_exporters/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_telemetry_accel_exporters role.
+    options:
+      edpm_telemetry_accel_exporters_install_nvidia:
+        type: bool
+        default: true
+        description: Whether to install NVIDIA components
+      edpm_telemetry_accel_exporters_nvidia_configure_container_runtime:
+        type: bool
+        default: true
+        description: Whether to configure NVIDIA container runtime
+      edpm_telemetry_accel_exporters_nvidia_repo_url:
+        type: str
+        default: "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/"
+        description: NVIDIA repository URL
+      edpm_telemetry_accel_exporters_nvidia_repo_gpgkey:
+        type: str
+        default: "{{ edpm_telemetry_accel_exporters_nvidia_repo_url }}/x86_64/D42D0685.pub"
+        description: NVIDIA repository GPG key URL
+      edpm_telemetry_accel_exporters_install_nvidia_management_library:
+        type: bool
+        default: false
+        description: >
+          Whether to install NVIDIA Management Library - usually false on EDPM nodes because
+          it is installed along with the vGPU Host Driver.
+      edpm_telemetry_accel_exporters_nvidia_management_library_version:
+        type: str
+        default: ""
+        description: NVIDIA Management Library version (e.g., "580.126.08-1")
+      edpm_telemetry_accel_exporters_libnvidia_container_toolkit_version:
+        type: str
+        default: ""
+        description: NVIDIA Container Tools RPM version (e.g., "1.17.8-1")
+      edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_repo:
+        type: str
+        default: "nvcr.io/nvidia/k8s/dcgm-exporter"
+        description: NVIDIA DCGM Exporter container image repository
+      edpm_telemetry_accel_exporters_nvidia_dcgm_exporter_image_tag:
+        type: str
+        default: "latest"
+        description: NVIDIA DCGM Exporter container image tag (e.g., "4.3.1-4.4.0-ubi9")
+      edpm_telemetry_accel_exporters_nvidia_device_list:
+        type: list
+        default:
+          - nvidia.com/gpu=all
+        description: List of devices to pass to the container. If empty, the device section will not be included in the container configuration.
