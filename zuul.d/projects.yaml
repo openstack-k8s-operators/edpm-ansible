@@ -24,6 +24,8 @@
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
+        - edpm-ansible-molecule-edpm_telemetry
+        - edpm-ansible-molecule-edpm_telemetry_logging
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
         - edpm-ansible-molecule-edpm_update
         - openstack-k8s-operators-content-provider
@@ -63,3 +65,15 @@
               - ^roles/edpm_pre_adoption_validation/*
               - ^roles/edpm_tripleo_cleanup/*
               - ^roles/edpm_update/*
+          # telemetry-operator jobs
+        - telemetry-openstack-meta-content-provider-master:
+            files: &telemetry-files
+              - ^playbooks/telemetry.yml
+              - ^roles/edpm_telemetry/*
+              - ^roles/edpm_telemetry_logging/*
+              - ^roles/edpm_telemetry_power_monitoring/*
+        - functional-tests-osp18:
+            required-projects:
+              - name: infrawatch/feature-verification-tests
+                override-checkout: master
+            files: *telemetry-files
