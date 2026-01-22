@@ -86,6 +86,7 @@
       check_mode: true
       register: grub_file_entry_check
 
+    # DNM reproduce as this doesnt work
     - name: Set boot_file_entry_check fact
       ansible.builtin.set_fact:
         boot_file_entry_present: grub_file_entry_check is changed
