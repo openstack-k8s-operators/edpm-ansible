@@ -9,5 +9,5 @@
         state: absent
       check_mode: true
       loop:
-        - { service_name: 'fake-tripleo-service', path: '/usr/lib/systemd/system' }
-        - { service_name: 'fake-etc-tripleo-service', path: '/etc/systemd/system' }
+        - {service_name: 'fake-tripleo-service', path: '/usr/lib/systemd/system'}
+        - {service_name: 'fake-etc-tripleo-service', path: '/etc/systemd/system'}
