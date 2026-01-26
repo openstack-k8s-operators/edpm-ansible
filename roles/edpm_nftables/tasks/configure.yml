@@ -53,8 +53,38 @@
       ansible.builtin.command: nft -f /etc/nftables/iptables.nft
       register: nft_iptables
       changed_when: nft_iptables.rc == 0
-      failed_when: nft_iptables.rc != 0
+      failed_when: false  # Handle failure below
       when: iptables_nft_ruleset.changed  # noqa: no-handler
+
+    # Workaround for nftables idempotency issue: if chains exist without
+    # hook/priority (created via 'nft add chain'), loading a ruleset that
+    # defines the same chains WITH hook/priority fails with
+    # "Operation not supported". Delete tables first to ensure clean state.
+    - name: Delete iptables-compat tables if load failed due to bare chains
+      ansible.builtin.command: "nft delete table {{ item }}"
+      loop:
+        - inet filter
+        - inet raw
+        - inet nat
+        - ip filter
+        - ip raw
+        - ip nat
+        - ip6 filter
+        - ip6 raw
+      failed_when: false
+      changed_when: false
+      when:
+        - iptables_nft_ruleset.changed  # noqa: no-handler
+        - nft_iptables.rc != 0
+
+    - name: Retry loading empty ruleset after cleanup
+      ansible.builtin.command: nft -f /etc/nftables/iptables.nft
+      register: nft_iptables_retry
+      changed_when: nft_iptables_retry.rc == 0
+      failed_when: nft_iptables_retry.rc != 0
+      when:
+        - iptables_nft_ruleset.changed  # noqa: no-handler
+        - nft_iptables.rc != 0
 
 # Get current nft rules in JSON format, with our iptables compat content.
 - name: Get current nftables content
