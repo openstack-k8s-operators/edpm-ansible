@@ -25,6 +25,6 @@ edpm_download_cache_packages: true
 
 edpm_download_cache_container_images: true
 
-edpm_download_cache_running_services: "{{ edpm_services_override | default(edpm_services) }}"
+edpm_download_cache_running_services: "{{ edpm_service_types }}"
 
 edpm_download_cache_podman_auth_file: "~/.config/containers/auth.json"
