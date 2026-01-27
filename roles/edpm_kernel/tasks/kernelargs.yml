@@ -88,7 +88,7 @@
 
     - name: Set boot_file_entry_check fact
       ansible.builtin.set_fact:
-        boot_file_entry_present: grub_file_entry_check is changed
+        boot_file_entry_present: "{{ grub_file_entry_check is changed }}"
 
     # Leapp does not recognise grub entries starting other than GRUB
     # It results wrong formatting of entries in file /etc/default/grub
