@@ -19,7 +19,7 @@
   hosts: all
   gather_facts: false
   vars:
-    edpm_services:
+    edpm_service_types:
       - bootstrap
       - configure-network
       - validate-network
