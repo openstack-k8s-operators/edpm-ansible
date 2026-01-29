@@ -163,3 +163,9 @@ argument_specs:
         description: >
           Indicates whether the OCP environment we're deployed from is using a custom
           registry and specifically a ImageContentSourcePolicy to set registry mirrors.
+      edpm_podman_registry_ca_certs:
+        type: dict
+        default: {}
+        description: >
+          CA certificates for mirror registries. This is a map of registry hostname
+          to PEM certificate content.

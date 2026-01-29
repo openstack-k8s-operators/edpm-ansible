@@ -124,6 +124,24 @@
         mode: "0644"
       when: edpm_podman_disconnected_ocp
 
+    - name: Install mirror registry CA certificates
+      when: edpm_podman_registry_ca_certs | length > 0
+      block:
+        - name: Copy CA certificates to trust anchors
+          ansible.builtin.copy:
+            content: "{{ item.value }}"
+            dest: "/etc/pki/ca-trust/source/anchors/{{ item.key | replace(':', '_') | replace('..', '_') }}.crt"
+            owner: root
+            group: root
+            mode: "0644"
+          loop: "{{ edpm_podman_registry_ca_certs | dict2items }}"
+          register: ca_certs_copied
+
+        - name: Update CA trust store
+          ansible.builtin.command: update-ca-trust extract
+          changed_when: true
+          when: ca_certs_copied.changed
+
     - name: Write containers.conf
       community.general.ini_file:
         path: /etc/containers/containers.conf
