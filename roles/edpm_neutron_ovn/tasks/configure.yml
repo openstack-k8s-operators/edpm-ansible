@@ -41,6 +41,7 @@
         recurse: true
         patterns:
           - "*ovn.conf"
+          - "*metadata*conf"
       register: edpm_neutron_ovn_secrets
       delegate_to: localhost
       become: false
