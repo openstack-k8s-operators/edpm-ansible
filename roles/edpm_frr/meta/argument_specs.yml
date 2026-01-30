@@ -134,6 +134,10 @@ argument_specs:
         default: ''
         description: ''
         type: str
+      edpm_frr_conf_custom_router_bgp_ovn:
+        default: ''
+        description: Custom router BGP configuration for OVN VRF.
+        type: str
       edpm_frr_config_basedir:
         default: /var/lib/openstack/frr
         description: Path to FRR configuration directory.
@@ -166,6 +170,10 @@ argument_specs:
         default: 3
         description: ''
         type: int
+      edpm_frr_ovn_vrf:
+        default: ''
+        description: VRF name for OVN-BGP extension.
+        type: str
       edpm_frr_version:
         default: 7.0
         description: ''
