@@ -7,7 +7,7 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
     edpm_nova_tls_ca_src_dir: /tmp/pki
-    edpm_nova_config_dest: /var/lib/openstack/config/nova
+    edpm_nova_config_dest: /var/lib/openstack/nova
   tasks:
     - name: ensure expected directories exist
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
@@ -15,13 +15,12 @@
         # common directories
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack"
-        - "/var/lib/openstack/config/containers"
         - "/etc/ssh/ssh_known_hosts"
         # extrenal deps
         - "/var/lib/openstack/config/ceph"
          # nova directories
         - "/var/lib/nova"
-        - "/var/lib/openstack/config/nova"
+        - "{{ edpm_nova_config_dest }}"
         - "/var/lib/_nova_secontext"
         - "/var/lib/nova/instances"
         # NOTE(sean-k-mooney): this directory is normaly created by the edpm_install_cert role
@@ -39,10 +38,14 @@
     - name: ensure nova config mounts are present for both nova_compute and nova_nvme_cleaner containers
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
       loop:
-        - {"name": "nova_compute", "src": "{{ edpm_nova_config_dest }}",
-            "dest": "/var/lib/kolla/config_files", "options": "ro"}
-        - {"name": "nova_nvme_cleaner", "src": "{{ edpm_nova_config_dest }}",
-            "dest": "/var/lib/kolla/config_files/nova_shared", "options": "ro"}
+        - name: "nova_compute"
+          src: "{{ edpm_nova_config_dest }}"
+          dest: "/var/lib/kolla/config_files/src"
+          options: "ro"
+        - name: "nova_nvme_cleaner"
+          src: "{{ edpm_nova_config_dest }}"
+          dest: "/var/lib/kolla/config_files/src/nova_shared"
+          options: "ro"
 
     - name: ensure nvme cleaner container has /dev mounted
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
@@ -68,7 +71,7 @@
     - name: read nvme cleaner kolla config
       become: true
       ansible.builtin.slurp:
-        src: /var/lib/openstack/config/nova_nvme_cleaner/config.json
+        src: /var/lib/kolla/config_files/nova_nvme_cleaner.json
       register: cleaner_kolla_cfg
 
     - name: parse nvme cleaner kolla config
@@ -99,17 +102,17 @@
       ansible.builtin.shell: |
         podman logs nova_compute 2>&1 | grep "{{item}}" > /dev/null
       loop:
-        - "Copying /var/lib/kolla/config_files/nova-blank.conf to /etc/nova/nova.conf"
-        - "Copying /var/lib/kolla/config_files/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
-        - "Copying /var/lib/kolla/config_files/ssh-config to /var/lib/nova/.ssh/config"
-        - "Copying /var/lib/kolla/config_files/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
-        - "Copying /var/lib/kolla/config_files/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
-        - "Copying /var/lib/kolla/config_files/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
-        - "Copying /var/lib/kolla/config_files/run-on-host to /usr/sbin/iscsiadm"
+        - "Copying /var/lib/kolla/config_files/src/nova-blank.conf to /etc/nova/nova.conf"
+        - "Copying /var/lib/kolla/config_files/src/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
+        - "Copying /var/lib/kolla/config_files/src/ssh-config to /var/lib/nova/.ssh/config"
+        - "Copying /var/lib/kolla/config_files/src/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
+        - "Copying /var/lib/kolla/config_files/src/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
+        - "Copying /var/lib/kolla/config_files/src/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
+        - "Copying /var/lib/kolla/config_files/src/run-on-host to /usr/sbin/iscsiadm"
 
     - name: slurp host specific config
       ansible.builtin.slurp:
-        src: /var/lib/openstack/config/nova/02-nova-host-specific.conf
+        src: "{{ edpm_nova_config_dest }}/02-nova-host-specific.conf"
       register: host_specific_config
 
     - name: Assert that my_ip is rendered into the host specific config
@@ -180,10 +183,10 @@
 
     - name: Check if after sync old file is removed
       ansible.builtin.stat:
-        path: '/var/lib/openstack/config/nova/test.conf'
+        path: '/var/lib/openstack/nova/test.conf'
       register: nova_host_specific_conf
 
-    - name: Assert that /var/lib/openstack/config/nova/test.conf file does not exist
+    - name: Assert that /var/lib/openstack/nova/test.conf file does not exist
       ansible.builtin.assert:
         that:
           - "not nova_host_specific_conf.stat.exists"
@@ -217,7 +220,7 @@
     - name: Remove nvme_cleaner config directory to simulate update-only scenario
       become: true
       ansible.builtin.file:
-        path: /var/lib/openstack/config/nova_nvme_cleaner
+        path: /var/lib/openstack/nova_nvme_cleaner
         state: absent
 
     - name: Run updates to simulate minor update
@@ -233,7 +236,7 @@
     - name: Verify nvme_cleaner config directory exists after minor update
       become: true
       ansible.builtin.stat:
-        path: /var/lib/openstack/config/nova_nvme_cleaner
+        path: /var/lib/openstack/nova_nvme_cleaner
       register: nvme_cleaner_dir_after_update
 
     - name: Assert nvme_cleaner directory exists after update
