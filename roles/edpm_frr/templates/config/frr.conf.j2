@@ -9,6 +9,62 @@ service integrated-vtysh-config
 line vty
 {{ edpm_frr_conf_custom_globals }}
 
+{% if edpm_frr_ovn_vrf_learn|length %}
+vrf {{ edpm_frr_ovn_vrf_learn }}
+{% if edpm_frr_bgp_ipv4 %}
+  ip protocol bgp route-map rm-install-only-default
+{% endif %}
+{% if edpm_frr_bgp_ipv6 %}
+  ipv6 protocol bgp route-map rm-install-only-default
+{% endif %}
+exit-vrf
+
+router bgp {{ edpm_frr_bgp_asn }} vrf {{ edpm_frr_ovn_vrf_learn }}
+{% if edpm_frr_bgp_ipv4 %}
+  address-family ipv4 unicast
+    ! Leak everything from root (including dynamic next-hops)
+    import vrf default
+  exit-address-family
+{% endif %}
+{% if edpm_frr_bgp_ipv6 %}
+  address-family ipv6 unicast
+    ! Leak everything from root (including dynamic next-hops)
+    import vrf default
+  exit-address-family
+{% endif %}
+exit
+
+{% if edpm_frr_bgp_ipv4 %}
+route-map rm-install-only-default permit 10
+  match ip address prefix-list only-default
+{% endif %}
+
+{% if edpm_frr_bgp_ipv6 %}
+route-map rm-install-only-default permit 11
+  match ipv6 address prefix-list only-default
+{% endif %}
+{% endif %}
+
+{% if edpm_frr_ovn_vrf_advertise|length %}
+router bgp {{ edpm_frr_bgp_asn }} vrf {{ edpm_frr_ovn_vrf_advertise }}
+  bgp log-neighbor-changes
+  no bgp default ipv4-unicast
+  no bgp ebgp-requires-policy
+  {{ edpm_frr_conf_custom_router_bgp_ovn }}
+
+{% if edpm_frr_bgp_ipv4 %}
+  address-family ipv4 unicast
+    redistribute kernel
+  exit-address-family
+{% endif %}
+
+{% if edpm_frr_bgp_ipv6 %}
+  address-family ipv6 unicast
+    redistribute kernel
+  exit-address-family
+{% endif %}
+{% endif %}
+
 router bgp {{ edpm_frr_bgp_asn }}
   bgp router-id {{ hostvars[inventory_hostname][edpm_frr_bgp_ipv4_src_network ~ '_ip'] }}
   bgp log-neighbor-changes
@@ -62,6 +118,9 @@ router bgp {{ edpm_frr_bgp_asn }}
 
 {% if edpm_frr_bgp_ipv4 %}
   address-family ipv4 unicast
+{% if edpm_frr_ovn_vrf_advertise|length %}
+    import vrf {{ edpm_frr_ovn_vrf_advertise }}
+{% endif %}
     redistribute connected
     neighbor uplink activate
 {% if edpm_frr_bgp_ipv4_allowas_in %}
@@ -75,6 +134,9 @@ router bgp {{ edpm_frr_bgp_asn }}
 
 {% if edpm_frr_bgp_ipv6 %}
   address-family ipv6 unicast
+{% if edpm_frr_ovn_vrf_advertise|length %}
+    import vrf {{ edpm_frr_ovn_vrf_advertise }}
+{% endif %}
     redistribute connected
     neighbor uplink activate
 {% if edpm_frr_bgp_ipv6_allowas_in %}
