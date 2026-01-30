@@ -93,6 +93,11 @@ options:
       - Enable debug
     type: bool
     default: False
+  cleanup_old_images:
+    description:
+      - Whether to clean up old container images after updating to a new version.
+    type: bool
+    default: True
 """
 
 EXAMPLES = """
@@ -137,6 +142,7 @@ class EdpmContainerManage:
         self.containers = args.get('containers', [])
         self.log_base_path = args.get('log_base_path')
         self.debug = args.get('debug')
+        self.cleanup_old_images = args.get('cleanup_old_images', True)
 
         # Deprecation warning for log_base_path
         if self.log_base_path and self.log_base_path != '/var/log/containers/stdouts':
@@ -338,6 +344,15 @@ class EdpmContainerManage:
             opts['stop_timeout'] = opts.pop('stop_grace_period')
 
         success = True
+        existing_image = None
+
+        if self.cleanup_old_images:
+            cmd_inspect = ['podman', 'inspect', name]
+            rc_inspect, out_inspect, err_inspect = self.module.run_command(cmd_inspect)
+            if rc_inspect == 0:
+                data_inspect = json.loads(out_inspect)[0]
+                existing_image = data_inspect.get('Config').get('Image')
+
         try:
             container_opts = self._container_opts_update(opts)
             container_opts = self._container_opts_types(container_opts)
@@ -346,6 +361,20 @@ class EdpmContainerManage:
             print(e)
             self.module.warn(str(e))
             success = False
+
+        # If successful and we need to cleanup old images
+        if success and self.cleanup_old_images and existing_image is not None:
+            new_image = opts.get('image')
+            if new_image and existing_image != new_image:
+                # Remove the old image
+                cmd_remove = ['podman', 'rmi', existing_image]
+                rc_remove, out_remove, err_remove = self.module.run_command(cmd_remove)
+                if rc_remove == 0:
+                    self.results['changed'] = True
+                    self.module.debug(f"Removed old image {existing_image}")
+                else:
+                    self.module.warn(f"Failed to remove old image {existing_image}: {err_remove}")
+
         return success
 
     def run_container(self, data):
