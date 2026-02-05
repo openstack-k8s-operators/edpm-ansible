@@ -119,4 +119,3 @@ argument_specs:
       tenant_ip:
         description: Local IP address
         type: str
-        required: true
