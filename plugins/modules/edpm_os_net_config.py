@@ -72,6 +72,13 @@ options:
       - If enabled, use nmstate and network manager for network configuration.
     type: bool
     default: false
+  purge_provider:
+    description:
+      - Purge the network configuration created previously using the provider
+        specified in 'str' either ifcfg or nmstate.
+    type: str
+    default: ''
+
 """
 
 EXAMPLES = """
@@ -102,7 +109,7 @@ DEFAULT_CFG = '/etc/os-net-config/dhcp_all_interfaces.yaml'
 
 def _run_os_net_config(config_file, cleanup=False, debug=False,
                        detailed_exit_codes=False, noop=False,
-                       use_nmstate=False):
+                       use_nmstate=False, purge_provider=''):
     # Build os-net-config command
     argv = ['os-net-config --config-file {}'.format(config_file)]
     if cleanup:
@@ -117,6 +124,11 @@ def _run_os_net_config(config_file, cleanup=False, debug=False,
         argv.append('--provider nmstate')
     else:
         argv.append('--provider ifcfg')
+    if len(purge_provider) > 0:
+        argv.append('--purge-provider {}'.format(purge_provider))
+        argv.append('--minimum-config')
+        argv.append('--no-network-config')
+
     cmd = " ".join(argv)
 
     # Apply the provided network configuration
@@ -206,6 +218,7 @@ def main():
     detailed_exit_codes = args['detailed_exit_codes']
     safe_defaults = args['safe_defaults']
     use_nmsate = args['use_nmstate']
+    purge_provider = args['purge_provider']
     return_codes = [0]
     if detailed_exit_codes:
         return_codes.append(2)
@@ -214,7 +227,8 @@ def main():
     cmd, run = _run_os_net_config(config_file, cleanup, debug,
                                   detailed_exit_codes,
                                   module.check_mode,
-                                  use_nmstate=use_nmsate)
+                                  use_nmstate=use_nmsate,
+                                  purge_provider=purge_provider)
     results['stderr'] = run.stderr
     results['stdout'] = run.stdout
     if run.returncode not in return_codes and not module.check_mode:

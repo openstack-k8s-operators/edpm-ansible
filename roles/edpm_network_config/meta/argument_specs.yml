@@ -57,6 +57,18 @@ argument_specs:
         type: dict
         description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
         default: {}
+      edpm_network_config_purge_provider:
+        type: str
+        description: >
+          Purge the network configuration created previously using the provider specified in 'str'
+          either ifcfg or nmstate. Also ensure minimum_config should be provided in your
+          edpm_network_config_template variable to maintain control plane connectivity.
+          This variable should be used for day2 network provider migration.
+        default: ""
+        choices:
+          - ""
+          - "ifcfg"
+          - "nmstate"
       edpm_network_config_safe_defaults:
         type: bool
         description: >

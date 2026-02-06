@@ -16,10 +16,20 @@
           - "local"
 
     - name: Import edpm_ovs to install ovs packages
-      ansible.builtin.import_role:
+      ansible.builtin.include_role:
         name: osp.edpm.edpm_ovs
+      when: edpm_network_config_purge_provider | default('') | length == 0
       tags:
         - edpm_ovs
+
+    - name: Purge edpm_network_config
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_network_config
+        tasks_from: purge_os_net_config.yml
+      when: edpm_network_config_purge_provider | default('') | length > 0
+      tags:
+        - edpm_purge_network_config
+
     # Sets up EDPM network using os-net-config
     - name: Import edpm_network_config
       ansible.builtin.import_role:
