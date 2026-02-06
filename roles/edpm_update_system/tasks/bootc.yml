@@ -20,11 +20,17 @@
     msg: The 'edpm_update_system_bootc_os_container_image' variable is not set. Please set the value to the bootc OS image to update to.
   when: not edpm_update_system_bootc_os_container_image
 
-- name: Update bootc image
+- name: Switch bootc image
   ansible.builtin.shell: bootc switch "{{ edpm_update_system_bootc_os_container_image }}"
   become: true
   register: _bootc_switch_result
   changed_when: "'unchanged' not in _bootc_switch_result.stdout"
+
+- name: Update bootc image
+  ansible.builtin.shell: bootc upgrade
+  become: true
+  register: _bootc_upgrade_result
+  changed_when: "'No changes' not in _bootc_upgrade_result.stdout"
 
 - name: Check bootc status to see if a reboot is required
   ansible.builtin.command: bootc status --format=json
