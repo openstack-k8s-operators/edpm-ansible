@@ -13,27 +13,33 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
 - name: Converge
   hosts: all
   gather_facts: false
   vars:
     edpm_network_config_template: |
       ---
+      remove_config:
+      - remove_type: vlan
+        remove_name: vlan200
       network_config:
-        - type: interface
-          name: dummy0
+        - type: vlan
+          vlan_id: 100
+          device: dummy0
           use_dhcp: false
           use_dhcpv6: false
           addresses:
-            - ip_netmask: 192.168.180.2
+          - ip_netmask: 192.168.180.2/24
           routes:
-            - ip_netmask: 192.168.181.0/24
+            - ip_netmask: 192.168.180.0/24
               next_hop: 192.168.180.1
-    edpm_network_config_manage_service: false
-    edpm_network_config_hide_sensitive_logs: false
+    edpm_network_config_nonconfigured_cleanup: false
     edpm_network_config_nmstate: false
+    edpm_network_config_hide_sensitive_logs: false
+    edpm_network_config_update: false
+    edpm_network_config_remove_config: false
+    edpm_bootstrap_network_resolvconf_update: false
+    edpm_network_config_debug: true
   pre_tasks:
     - name: Gather user fact
       ansible.builtin.setup:
@@ -49,3 +55,43 @@
         - ansible_user is undefined
   roles:
     - role: "osp.edpm.edpm_network_config"
+
+- name: Verify os-net-config rpm version and interface creation
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Print os-net-config version
+      ansible.builtin.command: rpm -q os-net-config
+      register: onc_ver
+      changed_when: false
+
+    - name: Display version
+      ansible.builtin.debug:
+        msg: "{{ onc_ver.stdout }}"
+
+    - name: List /etc/sysconfig/network-scripts
+      ansible.builtin.command: ls -l /etc/sysconfig/network-scripts
+      register: netscripts_list
+      changed_when: false
+
+    - name: Debug listing of /etc/sysconfig/network-scripts
+      ansible.builtin.debug:
+        var: netscripts_list.stdout_lines
+
+    - name: List all NetworkManager connections
+      ansible.builtin.command: nmcli -t -f NAME,TYPE,DEVICE connection show
+      register: nmcli_conns
+      changed_when: false
+
+    - name: Debug NM connections
+      ansible.builtin.debug:
+        var: nmcli_conns.stdout_lines
+
+    - name: Show ip addr state
+      ansible.builtin.command: ip addr show
+      register: ip_addr
+      changed_when: false
+
+    - name: Debug ip link state
+      ansible.builtin.debug:
+        var: ip_addr.stdout_lines
