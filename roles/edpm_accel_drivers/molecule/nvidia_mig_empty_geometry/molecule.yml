@@ -1,0 +1,26 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: compute-1
+    groups:
+      - compute
+provisioner:
+  name: ansible
+  playbooks:
+    prepare: ../nvidia_mig/prepare.yml
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify

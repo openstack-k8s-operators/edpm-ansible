@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Verify remaining MIG unit (GPU 0) exists and is enabled
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
+
+    - name: Check that removed GPU unit file (edpm_nvidia_mig_apply_1.service) is absent
+      ansible.builtin.stat:
+        path: /etc/systemd/system/edpm_nvidia_mig_apply_1.service
+      register: _edpm_accel_drivers_nvidia_mig_removed_unit_stat
+
+    - name: Assert removed GPU unit file is absent on disk
+      ansible.builtin.assert:
+        that: not _edpm_accel_drivers_nvidia_mig_removed_unit_stat.stat.exists
+        fail_msg: "edpm_nvidia_mig_apply_1.service should have been removed when GPU 1 was removed from geometry list"

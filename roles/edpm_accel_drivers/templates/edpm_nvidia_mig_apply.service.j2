@@ -1,0 +1,15 @@
+[Unit]
+Description=Apply NVIDIA MIG layout
+Before=edpm_libvirt.target
+After=edpm_nvidia_sriov_manage@{{ bdf }}.service
+Requires=edpm_nvidia_sriov_manage@{{ bdf }}.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -pm 1
+ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -mig 1
+ExecStart=/usr/bin/nvidia-smi mig -i {{ index }} -cgi {{ geometry }} -C
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

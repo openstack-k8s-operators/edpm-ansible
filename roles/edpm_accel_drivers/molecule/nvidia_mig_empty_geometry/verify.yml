@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Find any remaining MIG apply systemd unit files
+      become: true
+      ansible.builtin.find:
+        paths: /etc/systemd/system
+        patterns: "edpm_nvidia_mig_apply_*.service"
+      register: _edpm_accel_drivers_nvidia_mig_remaining_units
+      changed_when: false
+
+    - name: Assert no MIG unit files remain when geometry list is empty
+      ansible.builtin.assert:
+        that: _edpm_accel_drivers_nvidia_mig_remaining_units.matched == 0
+        fail_msg: "All edpm_nvidia_mig_apply_*.service units should have been removed when geometry list was emptied, found {{ _edpm_accel_drivers_nvidia_mig_remaining_units.files | map(attribute='path') | list }}"

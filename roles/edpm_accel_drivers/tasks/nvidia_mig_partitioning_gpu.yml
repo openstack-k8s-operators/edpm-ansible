@@ -1,0 +1,57 @@
+---
+- name: Get GPU PCI BDF for nvidia-sriov-manage dependency
+  become: true
+  ansible.builtin.command:
+    cmd: nvidia-smi -i {{ _edpm_accel_drivers_nvidia_mig_gpu_index }} --query-gpu=pci.bus_id --format=csv,noheader,nounits
+  register: _edpm_accel_drivers_nvidia_mig_gpu_pci_bus_id
+  changed_when: false
+
+- name: Normalize BDF to short form for systemd instance
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_mig_bdf_sriov: >-
+      {{
+        (_edpm_accel_drivers_nvidia_mig_gpu_pci_bus_id.stdout | trim).split(':')[0][-4:]
+      }}:{{
+        (_edpm_accel_drivers_nvidia_mig_gpu_pci_bus_id.stdout | trim).split(':')[1]
+      }}:{{
+        (_edpm_accel_drivers_nvidia_mig_gpu_pci_bus_id.stdout | trim).split(':')[2]
+      }}
+
+- name: Install systemd unit to apply MIG layout for GPU {{ _edpm_accel_drivers_nvidia_mig_gpu_index }}
+  become: true
+  ansible.builtin.template:
+    src: edpm_nvidia_mig_apply.service.j2
+    dest: "/etc/systemd/system/edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}.service"
+    mode: '0644'
+  register: _edpm_accel_drivers_nvidia_mig_unit_installed
+  vars:
+    index: "{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}"
+    geometry: "{{ _edpm_accel_drivers_nvidia_mig_geometry }}"
+    bdf: "{{ _edpm_accel_drivers_nvidia_mig_bdf_sriov }}"
+
+- name: Enable edpm_nvidia_mig_apply service for GPU {{ _edpm_accel_drivers_nvidia_mig_gpu_index }}
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}"
+    enabled: true
+    daemon_reload: "{{ _edpm_accel_drivers_nvidia_mig_unit_installed.changed | default(false) | bool }}"
+
+- name: Reset and apply MIG layout if there are changes to the unit file
+  when: _edpm_accel_drivers_nvidia_mig_unit_installed.changed | bool
+  block:
+    - name: Ensure no MIG compute instances are in use before reconfiguring GPU {{ _edpm_accel_drivers_nvidia_mig_gpu_index }}
+      ansible.builtin.include_tasks: nvidia_mig_partitioning_check_gpu_in_use.yml
+      vars:
+        _edpm_accel_drivers_nvidia_mig_check_gpu_index: "{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}"
+
+    - name: Reset MIG mode before applying new layout
+      become: true
+      ansible.builtin.command:
+        cmd: nvidia-smi -i {{ _edpm_accel_drivers_nvidia_mig_gpu_index }} -mig 0
+      changed_when: true
+
+    - name: Restart edpm_nvidia_mig_apply service after unit file change
+      become: true
+      ansible.builtin.systemd:
+        name: "edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}"
+        state: restarted
