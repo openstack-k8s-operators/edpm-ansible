@@ -36,6 +36,19 @@
         state: present
       when:
         - ansible_facts['distribution_major_version'] is version('8', '>=')
+    - name: Ensure NetworkManager is installed
+      become: true
+      ansible.builtin.package:
+        name: NetworkManager
+        state: present
+
+    - name: Enable and start NetworkManager
+      become: true
+      ansible.builtin.service:
+        name: NetworkManager
+        state: started
+        enabled: true
+
     - name: Create a dummy network interface
       ansible.builtin.command: "ip link add dummy0 type dummy"
       register: ip_command_output
@@ -49,3 +62,15 @@
         owner: root
         group: root
         mode: 0755
+    - name: Create a NM VLAN connection vlan200 (for remove_config)
+      become: true
+      ansible.builtin.command: >
+        nmcli connection add
+        type vlan
+        ifname vlan200
+        con-name vlan200
+        dev dummy0
+        id 200
+      register: nmcli_vlan_create
+      changed_when: nmcli_vlan_create.rc == 0
+      failed_when: nmcli_vlan_create.rc != 0

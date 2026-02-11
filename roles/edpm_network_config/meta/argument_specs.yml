@@ -93,8 +93,16 @@ argument_specs:
         default: nic1
       edpm_network_config_nonconfigured_cleanup:
         type: bool
-        description: "Cleanup network interfaces not in network config"
+        description: >
+          For developer use only (use edpm_network_config_remove_config instead).
+          Cleanup network interfaces not in network config
         default: true
+      edpm_network_config_remove_config:
+        type: bool
+        description: >
+          Parse and remove the optional list of network devices specified in
+          the remove_config section before applying the network_config section.
+        default: false
       edpm_bootstrap_network_resolvconf_update:
         type: bool
         default: true
