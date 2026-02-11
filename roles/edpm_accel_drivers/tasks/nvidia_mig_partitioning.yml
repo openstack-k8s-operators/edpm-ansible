@@ -1,0 +1,53 @@
+---
+- name: Install systemd unit to control sriov-manage
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage@.service"
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Unit]
+      After = nvidia-vgpu-mgr.service
+      After = nvidia-vgpud.service
+      After = systemd-udevd.service
+      Description = Enable Nvidia GPU virtual functions. Should be triggered via edpm_nvidia_sriov_manage@.path to ensure GPU is ready for sriov operations.
+      [Service]
+      Type = oneshot
+      User = root
+      Group = root
+      ExecStart = /usr/lib/nvidia/sriov-manage -e %i
+      TimeoutSec = 120
+      Slice = system.slice
+      CPUAccounting = True
+      BlockIOAccounting = True
+      MemoryAccounting = True
+      TasksAccounting = True
+      RemainAfterExit = True
+
+- name: Install systemd unit to cause sriov-manage to run when sriov_numvfs appears
+  become: true
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage@.path"
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Unit]
+      After = nvidia-vgpu-mgr.service
+      After = nvidia-vgpud.service
+      After = systemd-udevd.service
+      Description = Wait for sriov_numvfs to exist before running sriov-manage
+      [Path]
+      PathExists=/sys/bus/pci/devices/%i/sriov_numvfs
+
+- name: Remove MIG units and reset GPUs no longer in geometry list
+  ansible.builtin.include_tasks: nvidia_mig_partitioning_cleanup.yml
+
+- name: Configure MIG for each GPU
+  ansible.builtin.include_tasks: nvidia_mig_partitioning_gpu.yml
+  loop: "{{ edpm_accel_drivers_nvidia_mig_geometries }}"
+  loop_control:
+    index_var: _edpm_accel_drivers_nvidia_mig_gpu_index
+  vars:
+    _edpm_accel_drivers_nvidia_mig_geometry: "{{ item }}"

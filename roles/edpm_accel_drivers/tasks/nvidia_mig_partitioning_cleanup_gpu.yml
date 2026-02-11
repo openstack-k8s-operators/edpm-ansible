@@ -1,0 +1,26 @@
+---
+- name: Ensure no MIG compute instances are in use on GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+  ansible.builtin.include_tasks: nvidia_mig_partitioning_check_gpu_in_use.yml
+  vars:
+    _edpm_accel_drivers_nvidia_mig_check_gpu_index: "{{ _edpm_accel_drivers_nvidia_mig_remove_index }}"
+
+- name: Stop and disable MIG apply service for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}"
+    state: stopped
+    enabled: false
+
+- name: Remove MIG apply systemd unit file for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}.service"
+    state: absent
+
+- name: Reset MIG mode on (no longer configured) GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+  become: true
+  ansible.builtin.command:
+    cmd: nvidia-smi -i {{ _edpm_accel_drivers_nvidia_mig_remove_index }} -mig 0
+  register: _edpm_accel_drivers_nvidia_mig_reset_result
+  ignore_errors: true
+  changed_when: _edpm_accel_drivers_nvidia_mig_reset_result.rc == 0

@@ -1,0 +1,30 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Install mock nvidia-smi for MIG scenarios
+      become: true
+      ansible.builtin.copy:
+        src: "./test_package/mock-nvidia-smi.sh"
+        dest: /usr/bin/nvidia-smi
+        mode: '0755'
+        force: true
+
+    - name: Ensure /usr/lib/nvidia directory exists
+      become: true
+      ansible.builtin.file:
+        path: /usr/lib/nvidia
+        state: directory
+        mode: '0755'
+
+    - name: Install mock sriov-manage for MIG scenarios
+      become: true
+      ansible.builtin.copy:
+        src: /bin/true
+        dest: /usr/lib/nvidia/sriov-manage
+        mode: '0755'
+        force: true
+        remote_src: true
