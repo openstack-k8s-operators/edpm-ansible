@@ -1,5 +1,17 @@
 ---
 
+# NOTE(OSPRH-22761): Disable libvirt default network to prevent virbr0 bridge creation.
+# Nova doesn't use libvirt networking (uses Neutron/OVN instead)
+# Remove the autostart symlink to prevent virbr0 from being created on reboot.
+- name: Disable libvirt default network autostart
+  tags:
+    - install
+    - post-libvirt
+  become: true
+  ansible.builtin.file:
+    path: /etc/libvirt/qemu/networks/autostart/default.xml
+    state: absent
+
 # NOTE: This should be done by bootstrap, or a prior role even when not using eph
 # however, that is not the case today. so we simply do it here to ensure that
 # the ceph config directory exists.
