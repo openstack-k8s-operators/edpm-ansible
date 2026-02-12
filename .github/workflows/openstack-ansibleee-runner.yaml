@@ -12,6 +12,7 @@ on:
       - .github/
       - docs/
       - tests/
+  workflow_dispatch:  # This allows manual triggering from the Actions tab if needed
 
 env:
   imageregistry: 'quay.io'
