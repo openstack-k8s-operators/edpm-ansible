@@ -117,6 +117,21 @@
      - ^roles/edpm_tuned/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
     vars:
       TEST_RUN: edpm_tuned
+
+- job:
+    name: edpm-ansible-molecule-edpm_telemetry
+    parent: edpm-ansible-molecule-base
+    files:
+      - ^roles/edpm_telemetry/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_telemetry
+- job:
+    name: edpm-ansible-molecule-edpm_telemetry_logging
+    parent: edpm-ansible-molecule-base
+    files:
+      - ^roles/edpm_telemetry_logging/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_telemetry_logging
 - job:
     name: edpm-ansible-molecule-edpm_telemetry_power_monitoring
     parent: edpm-ansible-molecule-base
