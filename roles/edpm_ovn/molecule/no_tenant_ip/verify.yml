@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify ovn-encap-ip is set correctly when tenant_ip is not set
+      vars:
+        bgpmainnet_ip: "1.2.3.4"
+        expected_encap_ip_quoted: '"{{ bgpmainnet_ip }}"'
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-encap-ip
+      register: output
+      failed_when: output.rc != 0 or output.stdout != expected_encap_ip_quoted
+
+    - name: Include default verification tasks
+      ansible.builtin.include_tasks:
+        file: ../default/verify-tasks.yml
