@@ -19,7 +19,7 @@ argument_specs:
         description: List of packages to exclude from the update
       edpm_update_running_services:
         type: list
-        default: edpm_services
+        default: edpm_service_types
         description: >
-          Used to select which list of services are running
+          Used to select which list of service types are running
           on the machine. The list is provided by openstack-operator.
