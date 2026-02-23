@@ -1,0 +1,22 @@
+---
+- name: Gather PCI device information
+  ansible.builtin.command: lspci
+  register: _edpm_accel_drivers_lspci_output
+  changed_when: false
+  failed_when: false
+
+- name: Set GPU vendor fact
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_detected_gpu: >-
+      {%- set gpu_devices = _edpm_accel_drivers_lspci_output.stdout_lines | default([]) | select('search', '(?i)(vga|3d|display)') | list -%}
+      {%- if gpu_devices | select('search', '(?i)nvidia') | list | length > 0 -%}
+      nvidia
+      {%- elif gpu_devices | select('search', '(?i)amd') | list | length > 0 -%}
+      amd
+      {%- else -%}
+      none
+      {%- endif -%}
+
+- name: Debug detected GPU vendor
+  ansible.builtin.debug:
+    msg: "Detected GPU: {{ _edpm_accel_drivers_detected_gpu }}"

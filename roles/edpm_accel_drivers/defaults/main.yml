@@ -1,4 +1,5 @@
 ---
+edpm_accel_drivers_auto_detect: true
 edpm_accel_drivers_blacklist_nouveau: true
 
 edpm_accel_drivers_install_nvidia: false

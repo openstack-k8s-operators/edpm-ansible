@@ -6,6 +6,10 @@
   when: ansible_local.bootc is defined and ansible_local.bootc
   failed_when: true
 
+- name: Detect GPU hardware
+  ansible.builtin.import_tasks: detect_gpu.yml
+  when: edpm_accel_drivers_auto_detect | bool
+
 - name: Blacklist nouveau driver
   when: edpm_accel_drivers_blacklist_nouveau | bool
   ansible.builtin.import_tasks: blacklist_nouveau.yml
