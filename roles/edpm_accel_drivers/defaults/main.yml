@@ -1,7 +1,11 @@
 ---
+# Common
 edpm_accel_drivers_auto_detect: true
 edpm_accel_drivers_blacklist_nouveau: true
+edpm_accel_drivers_download_delay: "{{ edpm_download_delay | default(60) }}"
+edpm_accel_drivers_download_retries: "{{ edpm_download_retries | default(5) }}"
 
+# NVIDIA specific
 edpm_accel_drivers_install_nvidia: false
 edpm_accel_drivers_nvidia_custom_url: ""
 edpm_accel_drivers_nvidia_custom_url_ssl_no_verify: false
@@ -11,7 +15,15 @@ edpm_accel_drivers_nvidia_rpm_disable_gpg_check: false
 edpm_accel_drivers_nvidia_dnf_module_stream: "latest"
 edpm_accel_drivers_nvidia_package_name: "nvidia-driver"
 edpm_accel_drivers_nvidia_cleanup_temp_files: true
-
 edpm_accel_drivers_nvidia_cache_dir: "/var/cache/nvidia-drivers"
-edpm_accel_drivers_download_delay: "{{ edpm_download_delay | default(60) }}"
-edpm_accel_drivers_download_retries: "{{ edpm_download_retries | default(5) }}"
+
+# AMD specific
+edpm_accel_drivers_install_amd: false
+edpm_accel_drivers_amd_method: "package"  # "package" (AMDGPU driver via package manager) or "runfile" (AMDGPU driver via runfile installer)
+edpm_accel_drivers_amd_installer_version: "latest"  # amdgpu-install repository version (e.g., "7.2", "6.3.1", "latest")
+edpm_accel_drivers_amd_installer_rpm: ""  # Specific amdgpu-install RPM filename (e.g., "amdgpu-install-7.2.70200-1.el9.noarch.rpm") - if empty, auto-discovers
+edpm_accel_drivers_amd_installer_url: ""  # Full custom URL for amdgpu-install RPM (if empty, constructs from version/rpm variables)
+edpm_accel_drivers_amd_rpm_disable_gpg_check: false
+edpm_accel_drivers_amd_rocm_version: ""  # ROCm version for runfile installer (if empty, auto-discovers latest from AMD repo)
+edpm_accel_drivers_amd_runfile_installer_version: ""  # Runfile installer version (if empty, auto-discovers latest from AMD repo)
+edpm_accel_drivers_amd_runfile_installer_url: ""  # Full custom URL for runfile installer (if empty, constructs from rocm_version/runfile_installer_version variables)
