@@ -88,14 +88,24 @@
       ansible.builtin.set_fact:
         edpm_ovn_ovs_other_config: "{{ edpm_ovn_ovs_other_config | combine(hw_offload) }}"
 
-- name: Configure OVS external_ids
-  become: true
-  ansible.builtin.shell: >
-    ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
-  register: ovs_external_ids
-  changed_when: ovs_external_ids.rc == 0
-  failed_when: ovs_external_ids.rc != 0
+- name: Check and configure OVS external_ids
   when: edpm_ovn_ovs_external_ids | length > 0
+  block:
+    - name: Assert ovn-encap-ip value is correct
+      ansible.builtin.assert:
+        that:
+          - "'ovn-encap-ip' in edpm_ovn_ovs_external_ids"
+          - edpm_ovn_ovs_external_ids['ovn-encap-ip'] | length > 0
+        success_msg: "ovn-encap-ip is set to a valid value: {{ edpm_ovn_ovs_external_ids['ovn-encap-ip'] }}"
+        fail_msg: "ovn-encap-ip must be defined and cannot be an empty string"
+
+    - name: Configure OVS external_ids
+      become: true
+      ansible.builtin.shell: >
+        ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
+      register: ovs_external_ids
+      changed_when: ovs_external_ids.rc == 0
+      failed_when: ovs_external_ids.rc != 0
 
 - name: Configure OVS other_config
   become: true
