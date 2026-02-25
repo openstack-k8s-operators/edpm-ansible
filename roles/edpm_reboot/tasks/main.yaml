@@ -86,7 +86,7 @@
 
 - name: Print message if reboot is required, but is not going to be started
   ansible.builtin.debug:
-    msg: "Reboot is required but was not started. Edpm_reboot_strategy is set to never or this is
+    msg: "Reboot is required but was not started. edpm_reboot_strategy is set to never or this is
           already deployed machine. Reboot has to be planned. To start reboot set edpm_reboot_strategy
           to force"
   when:
