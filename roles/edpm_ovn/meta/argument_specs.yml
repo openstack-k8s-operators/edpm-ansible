@@ -69,9 +69,10 @@ argument_specs:
         description: ''
         type: list
       edpm_ovn_encap_ip:
-        default: '{{ tenant_ip }}'
+        default: '{{ tenant_ip | default("") }}'
         description: >
           Defaults to value of the host variable `tenant_ip`.
+          When `tenant_ip` is not set, it has to be configured with other IP address.
           Passed to the `edpm_ovn_ovs_external_ids` as value for the `ovn-encap-ip`.
         type: str
       edpm_ovn_encap_type:
@@ -119,4 +120,3 @@ argument_specs:
       tenant_ip:
         description: Local IP address
         type: str
-        required: true

@@ -15,14 +15,26 @@
 # under the License.
 #
 # Apply network configuration with os-net-config.
+#
 
-- name: Apply os-net-config configuration
+- name: Purge os-net-config configuration
   become: true
   block:
+    - name: Remove os-net-config return code file
+      become: true
+      block:
+        - name: Check if os-net-config return code file exists
+          ansible.builtin.stat:
+            path: /var/lib/edpm-config/os-net-config.returncode
+          register: os_net_config_returncode_stat
+        - name: Remove file if os-net-config return code file exists
+          ansible.builtin.file:
+            path: /var/lib/edpm-config/os-net-config.returncode
+            state: absent
+          when: os_net_config_returncode_stat.stat.exists
     - name: Set nic_config_file fact
       ansible.builtin.set_fact:
         nic_config_file: "/etc/os-net-config/config.yaml"
-
     - name: Render network_config from template
       no_log: "{{ edpm_network_config_hide_sensitive_logs | bool }}"
       ansible.builtin.copy:
@@ -30,7 +42,6 @@
         dest: "{{ nic_config_file }}"
         mode: '0644'
         backup: true
-
     - name: Retrieve and output nic_config_file contents for debug before applying
       when: edpm_network_config_debug|bool
       block:
@@ -41,16 +52,14 @@
         - name: Debug print nic_config_file contents
           ansible.builtin.debug:
             msg: "{{ os_net_config_config['content'] | b64decode | trim }}"
-
-    - name: Run edpm_os_net_config_module with network_config
+    - name: Run edpm_os_net_config_module to purge network_config
       edpm_os_net_config:
-        cleanup: "{{ edpm_network_config_nonconfigured_cleanup }}"
         config_file: "{{ nic_config_file }}"
+        purge_provider: "{{ edpm_network_config_purge_provider }}"
         debug: "{{ edpm_network_config_debug | bool }}"
         detailed_exit_codes: true
         safe_defaults: "{{ edpm_network_config_safe_defaults | bool }}"
         use_nmstate: "{{ edpm_network_config_nmstate | bool }}"
-        remove_config: "{{ edpm_network_config_remove_config | bool }}"
       async: "{{ edpm_network_config_async_timeout }}"
       poll: "{{ edpm_network_config_async_poll }}"
       register: network_config_result

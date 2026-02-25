@@ -39,11 +39,12 @@ notes: []
 requirements:
   - os-net-config
 description:
-    - Configure host network interfaces using a JSON config file format.
+    - Configure host network interfaces using a JSON/YAML config file format.
 options:
   cleanup:
     description:
-      - Cleanup unconfigured interfaces.
+      - For developer use only (use remove_config instead).
+        Cleanup unconfigured interfaces.
     type: bool
     default: false
   config_file:
@@ -67,11 +68,23 @@ options:
         case of failing while applying the provided net config.
     type: bool
     default: false
+  remove_config:
+    description:
+      - Remove configured interface(s) before applying the network_config.
+    type: bool
+    default: false
   use_nmstate:
     description:
       - If enabled, use nmstate and network manager for network configuration.
     type: bool
     default: false
+  purge_provider:
+    description:
+      - Purge the network configuration created previously using the provider
+        specified in 'str' either ifcfg or nmstate.
+    type: str
+    default: ''
+
 """
 
 EXAMPLES = """
@@ -102,7 +115,8 @@ DEFAULT_CFG = '/etc/os-net-config/dhcp_all_interfaces.yaml'
 
 def _run_os_net_config(config_file, cleanup=False, debug=False,
                        detailed_exit_codes=False, noop=False,
-                       use_nmstate=False):
+                       use_nmstate=False, purge_provider='',
+                       remove_config=False):
     # Build os-net-config command
     argv = ['os-net-config --config-file {}'.format(config_file)]
     if cleanup:
@@ -117,6 +131,12 @@ def _run_os_net_config(config_file, cleanup=False, debug=False,
         argv.append('--provider nmstate')
     else:
         argv.append('--provider ifcfg')
+    if len(purge_provider) > 0:
+        argv.append('--purge-provider {}'.format(purge_provider))
+        argv.append('--minimum-config')
+        argv.append('--no-network-config')
+    if remove_config:
+        argv.append('--remove-config')
     cmd = " ".join(argv)
 
     # Apply the provided network configuration
@@ -130,7 +150,8 @@ def _apply_safe_defaults(debug=False, noop=False, use_nmstate=False):
     _generate_default_cfg()
     cmd, run = _run_os_net_config(config_file=DEFAULT_CFG, cleanup=True,
                                   debug=debug, detailed_exit_codes=True,
-                                  noop=noop, use_nmstate=use_nmstate)
+                                  noop=noop, use_nmstate=use_nmstate,
+                                  remove_config=False)
     return cmd, run
 
 
@@ -206,15 +227,21 @@ def main():
     detailed_exit_codes = args['detailed_exit_codes']
     safe_defaults = args['safe_defaults']
     use_nmsate = args['use_nmstate']
+    purge_provider = args['purge_provider']
+    remove_config = args['remove_config']
     return_codes = [0]
     if detailed_exit_codes:
         return_codes.append(2)
 
     # Apply the provided network configuration
-    cmd, run = _run_os_net_config(config_file, cleanup, debug,
+    cmd, run = _run_os_net_config(config_file,
+                                  cleanup,
+                                  debug,
                                   detailed_exit_codes,
                                   module.check_mode,
-                                  use_nmstate=use_nmsate)
+                                  use_nmstate=use_nmsate,
+                                  purge_provider=purge_provider,
+                                  remove_config=remove_config)
     results['stderr'] = run.stderr
     results['stdout'] = run.stdout
     if run.returncode not in return_codes and not module.check_mode:

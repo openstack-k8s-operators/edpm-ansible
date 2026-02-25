@@ -1,0 +1,17 @@
+image: "{{ edpm_nova_compute_image }}"
+privileged: false
+user: root
+restart: never
+command: "bash -c $* -- eval python3 /sbin/nova_statedir_ownership.py | logger -t nova_compute_init"
+net: none
+security_opt:
+  - label=disable
+detach: false
+environment:
+  NOVA_STATEDIR_OWNERSHIP_SKIP: /var/lib/nova/compute_id
+  __OS_DEBUG: false
+volumes:
+  - /dev/log:/dev/log
+  - /var/lib/nova:/var/lib/nova:shared
+  - /var/lib/_nova_secontext:/var/lib/_nova_secontext:shared,z
+  - "{{ edpm_nova_config_dest }}/nova_statedir_ownership.py:/sbin/nova_statedir_ownership.py:z"

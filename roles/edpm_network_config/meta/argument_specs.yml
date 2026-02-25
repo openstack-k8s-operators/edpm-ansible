@@ -57,6 +57,18 @@ argument_specs:
         type: dict
         description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
         default: {}
+      edpm_network_config_purge_provider:
+        type: str
+        description: >
+          Purge the network configuration created previously using the provider specified in 'str'
+          either ifcfg or nmstate. Also ensure minimum_config should be provided in your
+          edpm_network_config_template variable to maintain control plane connectivity.
+          This variable should be used for day2 network provider migration.
+        default: ""
+        choices:
+          - ""
+          - "ifcfg"
+          - "nmstate"
       edpm_network_config_safe_defaults:
         type: bool
         description: >
@@ -81,8 +93,16 @@ argument_specs:
         default: nic1
       edpm_network_config_nonconfigured_cleanup:
         type: bool
-        description: "Cleanup network interfaces not in network config"
+        description: >
+          For developer use only (use edpm_network_config_remove_config instead).
+          Cleanup network interfaces not in network config
         default: true
+      edpm_network_config_remove_config:
+        type: bool
+        description: >
+          Parse and remove the optional list of network devices specified in
+          the remove_config section before applying the network_config section.
+        default: false
       edpm_bootstrap_network_resolvconf_update:
         type: bool
         default: true

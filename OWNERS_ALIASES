@@ -6,6 +6,8 @@ aliases:
   - rabi
   ci-approvers:
   - rebtoor
+  - danpawlik
+  - brjackma
   openstack-approvers:
   - abays
   - dprince

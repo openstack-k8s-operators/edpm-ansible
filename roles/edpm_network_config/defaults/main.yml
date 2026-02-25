@@ -53,12 +53,14 @@ edpm_network_config_manage_service: true
 # * false -> os-net-config uses ifcfg provider (legacy network scripts)
 # Note: This only applies when edpm_network_config_tool is 'os-net-config'
 edpm_network_config_nmstate: true
+edpm_network_config_purge_provider: ""
 edpm_network_config_os_net_config_mappings: {}
 edpm_network_config_safe_defaults: false
 edpm_network_config_template: ""
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: true
+edpm_network_config_remove_config: false
 # Control resolv.conf management by NetworkManager
 # false = disable NetworkManager resolv.conf update (default)
 # true = enable NetworkManager resolv.conf updat

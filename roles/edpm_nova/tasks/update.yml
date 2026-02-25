@@ -1,7 +1,7 @@
 ---
-# NOTE(auniyal): Ensure container config directories exist
+# NOTE(auniyal): Ensure service config directories exist
 # during minor-update for nvme cleaner. bug: OSPRH-21712
-- name: Ensure container config directories exist
+- name: Ensure service config directories exist
   become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -10,28 +10,123 @@
     mode: "{{ item.mode }}"
   loop:
     - {"path": "{{ edpm_nova_config_dest }}", "mode": "0755"}
-    - {"path": "/var/lib/openstack/config/containers", "mode": "0755"}
     - {"path": "{{ edpm_nova_nvme_cleaner_config_dest }}", "mode": "0755", "when_enabled": true}
   when: not (item.when_enabled | default(false)) or edpm_nova_enable_nvme_cleaner
   tags:
     - update
     - nova
 
-- name: Render newly introduced nova config files
+- name: Check if old config directory exists
   tags:
     - update
     - nova
-  ansible.builtin.template:
+  ansible.builtin.stat:
+    path: "/var/lib/openstack/config/nova"
+  register: edpm_nova_old_config_dir
+
+- name: Move config files from old location to new location
+  tags:
+    - update
+    - nova
+  become: true
+  when:
+    - edpm_nova_old_config_dir.stat.exists
+    - edpm_nova_old_config_dir.stat.isdir
+  block:
+    - name: Find config files in old location
+      ansible.builtin.find:
+        paths: "/var/lib/openstack/config/nova"
+        file_type: file
+        recurse: true
+      register: edpm_nova_old_config_files
+
+    - name: Copy config files to new location
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ edpm_nova_config_dest }}/{{ item.path | regex_replace('^.*/config/nova/', '') }}"
+        remote_src: true
+        setype: "container_file_t"
+        mode: "0644"
+      loop: "{{ edpm_nova_old_config_files.files }}"
+      when:
+        - edpm_nova_old_config_files.files is defined
+        - edpm_nova_old_config_files.files | length > 0
+
+    - name: Remove old config directory
+      ansible.builtin.file:
+        path: "/var/lib/openstack/config/nova"
+        state: absent
+
+- name: Ensure nvme_cleaner config directory exists
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_nova_nvme_cleaner_config_dest }}"
+    state: directory
+    setype: "container_file_t"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "0755"
+  when: edpm_nova_enable_nvme_cleaner
+
+- name: Check if old nvme_cleaner config directory exists
+  tags:
+    - update
+    - nova
+  ansible.builtin.stat:
+    path: "/var/lib/openstack/config/nova_nvme_cleaner"
+  register: edpm_nova_old_nvme_cleaner_config_dir
+  when: edpm_nova_enable_nvme_cleaner
+
+- name: Move nvme_cleaner config files from old location to new location
+  tags:
+    - update
+    - nova
+  become: true
+  when:
+    - edpm_nova_enable_nvme_cleaner
+    - edpm_nova_old_nvme_cleaner_config_dir.stat.exists | default(false)
+    - edpm_nova_old_nvme_cleaner_config_dir.stat.isdir | default(false)
+  block:
+    - name: Find nvme_cleaner config files in old location
+      ansible.builtin.find:
+        paths: "/var/lib/openstack/config/nova_nvme_cleaner"
+        file_type: file
+        recurse: true
+      register: edpm_nova_old_nvme_cleaner_config_files
+
+    - name: Copy nvme_cleaner config files to new location
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ edpm_nova_nvme_cleaner_config_dest }}/{{ item.path | regex_replace('^.*/config/nova_nvme_cleaner/', '') }}"
+        remote_src: true
+        setype: "container_file_t"
+        mode: "0644"
+      loop: "{{ edpm_nova_old_nvme_cleaner_config_files.files }}"
+      when:
+        - edpm_nova_old_nvme_cleaner_config_files.files is defined
+        - edpm_nova_old_nvme_cleaner_config_files.files | length > 0
+
+    - name: Remove old nvme_cleaner config directory
+      ansible.builtin.file:
+        path: "/var/lib/openstack/config/nova_nvme_cleaner"
+        state: absent
+
+- name: Copy newly introduced nova config files
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ edpm_nova_config_dest }}/{{ item.dest }}"
     setype: "container_file_t"
     mode: "0644"
   loop:
-    - {"src": "config.json.j2", "dest": "config.json"}
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
     - {"src": "run-on-host", "dest": "run-on-host"}
-  notify:
-    - Restart nova
 
 - name: Run LVM bootstrap tasks
   tags:
