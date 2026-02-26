@@ -95,6 +95,7 @@
 			"access-bridge-name": "br-int",
 
 			"encap": {
+		                {% if edpm_cisco_opflex_agent_aci_opflex_encap_mode == "vxlan" %}
 				"vxlan" : {
 					"encap-iface": "{{ edpm_cisco_opflex_agent_encap_iface }}",
 					"uplink-iface": "{{ edpm_cisco_opflex_agent_aci_opflex_uplink_interface }}.{{ edpm_cisco_opflex_agent_aci_apic_infravlan }}",
@@ -103,6 +104,14 @@
 					"remote-ip": "{{ edpm_cisco_opflex_agent_aci_apic_infra_anycast_address }}",
 					"remote-port": {{ edpm_cisco_opflex_agent_remote_port }}
 				}
+		                {% else %}
+                                "vlan" : {
+                                        "uplink-native-iface": "{{ edpm_cisco_opflex_agent_v_opflex_encap_iface }}",
+					"uplink-iface": "{{ edpm_cisco_opflex_agent_aci_opflex_uplink_interface }}.{{ edpm_cisco_opflex_agent_aci_apic_infravlan }}",
+                                        "encap-iface": "{{ edpm_cisco_opflex_agent_v_opflex_encap_iface }}"
+                                }
+		                {% endif %}
+
 			},
 			"forwarding": {
 				"virtual-router": {
