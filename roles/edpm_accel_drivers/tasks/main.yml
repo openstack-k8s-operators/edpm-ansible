@@ -7,29 +7,23 @@
   failed_when: true
 
 - name: Detect GPU hardware
-  ansible.builtin.import_tasks: detect_gpu.yml
   when: edpm_accel_drivers_auto_detect | bool
+  ansible.builtin.import_tasks: detect_gpu.yml
 
 - name: Blacklist nouveau driver
   when: edpm_accel_drivers_blacklist_nouveau | bool
   ansible.builtin.import_tasks: blacklist_nouveau.yml
 
 - name: NVIDIA Driver installation
-  when: >
-    (edpm_accel_drivers_install_nvidia | bool) or
-    (_edpm_accel_drivers_detected_gpu | default('none') == 'nvidia' and edpm_accel_drivers_auto_detect | bool)
+  when: edpm_accel_drivers_install_nvidia | bool
   ansible.builtin.import_tasks: nvidia_drivers.yml
 
 - name: AMD Driver installation
-  when: >
-    (edpm_accel_drivers_install_amd | bool) or
-    (_edpm_accel_drivers_detected_gpu | default('none') == 'amd' and edpm_accel_drivers_auto_detect | bool)
+  when: edpm_accel_drivers_install_amd | bool
   ansible.builtin.import_tasks: amd_drivers.yml
 
 - name: Run boot configuration tasks
   when: >
-    edpm_accel_drivers_install_nvidia | bool or
-    edpm_accel_drivers_install_amd | bool or
-    (_edpm_accel_drivers_detected_gpu | default('none') in ['nvidia', 'amd'] and edpm_accel_drivers_auto_detect | bool) or
-    _edpm_accel_drivers_blacklist_nouveau_result.changed | bool
+    (_edpm_accel_drivers_detected_gpu | default('none')) != 'none' or
+    not edpm_accel_drivers_auto_detect | bool
   ansible.builtin.import_tasks: boot_config.yml
