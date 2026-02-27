@@ -26,6 +26,7 @@ command:
   - --no-collector.powersupplyclass
   - --no-collector.pressure
   - --no-collector.rapl
+  - --path.rootfs=/rootfs
 net: host
 environment:
   OS_ENDPOINT_TYPE: internal
@@ -40,3 +41,4 @@ volumes:
   - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
 {% endif %}
   - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw
+  - /:/rootfs:ro
