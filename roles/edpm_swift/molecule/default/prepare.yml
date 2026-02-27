@@ -14,10 +14,141 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Prepare swift config fixtures
+  hosts: localhost
+  gather_facts: false
+  vars:
+    edpm_swift_molecule_config_src: /tmp/edpm-swift-configs
+    edpm_swift_molecule_rings_dir: /tmp/edpm-swift-configs/rings
+  tasks:
+    - name: Create local directory for swift rings
+      ansible.builtin.file:
+        path: "{{ edpm_swift_molecule_rings_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Create dummy swift ring files for molecule
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_rings_dir }}/{{ item }}"
+        content: "molecule test fixture\n"
+        mode: "0644"
+      loop:
+        - account.ring.gz
+        - container.ring.gz
+        - object.ring.gz
+
+    - name: Create local swiftrings.tar.gz fixture
+      ansible.builtin.archive:
+        path: "{{ edpm_swift_molecule_rings_dir }}/*.ring.gz"
+        dest: "{{ edpm_swift_molecule_config_src }}/swiftrings.tar.gz"
+        format: gz
+        force_archive: true
+
+    - name: Create dummy swift.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/swift.conf"
+        mode: "0644"
+        content: |
+          [swift-hash]
+          swift_hash_path_suffix = molecule_test
+
+    - name: Create dummy account-server.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/account-server.conf"
+        mode: "0644"
+        content: |
+          [DEFAULT]
+          bind_ip = 0.0.0.0
+          bind_port = 6202
+          [pipeline:main]
+          pipeline = account-server
+          [app:account-server]
+          use = egg:swift#account
+          [account-replicator]
+          [account-auditor]
+          [account-reaper]
+
+    - name: Create dummy container-server.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/container-server.conf"
+        mode: "0644"
+        content: |
+          [DEFAULT]
+          bind_ip = 0.0.0.0
+          bind_port = 6201
+          [pipeline:main]
+          pipeline = container-server
+          [app:container-server]
+          use = egg:swift#container
+          [container-replicator]
+          [container-updater]
+          [container-auditor]
+
+    - name: Create dummy object-server.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/object-server.conf"
+        mode: "0644"
+        content: |
+          [DEFAULT]
+          bind_ip = 0.0.0.0
+          bind_port = 6200
+          [pipeline:main]
+          pipeline = object-server
+          [app:object-server]
+          use = egg:swift#object
+          [object-replicator]
+          [object-updater]
+          [object-auditor]
+
+    - name: Create dummy object-expirer.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/object-expirer.conf"
+        mode: "0644"
+        content: |
+          [DEFAULT]
+          [object-expirer]
+          [pipeline:main]
+          pipeline = proxy-server
+          [app:proxy-server]
+          use = egg:swift#proxy
+
+    - name: Create dummy rsyncd.conf
+      ansible.builtin.copy:
+        dest: "{{ edpm_swift_molecule_config_src }}/rsyncd.conf"
+        mode: "0644"
+        content: |
+          uid = swift
+          gid = swift
+          pid file = /tmp/rsyncd.pid
+          [account]
+          max connections = 2
+          path = /srv/node
+          read only = false
+          lock file = /var/lock/account.lock
+          [container]
+          max connections = 4
+          path = /srv/node
+          read only = false
+          lock file = /var/lock/container.lock
+          [object]
+          max connections = 8
+          path = /srv/node
+          read only = false
+          lock file = /var/lock/object.lock
 
 - name: Prepare
   hosts: all
   gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - nftables
+        - podman
     - role: env_data
+  tasks:
+    - name: Ensure nftables directory exists in test container
+      become: true
+      ansible.builtin.file:
+        path: /etc/nftables
+        state: directory
+        mode: "0755"

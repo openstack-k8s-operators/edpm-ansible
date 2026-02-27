@@ -1,0 +1,178 @@
+---
+# Copyright 2023 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Verify edpm_swift
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Ensure expected directories exist
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_dir.yaml"
+      loop:
+        - "/var/lib/openstack/swift"
+        - "/srv/node"
+        - "/var/cache/swift"
+        - "/var/lib/edpm-config/container-startup-config/swift"
+        - "/var/lib/kolla/config_files"
+        - "/var/lib/edpm-config/firewall"
+
+    - name: Ensure swift ring files were extracted
+      become: true
+      ansible.builtin.stat:
+        path: "/var/lib/openstack/swift/{{ item }}"
+      register: ring_file
+      loop:
+        - account.ring.gz
+        - container.ring.gz
+        - object.ring.gz
+    - name: Assert swift ring files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Ring file {{ item.item }} does not exist"
+      loop: "{{ ring_file.results }}"
+
+    - name: Ensure kolla config files exist
+      become: true
+      ansible.builtin.stat:
+        path: "/var/lib/kolla/config_files/{{ item }}.json"
+      register: kolla_config
+      loop:
+        - swift_account_auditor
+        - swift_account_reaper
+        - swift_account_replicator
+        - swift_account_server
+        - swift_container_auditor
+        - swift_container_replicator
+        - swift_container_server
+        - swift_container_updater
+        - swift_object_auditor
+        - swift_object_expirer
+        - swift_object_replicator
+        - swift_object_server
+        - swift_object_updater
+        - rsync
+    - name: Assert kolla config files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Kolla config file {{ item.item }}.json does not exist"
+      loop: "{{ kolla_config.results }}"
+
+    - name: Ensure container startup config files exist
+      become: true
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/container-startup-config/swift/{{ item }}.json"
+      register: container_config
+      loop:
+        - swift_account_auditor
+        - swift_account_reaper
+        - swift_account_replicator
+        - swift_account_server
+        - swift_container_auditor
+        - swift_container_replicator
+        - swift_container_server
+        - swift_container_updater
+        - swift_object_auditor
+        - swift_object_expirer
+        - swift_object_replicator
+        - swift_object_server
+        - swift_object_updater
+        - rsync
+    - name: Assert container startup config files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Container startup config {{ item.item }}.json does not exist"
+      loop: "{{ container_config.results }}"
+
+    - name: Ensure firewall rules file exists
+      become: true
+      block:
+        - name: Check if swift firewall rules file exists
+          ansible.builtin.stat:
+            path: /var/lib/edpm-config/firewall/swift.yaml
+          register: firewall_rules
+        - name: Assert swift firewall rules file exists
+          ansible.builtin.assert:
+            that:
+              - firewall_rules.stat.exists
+            fail_msg: "Swift firewall rules file does not exist"
+
+    - name: Ensure nftables rules are loaded for swift
+      become: true
+      ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
+      register: nft_rules
+      ignore_errors: true
+      loop:
+        - "100 swift account server"
+        - "100 swift container server"
+        - "100 swift object server"
+        - "100 swift rsync server"
+    - name: Assert nftables rules are loaded
+      ansible.builtin.assert:
+        that:
+          - item.rc == 0
+        fail_msg: "nftables rule '{{ item.item }}' not found in edpm-rules.nft"
+      loop: "{{ nft_rules.results }}"
+
+    - name: Ensure podman containers exist and are running
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
+      loop:
+        - swift_account_auditor
+        - swift_account_reaper
+        - swift_account_server
+        - swift_container_auditor
+        - swift_container_server
+        - swift_container_updater
+        - swift_object_auditor
+        - swift_object_replicator
+        - swift_object_server
+        - swift_object_updater
+        - rsync
+
+    # Replicators (account, container) and object-expirer fail with
+    # dummy ring files in molecule. Verify they were created but don't
+    # check running state.
+    - name: Ensure remaining podman containers were created
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
+      loop:
+        - { "name": "swift_account_replicator", "running": false }
+        - { "name": "swift_container_replicator", "running": false }
+        - { "name": "swift_object_expirer", "running": false }
+
+    - name: Ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
+      loop:
+        - { "name": "edpm_swift_account_auditor.service" }
+        - { "name": "edpm_swift_account_reaper.service" }
+        - { "name": "edpm_swift_account_server.service" }
+        - { "name": "edpm_swift_container_auditor.service" }
+        - { "name": "edpm_swift_container_server.service" }
+        - { "name": "edpm_swift_container_updater.service" }
+        - { "name": "edpm_swift_object_auditor.service" }
+        - { "name": "edpm_swift_object_replicator.service" }
+        - { "name": "edpm_swift_object_server.service" }
+        - { "name": "edpm_swift_object_updater.service" }
+        - { "name": "edpm_rsync.service" }
+        # These fail with dummy ring files in molecule
+        - { "name": "edpm_swift_account_replicator.service", "running": false }
+        - {
+            "name": "edpm_swift_container_replicator.service",
+            "running": false,
+          }
+        - { "name": "edpm_swift_object_expirer.service", "running": false }

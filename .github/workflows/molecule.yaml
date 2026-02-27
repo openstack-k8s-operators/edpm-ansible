@@ -38,6 +38,7 @@ jobs:
         - edpm_nodes_validation
         - edpm_ovn
         - edpm_reboot
+        - edpm_swift
         - edpm_sshd
         - edpm_ssh_known_hosts
         - edpm_timezone
