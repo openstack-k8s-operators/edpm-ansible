@@ -1,0 +1,12 @@
+---
+# AMD GPU driver installation
+
+# Install AMDGPU driver via package manager (default method)
+- name: Install AMDGPU driver from package manager
+  when: edpm_accel_drivers_amd_method == "package"
+  ansible.builtin.import_tasks: amd_from_rpm.yml  # noqa: name[missing]
+
+# Install AMDGPU driver via ROCm runfile installer (self-contained installation)
+- name: Install AMDGPU driver from runfile installer
+  when: edpm_accel_drivers_amd_method == "runfile"
+  ansible.builtin.import_tasks: amd_from_run.yml  # noqa: name[missing]

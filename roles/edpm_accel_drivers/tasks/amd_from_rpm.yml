@@ -1,0 +1,72 @@
+---
+# Following AMD Quick Start Guide: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html
+# Package manager installation method (package)
+
+- name: Set amdgpu-install package URL (custom URL)
+  when: edpm_accel_drivers_amd_installer_url != ""
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_amd_installer_rpm_url: "{{ edpm_accel_drivers_amd_installer_url }}"
+
+- name: Construct amdgpu-install package URL
+  when: edpm_accel_drivers_amd_installer_url == ""
+  block:
+    - name: Set amdgpu-install repository version path
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_installer_version_path: "{{ edpm_accel_drivers_amd_installer_version }}"
+
+    - name: Get list of available amdgpu-install RPMs from AMD repository
+      when: edpm_accel_drivers_amd_installer_rpm == ""
+      ansible.builtin.uri:
+        url: "https://repo.radeon.com/amdgpu-install/{{ _edpm_accel_drivers_amd_installer_version_path }}/rhel/{{ ansible_distribution_version }}/"
+        return_content: true
+      register: _edpm_accel_drivers_amd_installer_repo_listing
+
+    - name: Extract amdgpu-install RPM filename (auto-discovered)
+      when: edpm_accel_drivers_amd_installer_rpm == ""
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_installer_rpm: "{{ _edpm_accel_drivers_amd_installer_repo_listing.content | regex_search('amdgpu-install-[0-9\\.]+-[0-9]+\\.el[0-9]+\\.noarch\\.rpm') }}"
+
+    - name: Set amdgpu-install RPM filename (user specified)
+      when: edpm_accel_drivers_amd_installer_rpm != ""
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_installer_rpm: "{{ edpm_accel_drivers_amd_installer_rpm }}"
+
+    - name: Fail if no amdgpu-install RPM found
+      when: _edpm_accel_drivers_amd_installer_rpm == "" or _edpm_accel_drivers_amd_installer_rpm is none
+      ansible.builtin.fail:
+        msg: "Could not find amdgpu-install RPM at https://repo.radeon.com/amdgpu-install/{{ _edpm_accel_drivers_amd_installer_version_path }}/rhel/{{ ansible_distribution_version }}/"
+
+    - name: Set amdgpu-install package URL (constructed from version/rpm)
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_installer_rpm_url: "https://repo.radeon.com/amdgpu-install/{{ _edpm_accel_drivers_amd_installer_version_path }}/rhel/{{ ansible_distribution_version }}/{{ _edpm_accel_drivers_amd_installer_rpm }}"
+
+- name: Install amdgpu-install package to configure AMD repositories
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ _edpm_accel_drivers_amd_installer_rpm_url }}"
+    state: present
+    disable_gpg_check: "{{ edpm_accel_drivers_amd_rpm_disable_gpg_check }}"
+  register: _edpm_accel_drivers_install_packages_result
+  until: _edpm_accel_drivers_install_packages_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"
+
+- name: Clean DNF cache
+  become: true
+  ansible.builtin.command: dnf clean all
+  changed_when: true
+
+- name: Install kernel development packages and AMD driver
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - "kernel-headers-{{ ansible_kernel }}"
+      - "kernel-devel-{{ ansible_kernel }}"
+      - "kernel-devel-matched-{{ ansible_kernel }}"
+      - "amdgpu-dkms"
+    state: present
+    disable_gpg_check: "{{ edpm_accel_drivers_amd_rpm_disable_gpg_check }}"
+  register: _edpm_accel_drivers_install_packages_result
+  until: _edpm_accel_drivers_install_packages_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"

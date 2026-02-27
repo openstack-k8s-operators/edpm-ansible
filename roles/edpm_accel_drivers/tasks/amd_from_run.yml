@@ -1,0 +1,109 @@
+---
+# Following AMD ROCm Runfile Installer Guide: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/rocm-runfile-installer.html
+# ROCm runfile self-contained installation method (runfile)
+
+- name: Set runfile installer URL (custom URL)
+  when: edpm_accel_drivers_amd_runfile_installer_url != ""
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_amd_runfile_url: "{{ edpm_accel_drivers_amd_runfile_installer_url }}"
+
+- name: Construct runfile installer URL
+  when: edpm_accel_drivers_amd_runfile_installer_url == ""
+  block:
+    # Use user-specified ROCm version if provided
+    - name: Set ROCm version (user specified)
+      when: edpm_accel_drivers_amd_rocm_version != ""
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_rocm_version: "{{ edpm_accel_drivers_amd_rocm_version }}"
+
+    # Auto-discover latest ROCm version if not specified
+    - name: Auto-discover ROCm version
+      when: edpm_accel_drivers_amd_rocm_version == ""
+      block:
+        - name: Get list of available ROCm versions from AMD repository
+          ansible.builtin.uri:
+            url: "https://repo.radeon.com/rocm/installer/rocm-runfile-installer/"
+            return_content: true
+          register: _edpm_accel_drivers_rocm_versions_listing
+
+        - name: Extract latest ROCm version
+          ansible.builtin.set_fact:
+            _edpm_accel_drivers_amd_rocm_version: "{{ _edpm_accel_drivers_rocm_versions_listing.content | regex_findall('rocm-rel-([0-9]+\\.[0-9]+\\.?[0-9]*)') | map('split', '.') | map('map', 'int') | sort | last | join('.') }}"
+
+    # Map RHEL version to EL directory
+    - name: Set EL directory based on RHEL version
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_el_dir: "el{{ ansible_distribution_major_version }}"
+
+    # Use user-specified runfile installer version if provided
+    - name: Set runfile installer version (user specified)
+      when: edpm_accel_drivers_amd_runfile_installer_version != ""
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_runfile_installer_version: "{{ edpm_accel_drivers_amd_runfile_installer_version }}"
+
+    # Auto-discover runfile installer version if not specified
+    - name: Auto-discover runfile installer version
+      when: edpm_accel_drivers_amd_runfile_installer_version == ""
+      block:
+        - name: Get list of available runfile installers for ROCm version and EL version
+          ansible.builtin.uri:
+            url: "https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-{{ _edpm_accel_drivers_amd_rocm_version }}/{{ _edpm_accel_drivers_amd_el_dir }}/"
+            return_content: true
+          register: _edpm_accel_drivers_rocm_installer_listing
+
+        - name: Extract runfile installer filename
+          ansible.builtin.set_fact:
+            _edpm_accel_drivers_amd_runfile_filename: "{{ _edpm_accel_drivers_rocm_installer_listing.content | regex_search('rocm-installer_([0-9\\.\\-]+)~' + _edpm_accel_drivers_amd_el_dir + '\\.run') }}"
+
+        - name: Fail if no runfile installer found
+          when: _edpm_accel_drivers_amd_runfile_filename == "" or _edpm_accel_drivers_amd_runfile_filename is none
+          ansible.builtin.fail:
+            msg: "Could not find ROCm runfile installer at https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-{{ _edpm_accel_drivers_amd_rocm_version }}/{{ _edpm_accel_drivers_amd_el_dir }}/"
+
+        - name: Extract runfile installer version from filename
+          ansible.builtin.set_fact:
+            _edpm_accel_drivers_amd_runfile_installer_version: "{{ _edpm_accel_drivers_amd_runfile_filename | regex_search('rocm-installer_([0-9\\.\\-]+)~', '\\1') | first }}"
+
+    # Construct runfile installer URL
+    - name: Set runfile installer URL (constructed from rocm_version/runfile_installer_version)
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_amd_runfile_url: "https://repo.radeon.com/rocm/installer/rocm-runfile-installer/rocm-rel-{{ _edpm_accel_drivers_amd_rocm_version }}/{{ _edpm_accel_drivers_amd_el_dir }}/rocm-installer_{{ _edpm_accel_drivers_amd_runfile_installer_version }}~{{ _edpm_accel_drivers_amd_el_dir }}.run"
+
+- name: Set runfile installer path
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_amd_runfile_path: "/tmp/rocm-installer.run"
+
+- name: Install rsync dependency for ROCm runfile installer
+  become: true
+  ansible.builtin.dnf:
+    name: rsync
+    state: present
+
+- name: Download ROCm runfile installer
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ _edpm_accel_drivers_amd_runfile_url }}"
+    dest: "{{ _edpm_accel_drivers_amd_runfile_path }}"
+    mode: '0755'
+  register: _edpm_accel_drivers_download_runfile_result
+  until: _edpm_accel_drivers_download_runfile_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"
+
+- name: Install AMDGPU driver using runfile installer
+  become: true
+  ansible.builtin.command: >
+    bash {{ _edpm_accel_drivers_amd_runfile_path }}
+    deps=install
+    amdgpu
+    amdgpu-start
+  args:
+    chdir: /tmp
+  register: _edpm_accel_drivers_runfile_driver_result
+  changed_when: "_edpm_accel_drivers_runfile_driver_result.rc == 0"
+
+- name: Clean up runfile installer
+  become: true
+  ansible.builtin.file:
+    path: "{{ _edpm_accel_drivers_amd_runfile_path }}"
+    state: absent

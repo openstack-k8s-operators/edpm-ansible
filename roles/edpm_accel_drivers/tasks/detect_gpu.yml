@@ -1,0 +1,38 @@
+---
+- name: Gather PCI device information
+  ansible.builtin.command: lspci
+  register: _edpm_accel_drivers_lspci_output
+  changed_when: false
+  failed_when: false
+
+- name: Set GPU vendor fact
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_detected_gpu: >-
+      {%- set gpu_devices = _edpm_accel_drivers_lspci_output.stdout_lines | default([]) | select('search', '(?i)(vga|3d|display)') | list -%}
+      {%- if gpu_devices | select('search', '(?i)nvidia') | list | length > 0 -%}
+      nvidia
+      {%- elif gpu_devices | select('search', '(?i)amd') | list | length > 0 -%}
+      amd
+      {%- else -%}
+      none
+      {%- endif -%}
+
+- name: Display detected GPU vendor
+  ansible.builtin.debug:
+    msg: |-
+      {% if _edpm_accel_drivers_detected_gpu == 'none' %}
+      WARNING: No supported GPU detected. No drivers will be installed.
+      {% else %}
+      Detected GPU vendor: {{ _edpm_accel_drivers_detected_gpu | upper }}
+      {% endif %}
+
+- name: Enable NVIDIA driver installation for detected NVIDIA GPU
+  when: _edpm_accel_drivers_detected_gpu == 'nvidia'
+  ansible.builtin.set_fact:
+    edpm_accel_drivers_blacklist_nouveau: true
+    edpm_accel_drivers_install_nvidia: true
+
+- name: Enable AMD driver installation for detected AMD GPU
+  when: _edpm_accel_drivers_detected_gpu == 'amd'
+  ansible.builtin.set_fact:
+    edpm_accel_drivers_install_amd: true
