@@ -137,3 +137,6 @@
 - job:
     name: edpm-ansible-baremetal-minor-update
     parent: cifmw-crc-podified-edpm-baremetal-minor-update
+    vars:
+      cifmw_install_yamls_vars:
+        BMAAS_INSTANCE_DISK_SIZE: 60
