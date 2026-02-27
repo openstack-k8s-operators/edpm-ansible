@@ -68,3 +68,16 @@ argument_specs:
         type: bool
         default: true
         description: Whether to blacklist nouveau driver
+      edpm_accel_drivers_nvidia_manage_mig:
+        type: bool
+        default: false
+        description: Whether to configure NVIDIA MIG (Multi-Instance GPU) partitioning.
+      edpm_accel_drivers_nvidia_mig_geometries:
+        type: list
+        elements: str
+        default: []
+        description: |
+          List of MIG geometry strings, one per GPU. Index 0 applies to GPU 0, index 1 to GPU 1, etc.
+          Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
+          Required when edpm_accel_drivers_nvidia_manage_mig is true. An empty (or shortened) list
+          removes previously configured systemd units and disables MIG on affected GPUs.

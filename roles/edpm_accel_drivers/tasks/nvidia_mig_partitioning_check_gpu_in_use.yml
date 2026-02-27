@@ -1,0 +1,20 @@
+---
+# Expects _edpm_accel_drivers_nvidia_mig_check_gpu_index to be set (GPU index to check).
+# Fails if any compute instances (CIs) on that GPU are in use by running processes.
+- name: Check no compute instances are in use on GPU {{ _edpm_accel_drivers_nvidia_mig_check_gpu_index }}
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      nvidia-smi -i {{ _edpm_accel_drivers_nvidia_mig_check_gpu_index }}
+      --query-compute-apps=pid
+      --format=csv,noheader
+  register: _edpm_accel_drivers_nvidia_mig_compute_apps
+  changed_when: false
+
+- name: Fail if any MIG compute instances on GPU are in use by VMs or processes
+  ansible.builtin.fail:
+    msg: >
+      GPU {{ _edpm_accel_drivers_nvidia_mig_check_gpu_index }} has compute instances in use.
+      Refusing to stop MIG apply service or reset MIG mode while processes are using the GPU.
+      Ensure no VMs or processes are using MIG instances on this GPU, then retry.
+  when: _edpm_accel_drivers_nvidia_mig_compute_apps.stdout | trim | length > 0

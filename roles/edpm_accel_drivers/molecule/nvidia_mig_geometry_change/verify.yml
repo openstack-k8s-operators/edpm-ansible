@@ -1,0 +1,32 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+  tasks:
+    - name: Verify systemd units exist and are enabled
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
+        - {"name": "edpm_nvidia_mig_apply_1.service", "running": false}
+
+    - name: Read edpm_nvidia_mig_apply_0 systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/edpm_nvidia_mig_apply_0.service
+      register: _edpm_accel_drivers_nvidia_mig_unit_content_0
+
+    - name: Verify first unit file contains expected MIG geometry command (second configuration)
+      ansible.builtin.assert:
+        that: "'nvidia-smi mig -i 0 -cgi 3g.20gb' in (_edpm_accel_drivers_nvidia_mig_unit_content_0.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_0.service does not contain expected MIG command for GPU 0 and geometry 3g.20gb"
+
+    - name: Read edpm_nvidia_mig_apply_1 systemd unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/edpm_nvidia_mig_apply_1.service
+      register: _edpm_accel_drivers_nvidia_mig_unit_content_1
+
+    - name: Verify second unit file contains expected MIG geometry command (second configuration)
+      ansible.builtin.assert:
+        that: "'nvidia-smi mig -i 1 -cgi 1g.5gb' in (_edpm_accel_drivers_nvidia_mig_unit_content_1.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_1.service does not contain expected MIG command for GPU 1 and geometry 1g.5gb"

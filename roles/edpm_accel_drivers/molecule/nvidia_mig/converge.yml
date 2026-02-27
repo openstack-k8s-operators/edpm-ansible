@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_install_nvidia: false
+        edpm_accel_drivers_nvidia_manage_mig: true
+        edpm_accel_drivers_nvidia_mig_geometries:
+          - "14,14,14,14"
+          - "2g.12gb,2g.12gb"
