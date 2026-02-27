@@ -136,3 +136,5 @@ edpm_cisco_opflex_agent_opflex_router_advertisement: false
 edpm_cisco_opflex_agent_opflex_virtual_dhcp_enabled: true
 edpm_cisco_opflex_agent_opflex_virtual_dhcp_mac: '00:22:bd:f8:19:ff'
 edpm_cisco_opflex_agent_opflex_cache_dir: '/var/lib/opflex-agent-ovs/ids'
+edpm_cisco_opflex_agent_limit_mcast_interfaces: true
+edpm_cisco_opflex_agent_v_opflex_encap_iface: "{{ edpm_cisco_opflex_agent_aci_opflex_ovs_bridge[:5] }}_to_{{ edpm_cisco_opflex_agent_neutron_external_bridge[:5] }}"
