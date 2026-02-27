@@ -6,3 +6,4 @@ spec:
   label: dataplane-deployment-cisco-opflex-agent-service
   openStackAnsibleEERunnerImage: registry.connect.redhat.com/noiro/combined-ansibleee-runner:latest
   playbook: osp.edpm.opflex_agent
+

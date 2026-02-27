@@ -8,3 +8,4 @@ spec:
   playbook: osp.edpm.lldp
   caCerts: combined-ca-bundle
   edpmServiceType: ciscoaci-lldp-agent-service
+

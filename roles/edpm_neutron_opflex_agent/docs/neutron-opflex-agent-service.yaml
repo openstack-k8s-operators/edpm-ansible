@@ -11,3 +11,4 @@ spec:
   dataSources:
     - secretRef:
         name: rabbitmq-transport-url-neutron-neutron-transport
+
