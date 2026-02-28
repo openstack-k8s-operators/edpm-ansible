@@ -90,3 +90,7 @@ edpm_frr_images_download_delay: "{{ edpm_download_delay | default(60) }}"
 
 # number of retries for download tasks
 edpm_frr_images_download_retries: "{{ edpm_download_retries | default(5) }}"
+
+# ovn-bgp extension related vars
+edpm_frr_ovn_vrf: ''
+edpm_frr_conf_custom_router_bgp_ovn: ''
