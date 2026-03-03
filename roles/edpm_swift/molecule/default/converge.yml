@@ -20,3 +20,5 @@
   gather_facts: false
   roles:
     - role: "edpm_swift"
+      vars:
+        edpm_swift_config_src: /tmp/edpm-swift-configs

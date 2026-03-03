@@ -24,18 +24,20 @@
 - name: Prepare
   hosts: all
   gather_facts: false
+  vars:
+    edpm_reboot_edpm_node_config_dir: /var/lib/openstack/nova
   roles:
     - role: osp.edpm.env_data
   tasks:
-    - name: Create nova config directory
+    - name: Create edpm node config directory
       ansible.builtin.file:
-        path: /var/lib/openstack/nova
+        path: "{{ edpm_reboot_edpm_node_config_dir }}"
         state: directory
         mode: "0775"
 
     - name: Create nova.conf
       ansible.builtin.copy:
-        dest: /var/lib/openstack/nova/01-nova.conf
+        dest: "{{ edpm_reboot_edpm_node_config_dir }}/01-nova.conf"
         mode: "0644"
         owner: root
         group: root
