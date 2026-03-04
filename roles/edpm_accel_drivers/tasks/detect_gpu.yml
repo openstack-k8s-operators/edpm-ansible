@@ -3,7 +3,7 @@
   ansible.builtin.command: lspci
   register: _edpm_accel_drivers_lspci_output
   changed_when: false
-  failed_when: false
+  failed_when: _edpm_accel_drivers_lspci_output.rc != 0
 
 - name: Set GPU vendor fact
   ansible.builtin.set_fact:
