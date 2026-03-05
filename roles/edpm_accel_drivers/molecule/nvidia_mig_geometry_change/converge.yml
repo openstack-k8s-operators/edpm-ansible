@@ -1,0 +1,22 @@
+---
+- name: Converge with initial geometry list (two GPUs)
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_install_nvidia: false
+        edpm_accel_drivers_nvidia_manage_mig: true
+        edpm_accel_drivers_nvidia_mig_geometries:
+          - "14,14,14,14"
+          - "2g.12gb,2g.12gb"
+
+- name: Converge with new geometry list to trigger reconfiguration
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_install_nvidia: false
+        edpm_accel_drivers_nvidia_manage_mig: true
+        edpm_accel_drivers_nvidia_mig_geometries:
+          - "3g.20gb"
+          - "1g.5gb"

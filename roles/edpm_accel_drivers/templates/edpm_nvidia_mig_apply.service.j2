@@ -1,0 +1,22 @@
+[Unit]
+Description=Apply NVIDIA MIG layout
+Before=edpm_libvirt.target
+After=edpm_nvidia_sriov_manage@{{ bdf }}.path
+Requires=edpm_nvidia_sriov_manage@{{ bdf }}.path
+
+[Service]
+Type=oneshot
+User = root
+Group = root
+ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -pm 1
+ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -mig 1
+# Testing shows that it's possible to run the `-cgi` command below, have it "succeed", and the MIG
+# instances still are not actually created. This loop will retry for up to 30 seconds to ensure
+# the MIG instances are actually created. Using ExecStartPost causes the ansible to fail when
+# it sees the service failed to start, so we prefer to have it retry and ultimately succeed.
+ExecStart=/bin/bash -c 'for _ in $(seq 1 30); do /usr/bin/nvidia-smi mig -i {{ index }} -cgi {{ geometry }} -C; sleep 1; nvidia-smi mig -lgi -i {{ index }} 2>/dev/null | grep -q "MIG " && exit 0; done; exit 1'
+
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

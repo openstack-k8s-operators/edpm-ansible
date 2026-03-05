@@ -1,0 +1,48 @@
+---
+- name: Find existing MIG apply systemd unit files
+  become: true
+  ansible.builtin.find:
+    paths: /etc/systemd/system
+    patterns: "edpm_nvidia_mig_apply_*.service"
+  register: _edpm_accel_drivers_nvidia_mig_existing_units
+  changed_when: false
+
+- name: Set list of GPU indices that currently have MIG units
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_mig_existing_indices: "{{
+      _edpm_accel_drivers_nvidia_mig_existing_units.files
+      | map(attribute='path')
+      | map('basename')
+      | map('regex_replace', '^edpm_nvidia_mig_apply_(\\d+)\\.service$', '\\1')
+      | map('int')
+      | list }}"
+
+- name: Set list of GPU indices to keep from current geometry list
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_mig_indices_to_keep: "{{
+      range(0, edpm_accel_drivers_nvidia_mig_geometries | length) | list
+      if (edpm_accel_drivers_nvidia_mig_geometries | length > 0)
+      else [] }}"
+
+- name: Set list of GPU indices to remove (stale MIG units)
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_mig_indices_to_remove: "{{
+      _edpm_accel_drivers_nvidia_mig_existing_indices
+      | difference(_edpm_accel_drivers_nvidia_mig_indices_to_keep)
+      | sort
+      | list }}"
+
+- name: Remove MIG configuration from GPUs no longer in geometry list
+  when: _edpm_accel_drivers_nvidia_mig_indices_to_remove | length > 0
+  block:
+    - name: Remove MIG configuration for each GPU no longer in geometry list
+      ansible.builtin.include_tasks: nvidia_mig_partitioning_cleanup_gpu.yml
+      loop: "{{ _edpm_accel_drivers_nvidia_mig_indices_to_remove }}"
+      loop_control:
+        loop_var: _edpm_accel_drivers_nvidia_mig_remove_index
+
+    - name: Reload systemd after removing MIG units
+      become: true
+      ansible.builtin.systemd:
+        daemon_reload: true
+      changed_when: true
