@@ -77,7 +77,7 @@ edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_ovn_ovs_external_ids:
   hostname: "{{ canonical_hostname }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
-  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(',') }}"
+  ovn-bridge-mappings: "{{ edpm_ovn_bridge_mappings | join(',') if edpm_ovn_bridge_mappings is iterable and edpm_ovn_bridge_mappings is not string else edpm_ovn_bridge_mappings }}"
   ovn-chassis-mac-mappings: >-
     "{%- set chassis_mac_mappings = [] -%}
     {%- for physnet, mac_prefix in edpm_ovn_chassis_mac_mapping_prefixes.items() -%}
