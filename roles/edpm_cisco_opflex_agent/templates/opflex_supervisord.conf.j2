@@ -42,7 +42,7 @@ stderr_logfile=NONE
 {% if edpm_cisco_opflex_agent_opflex_conn_monitor == true %}
 [program:monitor-opflex-conn]
 command=/bin/sh -c "sleep 120; while true; do if ! sudo neutron-rootwrap /etc/neutron/rootwrap.conf netstat -natp | grep -q {{ edpm_cisco_opflex_agent_opflex_peer_port }}; then sleep 60; if ! sudo neutron-rootwrap /etc/neutron/rootwrap.conf netstat -natp | grep -q {{ edpm_cisco_opflex_agent_opflex_peer_port }}; then date >> /var/lib/opflex-agent-ovs/restarts/reset.conf; fi; sleep 60; fi; done"
-{% end %}
+{% endif %}
 
 [program:monitor-ovs]
 command=/bin/sh -c "while true; do sleep 5; if [ $(ls /var/run/openvswitch/ | wc -l) = 0 ]; then kill $(ps -ef | grep opflex_supervisor[d] | awk '{print $3}'); fi; done"
