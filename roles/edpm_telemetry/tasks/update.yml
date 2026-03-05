@@ -58,6 +58,18 @@
     path: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.json"
   register: openstack_network_exporter_config_json
 
+- name: Check that tls.crt exists
+  become: true
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.crt"
+  register: tls_crt_stat
+
+- name: Check that tls.key exists
+  become: true
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.key"
+  register: tls_key_stat
+
 - name: Install openstack_network_operator if not present
   when: not openstack_network_exporter_config_json.stat.exists
   become: true
@@ -66,16 +78,6 @@
       ansible.builtin.stat:
         path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
       register: ca_bundle_stat_res
-
-    - name: Check that tls.crt exists
-      ansible.builtin.stat:
-        path: "{{ edpm_telemetry_certs }}/tls.crt"
-      register: tls_crt_stat
-
-    - name: Check that tls.key exists
-      ansible.builtin.stat:
-        path: "{{ edpm_telemetry_certs }}/tls.key"
-      register: tls_key_stat
 
     - name: Render openstack_network_exporter config
       ansible.builtin.template:
@@ -95,3 +97,18 @@
           openstack_network_exporter: "{{ lookup('template', 'container_defs/openstack_network_exporter.yaml.j2') | from_yaml }}"
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+- name: Create prometheus exporter configuration
+  become: true
+  block:
+    - name: Create prometheus exporter configuration
+      ansible.builtin.include_tasks:
+        file: exporter_tls.yml
+      vars:
+        exporter: "ceilometer_prom_exporter"
+      when:
+        - tls_crt_stat.stat.exists
+        - tls_key_stat.stat.exists
+      tags:
+        - update
+        - telemetry
