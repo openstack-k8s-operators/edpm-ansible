@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Include default tasks
+      ansible.builtin.include_tasks:
+        file: ../default/verify-tasks.yml
+
+    - name: Verify ovn-bridge-mappings with string value
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-bridge-mappings
+      register: output
+      failed_when: output.stdout != '"datacentre:br-ex"'
