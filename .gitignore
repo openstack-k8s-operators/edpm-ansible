@@ -45,3 +45,8 @@ docs/source/collections/**
 docs_build
 Gemfile.lock
 .ruby
+
+# Cursor AI - personal configs not to commit
+.cursor
+# Claude AI
+.claude
