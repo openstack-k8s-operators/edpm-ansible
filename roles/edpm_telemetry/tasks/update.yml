@@ -95,3 +95,29 @@
           openstack_network_exporter: "{{ lookup('template', 'container_defs/openstack_network_exporter.yaml.j2') | from_yaml }}"
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
+
+- name: Copy prometheus exporter configuration to the correct location
+  tags:
+    - update
+    - telemetry
+  become: true
+  block:
+    - name: Check that tls.crt exists
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_certs }}/tls.crt"
+      register: tls_crt_stat
+
+    - name: Check that tls.key exists
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_certs }}/tls.key"
+      register: tls_key_stat
+
+    - name: Create config file for exporters
+      ansible.builtin.include_tasks:
+        file: exporter_tls.yml
+      loop:
+        - node_exporter
+        - podman_exporter
+        - ceilometer_prom_exporter
+      loop_control:
+        loop_var: exporter
