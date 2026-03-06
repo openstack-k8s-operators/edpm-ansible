@@ -21,6 +21,7 @@
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
       test_deps_edpm_packages:
+        - centos-stream-release
         - openvswitch
         - libibverbs
         - podman
