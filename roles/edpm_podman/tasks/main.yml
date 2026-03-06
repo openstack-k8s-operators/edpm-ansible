@@ -20,9 +20,6 @@
 - name: Rsyslog configuration
   ansible.builtin.import_tasks: rsyslog.yml
 
-- name: Podman purge
-  ansible.builtin.import_tasks: purge.yml
-
 - name: Podman install
   ansible.builtin.import_tasks: login.yml
   when:

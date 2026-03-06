@@ -93,6 +93,11 @@ options:
       - Enable debug
     type: bool
     default: False
+  cleanup_old_images:
+    description:
+      - Whether to clean up old container images after updating to a new version.
+    type: bool
+    default: True
 """
 
 EXAMPLES = """
@@ -137,6 +142,7 @@ class EdpmContainerManage:
         self.containers = args.get('containers', [])
         self.log_base_path = args.get('log_base_path')
         self.debug = args.get('debug')
+        self.cleanup_old_images = args.get('cleanup_old_images', True)
 
         # Deprecation warning for log_base_path
         if self.log_base_path and self.log_base_path != '/var/log/containers/stdouts':
@@ -338,6 +344,15 @@ class EdpmContainerManage:
             opts['stop_timeout'] = opts.pop('stop_grace_period')
 
         success = True
+        existing_image = None
+        if self.cleanup_old_images:
+            cmd_inspect = ['podman', 'inspect', name]
+            rc_inspect, out_inspect, err_inspect = self.module.run_command(cmd_inspect)
+            if rc_inspect == 0:
+                data_inspect = json.loads(out_inspect)[0]
+                existing_image = data_inspect.get('Config').get('Image')
+                self.module.debug(f"existing_image {existing_image}")
+
         try:
             container_opts = self._container_opts_update(opts)
             container_opts = self._container_opts_types(container_opts)
@@ -346,6 +361,35 @@ class EdpmContainerManage:
             print(e)
             self.module.warn(str(e))
             success = False
+
+        if success and self.cleanup_old_images and existing_image is not None and not self.module.check_mode:
+            new_image = opts.get('image')
+            if existing_image != new_image:
+                image_name = ['podman', 'image', 'inspect', existing_image]
+                rc_image_name, out_image_name, err_image_name = self.module.run_command(image_name)
+                label_filter = None
+                if rc_image_name == 0:
+                    json_image_inspect = json.loads(out_image_name)[0]
+                    image_label_name = json_image_inspect.get('Labels', {}).get('name')
+                    image_label_tcib = json_image_inspect.get('Labels', {}).get('tcib_build_tag')
+                    if image_label_name:
+                        label_filter = f"name={image_label_name}"
+                    elif image_label_tcib:
+                        label_filter = f"tcib_build_tag={image_label_tcib}"
+                if label_filter:
+                    # Magic number until is set to 6days as we expect maintenances to happen with weakly cadency and prevent concurrency issues
+                    cmd_dangling_containers = ['podman', 'container', 'prune', '-f', '--filter', f"label={label_filter}", '--filter', 'until=144h']
+                    rc_dangling_containers, out_dangling_containers, err_dangling_containers = self.module.run_command(cmd_dangling_containers)
+                    if rc_dangling_containers == 0:
+                        cmd_dangling_images = ['podman', 'image', 'prune', '-a', '-f', '--filter', f"label={label_filter}", '--filter', 'until=144h']
+                        rc_remove, out_remove, err_remove = self.module.run_command(cmd_dangling_images)
+                        if rc_remove == 0:
+                            self.module.warn(f"Removed dangling containers {out_dangling_containers} and image {out_remove}")
+                        else:
+                            self.module.warn(f"Failed to remove {existing_image} {err_remove}")
+                    else:
+                        self.module.warn(f"Dangling container cleanup returned {rc_dangling_containers} out: {out_dangling_containers} err: {err_dangling_containers}")
+
         return success
 
     def run_container(self, data):
