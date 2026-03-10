@@ -4,7 +4,7 @@ argument_specs:
     short_description: The main entry point for the edpm_accel_drivers role.
     description: |
       Installs and configures accelerator drivers on RHEL systems.
-      Supports installation of NVIDIA drivers from an RPM repo or custom URL.
+      Supports installation of NVIDIA and AMD drivers from an RPM repo or custom URL.
     options:
       edpm_accel_drivers_download_delay:
         type: int
@@ -13,6 +13,16 @@ argument_specs:
       edpm_accel_drivers_download_retries:
         type: int
         default: 5
+      edpm_accel_drivers_blacklist_gpu_module:
+        type: bool
+        default: true
+        description: Whether to blacklist GPU module specified in edpm_accel_drivers_gpu_module
+      edpm_accel_drivers_gpu_module:
+        type: str
+        default: "nouveau"
+        description: |
+          GPU module to blacklist (e.g., "nouveau" for NVIDIA, "amdgpu" for AMD).
+          Only used when edpm_accel_drivers_blacklist_gpu_module is true.
       edpm_accel_drivers_install_nvidia:
         type: bool
         default: false
@@ -64,10 +74,6 @@ argument_specs:
         type: bool
         default: true
         description: Whether to cleanup temporary files after installation
-      edpm_accel_drivers_blacklist_nouveau:
-        type: bool
-        default: true
-        description: Whether to blacklist nouveau driver
       edpm_accel_drivers_nvidia_manage_mig:
         type: bool
         default: false
