@@ -48,31 +48,31 @@ argument_specs:
         default: "nvidia-driver"
         description: |
           GPU driver package name to install (e.g., "nvidia-driver" for NVIDIA).
+      edpm_accel_drivers_gpu_custom_url:
+        type: str
+        default: ""
+        description: |
+          Custom GPU driver URL (if set, driver will be installed from this URL instead of from a repository).
+          Must end with .rpm (SUPPORTED) or .run extension (UNSUPPORTED for NVIDIA only).
+          NOTE: file:/// URLs are supported, for example a local NFS mount.
+      edpm_accel_drivers_gpu_custom_url_ssl_no_verify:
+        type: bool
+        default: false
+        description: |
+          Whether to disable SSL certificate verification when downloading GPU driver from custom URL.
+          Set to true to disable SSL certificate verification (not recommended for production).
+      edpm_accel_drivers_gpu_cache_dir:
+        type: str
+        default: "/var/cache/gpu-drivers"
+        description: The directory to cache the GPU driver package when downloading from a custom URL.
+      edpm_accel_drivers_gpu_cleanup_temp_files:
+        type: bool
+        default: true
+        description: Whether to cleanup temporary files after installation
       edpm_accel_drivers_install_nvidia:
         type: bool
         default: false
         description: Whether to install nvidia drivers.
-      edpm_accel_drivers_nvidia_custom_url:
-        type: str
-        default: ""
-        description: |
-          Custom NVIDIA driver URL (if set, driver will be installed from this URL instead of from a repository).
-          Must end with .rpm (SUPPORTED) or .run extension (UNSUPPORTED).
-          NOTE: file:/// URLs are supported, for example a local NFS mount.
-      edpm_accel_drivers_nvidia_custom_url_ssl_no_verify:
-        type: bool
-        default: false
-        description: |
-          Whether to disable SSL certificate verification when downloading NVIDIA driver from custom URL.
-          Set to true to disable SSL certificate verification (not recommended for production).
-      edpm_accel_drivers_nvidia_cache_dir:
-        type: str
-        default: "/var/cache/nvidia-drivers"
-        description: The directory to cache the NVIDIA driver package when downloading from a custom URL.
-      edpm_accel_drivers_nvidia_cleanup_temp_files:
-        type: bool
-        default: true
-        description: Whether to cleanup temporary files after installation
       edpm_accel_drivers_nvidia_manage_mig:
         type: bool
         default: false
