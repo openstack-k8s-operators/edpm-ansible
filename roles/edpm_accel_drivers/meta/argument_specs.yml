@@ -23,6 +23,31 @@ argument_specs:
         description: |
           GPU module to blacklist (e.g., "nouveau" for NVIDIA, "amdgpu" for AMD).
           Only used when edpm_accel_drivers_blacklist_gpu_module is true.
+      edpm_accel_drivers_gpu_repo_url:
+        type: str
+        default: ""
+        description: GPU driver repository URL for driver installation.
+      edpm_accel_drivers_gpu_repo_gpgcheck:
+        type: bool
+        default: true
+        description: |
+          Whether to enable GPG checking for GPU driver repository.
+          Set to false to disable GPG check (not recommended for production).
+      edpm_accel_drivers_gpu_repo_gpgkey:
+        type: str
+        default: ""
+        description: GPG key URL for GPU driver repository verification
+      edpm_accel_drivers_gpu_dnf_module_stream:
+        type: str
+        default: "latest"
+        description: |
+          DNF module stream for GPU drivers (e.g., "latest").
+          If set to "", no DNF module will be selected.
+      edpm_accel_drivers_gpu_package_name:
+        type: str
+        default: "nvidia-driver"
+        description: |
+          GPU driver package name to install (e.g., "nvidia-driver" for NVIDIA).
       edpm_accel_drivers_install_nvidia:
         type: bool
         default: false
@@ -44,32 +69,6 @@ argument_specs:
         type: str
         default: "/var/cache/nvidia-drivers"
         description: The directory to cache the NVIDIA driver package when downloading from a custom URL.
-      edpm_accel_drivers_nvidia_repo_url:
-        type: str
-        default: ""
-        description: |
-          NVIDIA repository URL for driver installation.
-      edpm_accel_drivers_nvidia_repo_gpgkey:
-        type: str
-        default: ""
-        description: |
-          GPG key URL for NVIDIA repository verification.
-      edpm_accel_drivers_nvidia_rpm_disable_gpg_check:
-        type: bool
-        default: false
-        description: |
-          Whether to disable GPG check when installing NVIDIA driver from RPM.
-          Set to true to disable GPG check (not recommended for production).
-      edpm_accel_drivers_nvidia_dnf_module_stream:
-        type: str
-        default: "latest"
-        description: |
-          NVIDIA Driver dnf module stream to install from NVIDIA repo. If set to "", no DNF module will be selected.
-      edpm_accel_drivers_nvidia_package_name:
-        type: str
-        default: "nvidia-driver"
-        description: |
-          NVIDIA Driver package name to install from NVIDIA repo.
       edpm_accel_drivers_nvidia_cleanup_temp_files:
         type: bool
         default: true
