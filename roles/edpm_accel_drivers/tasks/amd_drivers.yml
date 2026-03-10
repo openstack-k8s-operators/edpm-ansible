@@ -1,7 +1,7 @@
 ---
 
 - name: Install AMD drivers from repository
-  when: edpm_accel_drivers_amd_custom_url == ""
+  when: edpm_accel_drivers_gpu_custom_url == ""
   block:
     - ansible.builtin.import_tasks: gpu_repos.yml  # noqa: name[missing]
     - ansible.builtin.import_tasks: gpu_from_rpm.yml  # noqa: name[missing]

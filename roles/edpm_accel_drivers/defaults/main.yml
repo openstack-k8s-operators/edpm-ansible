@@ -12,16 +12,15 @@ edpm_accel_drivers_gpu_repo_gpgcheck: true
 edpm_accel_drivers_gpu_repo_gpgkey: ""
 edpm_accel_drivers_gpu_dnf_module_stream: "latest"
 edpm_accel_drivers_gpu_package_name: "nvidia-driver"
+edpm_accel_drivers_gpu_custom_url: ""
+edpm_accel_drivers_gpu_custom_url_ssl_no_verify: false
+edpm_accel_drivers_gpu_cache_dir: "/var/cache/gpu-drivers"
+edpm_accel_drivers_gpu_cleanup_temp_files: true
 
 # NVIDIA
 edpm_accel_drivers_install_nvidia: false
-edpm_accel_drivers_nvidia_custom_url: ""
-edpm_accel_drivers_nvidia_custom_url_ssl_no_verify: false
-edpm_accel_drivers_nvidia_cleanup_temp_files: true
 edpm_accel_drivers_nvidia_manage_mig: false
 edpm_accel_drivers_nvidia_mig_geometries: []
-edpm_accel_drivers_nvidia_cache_dir: "/var/cache/nvidia-drivers"
 
 # AMD
 edpm_accel_drivers_install_amd: false
-edpm_accel_drivers_amd_custom_url: ""
