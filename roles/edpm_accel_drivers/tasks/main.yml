@@ -8,7 +8,9 @@
 
 - name: Blacklist nouveau driver
   when: edpm_accel_drivers_blacklist_nouveau | bool
-  ansible.builtin.import_tasks: blacklist_nouveau.yml
+  ansible.builtin.include_tasks: blacklist_gpu_module.yml
+  vars:
+    blacklist_module_name: "nouveau"
 
 - name: NVIDIA Driver installation
   when: edpm_accel_drivers_install_nvidia | bool
@@ -19,5 +21,5 @@
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml
 
 - name: Run boot configuration tasks
-  when: edpm_accel_drivers_install_nvidia | bool or _edpm_accel_drivers_blacklist_nouveau_result.changed | bool
+  when: edpm_accel_drivers_install_nvidia | bool or _edpm_accel_drivers_blacklist_result.changed | bool
   ansible.builtin.import_tasks: boot_config.yml
