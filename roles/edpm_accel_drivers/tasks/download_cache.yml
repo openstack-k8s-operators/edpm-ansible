@@ -1,21 +1,21 @@
 ---
-- name: Download NVIDIA driver package from repository
+- name: Download GPU driver package from repository
   when: edpm_accel_drivers_gpu_custom_url == ""
   block:
-    - name: Import NVIDIA repos tasks
-      ansible.builtin.import_tasks: nvidia_repos.yml
+    - name: Import GPU repos tasks
+      ansible.builtin.import_tasks: gpu_repos.yml
 
-    - name: Download NVIDIA driver package
+    - name: Download GPU driver package
       ansible.builtin.dnf:
-        name: "{{ edpm_accel_drivers_nvidia_package_name }}"
+        name: "{{ edpm_accel_drivers_gpu_package_name }}"
         download_only: true
       become: true
-      register: _edpm_accel_drivers_nvidia_package_download_result
-      until: _edpm_accel_drivers_nvidia_package_download_result is succeeded
+      register: _edpm_accel_drivers_gpu_package_download_result
+      until: _edpm_accel_drivers_gpu_package_download_result is succeeded
       retries: "{{ edpm_accel_drivers_download_retries }}"
       delay: "{{ edpm_accel_drivers_download_delay }}"
 
-- name: Download NVIDIA driver package from custom URL
+- name: Download GPU driver package from custom URL
   when: edpm_accel_drivers_gpu_custom_url != ""
   ansible.builtin.import_tasks: gpu_custom_url.yml
 
@@ -32,7 +32,7 @@
           - "kernel-devel-{{ _edpm_accel_drivers_kernel_version }}"
         download_only: true
       become: true
-      register: _edpm_accel_drivers_nvidia_deps_download_result
-      until: _edpm_accel_drivers_nvidia_deps_download_result is succeeded
+      register: _edpm_accel_drivers_gpu_deps_download_result
+      until: _edpm_accel_drivers_gpu_deps_download_result is succeeded
       retries: "{{ edpm_accel_drivers_download_retries }}"
       delay: "{{ edpm_accel_drivers_download_delay }}"
