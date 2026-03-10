@@ -14,6 +14,10 @@
   when: edpm_accel_drivers_install_nvidia | bool
   ansible.builtin.import_tasks: nvidia_drivers.yml
 
+- name: AMD Driver installation
+  when: edpm_accel_drivers_install_amd | bool
+  ansible.builtin.import_tasks: amd_drivers.yml
+
 - name: Configure MIG partitioning on NVIDIA GPU
   when: edpm_accel_drivers_nvidia_manage_mig | bool
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml

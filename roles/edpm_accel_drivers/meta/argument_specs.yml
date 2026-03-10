@@ -90,3 +90,10 @@ argument_specs:
         type: bool
         default: false
         description: Whether to install AMD drivers.
+      edpm_accel_drivers_amd_custom_url:
+        type: str
+        default: ""
+        description: |
+          Custom AMD driver URL (if set, driver will be installed from this URL instead of from a repository).
+          Must end with .rpm extension.
+          NOTE: file:/// URLs are supported, for example a local NFS mount.

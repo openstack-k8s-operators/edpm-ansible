@@ -24,3 +24,4 @@ edpm_accel_drivers_nvidia_cache_dir: "/var/cache/nvidia-drivers"
 
 # AMD
 edpm_accel_drivers_install_amd: false
+edpm_accel_drivers_amd_custom_url: ""
