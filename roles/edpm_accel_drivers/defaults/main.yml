@@ -1,19 +1,28 @@
 ---
-edpm_accel_drivers_blacklist_nouveau: true
 
+# Common settings
+edpm_accel_drivers_download_delay: "{{ edpm_download_delay | default(60) }}"
+edpm_accel_drivers_download_retries: "{{ edpm_download_retries | default(5) }}"
+edpm_accel_drivers_cleanup_temp_files: true
+edpm_accel_drivers_cache_dir: "/var/cache/accel-drivers"
+edpm_accel_drivers_denylist_modules:
+  - nouveau
+  - amdgpu
+
+# NVIDIA-specific features
 edpm_accel_drivers_install_nvidia: false
-edpm_accel_drivers_nvidia_custom_url: ""
-edpm_accel_drivers_nvidia_custom_url_ssl_no_verify: false
 edpm_accel_drivers_nvidia_repo_url: ""
 edpm_accel_drivers_nvidia_repo_gpgkey: ""
-edpm_accel_drivers_nvidia_rpm_disable_gpg_check: false
 edpm_accel_drivers_nvidia_dnf_module_stream: "latest"
 edpm_accel_drivers_nvidia_package_name: "nvidia-driver"
-edpm_accel_drivers_nvidia_cleanup_temp_files: true
-
+edpm_accel_drivers_nvidia_custom_url: ""
+edpm_accel_drivers_nvidia_custom_url_ssl_no_verify: false
+edpm_accel_drivers_nvidia_rpm_disable_gpg_check: false
 edpm_accel_drivers_nvidia_manage_mig: false
 edpm_accel_drivers_nvidia_mig_geometries: []
 
-edpm_accel_drivers_nvidia_cache_dir: "/var/cache/nvidia-drivers"
-edpm_accel_drivers_download_delay: "{{ edpm_download_delay | default(60) }}"
-edpm_accel_drivers_download_retries: "{{ edpm_download_retries | default(5) }}"
+# AMD-specific features
+edpm_accel_drivers_install_amd: false
+edpm_accel_drivers_amd_custom_url: ""
+edpm_accel_drivers_amd_custom_url_ssl_no_verify: false
+edpm_accel_drivers_amd_rpm_disable_gpg_check: false

@@ -1,0 +1,12 @@
+---
+
+- name: Set internal variables for AMD driver installation
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_custom_url: "{{ edpm_accel_drivers_amd_custom_url }}"
+    _edpm_accel_drivers_custom_url_ssl_no_verify: "{{ edpm_accel_drivers_amd_custom_url_ssl_no_verify }}"
+    _edpm_accel_drivers_disable_gpg_check: "{{ edpm_accel_drivers_amd_rpm_disable_gpg_check }}"
+
+- name: Install AMD driver from custom URL
+  block:
+    - ansible.builtin.import_tasks: download_from_custom_url.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: install_from_rpm.yml  # noqa: name[missing]

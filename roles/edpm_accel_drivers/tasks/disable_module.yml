@@ -1,0 +1,16 @@
+---
+
+- name: Remove GPU module if loaded
+  become: true
+  ansible.builtin.command: modprobe -r {{ module_name }}
+  register: _edpm_accel_drivers_modprobe_result
+  changed_when: false
+
+- name: Blacklist GPU module
+  become: true
+  ansible.builtin.copy:
+    content: |
+      blacklist {{ module_name }}
+    dest: /etc/modprobe.d/blacklist-{{ module_name }}.conf
+    mode: "0644"
+  register: _edpm_accel_drivers_blacklist_result

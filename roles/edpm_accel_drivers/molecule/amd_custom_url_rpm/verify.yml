@@ -3,14 +3,14 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Verify nouveau blacklist file exists and contains correct entry
-      ansible.builtin.slurp:
-        src: /etc/modprobe.d/blacklist-nouveau.conf
-      register: nouveau_file
-      failed_when: "'blacklist nouveau' not in (nouveau_file.content | b64decode)"
-
     - name: Verify amdgpu blacklist file exists and contains correct entry
       ansible.builtin.slurp:
         src: /etc/modprobe.d/blacklist-amdgpu.conf
       register: amdgpu_file
       failed_when: "'blacklist amdgpu' not in (amdgpu_file.content | b64decode)"
+
+    - name: Verify amd-smi binary exists
+      ansible.builtin.stat:
+        path: /usr/local/bin/amd-smi
+      register: amd_smi_binary
+      failed_when: not amd_smi_binary.stat.exists

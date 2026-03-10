@@ -1,0 +1,23 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Install rpm-build package
+      become: true
+      ansible.builtin.package:
+        name: rpm-build
+        state: present
+
+    - name: Copy spec file into system under test
+      ansible.builtin.copy:
+        src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') | regex_replace('_vagrant$', '') }}/test_package/mock-amd-driver.spec"
+        dest: /tmp/mock-amd-driver.spec
+        mode: '0644'
+
+    - name: Build mock amd driver RPM
+      ansible.builtin.command:
+        cmd: rpmbuild -bb mock-amd-driver.spec
+        chdir: /tmp
