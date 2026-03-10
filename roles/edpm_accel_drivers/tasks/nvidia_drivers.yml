@@ -4,13 +4,13 @@
   when: edpm_accel_drivers_nvidia_custom_url == ""
   block:
     - ansible.builtin.import_tasks: gpu_repos.yml  # noqa: name[missing]
-    - ansible.builtin.import_tasks: nvidia_from_rpm.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: gpu_from_rpm.yml  # noqa: name[missing]
 
 - name: Install NVIDIA driver from custom URL
   when: edpm_accel_drivers_nvidia_custom_url != ""
   block:
     - ansible.builtin.import_tasks: nvidia_custom_url.yml  # noqa: name[missing]
-    - ansible.builtin.import_tasks: nvidia_from_rpm.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: gpu_from_rpm.yml  # noqa: name[missing]
       when: not _edpm_accel_drivers_is_run_file | bool
     - ansible.builtin.import_tasks: nvidia_from_run.yml  # noqa: name[missing]
       when: _edpm_accel_drivers_is_run_file | bool
