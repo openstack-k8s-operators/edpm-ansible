@@ -1,0 +1,49 @@
+---
+
+- name: Add GPU driver repository
+  when: edpm_accel_drivers_gpu_repo_url != ""
+  become: true
+  ansible.builtin.yum_repository:
+    name: gpu-drivers
+    description: GPU drivers repository
+    baseurl: "{{ edpm_accel_drivers_gpu_repo_url }}/$basearch/"
+    gpgcheck: "{{ edpm_accel_drivers_gpu_repo_gpgcheck }}"
+    gpgkey: "{{ edpm_accel_drivers_gpu_repo_gpgkey }}"
+    enabled: true
+
+# NOTE: DKMS is not supported, but it enables dnf repo testing w/ CS9 nodes
+- name: Assert DKMS module streams are not allowed on RHEL systems
+  ansible.builtin.assert:
+    that:
+      - not (
+          (ansible_facts['distribution'] | lower == 'redhat')
+          and
+          ('dkms' in edpm_accel_drivers_gpu_dnf_module_stream | lower)
+        )
+    fail_msg: >
+      DKMS-based GPU driver module streams are not supported on RHEL.
+      Please set 'edpm_accel_drivers_gpu_dnf_module_stream' to a non-DKMS value for RHEL systems.
+
+- name: Add EPEL repository if using a DKMS stream (UNSUPPORTED)
+  when: "'dkms' in edpm_accel_drivers_gpu_dnf_module_stream | lower"
+  block:
+    - name: Print debug message for unsupported DKMS installation
+      ansible.builtin.debug:
+        msg: >
+          Installing GPU drivers from a DKMS module stream is UNSUPPORTED and may result in unexpected behavior.
+    - name: Add EPEL repository (UNSUPPORTED)
+      become: true
+      ansible.builtin.yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: https://download.fedoraproject.org/pub/epel/9/Everything/$basearch/
+        enabled: 1
+        gpgcheck: 1
+        gpgkey: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+
+- name: Enable GPU driver DNF module for selected version stream
+  when: edpm_accel_drivers_gpu_dnf_module_stream != ""
+  become: true
+  ansible.builtin.dnf:
+    name: "@{{ edpm_accel_drivers_gpu_package_name }}:{{ edpm_accel_drivers_gpu_dnf_module_stream }}"
+    state: present
