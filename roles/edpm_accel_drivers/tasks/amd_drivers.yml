@@ -5,3 +5,16 @@
   block:
     - ansible.builtin.import_tasks: gpu_repos.yml  # noqa: name[missing]
     - ansible.builtin.import_tasks: gpu_from_rpm.yml  # noqa: name[missing]
+
+- name: Install AMD driver from custom URL
+  when: edpm_accel_drivers_gpu_custom_url != ""
+  block:
+    - ansible.builtin.import_tasks: gpu_custom_url.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: gpu_from_rpm.yml  # noqa: name[missing]
+
+- name: Clean up temporary directory
+  when: edpm_accel_drivers_gpu_cleanup_temp_files | bool
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_accel_drivers_gpu_cache_dir }}"
+    state: absent
