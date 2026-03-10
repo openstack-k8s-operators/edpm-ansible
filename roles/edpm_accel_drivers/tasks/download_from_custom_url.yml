@@ -1,0 +1,59 @@
+---
+
+- name: Extract filename from URL
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_filename: "{{ _edpm_accel_drivers_custom_url.split('/')[-1] }}"
+
+- name: Check if custom driver URL has allowable extension
+  ansible.builtin.assert:
+    that: _edpm_accel_drivers_filename | regex_search('\\.(rpm|run)$') is not none
+    fail_msg: "Custom GPU driver URL must end with .rpm or .run extension. Current URL: {{ _edpm_accel_drivers_custom_url }}"
+
+- name: Check if custom driver URL is a .run file
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_run_file: "{{ _edpm_accel_drivers_filename | regex_search('\\.run$') is not none }}"
+
+- name: Assert .run file is not allowed on RHEL systems
+  ansible.builtin.assert:
+    that:
+      - not (_edpm_accel_drivers_is_run_file and ansible_facts['distribution'] | lower == 'redhat')
+    fail_msg: "Installing a .run driver file is not supported on RHEL. Please provide a .rpm file instead."
+
+- name: Check if RPM filename indicates DKMS package
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_dkms_rpm: "{{ _edpm_accel_drivers_filename | regex_search('-dkms[-_.]') is not none }}"
+
+- name: Assert DKMS RPM restrictions
+  when: _edpm_accel_drivers_is_dkms_rpm | bool
+  ansible.builtin.assert:
+    that:
+      - not (ansible_facts['distribution'] | lower == 'redhat')
+    fail_msg: |
+      DKMS-based driver packages are not supported on RHEL systems.
+      Please use a precompiled kmod RPM package instead for RHEL systems.
+      Current URL: {{ _edpm_accel_drivers_custom_url }}
+    success_msg: |
+      Installing GPU drivers from a DKMS RPM package is UNSUPPORTED and may result in unexpected behavior.
+
+- name: Create cache directory for driver download
+  become: true
+  ansible.builtin.file:
+    path: "{{ _edpm_accel_drivers_cache_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set temporary file path
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_temp_path: "{{ _edpm_accel_drivers_cache_dir }}/{{ _edpm_accel_drivers_filename }}"
+
+- name: Download GPU driver from custom URL
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ _edpm_accel_drivers_custom_url }}"
+    dest: "{{ _edpm_accel_drivers_temp_path }}"
+    mode: "{{ '0755' if _edpm_accel_drivers_is_run_file else '0644' }}"
+    validate_certs: "{{ not _edpm_accel_drivers_custom_url_ssl_no_verify }}"
+  register: _edpm_accel_drivers_download_result
+  until: _edpm_accel_drivers_download_result is succeeded
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"

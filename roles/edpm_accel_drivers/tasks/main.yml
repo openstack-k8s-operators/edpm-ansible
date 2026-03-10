@@ -16,10 +16,23 @@
   when: edpm_accel_drivers_install_nvidia | bool
   ansible.builtin.import_tasks: nvidia_drivers.yml
 
+- name: AMD Driver installation
+  when: edpm_accel_drivers_install_amd | bool
+  block:
+    - name: Validate AMD driver custom URL is provided
+      ansible.builtin.assert:
+        that:
+          - edpm_accel_drivers_amd_custom_url != ""
+        fail_msg: |
+          AMD driver installation requires a custom URL.
+          Please set 'edpm_accel_drivers_amd_custom_url' to a valid driver package URL (.rpm file).
+
+    - ansible.builtin.import_tasks: amd_drivers.yml  # noqa: name[missing]
+
 - name: Configure MIG partitioning on NVIDIA GPU
   when: edpm_accel_drivers_nvidia_manage_mig | bool
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml
 
 - name: Run boot configuration tasks
-  when: edpm_accel_drivers_install_nvidia | bool or _edpm_accel_drivers_blacklist_result.changed | bool
+  when: edpm_accel_drivers_install_nvidia | bool or edpm_accel_drivers_install_amd | bool or _edpm_accel_drivers_blacklist_result.changed | bool
   ansible.builtin.import_tasks: boot_config.yml

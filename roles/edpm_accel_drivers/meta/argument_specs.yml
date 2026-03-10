@@ -8,7 +8,7 @@ argument_specs:
     options:
       edpm_accel_drivers_download_delay:
         type: int
-        default: 5
+        default: 60
         description: The seconds between retries for failed download tasks
       edpm_accel_drivers_download_retries:
         type: int
@@ -81,3 +81,33 @@ argument_specs:
           Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
           Required when edpm_accel_drivers_nvidia_manage_mig is true. An empty (or shortened) list
           removes previously configured systemd units and disables MIG on affected GPUs.
+      edpm_accel_drivers_install_amd:
+        type: bool
+        default: false
+        description: Whether to install AMD drivers.
+      edpm_accel_drivers_amd_custom_url:
+        type: str
+        default: ""
+        description: |
+          Custom AMD driver URL. Must end with .rpm (SUPPORTED) extension.
+          NOTE: file:/// URLs are supported, for example a local NFS mount.
+      edpm_accel_drivers_amd_custom_url_ssl_no_verify:
+        type: bool
+        default: false
+        description: |
+          Whether to disable SSL certificate verification when downloading AMD driver from custom URL.
+          Set to true to disable SSL certificate verification (not recommended for production).
+      edpm_accel_drivers_amd_cache_dir:
+        type: str
+        default: "/var/cache/amd-drivers"
+        description: The directory to cache the AMD driver package when downloading from a custom URL.
+      edpm_accel_drivers_amd_rpm_disable_gpg_check:
+        type: bool
+        default: false
+        description: |
+          Whether to disable GPG check when installing AMD driver from RPM.
+          Set to true to disable GPG check (not recommended for production).
+      edpm_accel_drivers_amd_cleanup_temp_files:
+        type: bool
+        default: true
+        description: Whether to cleanup temporary files after AMD driver installation

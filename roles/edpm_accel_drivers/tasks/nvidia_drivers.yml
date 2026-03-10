@@ -1,16 +1,23 @@
 ---
 
+- name: Set internal variables for NVIDIA driver installation
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_custom_url: "{{ edpm_accel_drivers_nvidia_custom_url }}"
+    _edpm_accel_drivers_custom_url_ssl_no_verify: "{{ edpm_accel_drivers_nvidia_custom_url_ssl_no_verify }}"
+    _edpm_accel_drivers_cache_dir: "{{ edpm_accel_drivers_nvidia_cache_dir }}"
+    _edpm_accel_drivers_disable_gpg_check: "{{ edpm_accel_drivers_nvidia_rpm_disable_gpg_check }}"
+
 - name: Install NVIDIA drivers from repository
   when: edpm_accel_drivers_nvidia_custom_url == ""
   block:
     - ansible.builtin.import_tasks: nvidia_repos.yml  # noqa: name[missing]
-    - ansible.builtin.import_tasks: nvidia_from_rpm.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: install_from_rpm.yml  # noqa: name[missing]
 
 - name: Install NVIDIA driver from custom URL
   when: edpm_accel_drivers_nvidia_custom_url != ""
   block:
-    - ansible.builtin.import_tasks: nvidia_custom_url.yml  # noqa: name[missing]
-    - ansible.builtin.import_tasks: nvidia_from_rpm.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: download_from_custom_url.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: install_from_rpm.yml  # noqa: name[missing]
       when: not _edpm_accel_drivers_is_run_file | bool
     - ansible.builtin.import_tasks: nvidia_from_run.yml  # noqa: name[missing]
       when: _edpm_accel_drivers_is_run_file | bool
