@@ -13,11 +13,21 @@
   ansible.builtin.set_fact:
     _edpm_accel_drivers_is_run_file: "{{ _edpm_accel_drivers_filename | regex_search('\\.run$') is not none }}"
 
-- name: Assert .run file is not allowed on RHEL systems
+- name: Assert .run file restrictions
+  when: _edpm_accel_drivers_is_run_file | bool
   ansible.builtin.assert:
     that:
-      - not (_edpm_accel_drivers_is_run_file and ansible_facts['distribution'] | lower == 'redhat')
-    fail_msg: "Installing a .run driver file is not supported on RHEL. Please provide a .rpm file instead."
+      - not (ansible_facts['distribution'] | lower == 'redhat')
+      - not (edpm_accel_drivers_install_amd | bool)
+    fail_msg: |
+      .run driver files are not supported in this configuration:
+      {% if ansible_facts['distribution'] | lower == 'redhat' %}
+      - RHEL systems do not support .run file installation (use .rpm instead)
+      {% endif %}
+      {% if edpm_accel_drivers_install_amd | bool %}
+      - AMD drivers do not support .run file installation (use .rpm instead)
+      {% endif %}
+      Current URL: {{ edpm_accel_drivers_custom_url }}
 
 - name: Create cache directory for driver download
   become: true

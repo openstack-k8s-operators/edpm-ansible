@@ -20,3 +20,6 @@ edpm_accel_drivers_nvidia_dnf_module_stream: "latest"
 edpm_accel_drivers_nvidia_package_name: "nvidia-driver"
 edpm_accel_drivers_nvidia_manage_mig: false
 edpm_accel_drivers_nvidia_mig_geometries: []
+
+# AMD-specific features
+edpm_accel_drivers_install_amd: false
