@@ -18,7 +18,7 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Call edpm_update role"
+    - name: "Call edpm_update_services role"
       ansible.builtin.include_role:
         name: osp.edpm.edpm_update_services
       vars:

@@ -2,7 +2,7 @@
 argument_specs:
   # ./roles/edpm_update_services/tasks/main.yml entry point
   main:
-    short_description: The main entry point for the edpm_update role.
+    short_description: The main entry point for the edpm_update_services role.
     options:
       edpm_update_services_enable_packages_update:
         type: bool
