@@ -1,0 +1,12 @@
+---
+# Backward compatibility layer for deprecated variable names
+# This allows existing playbooks using old variable names to continue working
+# while new deployments can use the current variable names
+
+- name: Set backward compatibility for deprecated variable names
+  ansible.builtin.set_fact:
+    edpm_accel_drivers_custom_url: "{{ edpm_accel_drivers_nvidia_custom_url | default(edpm_accel_drivers_custom_url) }}"
+    edpm_accel_drivers_custom_url_ssl_no_verify: "{{ edpm_accel_drivers_nvidia_custom_url_ssl_no_verify | default(edpm_accel_drivers_custom_url_ssl_no_verify) }}"
+    edpm_accel_drivers_disable_gpg_check: "{{ edpm_accel_drivers_nvidia_rpm_disable_gpg_check | default(edpm_accel_drivers_disable_gpg_check) }}"
+    edpm_accel_drivers_cleanup_temp_files: "{{ edpm_accel_drivers_nvidia_cleanup_temp_files | default(edpm_accel_drivers_cleanup_temp_files) }}"
+    edpm_accel_drivers_cache_dir: "{{ edpm_accel_drivers_nvidia_cache_dir | default(edpm_accel_drivers_cache_dir) }}"
