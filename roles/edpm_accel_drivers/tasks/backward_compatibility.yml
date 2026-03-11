@@ -1,0 +1,17 @@
+---
+# Backward compatibility layer for deprecated NVIDIA-specific variable names
+# This allows existing playbooks using edpm_accel_drivers_nvidia_* variables
+# to continue working while new deployments can use generic edpm_accel_drivers_gpu_* names
+
+- name: Set backward compatibility for deprecated NVIDIA-specific variables
+  ansible.builtin.set_fact:
+    edpm_accel_drivers_blacklist_gpu_module: "{{ edpm_accel_drivers_blacklist_nouveau | default(edpm_accel_drivers_blacklist_gpu_module) }}"
+    edpm_accel_drivers_gpu_custom_url: "{{ edpm_accel_drivers_nvidia_custom_url | default(edpm_accel_drivers_gpu_custom_url) }}"
+    edpm_accel_drivers_gpu_custom_url_ssl_no_verify: "{{ edpm_accel_drivers_nvidia_custom_url_ssl_no_verify | default(edpm_accel_drivers_gpu_custom_url_ssl_no_verify) }}"
+    edpm_accel_drivers_gpu_repo_url: "{{ edpm_accel_drivers_nvidia_repo_url | default(edpm_accel_drivers_gpu_repo_url) }}"
+    edpm_accel_drivers_gpu_repo_gpgkey: "{{ edpm_accel_drivers_nvidia_repo_gpgkey | default(edpm_accel_drivers_gpu_repo_gpgkey) }}"
+    edpm_accel_drivers_gpu_repo_gpgcheck: "{{ (not (edpm_accel_drivers_nvidia_rpm_disable_gpg_check | default(false))) if (edpm_accel_drivers_nvidia_rpm_disable_gpg_check is defined) else edpm_accel_drivers_gpu_repo_gpgcheck }}"
+    edpm_accel_drivers_gpu_dnf_module_stream: "{{ edpm_accel_drivers_nvidia_dnf_module_stream | default(edpm_accel_drivers_gpu_dnf_module_stream) }}"
+    edpm_accel_drivers_gpu_package_name: "{{ edpm_accel_drivers_nvidia_package_name | default(edpm_accel_drivers_gpu_package_name) }}"
+    edpm_accel_drivers_gpu_cleanup_temp_files: "{{ edpm_accel_drivers_nvidia_cleanup_temp_files | default(edpm_accel_drivers_gpu_cleanup_temp_files) }}"
+    edpm_accel_drivers_gpu_cache_dir: "{{ edpm_accel_drivers_nvidia_cache_dir | default(edpm_accel_drivers_gpu_cache_dir) }}"

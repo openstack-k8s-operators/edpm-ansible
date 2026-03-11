@@ -6,6 +6,9 @@
   when: ansible_local.bootc is defined and ansible_local.bootc
   failed_when: true
 
+- name: Import backward compatibility variables
+  ansible.builtin.import_tasks: backward_compatibility.yml
+
 - name: Blacklist GPU module
   when: edpm_accel_drivers_blacklist_gpu_module | bool
   ansible.builtin.import_tasks: blacklist_gpu_module.yml
