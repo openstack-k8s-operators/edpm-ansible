@@ -8,7 +8,7 @@ argument_specs:
     options:
       edpm_accel_drivers_download_delay:
         type: int
-        default: 5
+        default: 60
         description: The seconds between retries for failed download tasks
       edpm_accel_drivers_download_retries:
         type: int
@@ -17,23 +17,23 @@ argument_specs:
         type: bool
         default: false
         description: Whether to install nvidia drivers.
-      edpm_accel_drivers_nvidia_custom_url:
+      edpm_accel_drivers_custom_url:
         type: str
         default: ""
         description: |
-          Custom NVIDIA driver URL (if set, driver will be installed from this URL instead of from a repository).
+          Custom GPU driver URL (if set, driver will be installed from this URL instead of from a repository).
           Must end with .rpm (SUPPORTED) or .run extension (UNSUPPORTED).
           NOTE: file:/// URLs are supported, for example a local NFS mount.
-      edpm_accel_drivers_nvidia_custom_url_ssl_no_verify:
+      edpm_accel_drivers_custom_url_ssl_no_verify:
         type: bool
         default: false
         description: |
-          Whether to disable SSL certificate verification when downloading NVIDIA driver from custom URL.
+          Whether to disable SSL certificate verification when downloading GPU driver from custom URL.
           Set to true to disable SSL certificate verification (not recommended for production).
-      edpm_accel_drivers_nvidia_cache_dir:
+      edpm_accel_drivers_cache_dir:
         type: str
-        default: "/var/cache/nvidia-drivers"
-        description: The directory to cache the NVIDIA driver package when downloading from a custom URL.
+        default: "/var/cache/accel-drivers"
+        description: The directory to cache the GPU driver package when downloading from a custom URL.
       edpm_accel_drivers_nvidia_repo_url:
         type: str
         default: ""
@@ -44,11 +44,11 @@ argument_specs:
         default: ""
         description: |
           GPG key URL for NVIDIA repository verification.
-      edpm_accel_drivers_nvidia_rpm_disable_gpg_check:
+      edpm_accel_drivers_disable_gpg_check:
         type: bool
         default: false
         description: |
-          Whether to disable GPG check when installing NVIDIA driver from RPM.
+          Whether to disable GPG check when installing GPU driver from RPM.
           Set to true to disable GPG check (not recommended for production).
       edpm_accel_drivers_nvidia_dnf_module_stream:
         type: str
@@ -60,7 +60,7 @@ argument_specs:
         default: "nvidia-driver"
         description: |
           NVIDIA Driver package name to install from NVIDIA repo.
-      edpm_accel_drivers_nvidia_cleanup_temp_files:
+      edpm_accel_drivers_cleanup_temp_files:
         type: bool
         default: true
         description: Whether to cleanup temporary files after installation
@@ -81,3 +81,7 @@ argument_specs:
           Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
           Required when edpm_accel_drivers_nvidia_manage_mig is true. An empty (or shortened) list
           removes previously configured systemd units and disables MIG on affected GPUs.
+      edpm_accel_drivers_install_amd:
+        type: bool
+        default: false
+        description: Whether to install AMD drivers.

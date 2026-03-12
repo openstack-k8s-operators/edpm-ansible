@@ -1,0 +1,51 @@
+---
+
+- name: Extract filename from URL
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_filename: "{{ edpm_accel_drivers_custom_url.split('/')[-1] }}"
+
+- name: Check if custom driver URL has allowable extension
+  ansible.builtin.assert:
+    that: _edpm_accel_drivers_filename | regex_search('\\.(rpm|run)$') is not none
+    fail_msg: "edpm_accel_drivers_custom_url must end with .rpm or .run extension. Current URL: {{ edpm_accel_drivers_custom_url }}"
+
+- name: Check if custom driver URL is a .run file
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_run_file: "{{ _edpm_accel_drivers_filename | regex_search('\\.run$') is not none }}"
+
+- name: Assert .run file restrictions
+  when: _edpm_accel_drivers_is_run_file | bool
+  ansible.builtin.assert:
+    that:
+      - not (ansible_facts['distribution'] | lower == 'redhat')
+      - not (edpm_accel_drivers_install_amd | bool)
+    fail_msg: |
+      .run driver files are not supported in this configuration:
+      {% if ansible_facts['distribution'] | lower == 'redhat' %}
+      - RHEL systems do not support .run file installation (use .rpm instead)
+      {% endif %}
+      {% if edpm_accel_drivers_install_amd | bool %}
+      - AMD drivers do not support .run file installation (use .rpm instead)
+      {% endif %}
+      Current URL: {{ edpm_accel_drivers_custom_url }}
+
+- name: Create cache directory for driver download
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_accel_drivers_cache_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set temporary file path
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_temp_path: "{{ edpm_accel_drivers_cache_dir }}/{{ _edpm_accel_drivers_filename }}"
+
+- name: Download GPU driver from custom URL
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ edpm_accel_drivers_custom_url }}"
+    dest: "{{ _edpm_accel_drivers_temp_path }}"
+    mode: "{{ '0755' if _edpm_accel_drivers_is_run_file else '0644' }}"
+    validate_certs: "{{ not edpm_accel_drivers_custom_url_ssl_no_verify }}"
+  retries: "{{ edpm_accel_drivers_download_retries }}"
+  delay: "{{ edpm_accel_drivers_download_delay }}"

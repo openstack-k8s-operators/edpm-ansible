@@ -1,0 +1,19 @@
+---
+
+- name: Blacklist amdgpu module
+  ansible.builtin.include_tasks: blacklist_gpu_module.yml
+  vars:
+    blacklist_module_name: "amdgpu"
+
+- name: Install AMD driver from custom URL
+  when: edpm_accel_drivers_custom_url != ""
+  block:
+    - ansible.builtin.import_tasks: download_from_custom_url.yml  # noqa: name[missing]
+    - ansible.builtin.import_tasks: install_from_rpm.yml  # noqa: name[missing]
+
+- name: Clean up temporary directory
+  when: edpm_accel_drivers_cleanup_temp_files | bool
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_accel_drivers_cache_dir }}"
+    state: absent

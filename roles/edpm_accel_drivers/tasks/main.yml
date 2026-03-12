@@ -6,18 +6,29 @@
   when: ansible_local.bootc is defined and ansible_local.bootc
   failed_when: true
 
+- name: Import backward compatibility variables
+  ansible.builtin.import_tasks: backward_compatibility.yml
+
 - name: Blacklist nouveau driver
-  when: edpm_accel_drivers_blacklist_nouveau | bool
-  ansible.builtin.import_tasks: blacklist_nouveau.yml
+  when:
+    - edpm_accel_drivers_blacklist_nouveau | bool
+    - not (edpm_accel_drivers_install_amd | bool)
+  ansible.builtin.include_tasks: blacklist_gpu_module.yml
+  vars:
+    blacklist_module_name: "nouveau"
 
 - name: NVIDIA Driver installation
   when: edpm_accel_drivers_install_nvidia | bool
   ansible.builtin.import_tasks: nvidia_drivers.yml
+
+- name: AMD Driver installation
+  when: edpm_accel_drivers_install_amd | bool
+  ansible.builtin.import_tasks: amd_drivers.yml
 
 - name: Configure MIG partitioning on NVIDIA GPU
   when: edpm_accel_drivers_nvidia_manage_mig | bool
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml
 
 - name: Run boot configuration tasks
-  when: edpm_accel_drivers_install_nvidia | bool or _edpm_accel_drivers_blacklist_nouveau_result.changed | bool
+  when: edpm_accel_drivers_install_nvidia | bool or edpm_accel_drivers_install_amd | bool or _edpm_accel_drivers_blacklist_result.changed | bool
   ansible.builtin.import_tasks: boot_config.yml
