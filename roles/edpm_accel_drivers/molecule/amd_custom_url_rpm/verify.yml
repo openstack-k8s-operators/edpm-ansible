@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify amdgpu is blacklisted
+      ansible.builtin.command: grep -q "^blacklist amdgpu" /etc/modprobe.d/blacklist.conf
+      register: amdgpu_blacklisted
+      changed_when: false
+      failed_when: amdgpu_blacklisted.rc != 0
+
+    - name: Verify amd-smi binary exists
+      ansible.builtin.stat:
+        path: /usr/local/bin/amd-smi
+      register: amd_smi_binary
+      failed_when: not amd_smi_binary.stat.exists

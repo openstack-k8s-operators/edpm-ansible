@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers_blacklist_nouveau: false
+        edpm_accel_drivers_install_amd: true
+        edpm_accel_drivers_amd_custom_url: "file:///tmp/mock-amd-driver.rpm"
+        edpm_accel_drivers_amd_rpm_disable_gpg_check: true
