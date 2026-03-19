@@ -131,6 +131,24 @@
         fail_msg: "Kolla config for test_service3_container_a should still exist"
         success_msg: "Kolla config for test_service3_container_a still exists as expected"
 
+- name: Verify image pruning after service cleanup
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if old service image was pruned
+      ansible.builtin.command: podman image exists quay.io/centos/centos:stream9
+      register: _old_image_check
+      failed_when: false
+      changed_when: false
+
+    - name: Verify old service image was removed
+      ansible.builtin.assert:
+        that:
+          - _old_image_check.rc != 0
+        fail_msg: "centos:stream9 should have been pruned after test_service1 was removed"
+        success_msg: "Old service image centos:stream9 was successfully pruned"
+
 - name: Verify state file
   hosts: all
   gather_facts: false
