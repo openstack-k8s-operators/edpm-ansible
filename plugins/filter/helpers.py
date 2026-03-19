@@ -52,7 +52,7 @@ class FilterModule:
         for c in container_infos:
             c_name = c['Name']
             installed_containers.append(c_name)
-            labels = c['Config'].get('Labels', {})
+            labels = c['Config'].get('Labels') or {}
             managed_by = labels.get('managed_by', 'unknown').lower()
 
             # Check containers have a label
