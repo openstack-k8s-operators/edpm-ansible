@@ -155,3 +155,11 @@
       when:
         - _edpm_orphaned_containers | length > 0
         - _edpm_orphaned_startup_configs.results is defined
+
+- name: Prune unused container images and volumes
+  become: true
+  containers.podman.podman_prune:
+    image: true
+    image_filters:
+      dangling_only: false
+    volume: true

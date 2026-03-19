@@ -203,3 +203,13 @@
     - edpm_telemetry
     - edpm_update_services
   when: '"telemetry" in edpm_update_services_running_services'
+
+- name: Prune unused container images and volumes after update
+  become: true
+  containers.podman.podman_prune:
+    image: true
+    image_filters:
+      dangling_only: false
+    volume: true
+  tags:
+    - edpm_update_services
