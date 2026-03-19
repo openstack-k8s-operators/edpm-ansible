@@ -20,8 +20,13 @@
 - name: Rsyslog configuration
   ansible.builtin.import_tasks: rsyslog.yml
 
-- name: Podman purge
-  ansible.builtin.import_tasks: purge.yml
+- name: Prune unused podman images and volumes
+  become: true
+  containers.podman.podman_prune:
+    image: true
+    image_filters:
+      dangling_only: false
+    volume: true
 
 - name: Podman install
   ansible.builtin.import_tasks: login.yml
