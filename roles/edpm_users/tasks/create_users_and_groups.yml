@@ -45,3 +45,4 @@
         shell: "{{ item.shell }}"
         comment: "{{ item.comment }}"
         groups: "{{ item.groups | default('') }}"
+        expires: "{{ edpm_users_account_expires }}"
