@@ -63,12 +63,18 @@
   ansible.builtin.stat:
     path: "{{ edpm_telemetry_certs }}/tls.crt"
   register: tls_crt_stat
+  tags:
+    - update
+    - telemetry
 
 - name: Check that tls.key exists
   become: true
   ansible.builtin.stat:
     path: "{{ edpm_telemetry_certs }}/tls.key"
   register: tls_key_stat
+  tags:
+    - update
+    - telemetry
 
 - name: Install openstack_network_operator if not present
   when: not openstack_network_exporter_config_json.stat.exists
