@@ -6,11 +6,11 @@
   when: ansible_local.bootc is defined and ansible_local.bootc
   failed_when: true
 
-- name: Blacklist nouveau driver
-  when: edpm_accel_drivers_blacklist_nouveau | bool
-  ansible.builtin.include_tasks: blacklist_gpu_module.yml
-  vars:
-    blacklist_module_name: "nouveau"
+- name: Disable GPU modules
+  ansible.builtin.include_tasks: disable_module.yml
+  loop: "{{ edpm_accel_drivers_denylist_modules }}"
+  loop_control:
+    loop_var: module_name
 
 - name: NVIDIA Driver installation
   when: edpm_accel_drivers_install_nvidia | bool
@@ -29,10 +29,17 @@
 
     - ansible.builtin.import_tasks: amd_drivers.yml  # noqa: name[missing]
 
-- name: Configure MIG partitioning on NVIDIA GPU
-  when: edpm_accel_drivers_nvidia_manage_mig | bool
-  ansible.builtin.import_tasks: nvidia_mig_partitioning.yml
+- name: Clean up temporary directory
+  when: edpm_accel_drivers_cleanup_temp_files | bool
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_accel_drivers_cache_dir }}"
+    state: absent
 
 - name: Run boot configuration tasks
   when: edpm_accel_drivers_install_nvidia | bool or edpm_accel_drivers_install_amd | bool or _edpm_accel_drivers_blacklist_result.changed | bool
   ansible.builtin.import_tasks: boot_config.yml
+
+- name: Configure MIG partitioning on NVIDIA GPU
+  when: edpm_accel_drivers_nvidia_manage_mig | bool
+  ansible.builtin.import_tasks: nvidia_mig_partitioning.yml

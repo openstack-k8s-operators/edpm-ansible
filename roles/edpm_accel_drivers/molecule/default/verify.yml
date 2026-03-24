@@ -8,3 +8,9 @@
       register: nouveau_blacklisted
       changed_when: false
       failed_when: nouveau_blacklisted.rc != 0
+
+    - name: Verify amdgpu is blacklisted
+      ansible.builtin.command: grep -q "^blacklist amdgpu" /etc/modprobe.d/blacklist.conf
+      register: amdgpu_blacklisted
+      changed_when: false
+      failed_when: amdgpu_blacklisted.rc != 0

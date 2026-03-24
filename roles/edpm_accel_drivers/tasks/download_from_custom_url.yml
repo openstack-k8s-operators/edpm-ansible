@@ -38,13 +38,13 @@
 - name: Create cache directory for driver download
   become: true
   ansible.builtin.file:
-    path: "{{ _edpm_accel_drivers_cache_dir }}"
+    path: "{{ edpm_accel_drivers_cache_dir }}"
     state: directory
     mode: '0755'
 
 - name: Set temporary file path
   ansible.builtin.set_fact:
-    _edpm_accel_drivers_temp_path: "{{ _edpm_accel_drivers_cache_dir }}/{{ _edpm_accel_drivers_filename }}"
+    _edpm_accel_drivers_temp_path: "{{ edpm_accel_drivers_cache_dir }}/{{ _edpm_accel_drivers_filename }}"
 
 - name: Download GPU driver from custom URL
   become: true

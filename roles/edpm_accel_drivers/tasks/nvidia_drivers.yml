@@ -4,7 +4,6 @@
   ansible.builtin.set_fact:
     _edpm_accel_drivers_custom_url: "{{ edpm_accel_drivers_nvidia_custom_url }}"
     _edpm_accel_drivers_custom_url_ssl_no_verify: "{{ edpm_accel_drivers_nvidia_custom_url_ssl_no_verify }}"
-    _edpm_accel_drivers_cache_dir: "{{ edpm_accel_drivers_nvidia_cache_dir }}"
     _edpm_accel_drivers_disable_gpg_check: "{{ edpm_accel_drivers_nvidia_rpm_disable_gpg_check }}"
 
 - name: Install NVIDIA drivers from repository
@@ -21,10 +20,3 @@
       when: not _edpm_accel_drivers_is_run_file | bool
     - ansible.builtin.import_tasks: nvidia_from_run.yml  # noqa: name[missing]
       when: _edpm_accel_drivers_is_run_file | bool
-
-- name: Clean up temporary directory
-  when: edpm_accel_drivers_nvidia_cleanup_temp_files | bool
-  become: true
-  ansible.builtin.file:
-    path: "{{ edpm_accel_drivers_nvidia_cache_dir }}"
-    state: absent
