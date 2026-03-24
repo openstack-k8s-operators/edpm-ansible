@@ -8,11 +8,9 @@
 
 - name: Blacklist GPU module
   become: true
-  ansible.builtin.blockinfile:
-    block: |
+  ansible.builtin.copy:
+    content: |
       blacklist {{ module_name }}
-    path: /etc/modprobe.d/blacklist.conf
-    marker: "# {mark} edpm_accel_drivers role - blacklist {{ module_name }}"
+    dest: /etc/modprobe.d/blacklist-{{ module_name }}.conf
     mode: "0644"
-    create: true
   register: _edpm_accel_drivers_blacklist_result

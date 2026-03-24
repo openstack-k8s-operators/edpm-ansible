@@ -3,14 +3,14 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Verify nouveau is blacklisted
-      ansible.builtin.command: grep -q "^blacklist nouveau" /etc/modprobe.d/blacklist.conf
-      register: nouveau_blacklisted
-      changed_when: false
-      failed_when: nouveau_blacklisted.rc != 0
+    - name: Verify nouveau blacklist file exists and contains correct entry
+      ansible.builtin.slurp:
+        src: /etc/modprobe.d/blacklist-nouveau.conf
+      register: nouveau_file
+      failed_when: "'blacklist nouveau' not in (nouveau_file.content | b64decode)"
 
-    - name: Verify amdgpu is blacklisted
-      ansible.builtin.command: grep -q "^blacklist amdgpu" /etc/modprobe.d/blacklist.conf
-      register: amdgpu_blacklisted
-      changed_when: false
-      failed_when: amdgpu_blacklisted.rc != 0
+    - name: Verify amdgpu blacklist file exists and contains correct entry
+      ansible.builtin.slurp:
+        src: /etc/modprobe.d/blacklist-amdgpu.conf
+      register: amdgpu_file
+      failed_when: "'blacklist amdgpu' not in (amdgpu_file.content | b64decode)"
