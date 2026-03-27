@@ -102,3 +102,33 @@ edpm_ovn_ovs_other_config: {}
 
 # If container health check should be enabled
 edpm_ovn_healthcheck: true
+
+# Resource provider configuration for OVN CMS options
+# Dictionary defining bandwidth limits and hypervisor mappings for resource providers
+# Format: { bridge_name: { ingress: value, egress: value } }
+# Both ingress and egress are optional. Missing values result in empty fields (e.g., "provider::")
+# Each provider will automatically be mapped to the current host's FQDN for hypervisors
+# Examples:
+#   Full config: { "br-ex": { "ingress": 10000000, "egress": 15000000 } }
+#   Egress only: { "br-ex": { "egress": 15000000 } }
+#   Ingress only: { "br-ex": { "ingress": 10000000 } }
+#   No bandwidth (just hypervisor mapping): { "br-ex": {} }
+edpm_ovn_resource_provider_bandwidths: {}
+
+# Resource provider inventory defaults configuration
+# Dictionary defining default inventory settings for all resource providers
+# Format: { option_name: value }
+# Example: { "allocation_ratio": 1.0, "min_unit": 10, "max_unit": 20, "reserved": 2, "step_size": 5 }
+# All options are optional
+edpm_ovn_resource_provider_inventory_defaults: {}
+
+# Resource provider hypervisors configuration
+# Dictionary defining custom hypervisor mappings for resource providers
+# Format: { bridge_name: "hypervisor_name" }
+# If not set, defaults to mapping each provider from edpm_ovn_resource_provider_bandwidths to the host FQDN
+# This variable allows overriding the automatic FQDN mapping with custom hypervisor names
+# Examples:
+#   Custom hypervisor names: { "br-ex": "compute-01", "rp_tunnelled": "compute-01-tunnel" }
+#   Mixed with FQDN: { "br-ex": "custom-name", "br-storage": "{{ ansible_facts['fqdn'] }}" }
+#   Override only some: { "br-ex": "custom-name" }  # other providers use auto-generated FQDN
+edpm_ovn_resource_provider_hypervisors: {}

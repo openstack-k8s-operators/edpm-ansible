@@ -35,6 +35,33 @@ argument_specs:
         default: []
         description: Availability zones for the chassis
         type: list
+      edpm_ovn_resource_provider_bandwidths:
+        default: {}
+        description: >
+          Dictionary defining bandwidth limits and hypervisor mappings for resource providers.
+          Format: { bridge_name: { ingress: value, egress: value } }.
+          Both ingress and egress are optional. Missing values result in empty fields.
+          Each provider will automatically be mapped to the current host's FQDN for hypervisors.
+          Examples: Full config { "br-ex": { "ingress": 10000000, "egress": 15000000 } },
+          Egress only { "br-ex": { "egress": 15000000 } }, No bandwidth { "br-ex": {} }
+        type: dict
+      edpm_ovn_resource_provider_inventory_defaults:
+        default: {}
+        description: >
+          Dictionary defining default inventory settings for all resource providers.
+          Format: { option_name: value }. All options are optional.
+          Supported options: allocation_ratio, min_unit, max_unit, reserved, step_size.
+          Example: { "allocation_ratio": 1.0, "min_unit": 10, "max_unit": 20, "reserved": 2, "step_size": 5 }
+        type: dict
+      edpm_ovn_resource_provider_hypervisors:
+        default: {}
+        description: >
+          Dictionary defining custom hypervisor mappings for resource providers.
+          Format: { bridge_name: "hypervisor_name" }.
+          If not set, defaults to mapping each provider from edpm_ovn_resource_provider_bandwidths to the host FQDN.
+          This variable allows overriding the automatic FQDN mapping with custom hypervisor names.
+          Examples: { "br-ex": "compute-01", "rp_tunnelled": "compute-01-tunnel" }
+        type: dict
       edpm_ovn_bridge:
         default: br-int
         description: >
