@@ -52,3 +52,4 @@ argument_specs:
           - tripleo_swift_object_replicator
           - tripleo_swift_object_server
           - tripleo_swift_object_updater
+          - tripleo_swift_rsync.service
