@@ -1,0 +1,53 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Cleanup
+  hosts: all
+  gather_facts: false
+  any_errors_fatal: true
+  become: true
+  tasks:
+    - name: Cleanup edpm_ovn
+      ansible.builtin.import_role:
+        name: "osp.edpm.edpm_ovn"
+        tasks_from: cleanup.yml
+      vars:
+        # Set the config that we need to preserve
+        edpm_enable_chassis_gw: true
+
+    - name: Get ovn-cms-options after cleanup
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-cms-options
+      register: cleanup_output
+      failed_when: false
+
+    - name: Debug ovn-cms-options after cleanup
+      ansible.builtin.debug:
+        var: cleanup_output.stdout
+
+    - name: Verify resource provider configurations were removed
+      ansible.builtin.assert:
+        that:
+          - "'resource_provider_bandwidths=' not in cleanup_output.stdout"
+          - "'resource_provider_hypervisors=' not in cleanup_output.stdout"
+          - "'resource_provider_inventory_defaults=' not in cleanup_output.stdout"
+        fail_msg: "Resource provider configurations were not properly cleaned up"
+
+    - name: Verify other configurations remain intact
+      ansible.builtin.assert:
+        that:
+          - "'enable-chassis-as-gw' in cleanup_output.stdout"
+        fail_msg: "Non-resource-provider configurations were incorrectly removed during cleanup"

@@ -63,6 +63,49 @@
         chassis_options: "{{ chassis_options | default([]) + ['availability-zones=' + edpm_ovn_availability_zones | join(':')] }}"
       when: edpm_ovn_availability_zones | length > 0
 
+    - name: Configure resource provider bandwidths if set
+      ansible.builtin.set_fact:
+        chassis_options: >-
+          {%- set bandwidth_entries = [] -%}
+          {%- for provider, bandwidth in edpm_ovn_resource_provider_bandwidths.items() -%}
+            {%- set egress_val = bandwidth.egress | default('') | string -%}
+            {%- set ingress_val = bandwidth.ingress | default('') | string -%}
+            {%- set _ = bandwidth_entries.append(provider + ':' + egress_val + ':' + ingress_val) -%}
+          {%- endfor -%}
+          {{ chassis_options | default([]) + ['resource_provider_bandwidths=' + bandwidth_entries|join(';')] }}
+      when: edpm_ovn_resource_provider_bandwidths | length > 0
+
+    - name: Configure resource provider hypervisors if set
+      ansible.builtin.set_fact:
+        chassis_options: >-
+          {%- set hypervisor_entries = [] -%}
+          {%- set all_providers = [] -%}
+          {%- if edpm_ovn_resource_provider_hypervisors | length > 0 -%}
+            {%- for provider, hypervisor in edpm_ovn_resource_provider_hypervisors.items() -%}
+              {%- set _ = hypervisor_entries.append(provider + ':' + hypervisor) -%}
+              {%- set _ = all_providers.append(provider) -%}
+            {%- endfor -%}
+          {%- endif -%}
+          {%- for provider in edpm_ovn_resource_provider_bandwidths.keys() -%}
+            {%- if provider not in all_providers -%}
+              {%- set _ = hypervisor_entries.append(provider + ':' + ansible_facts['fqdn']) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ chassis_options | default([]) + ['resource_provider_hypervisors=' + hypervisor_entries|join(';')] }}
+      when: >
+        edpm_ovn_resource_provider_hypervisors | length > 0 or
+        edpm_ovn_resource_provider_bandwidths | length > 0
+
+    - name: Configure resource provider inventory defaults if set
+      ansible.builtin.set_fact:
+        chassis_options: >-
+          {%- set inventory_entries = [] -%}
+          {%- for option, value in edpm_ovn_resource_provider_inventory_defaults.items() -%}
+            {%- set _ = inventory_entries.append(option + ':' + value|string) -%}
+          {%- endfor -%}
+          {{ chassis_options | default([]) + ['resource_provider_inventory_defaults=' + inventory_entries|join(';')] }}
+      when: edpm_ovn_resource_provider_inventory_defaults | length > 0
+
     - name: Build OVN CMS Options
       ansible.builtin.set_fact:
         ovn_cms_options:
@@ -102,7 +145,7 @@
     - name: Configure OVS external_ids
       become: true
       ansible.builtin.shell: >
-        ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}={{ value }} {% endfor %}
+        ovs-vsctl set open . {% for key, value in edpm_ovn_ovs_external_ids.items() -%} external_ids:{{ key }}="{{ value }}" {% endfor %}
       register: ovs_external_ids
       changed_when: ovs_external_ids.rc == 0
       failed_when: ovs_external_ids.rc != 0

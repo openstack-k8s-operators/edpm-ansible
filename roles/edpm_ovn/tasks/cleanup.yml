@@ -66,10 +66,36 @@
       ansible.builtin.set_fact:
         cleanup_ovn_cms_options_stdout: "{{ filtered_azs }}"
 
+- name: Cleanup resource provider configurations
+  when:
+    - cleanup_ovn_cms_options.rc == 0
+    - cleanup_ovn_cms_options_stdout | length > 0
+  block:
+    - name: Remove resource provider bandwidths from ovn-cms-options
+      ansible.builtin.set_fact:
+        cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('resource_provider_bandwidths=[^,]*' ~ ',?', '') }}"
+      when: edpm_ovn_resource_provider_bandwidths | length == 0
+
+    - name: Remove resource provider hypervisors from ovn-cms-options
+      ansible.builtin.set_fact:
+        cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('resource_provider_hypervisors=[^,]*' ~ ',?', '') }}"
+      when:
+        - edpm_ovn_resource_provider_hypervisors | length == 0
+        - edpm_ovn_resource_provider_bandwidths | length == 0
+
+    - name: Remove resource provider inventory defaults from ovn-cms-options
+      ansible.builtin.set_fact:
+        cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('resource_provider_inventory_defaults=[^,]*' ~ ',?', '') }}"
+      when: edpm_ovn_resource_provider_inventory_defaults | length == 0
+
+    - name: Clean up leading/trailing commas
+      ansible.builtin.set_fact:
+        cleanup_ovn_cms_options_stdout: "{{ cleanup_ovn_cms_options_stdout | regex_replace('^,|,$', '') | regex_replace(',,+', ',') }}"
+
 - name: Set updated OVN CMS Options to the local OVSDB
   become: true
   ansible.builtin.shell: >
-    ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options={{ cleanup_ovn_cms_options_stdout }}
+    ovs-vsctl set Open_vSwitch . external_ids:ovn-cms-options="{{ cleanup_ovn_cms_options_stdout }}"
   register: cleanup_ovn_cms_options_set
   changed_when: cleanup_ovn_cms_options_set.rc == 0
   failed_when: cleanup_ovn_cms_options_set.rc != 0

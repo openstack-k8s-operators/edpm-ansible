@@ -1,0 +1,74 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Include default tasks
+      ansible.builtin.include_tasks:
+        file: ../default/verify-tasks.yml
+
+    - name: Verify comprehensive resource provider configuration
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-cms-options
+      register: cms_options_output
+
+    - name: Debug ovn-cms-options output
+      ansible.builtin.debug:
+        var: cms_options_output.stdout
+
+    # Test bandwidth configurations and format
+    - name: Verify resource_provider_bandwidths configuration and format
+      ansible.builtin.assert:
+        that:
+          - "'resource_provider_bandwidths=' in cms_options_output.stdout"
+          - "'br-ex:15000000:10000000' in cms_options_output.stdout"  # Full config
+          - "'rp_tunnelled:25000000:' in cms_options_output.stdout"   # Egress-only
+          - "'br-ext::30000000' in cms_options_output.stdout"        # Ingress-only
+          - "'br-storage::' in cms_options_output.stdout"            # Empty config
+        fail_msg: "resource_provider_bandwidths configuration not found or format incorrect"
+
+    # Test hypervisor configurations with custom and auto-generated mappings
+    - name: Verify resource_provider_hypervisors includes custom and auto-generated providers
+      ansible.builtin.assert:
+        that:
+          - "'resource_provider_hypervisors=' in cms_options_output.stdout"
+          - "'br-ex:custom-compute-01' in cms_options_output.stdout"         # Custom hypervisor name
+          - "'rp_tunnelled:tunnel-host' in cms_options_output.stdout"        # Custom hypervisor name
+          - "'br-ext:edpm-0.localdomain' in cms_options_output.stdout"       # Auto-generated FQDN
+          - "'br-storage:edpm-0.localdomain' in cms_options_output.stdout"   # Auto-generated FQDN
+        fail_msg: "resource_provider_hypervisors configuration not found or incorrect - should include custom and auto-generated hypervisor mappings"
+
+    # Test inventory defaults configuration
+    - name: Verify resource_provider_inventory_defaults configuration
+      ansible.builtin.assert:
+        that:
+          - "'resource_provider_inventory_defaults=' in cms_options_output.stdout"
+          - "'allocation_ratio:1.0' in cms_options_output.stdout"
+          - "'min_unit:10' in cms_options_output.stdout"
+          - "'max_unit:20' in cms_options_output.stdout"
+          - "'reserved:2' in cms_options_output.stdout"
+          - "'step_size:5' in cms_options_output.stdout"
+        fail_msg: "resource_provider_inventory_defaults configuration not found or incorrect"
+
+    # Extract configurations and verify format with semicolon separators
+    - name: Extract configurations for detailed format validation
+      ansible.builtin.set_fact:
+        bandwidths_config: "{{ cms_options_output.stdout | regex_search('resource_provider_bandwidths=([^,]+)', '\\1') | first }}"
+        hypervisors_config: "{{ cms_options_output.stdout | regex_search('resource_provider_hypervisors=([^,\"]+)', '\\1') | first }}"
+        inventory_defaults_config: "{{ cms_options_output.stdout | regex_search('resource_provider_inventory_defaults=([^\"]+)', '\\1') | first }}"
+
+    - name: Debug extracted configurations
+      ansible.builtin.debug:
+        msg:
+          - "Bandwidths: {{ bandwidths_config }}"
+          - "Hypervisors: {{ hypervisors_config }}"
+          - "Inventory Defaults: {{ inventory_defaults_config }}"
+
+    # Verify only semicolon separators (content already validated above)
+    - name: Verify semicolon separators in all configurations
+      ansible.builtin.assert:
+        that:
+          - "';' in bandwidths_config"
+          - "';' in hypervisors_config"
+          - "';' in inventory_defaults_config"
+        fail_msg: "Semicolon separators missing in resource provider configurations"
