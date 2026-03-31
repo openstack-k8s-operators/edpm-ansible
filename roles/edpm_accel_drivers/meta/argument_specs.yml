@@ -8,11 +8,26 @@ argument_specs:
     options:
       edpm_accel_drivers_download_delay:
         type: int
-        default: 5
+        default: 60
         description: The seconds between retries for failed download tasks
       edpm_accel_drivers_download_retries:
         type: int
         default: 5
+      edpm_accel_drivers_cleanup_temp_files:
+        type: bool
+        default: true
+        description: Whether to cleanup temporary files after driver installation
+      edpm_accel_drivers_cache_dir:
+        type: str
+        default: "/var/cache/accel-drivers"
+        description: The directory to cache driver packages when downloading from a custom URL
+      edpm_accel_drivers_denylist_modules:
+        type: list
+        elements: str
+        default:
+          - nouveau
+          - amdgpu
+        description: List of kernel modules to disable
       edpm_accel_drivers_install_nvidia:
         type: bool
         default: false
@@ -30,10 +45,6 @@ argument_specs:
         description: |
           Whether to disable SSL certificate verification when downloading NVIDIA driver from custom URL.
           Set to true to disable SSL certificate verification (not recommended for production).
-      edpm_accel_drivers_nvidia_cache_dir:
-        type: str
-        default: "/var/cache/nvidia-drivers"
-        description: The directory to cache the NVIDIA driver package when downloading from a custom URL.
       edpm_accel_drivers_nvidia_repo_url:
         type: str
         default: ""
@@ -60,14 +71,6 @@ argument_specs:
         default: "nvidia-driver"
         description: |
           NVIDIA Driver package name to install from NVIDIA repo.
-      edpm_accel_drivers_nvidia_cleanup_temp_files:
-        type: bool
-        default: true
-        description: Whether to cleanup temporary files after installation
-      edpm_accel_drivers_blacklist_nouveau:
-        type: bool
-        default: true
-        description: Whether to blacklist nouveau driver
       edpm_accel_drivers_nvidia_manage_mig:
         type: bool
         default: false
@@ -81,3 +84,25 @@ argument_specs:
           Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
           Required when edpm_accel_drivers_nvidia_manage_mig is true. An empty (or shortened) list
           removes previously configured systemd units and disables MIG on affected GPUs.
+      edpm_accel_drivers_install_amd:
+        type: bool
+        default: false
+        description: Whether to install AMD drivers.
+      edpm_accel_drivers_amd_custom_url:
+        type: str
+        default: ""
+        description: |
+          Custom AMD driver URL. Must end with .rpm (SUPPORTED) extension.
+          NOTE: file:/// URLs are supported, for example a local NFS mount.
+      edpm_accel_drivers_amd_custom_url_ssl_no_verify:
+        type: bool
+        default: false
+        description: |
+          Whether to disable SSL certificate verification when downloading AMD driver from custom URL.
+          Set to true to disable SSL certificate verification (not recommended for production).
+      edpm_accel_drivers_amd_rpm_disable_gpg_check:
+        type: bool
+        default: false
+        description: |
+          Whether to disable GPG check when installing AMD driver from RPM.
+          Set to true to disable GPG check (not recommended for production).

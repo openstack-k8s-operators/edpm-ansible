@@ -24,6 +24,6 @@
 
 - name: Execute .run file (UNSUPPORTED)
   become: true
-  ansible.builtin.command: "{{ _edpm_accel_drivers_nvidia_temp_path }} --no-dkms --no-disable-nouveau --silent"
+  ansible.builtin.command: "{{ _edpm_accel_drivers_temp_path }} --no-dkms --no-disable-nouveau --silent"
   args:
     creates: /usr/bin/nvidia-smi
