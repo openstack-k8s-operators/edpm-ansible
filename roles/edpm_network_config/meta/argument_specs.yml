@@ -94,9 +94,9 @@ argument_specs:
       edpm_network_config_nonconfigured_cleanup:
         type: bool
         description: >
-          For developer use only (use edpm_network_config_remove_config instead).
           Cleanup network interfaces not in network config
-        default: true
+          Note: For developer use only (use edpm_network_config_remove_config instead).
+        default: false
       edpm_network_config_remove_config:
         type: bool
         description: >

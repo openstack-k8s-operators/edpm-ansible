@@ -37,7 +37,7 @@
     edpm_network_config_nmstate: false
     edpm_network_config_hide_sensitive_logs: false
     edpm_network_config_update: false
-    edpm_network_config_remove_config: false
+    edpm_network_config_remove_config: true
     edpm_bootstrap_network_resolvconf_update: false
     edpm_network_config_debug: true
   pre_tasks:
@@ -91,6 +91,13 @@
       ansible.builtin.command: ip addr show
       register: ip_addr
       changed_when: false
+
+    - name: Verify vlan200 was removed by "remove_config" flag
+      ansible.builtin.assert:
+        that:
+          - "'vlan200' not in ip_addr.stdout"
+        fail_msg: "FAILED: vlan200 interface still exists in ip addr output"
+        success_msg: "SUCCESS: vlan200 interface was removed"
 
     - name: Debug ip link state
       ansible.builtin.debug:
