@@ -17,13 +17,62 @@
 
 - name: Converge
   hosts: all
+  vars:
+    test_cosign_key_data: "dGVzdC1jb3NpZ24tcHVibGljLWtleS1kYXRh"
   tasks:
-    - name: Run install
-      include_role:
+    - name: Run install without remapped signed identity
+      ansible.builtin.include_role:
         name: osp.edpm.edpm_podman
         tasks_from: install.yml
         vars_from: "redhat.yml"
-    # https://bugs.launchpad.net/bugs/1889510
+      vars:
+        edpm_podman_disconnected_ocp: true
+        edpm_container_signature_verification: true
+        edpm_container_signature_mirror_registry: "mirror.example.com:5000"
+        edpm_container_signature_cosign_key_data: "{{ test_cosign_key_data }}"
+
     - name: Test podman network ls
       become: true
-      command: podman network ls
+      ansible.builtin.command: podman network ls
+      changed_when: false
+
+    - name: Read merged container policy
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/policy.json
+      register: policy_json
+
+    - name: Assert sigstore policy was merged without signed identity remap
+      ansible.builtin.assert:
+        that:
+          - policy.transports.docker["mirror.example.com:5000"][0].type == "sigstoreSigned"
+          - policy.transports.docker["mirror.example.com:5000"][0].keyPath == "/etc/pki/containers/cosign-redhat.pub"
+          - "'signedIdentity' not in policy.transports.docker['mirror.example.com:5000'][0]"
+          - policy.transports.docker["registry.redhat.io"][0].type == "signedBy"
+          - policy.transports.docker["registry.access.redhat.com"][0].type == "signedBy"
+      vars:
+        policy: "{{ policy_json.content | b64decode | from_json }}"
+
+    - name: Read written cosign key
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/pki/containers/cosign-redhat.pub
+      register: cosign_key
+
+    - name: Assert cosign key content matches
+      ansible.builtin.assert:
+        that:
+          - cosign_key.content | b64decode == "test-cosign-public-key-data"
+
+    - name: Read sigstore registries configuration
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/registries.d/99-edpm-sigstore-verification.yaml
+      register: sigstore_registries
+
+    - name: Assert sigstore attachments are enabled for the mirror registry
+      ansible.builtin.assert:
+        that:
+          - registries.docker["mirror.example.com:5000"]["use-sigstore-attachments"] | bool
+      vars:
+        registries: "{{ sigstore_registries.content | b64decode | from_yaml }}"

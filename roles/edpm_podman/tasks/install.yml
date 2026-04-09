@@ -149,6 +149,111 @@
           option: network_backend
           value: "\"{{ edpm_container_default_network_backend }}\""
 
+    - name: Configure sigstore signature verification for mirror registry
+      when:
+        - edpm_container_signature_verification | bool
+        - edpm_podman_disconnected_ocp | bool
+      vars:
+        edpm_podman_sigstore_policy: >-
+          {{
+            {
+              'type': 'sigstoreSigned',
+              'keyPath': edpm_container_signature_cosign_key_path
+            }
+            | combine(
+                (
+                  edpm_container_signature_signed_prefix | length > 0
+                )
+                | ternary(
+                    {
+                      'signedIdentity': {
+                        'type': 'remapIdentity',
+                        'prefix': edpm_container_signature_mirror_registry,
+                        'signedPrefix': edpm_container_signature_signed_prefix
+                      }
+                    },
+                    {}
+                  ),
+                recursive=True
+              )
+          }}
+      block:
+        - name: Validate signature verification prerequisites
+          ansible.builtin.assert:
+            that:
+              - edpm_container_signature_mirror_registry | length > 0
+              - edpm_container_signature_cosign_key_data | length > 0
+            fail_msg: >-
+              edpm_container_signature_verification is enabled but required
+              variables are missing. These are normally auto-set by the
+              openstack-operator from the ClusterImagePolicy CR.
+
+        - name: Ensure cosign key directory exists
+          ansible.builtin.file:
+            path: "{{ edpm_container_signature_cosign_key_path | dirname }}"
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+
+        - name: Ensure sigstore registries directory exists
+          ansible.builtin.file:
+            path: /etc/containers/registries.d
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+
+        - name: Write cosign public key to EDPM node
+          ansible.builtin.copy:
+            content: "{{ edpm_container_signature_cosign_key_data | b64decode }}"
+            dest: "{{ edpm_container_signature_cosign_key_path }}"
+            owner: root
+            group: root
+            mode: "0644"
+            setype: cert_t
+
+        - name: Read current container policy
+          ansible.builtin.slurp:
+            src: /etc/containers/policy.json
+          register: edpm_podman_policy_current
+
+        - name: Write merged container signature verification policy
+          ansible.builtin.copy:
+            content: "{{ edpm_podman_updated_policy | to_nice_json }}\n"
+            dest: /etc/containers/policy.json
+            owner: root
+            group: root
+            setype: etc_t
+            mode: "0644"
+            backup: true
+          vars:
+            edpm_podman_updated_policy: >-
+              {{
+                (edpm_podman_policy_current.content | b64decode | from_json)
+                | combine(
+                    {
+                      'transports': {
+                        'docker': {
+                          edpm_container_signature_mirror_registry: [
+                            edpm_podman_sigstore_policy
+                          ]
+                        }
+                      }
+                    },
+                    recursive=True
+                  )
+              }}
+
+        - name: Write sigstore registries.d configuration
+          ansible.builtin.template:
+            src: sigstore-registries.yaml.j2
+            dest: /etc/containers/registries.d/99-edpm-sigstore-verification.yaml
+            owner: root
+            group: root
+            setype: etc_t
+            mode: "0644"
+
     - name: Enable podman.socket service
       when:
         - edpm_podman_enable_socket | bool

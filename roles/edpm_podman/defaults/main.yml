@@ -105,3 +105,9 @@ edpm_podman_auth_file: ~/.config/containers/auth.json
 edpm_podman_registries_conf: ""
 edpm_podman_disconnected_ocp: false
 edpm_podman_disconnected_conf_file: 10-edpm-podman-disconnected.conf
+
+edpm_container_signature_verification: false
+edpm_container_signature_cosign_key_data: ""
+edpm_container_signature_cosign_key_path: "/etc/pki/containers/cosign-redhat.pub"
+edpm_container_signature_mirror_registry: ""
+edpm_container_signature_signed_prefix: ""
