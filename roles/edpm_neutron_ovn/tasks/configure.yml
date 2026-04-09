@@ -53,3 +53,14 @@
         setype: "container_file_t"
         mode: "0644"
       loop: "{{ edpm_neutron_ovn_secrets.files }}"
+
+    # Configure BGP peer bridges in OVS when the ovn-agent is configured
+    # with the ovn-bgp extension.
+    - name: Set neutron-bgp-peer-bridges in OVS external-ids
+      become: true
+      ansible.builtin.command:
+        cmd: >-
+          ovs-vsctl --no-wait -- set Open_vSwitch .
+          external-ids:neutron-bgp-peer-bridges={{ edpm_neutron_ovn_agent_bgp_peer_bridges }}
+      when: edpm_neutron_ovn_agent_bgp_peer_bridges != ''
+      changed_when: true

@@ -62,3 +62,7 @@ edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout: '180'
 edpm_neutron_ovn_agent_ovn_ovsdb_probe_interval: '60000'
 edpm_neutron_ovn_agent_ovn_ovn_nb_connection: ''
 edpm_neutron_ovn_agent_ovn_ovn_sb_connection: ''
+
+# BGP peer bridges for the ovn-bgp extension.
+# Set this variable when the ovn-agent is configured with the ovn-bgp extension.
+edpm_neutron_ovn_agent_bgp_peer_bridges: ''
