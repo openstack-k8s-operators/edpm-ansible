@@ -1,0 +1,32 @@
+---
+
+# NOTE: DKMS is not supported, but it enables dnf repo testing w/ CS9 nodes
+- name: Handle DKMS restrictions for module stream
+  ansible.builtin.include_tasks: dkms_restrictions.yml
+
+- name: Add driver repository for {{ vendor_name }}
+  become: true
+  ansible.builtin.yum_repository:
+    name: "{{ vendor_name }}-rhel"
+    description: "{{ vendor_name }} drivers for rhel"
+    baseurl: >-
+      {{ _edpm_accel_drivers_config.vendors[vendor_name].repo.url }}{{
+        '' if _edpm_accel_drivers_config.vendors[vendor_name].repo.no_basearch | default(false)
+        else '/$basearch/'
+      }}
+    gpgcheck: true
+    gpgkey: "{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.gpgkey }}"
+
+- name: Assert module_name is set when module_stream is configured
+  when: _edpm_accel_drivers_config.vendors[vendor_name].repo.module_stream | default('') != ""
+  ansible.builtin.assert:
+    that:
+      - _edpm_accel_drivers_config.vendors[vendor_name].repo.module_name | default('') != ""
+    fail_msg: "repo.module_name must be set when repo.module_stream is configured for {{ vendor_name }}"
+
+- name: Enable DNF module for selected version stream
+  when: _edpm_accel_drivers_config.vendors[vendor_name].repo.module_stream | default('') != ""
+  become: true
+  ansible.builtin.dnf:
+    name: "@{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.module_name }}:{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.module_stream }}"
+    state: present

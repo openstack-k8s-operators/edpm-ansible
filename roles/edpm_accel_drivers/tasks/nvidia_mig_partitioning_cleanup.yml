@@ -20,8 +20,8 @@
 - name: Set list of GPU indices to keep from current geometry list
   ansible.builtin.set_fact:
     _edpm_accel_drivers_nvidia_mig_indices_to_keep: "{{
-      range(0, edpm_accel_drivers_nvidia_mig_geometries | length) | list
-      if (edpm_accel_drivers_nvidia_mig_geometries | length > 0)
+      range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list
+      if (_edpm_accel_drivers_config.features.nvidia_mig.geometries | length > 0)
       else [] }}"
 
 - name: Set list of GPU indices to remove (stale MIG units)

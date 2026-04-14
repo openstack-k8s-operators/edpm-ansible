@@ -1,0 +1,46 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify mock .run file was downloaded to cache
+      ansible.builtin.stat:
+        path: /var/cache/accel-drivers/mock-nvidia-driver.run
+      register: nvidia_run_file
+      failed_when: not nvidia_run_file.stat.exists
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: rpm
+
+    - name: Find all cached RPMs in DNF cache
+      ansible.builtin.find:
+        paths: /var/cache/dnf
+        patterns: '*.rpm'
+        recurse: true
+      register: cached_rpms
+
+    - name: Build list of cached package names
+      ansible.builtin.set_fact:
+        cached_package_names: "{{ cached_rpms.files | map(attribute='path') | map('basename') | list }}"
+
+    - name: Define required build dependencies
+      ansible.builtin.set_fact:
+        required_packages:
+          - name: pciutils
+            pattern: '^pciutils-[0-9]'
+          - name: gcc
+            pattern: '^gcc-[0-9]'
+          - name: kernel-headers
+            pattern: '^kernel-headers-'
+          - name: kernel-devel
+            pattern: '^kernel-devel-'
+
+    - name: Verify build dependencies are installed or cached
+      ansible.builtin.assert:
+        that: >
+          item.name in ansible_facts.packages or
+          (cached_package_names | select('search', item.pattern) | list | length > 0)
+        fail_msg: "Build dependency not installed or cached: {{ item.name }}"
+        success_msg: "Build dependency available: {{ item.name }}"
+      loop: "{{ required_packages }}"

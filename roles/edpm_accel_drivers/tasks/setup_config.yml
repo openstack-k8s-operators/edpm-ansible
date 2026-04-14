@@ -1,0 +1,17 @@
+---
+
+- name: Load role defaults for deep merge
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/defaults/main.yml"
+    name: _edpm_accel_drivers_defaults
+
+- name: Deep merge user config with defaults
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_config: "{{ _edpm_accel_drivers_defaults.edpm_accel_drivers | combine(edpm_accel_drivers | default({}), recursive=true) }}"
+
+- name: Build list of enabled vendors
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_enabled_vendors: >-
+      {{ _edpm_accel_drivers_config.vendors | dict2items |
+         selectattr('value.enabled', 'equalto', true) |
+         map(attribute='key') | list }}

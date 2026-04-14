@@ -1,0 +1,44 @@
+---
+
+- name: Check if using repository installation
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_using_repo: >-
+      {{
+        _edpm_accel_drivers_config.vendors[vendor_name].repo is defined and
+        _edpm_accel_drivers_config.vendors[vendor_name].repo.url | default('') != ''
+      }}
+
+- name: Check for DKMS in repository configuration
+  when: _edpm_accel_drivers_using_repo | bool
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_dkms: >-
+      {{
+        'dkms' in _edpm_accel_drivers_config.vendors[vendor_name].repo.module_stream | lower or
+        'dkms' in _edpm_accel_drivers_config.vendors[vendor_name].repo.package_name | lower
+      }}
+
+- name: Check for DKMS in custom URL filename
+  when: not _edpm_accel_drivers_using_repo | bool
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_is_dkms: >-
+      {{ (_edpm_accel_drivers_filename | default('') | regex_search('-dkms[-_.]')) is not none }}
+
+- name: Handle DKMS restrictions and setup
+  when: _edpm_accel_drivers_is_dkms | bool
+  block:
+    - name: Assert DKMS packages are not used on RHEL systems
+      ansible.builtin.assert:
+        that:
+          - not (ansible_facts['distribution'] | lower == 'redhat')
+        fail_msg: "DKMS-based drivers are not supported on RHEL systems. Please use a non-DKMS repository or package."
+        success_msg: "DKMS-based drivers are UNSUPPORTED and may result in unexpected behavior."
+
+    - name: Add EPEL repository for DKMS (UNSUPPORTED)
+      become: true
+      ansible.builtin.yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: "https://download.fedoraproject.org/pub/epel/{{ ansible_facts['distribution_major_version'] }}/Everything/$basearch/"
+        enabled: 1
+        gpgcheck: 1
+        gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"

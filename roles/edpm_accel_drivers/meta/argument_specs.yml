@@ -3,106 +3,191 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_accel_drivers role.
     description: |
-      Installs and configures accelerator drivers on RHEL systems.
-      Supports installation of NVIDIA drivers from an RPM repo or custom URL.
+      Installs and configures GPU accelerator drivers on RHEL systems.
+      Supports installation of NVIDIA and AMD GPU drivers from repositories or custom URLs.
+      Uses a plugin-style architecture where new GPU vendors can be added via configuration.
     options:
-      edpm_accel_drivers_download_delay:
-        type: int
-        default: 60
-        description: The seconds between retries for failed download tasks
-      edpm_accel_drivers_download_retries:
-        type: int
-        default: 5
-      edpm_accel_drivers_cleanup_temp_files:
-        type: bool
-        default: true
-        description: Whether to cleanup temporary files after driver installation
-      edpm_accel_drivers_cache_dir:
-        type: str
-        default: "/var/cache/accel-drivers"
-        description: The directory to cache driver packages when downloading from a custom URL
-      edpm_accel_drivers_denylist_modules:
-        type: list
-        elements: str
-        default:
-          - nouveau
-          - amdgpu
-        description: List of kernel modules to disable
-      edpm_accel_drivers_install_nvidia:
-        type: bool
-        default: false
-        description: Whether to install nvidia drivers.
-      edpm_accel_drivers_nvidia_custom_url:
-        type: str
-        default: ""
-        description: |
-          Custom NVIDIA driver URL (if set, driver will be installed from this URL instead of from a repository).
-          Must end with .rpm (SUPPORTED) or .run extension (UNSUPPORTED).
-          NOTE: file:/// URLs are supported, for example a local NFS mount.
-      edpm_accel_drivers_nvidia_custom_url_ssl_no_verify:
-        type: bool
-        default: false
-        description: |
-          Whether to disable SSL certificate verification when downloading NVIDIA driver from custom URL.
-          Set to true to disable SSL certificate verification (not recommended for production).
-      edpm_accel_drivers_nvidia_repo_url:
-        type: str
-        default: ""
-        description: |
-          NVIDIA repository URL for driver installation.
-      edpm_accel_drivers_nvidia_repo_gpgkey:
-        type: str
-        default: ""
-        description: |
-          GPG key URL for NVIDIA repository verification.
-      edpm_accel_drivers_nvidia_rpm_disable_gpg_check:
-        type: bool
-        default: false
-        description: |
-          Whether to disable GPG check when installing NVIDIA driver from RPM.
-          Set to true to disable GPG check (not recommended for production).
-      edpm_accel_drivers_nvidia_dnf_module_stream:
-        type: str
-        default: "latest"
-        description: |
-          NVIDIA Driver dnf module stream to install from NVIDIA repo. If set to "", no DNF module will be selected.
-      edpm_accel_drivers_nvidia_package_name:
-        type: str
-        default: "nvidia-driver"
-        description: |
-          NVIDIA Driver package name to install from NVIDIA repo.
-      edpm_accel_drivers_nvidia_manage_mig:
-        type: bool
-        default: false
-        description: Whether to configure NVIDIA MIG (Multi-Instance GPU) partitioning.
-      edpm_accel_drivers_nvidia_mig_geometries:
-        type: list
-        elements: str
-        default: []
-        description: |
-          List of MIG geometry strings, one per GPU. Index 0 applies to GPU 0, index 1 to GPU 1, etc.
-          Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
-          Required when edpm_accel_drivers_nvidia_manage_mig is true. An empty (or shortened) list
-          removes previously configured systemd units and disables MIG on affected GPUs.
-      edpm_accel_drivers_install_amd:
-        type: bool
-        default: false
-        description: Whether to install AMD drivers.
-      edpm_accel_drivers_amd_custom_url:
-        type: str
-        default: ""
-        description: |
-          Custom AMD driver URL. Must end with .rpm (SUPPORTED) extension.
-          NOTE: file:/// URLs are supported, for example a local NFS mount.
-      edpm_accel_drivers_amd_custom_url_ssl_no_verify:
-        type: bool
-        default: false
-        description: |
-          Whether to disable SSL certificate verification when downloading AMD driver from custom URL.
-          Set to true to disable SSL certificate verification (not recommended for production).
-      edpm_accel_drivers_amd_rpm_disable_gpg_check:
-        type: bool
-        default: false
-        description: |
-          Whether to disable GPG check when installing AMD driver from RPM.
-          Set to true to disable GPG check (not recommended for production).
+      edpm_accel_drivers:
+        type: dict
+        description: Main configuration dictionary for GPU accelerator drivers
+        options:
+          cache_dir:
+            type: str
+            default: "/var/cache/accel-drivers"
+            description: The directory to cache downloaded driver packages
+          cleanup_temp_files:
+            type: bool
+            default: true
+            description: Whether to cleanup temporary files after driver installation
+          download:
+            type: dict
+            description: Download configuration settings
+            options:
+              delay:
+                type: int
+                default: 60
+                description: The seconds between retries for failed download tasks
+              retries:
+                type: int
+                default: 5
+                description: The number of retries for failed download tasks
+          vendors:
+            type: dict
+            description: |
+              Map of GPU vendor configurations. Each vendor key (e.g., nvidia_gpu, amd_gpu, intel_gpu)
+              contains its driver installation configuration. New vendors can be added by adding a new key
+              with the same structure.
+            options:
+              nvidia_gpu:
+                type: dict
+                description: NVIDIA GPU driver configuration
+                options:
+                  enabled:
+                    type: bool
+                    default: false
+                    description: Whether to install NVIDIA GPU drivers
+                  denylist_modules:
+                    type: list
+                    elements: str
+                    default:
+                      - nouveau
+                    description: List of kernel modules to disable for NVIDIA GPU
+                  repo:
+                    type: dict
+                    description: NVIDIA GPU repository configuration
+                    options:
+                      url:
+                        type: str
+                        default: ""
+                        description: NVIDIA repository URL for driver installation
+                      gpgkey:
+                        type: str
+                        default: ""
+                        description: GPG key URL for NVIDIA repository verification
+                      module_name:
+                        type: str
+                        default: "nvidia-driver"
+                        description: DNF module name for NVIDIA GPU drivers. Used only if module_stream is set
+                      module_stream:
+                        type: str
+                        default: "latest"
+                        description: DNF module stream for NVIDIA GPU drivers. If set to empty string, no DNF module will be selected
+                      package_name:
+                        type: str
+                        default: "nvidia-driver"
+                        description: Package name to install from repository for NVIDIA GPU drivers
+                      disable_gpg_check:
+                        type: bool
+                        default: false
+                        description: Whether to disable GPG check when installing NVIDIA driver (not recommended for production)
+                      no_basearch:
+                        type: bool
+                        default: false
+                        description: |
+                          Set to true for repositories with flat structure (no $basearch subdirectory).
+                          The URL will be used as-is without appending /$basearch/
+                  custom_url:
+                    type: dict
+                    description: NVIDIA GPU custom URL configuration
+                    options:
+                      url:
+                        type: str
+                        default: ""
+                        description: |
+                          Custom NVIDIA driver URL. Must end with .rpm (SUPPORTED) or .run extension (UNSUPPORTED on RHEL).
+                          NOTE: file:/// URLs are supported, for example a local NFS mount.
+                      ssl_no_verify:
+                        type: bool
+                        default: false
+                        description: Whether to disable SSL certificate verification when downloading (not recommended for production)
+                      disable_gpg_check:
+                        type: bool
+                        default: false
+                        description: Whether to disable GPG check when installing RPM (not recommended for production)
+              amd_gpu:
+                type: dict
+                description: AMD GPU driver configuration
+                options:
+                  enabled:
+                    type: bool
+                    default: false
+                    description: Whether to install AMD GPU drivers
+                  denylist_modules:
+                    type: list
+                    elements: str
+                    default:
+                      - amdgpu
+                    description: List of kernel modules to disable for AMD GPU
+                  repo:
+                    type: dict
+                    description: AMD GPU repository configuration
+                    options:
+                      url:
+                        type: str
+                        default: ""
+                        description: AMD repository URL for driver installation
+                      gpgkey:
+                        type: str
+                        default: ""
+                        description: GPG key URL for AMD repository verification
+                      module_name:
+                        type: str
+                        default: ""
+                        description: DNF module name for AMD GPU drivers. Used only if module_stream is set
+                      module_stream:
+                        type: str
+                        default: ""
+                        description: DNF module stream for AMD GPU drivers. If set to empty string, no DNF module will be selected
+                      package_name:
+                        type: str
+                        default: ""
+                        description: Package name to install from repository for AMD GPU drivers
+                      disable_gpg_check:
+                        type: bool
+                        default: false
+                        description: Whether to disable GPG check when installing AMD driver (not recommended for production)
+                      no_basearch:
+                        type: bool
+                        default: false
+                        description: |
+                          Set to true for repositories with flat structure (no $basearch subdirectory).
+                          The URL will be used as-is without appending /$basearch/
+                  custom_url:
+                    type: dict
+                    description: AMD GPU custom URL configuration
+                    options:
+                      url:
+                        type: str
+                        default: ""
+                        description: |
+                          Custom AMD driver URL. Must end with .rpm (SUPPORTED) extension.
+                          NOTE: file:/// URLs are supported, for example a local NFS mount.
+                      ssl_no_verify:
+                        type: bool
+                        default: false
+                        description: Whether to disable SSL certificate verification when downloading (not recommended for production)
+                      disable_gpg_check:
+                        type: bool
+                        default: false
+                        description: Whether to disable GPG check when installing RPM (not recommended for production)
+          features:
+            type: dict
+            description: GPU-specific feature configurations
+            options:
+              nvidia_mig:
+                type: dict
+                description: NVIDIA MIG (Multi-Instance GPU) configuration
+                options:
+                  manage:
+                    type: bool
+                    default: false
+                    description: Whether to configure NVIDIA MIG (Multi-Instance GPU) partitioning
+                  geometries:
+                    type: list
+                    elements: str
+                    default: []
+                    description: |
+                      List of MIG geometry strings, one per GPU. Index 0 applies to GPU 0, index 1 to GPU 1, etc.
+                      Each string is passed to nvidia-smi mig -cgi (e.g. "14,14,14,14" or "2g.12gb,2g.12gb").
+                      Required when manage is true. An empty (or shortened) list
+                      removes previously configured systemd units and disables MIG on affected GPUs.

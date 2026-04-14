@@ -1,0 +1,17 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Test download_cache.yml entry point with .run file
+      ansible.builtin.include_role:
+        name: "edpm_accel_drivers"
+        tasks_from: download_cache.yml
+      vars:
+        edpm_accel_drivers:
+          cache:
+            path: /var/cache/accel-drivers
+          vendors:
+            nvidia_gpu:
+              enabled: true
+              custom_url:
+                url: "file:///tmp/mock-nvidia-driver.run"

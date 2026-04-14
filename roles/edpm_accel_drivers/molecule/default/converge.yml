@@ -3,3 +3,10 @@
   hosts: all
   roles:
     - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers:
+          vendors:
+            nvidia_gpu:
+              enabled: true
+            amd_gpu:
+              enabled: true

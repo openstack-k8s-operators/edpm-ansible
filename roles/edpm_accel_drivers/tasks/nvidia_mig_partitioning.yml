@@ -46,7 +46,7 @@
 
 - name: Configure MIG for each GPU
   ansible.builtin.include_tasks: nvidia_mig_partitioning_gpu.yml
-  loop: "{{ edpm_accel_drivers_nvidia_mig_geometries }}"
+  loop: "{{ _edpm_accel_drivers_config.features.nvidia_mig.geometries }}"
   loop_control:
     index_var: _edpm_accel_drivers_nvidia_mig_gpu_index
   vars:

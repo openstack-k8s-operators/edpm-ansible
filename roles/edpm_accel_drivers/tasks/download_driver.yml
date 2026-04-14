@@ -1,0 +1,33 @@
+---
+
+- name: Download driver package from repository for {{ vendor_name }}
+  when:
+    - _edpm_accel_drivers_config.vendors[vendor_name].repo is defined
+    - _edpm_accel_drivers_config.vendors[vendor_name].repo.url | default('') != ""
+  block:
+    - name: Import repository setup tasks
+      ansible.builtin.import_tasks: repo_config.yml
+
+    - name: Download driver package for {{ vendor_name }}
+      ansible.builtin.dnf:
+        name: "{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.package_name }}"
+        download_only: true
+      become: true
+      register: _edpm_accel_drivers_package_download_result
+      until: _edpm_accel_drivers_package_download_result is succeeded
+      retries: "{{ _edpm_accel_drivers_config.download.retries }}"
+      delay: "{{ _edpm_accel_drivers_config.download.delay }}"
+
+- name: Download driver package from custom URL for {{ vendor_name }}
+  when:
+    - _edpm_accel_drivers_config.vendors[vendor_name].custom_url is defined
+    - _edpm_accel_drivers_config.vendors[vendor_name].custom_url.url | default('') != ""
+  block:
+    - name: Set internal variables for custom URL download
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_custom_url: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.url }}"
+        _edpm_accel_drivers_custom_url_ssl_no_verify: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.ssl_no_verify }}"
+        _edpm_accel_drivers_disable_gpg_check: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.disable_gpg_check }}"
+
+    - name: Download driver from custom URL
+      ansible.builtin.import_tasks: download_from_custom_url.yml

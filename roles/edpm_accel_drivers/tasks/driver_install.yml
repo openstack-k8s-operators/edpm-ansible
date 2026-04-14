@@ -1,0 +1,47 @@
+---
+
+- name: Disable conflicting kernel modules for {{ vendor_name }}
+  ansible.builtin.include_tasks: disable_module.yml
+  loop: "{{ _edpm_accel_drivers_config.vendors[vendor_name].denylist_modules }}"
+  loop_control:
+    loop_var: module_name
+
+- name: Install driver from repository for {{ vendor_name }}
+  when:
+    - _edpm_accel_drivers_config.vendors[vendor_name].repo is defined
+    - _edpm_accel_drivers_config.vendors[vendor_name].repo.url | default('') != ''
+  block:
+    - name: Set internal variables for repository installation
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_package: "{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.package_name }}"
+        _edpm_accel_drivers_disable_gpg_check: "{{ _edpm_accel_drivers_config.vendors[vendor_name].repo.disable_gpg_check }}"
+
+    - name: Set up repository configuration
+      ansible.builtin.import_tasks: repo_config.yml
+
+    - name: Install driver package from repository
+      ansible.builtin.import_tasks: install_from_rpm.yml
+
+- name: Install driver from custom URL for {{ vendor_name }}
+  when:
+    - _edpm_accel_drivers_config.vendors[vendor_name].custom_url is defined
+    - _edpm_accel_drivers_config.vendors[vendor_name].custom_url.url | default('') != ''
+  block:
+    - name: Set internal variables for custom URL installation
+      ansible.builtin.set_fact:
+        _edpm_accel_drivers_custom_url: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.url }}"
+        _edpm_accel_drivers_custom_url_ssl_no_verify: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.ssl_no_verify }}"
+        _edpm_accel_drivers_disable_gpg_check: "{{ _edpm_accel_drivers_config.vendors[vendor_name].custom_url.disable_gpg_check }}"
+
+    - name: Download driver from custom URL
+      ansible.builtin.import_tasks: download_from_custom_url.yml
+
+    - name: Install driver from RPM package
+      ansible.builtin.import_tasks: install_from_rpm.yml
+      when: not _edpm_accel_drivers_is_run_file | bool
+
+    - name: Install NVIDIA driver from .run file (UNSUPPORTED)
+      ansible.builtin.import_tasks: nvidia_from_run.yml
+      when:
+        - _edpm_accel_drivers_is_run_file | bool
+        - vendor_name == 'nvidia_gpu'

@@ -6,8 +6,7 @@
       vars:
         edpm_accel_drivers:
           vendors:
-            amd_gpu:
+            nvidia_gpu:
               enabled: true
               custom_url:
-                url: "file:///tmp/mock-amd-driver.rpm"
-                disable_gpg_check: true
+                url: "file:///tmp/mock-nvidia-driver.run"
