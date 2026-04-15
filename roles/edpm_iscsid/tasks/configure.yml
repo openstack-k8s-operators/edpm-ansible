@@ -38,6 +38,7 @@
       ansible.builtin.copy:
         dest: /etc/iscsi/initiatorname.iscsi
         mode: "0644"
+        setype: etc_t
         content: "InitiatorName={{ iscsi_iname.stdout | trim }}"
 
     - name: Record the IQN has been reset
