@@ -65,6 +65,18 @@ edpm_container_standalone_volumes: "{{
 
 edpm_deploy_identifier: ''
 
+# Quadlet support
+# When true, container definitions are converted to Podman Quadlet
+# .container files instead of using edpm_container_manage. This can be
+# enabled per-service or globally to incrementally migrate services.
+edpm_container_standalone_use_quadlet: false
+# Directory where Quadlet .container files are written
+edpm_container_standalone_quadlet_dir: /etc/containers/systemd
+# Dict mapping container name to the Jinja2 template path for its Quadlet
+# .container file. Each service role provides its own templates.
+# Example: { ovn_controller: "quadlet/ovn_controller.container.j2" }
+edpm_container_standalone_quadlet_defs: {}
+
 # State file tracking
 edpm_container_track_state: true
 edpm_container_state_file: /var/lib/edpm-config/deployed_services.yaml

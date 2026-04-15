@@ -1,0 +1,22 @@
+# Quadlet container file for test_service (molecule test - updated)
+[Unit]
+Description=test_service container
+
+[Container]
+ContainerName=test_service
+Image=quay.io/centos/centos:stream9
+Network=host
+User=root
+PodmanArgs=--privileged
+LogDriver=journald
+Exec=sleep 7200
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

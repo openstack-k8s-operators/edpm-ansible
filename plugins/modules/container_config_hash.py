@@ -64,6 +64,7 @@ EXAMPLES = """
 """
 
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
+QUADLET_CONFIG_DIR = '/etc/containers/systemd'
 BUF_SIZE = 65536
 
 
@@ -89,7 +90,91 @@ class ContainerConfigHashManager:
         # Update container-startup-config with new config hashes
         self._update_hashes()
 
+        # Update quadlet .container files with new config hashes
+        self._update_quadlet_hashes()
+
         self.module.exit_json(**self.results)
+
+    def _update_quadlet_config_hash(self, path, new_hash):
+        """Update EDPM_CONFIG_HASH in a Quadlet .container file.
+
+        If an existing Environment=EDPM_CONFIG_HASH= line exists, it is
+        replaced. Otherwise, the line is added after the last Environment=
+        line in the [Container] section.
+
+        :param path: string
+        :param new_hash: string
+        """
+        hash_line = 'Environment=EDPM_CONFIG_HASH={}'.format(new_hash)
+        with open(path, 'r') as f:
+            lines = f.readlines()
+
+        new_lines = []
+        found = False
+        last_env_idx = -1
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped.startswith('Environment=EDPM_CONFIG_HASH='):
+                new_lines.append(hash_line + '\n')
+                found = True
+            else:
+                new_lines.append(line)
+                if stripped.startswith('Environment='):
+                    last_env_idx = len(new_lines) - 1
+
+        if not found:
+            if last_env_idx >= 0:
+                new_lines.insert(last_env_idx + 1, hash_line + '\n')
+            else:
+                # No Environment= lines found; add before first Volume=
+                inserted = False
+                for i, line in enumerate(new_lines):
+                    if line.strip().startswith('Volume='):
+                        new_lines.insert(i, hash_line + '\n')
+                        inserted = True
+                        break
+                if not inserted:
+                    # Fallback: add at end of [Container] section
+                    for i, line in enumerate(new_lines):
+                        if line.strip() == '[Service]':
+                            new_lines.insert(i, hash_line + '\n')
+                            break
+
+        with open(path, 'w') as f:
+            f.writelines(new_lines)
+        self.results['changed'] = True
+
+    def _get_quadlet_config_hash(self, path):
+        """Read the current EDPM_CONFIG_HASH from a Quadlet .container file.
+
+        :param path: string
+        :returns: string
+        """
+        if os.path.exists(path):
+            with open(path, 'r') as f:
+                for line in f:
+                    stripped = line.strip()
+                    if stripped.startswith('Environment=EDPM_CONFIG_HASH='):
+                        return stripped[len('Environment=EDPM_CONFIG_HASH='):]
+        return ''
+
+    def _update_quadlet_hashes(self):
+        """Update Quadlet .container files with new config hashes."""
+        quadlet_dir = QUADLET_CONFIG_DIR
+        configs = self._find(quadlet_dir, pattern='edpm_*.container')
+        for config in configs:
+            config_volumes = self._match_quadlet_config_volumes(config)
+            if config_volumes:
+                old_config_hash = self._get_quadlet_config_hash(config)
+                new_hashes = [
+                    self._calculate_checksum(vol_path)
+                    for vol_path in config_volumes
+                ]
+                new_hash = '-'.join(new_hashes)
+                if new_hash != old_config_hash:
+                    self._update_quadlet_config_hash(config, new_hash)
+                else:
+                    continue
 
     def _remove_file(self, path):
         """Remove a file.
@@ -210,6 +295,32 @@ class ContainerConfigHashManager:
                     '{} - Config: {}'.format(prefix, config))
         return sorted([self._get_config_base(prefix, v.split(":")[0])
                        for v in volumes if v.startswith(prefix)])
+
+    def _get_quadlet_volumes(self, quadlet_path):
+        """Extract volume mount host paths from a Quadlet .container file.
+
+        :param quadlet_path: string
+        :returns: list of volume strings (host:container:opts format)
+        """
+        volumes = []
+        if os.path.exists(quadlet_path):
+            with open(quadlet_path, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('Volume='):
+                        volumes.append(line[len('Volume='):])
+        return volumes
+
+    def _match_quadlet_config_volumes(self, quadlet_path):
+        """Return a list of config volumes from a Quadlet .container file.
+
+        :param quadlet_path: string
+        :returns: list
+        """
+        prefix = self.config_vol_prefix
+        volumes = self._get_quadlet_volumes(quadlet_path)
+        return sorted([self._get_config_base(prefix, v.split(":")[0])
+                       for v in volumes if v.split(":")[0].startswith(prefix)])
 
     def _update_hashes(self):
         """Update container startup config with new config hashes if needed.
