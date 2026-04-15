@@ -163,3 +163,39 @@ argument_specs:
         description: >
           Indicates whether the OCP environment we're deployed from is using a custom
           registry and specifically a ImageContentSourcePolicy to set registry mirrors.
+      edpm_container_signature_verification:
+        type: bool
+        default: false
+        description: >
+          Enable sigstore cosign signature verification for container images
+          pulled from a disconnected mirror registry. When enabled, podman will
+          verify cosign signatures (.sig OCI tag attachments) in the mirror
+          registry before pulling images. Auto-populated by the openstack-operator
+          from the ClusterImagePolicy CR.
+      edpm_container_signature_cosign_key_data:
+        type: str
+        default: ""
+        description: >
+          Base64-encoded cosign public key (PEM format) for verifying sigstore
+          signatures. Auto-populated by the openstack-operator from the
+          ClusterImagePolicy CR keyData field.
+      edpm_container_signature_cosign_key_path:
+        type: str
+        default: "/etc/pki/containers/cosign-redhat.pub"
+        description: >
+          Filesystem path where the cosign public key will be written on the
+          EDPM node. The key data comes from edpm_container_signature_cosign_key_data.
+      edpm_container_signature_mirror_registry:
+        type: str
+        default: ""
+        description: >
+          The mirror registry hostname[:port] to scope signature verification.
+          Auto-populated by the openstack-operator from the ClusterImagePolicy
+          CR scopes field.
+      edpm_container_signature_signed_prefix:
+        type: str
+        default: ""
+        description: >
+          Optional original registry prefix where images were signed. When set,
+          edpm_podman writes a remapIdentity signedIdentity policy to map mirror
+          registry references back to the original signing identity.
