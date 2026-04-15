@@ -31,6 +31,14 @@
     # For nmstate, always enable NetworkManager DNS management
     edpm_bootstrap_network_resolvconf_update: true
 
+- name: Set NIC mapping file path for nmstate path (internal, not user-overridable)
+  ansible.builtin.set_fact:
+    edpm_network_config_mapping_file: /var/lib/edpm-config/template_nic_mapping.yaml
+
+- name: Create EDPM NIC mapping file (nmstate path)
+  become: true
+  ansible.builtin.import_tasks: nic_mapping.yml
+
 - name: Check nmstate return code for conditional logic
   become: true
   block:

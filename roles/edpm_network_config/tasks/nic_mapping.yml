@@ -1,0 +1,61 @@
+---
+# Copyright 2020 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# nmstate / os-net-config: build interface_mapping (nic1 -> MAC or interface name, etc.)
+# and write edpm_network_config_mapping_file (set by nmstate_tool.yml or os_net_config_tool.yml).
+# Not an inventory variable; -e edpm_network_config_mapping_file=... overrides set_fact (unsupported).
+# Input: merged edpm_network_config_os_net_config_mappings (legacy) + edpm_network_config_mappings.
+# The edpm_os_net_config_mappings name refers to the Ansible module (plugins/modules/), not a role variable.
+
+- name: Merge NIC mapping lookups (edpm_network_config_os_net_config_mappings + edpm_network_config_mappings)
+  ansible.builtin.set_fact:
+    edpm_network_config_merged_mappings: >-
+      {{
+        edpm_network_config_os_net_config_mappings | default({})
+        | combine(edpm_network_config_mappings | default({}), recursive=True)
+      }}
+
+- name: Create directory for EDPM NIC mapping file
+  ansible.builtin.file:
+    path: "{{ edpm_network_config_mapping_file | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Create NIC mappings from lookup data
+  edpm_os_net_config_mappings:
+    net_config_data_lookup:
+      "{{ edpm_network_config_merged_mappings }}"
+  when: not ansible_check_mode | bool
+  register: edpm_os_net_config_mappings_result
+
+- name: Fail when NIC mappings were provided but no host match
+  ansible.builtin.fail:
+    msg: |
+      The edpm_os_net_config_mappings module did not match this host, so
+      {{ edpm_network_config_mapping_file }} was not written.
+      Set edpm_network_config_os_net_config_mappings and/or edpm_network_config_mappings so a MAC
+      matches an address under /sys/class/net/*/address (see plugins/modules/edpm_os_net_config_mappings.py),
+      or use dmiString + id. inventory_hostname for this run is {{ inventory_hostname }}.
+  when:
+    - edpm_network_config_merged_mappings | length > 0
+    - edpm_os_net_config_mappings_result.mapping is none
+
+- name: Write EDPM NIC mapping file
+  ansible.builtin.copy:
+    content: "{{ edpm_os_net_config_mappings_result.mapping | to_nice_yaml }}"
+    dest: "{{ edpm_network_config_mapping_file }}"
+    mode: "0644"
+  when: edpm_os_net_config_mappings_result.mapping is not none

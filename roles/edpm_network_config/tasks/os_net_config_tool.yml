@@ -40,6 +40,13 @@
       ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
       (not os_net_config_returncode_stat.stat.exists)
 
+- name: Create EDPM NIC mapping file (os-net-config path)
+  become: true
+  vars:
+    # Internal path for nic_mapping output; not exposed in role defaults.
+    edpm_network_config_mapping_file: /etc/os-net-config/mapping.yaml
+  ansible.builtin.import_tasks: nic_mapping.yml
+
 - name: Apply network configuration using os-net-config
   become: true
   # The conditions here are when we want to apply the NetworkConfig:
@@ -53,26 +60,6 @@
       ((os_net_config_returncode_slurp.content | b64decode | int) != 0)) or
       (not os_net_config_returncode_stat.stat.exists)
   block:
-    - name: Create /etc/os-net-config directory
-      ansible.builtin.file:
-        path: /etc/os-net-config
-        state: directory
-        mode: "0755"
-
-    - name: Create os-net-config mappings from lookup data
-      edpm_os_net_config_mappings:
-        net_config_data_lookup:
-          "{{ edpm_network_config_os_net_config_mappings }}"
-      when: not ansible_check_mode | bool
-      register: os_net_config_mappings_result
-
-    - name: Write os-net-config mappings file /etc/os-net-config/mapping.yaml
-      ansible.builtin.copy:
-        content: "{{ os_net_config_mappings_result.mapping | to_nice_yaml }}"
-        dest: /etc/os-net-config/mapping.yaml
-        mode: "0644"
-      when: os_net_config_mappings_result.changed | bool  # noqa: no-handler
-
     - name: Manage NetworkConfig with edpm_os_net_config module
       block:
         - name: Remove /var/lib/edpm-config/scripts directory
