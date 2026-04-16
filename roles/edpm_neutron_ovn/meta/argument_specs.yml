@@ -102,3 +102,10 @@ argument_specs:
         default: /var/lib/openstack/neutron-ovn-agent
         description: 'The directory that contains configuration files for Neutron OVN Agent.'
         type: str
+      edpm_neutron_ovn_agent_bgp_peer_bridges:
+        default: ''
+        description: >
+          BGP peer bridges required for the ovn-bgp extension.
+          Each bridge connects the OVN overlay from the corresponding EDPM node with a BGP peering switch (leaf, ToR, ...).
+          Set this variable when the ovn-agent is configured with the ovn-bgp extension.
+        type: str
