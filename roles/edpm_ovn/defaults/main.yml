@@ -66,15 +66,35 @@ edpm_ovn_controller_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_o
 edpm_ovn_controller_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_volumes: []
 
+# RBAC PKI CA paths (available in the AnsibleEE pod via DataSource mount)
+edpm_ovn_rbac_ca_cert_src: "/var/lib/openstack/configs/{{ edpm_ovn_service_name }}/tls.crt"
+edpm_ovn_rbac_ca_key_src: "/var/lib/openstack/configs/{{ edpm_ovn_service_name }}/tls.key"
+
+# RBAC certificate paths on EDPM node
+edpm_ovn_rbac_cert_dir: "/etc/openvswitch"
+edpm_ovn_rbac_cert_path: "{{ edpm_ovn_rbac_cert_dir }}/ovn-controller-cert.pem"
+edpm_ovn_rbac_key_path: "{{ edpm_ovn_rbac_cert_dir }}/ovn-controller-privkey.pem"
+
+# OVN controller certificate paths used in the kolla config command line.
+# When TLS is enabled, per-node RBAC certs are used for OVN RBAC identity.
+edpm_ovn_controller_cert: "{{ edpm_ovn_rbac_cert_path }}"
+edpm_ovn_controller_privkey: "{{ edpm_ovn_rbac_key_path }}"
+edpm_ovn_controller_cacert: "/etc/pki/tls/certs/ovndbca.crt"
+
 edpm_ovn_controller_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt:{{ edpm_ovn_controller_cacert }}:ro,z"
+  - "{{ edpm_ovn_rbac_cert_path }}:{{ edpm_ovn_controller_cert }}:ro,z"
+  - "{{ edpm_ovn_rbac_key_path }}:{{ edpm_ovn_controller_privkey }}:ro,Z"
 
 edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
+# OVN chassis system-id: a deterministic UUID5 derived from the hostname.
+# Using a UUID is the recommended practice for OVN system-id.
+edpm_ovn_system_id: "{{ canonical_hostname | to_uuid }}"
+
 # Set external_id data from provided variables
 edpm_ovn_ovs_external_ids:
+  system-id: "{{ edpm_ovn_system_id }}"
   hostname: "{{ canonical_hostname }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
   ovn-bridge-mappings: >-

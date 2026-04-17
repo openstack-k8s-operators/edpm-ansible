@@ -1,0 +1,114 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Include default tasks
+      ansible.builtin.include_tasks:
+        file: ../default/verify-tasks.yml
+
+    - name: Verify ovn-cms-options was not set by default
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open . external_ids
+      register: output
+      failed_when: "'ovn-cms-options' in output.stdout"
+
+    - name: Verify RBAC certificate exists
+      become: true
+      ansible.builtin.stat:
+        path: /etc/openvswitch/ovn-controller-cert.pem
+      register: rbac_cert
+
+    - name: Assert RBAC certificate exists
+      ansible.builtin.assert:
+        that:
+          - rbac_cert.stat.exists
+        fail_msg: "RBAC certificate does not exist at /etc/openvswitch/ovn-controller-cert.pem"
+
+    - name: Verify RBAC private key exists
+      become: true
+      ansible.builtin.stat:
+        path: /etc/openvswitch/ovn-controller-privkey.pem
+      register: rbac_key
+
+    - name: Assert RBAC private key exists
+      ansible.builtin.assert:
+        that:
+          - rbac_key.stat.exists
+        fail_msg: "RBAC private key does not exist at /etc/openvswitch/ovn-controller-privkey.pem"
+
+    - name: Verify RBAC certificate permissions
+      ansible.builtin.assert:
+        that:
+          - rbac_cert.stat.mode == '0644'
+        fail_msg: "RBAC certificate has incorrect permissions: {{ rbac_cert.stat.mode }}, expected 0644"
+
+    - name: Verify RBAC private key permissions
+      ansible.builtin.assert:
+        that:
+          - rbac_key.stat.mode == '0600'
+        fail_msg: "RBAC private key has incorrect permissions: {{ rbac_key.stat.mode }}, expected 0600"
+
+    - name: Verify RBAC certificate CN matches system-id UUID
+      become: true
+      ansible.builtin.shell: |
+        set -o pipefail
+        openssl x509 -in /etc/openvswitch/ovn-controller-cert.pem -noout -subject | \
+          sed -n 's/.*CN *= *\([^ ,]*\).*/\1/p'
+      register: cert_cn
+
+    - name: Assert RBAC certificate CN matches system-id UUID
+      ansible.builtin.assert:
+        that:
+          - cert_cn.stdout == 'c65865cc-d678-50fe-b2d8-f97e56d71d0a'
+        fail_msg: "RBAC certificate CN is '{{ cert_cn.stdout }}', expected 'c65865cc-d678-50fe-b2d8-f97e56d71d0a'"
+
+    - name: Verify RBAC certificate issuer matches the CA
+      become: true
+      ansible.builtin.shell: |
+        set -o pipefail
+        openssl x509 -in /etc/openvswitch/ovn-controller-cert.pem -noout -issuer | \
+          sed -n 's/.*CN *= *\(.*\)/\1/p'
+      register: cert_issuer
+
+    - name: Assert RBAC certificate issuer is the test CA
+      ansible.builtin.assert:
+        that:
+          - "'OVN SB DB Test CA' in cert_issuer.stdout"
+        fail_msg: "RBAC certificate issuer is '{{ cert_issuer.stdout }}', expected 'OVN SB DB Test CA'"
+
+    - name: Fetch RBAC certificate to localhost for CA verification
+      become: true
+      ansible.builtin.fetch:
+        src: /etc/openvswitch/ovn-controller-cert.pem
+        dest: /tmp/ovn-rbac-test-ca/ovn-controller-cert.pem
+        flat: true
+
+    - name: Verify RBAC certificate is signed by the test CA
+      ansible.builtin.command:
+        cmd: >
+          openssl verify
+          -CAfile /tmp/ovn-rbac-test-ca/tls.crt
+          /tmp/ovn-rbac-test-ca/ovn-controller-cert.pem
+      register: cert_verify
+      delegate_to: localhost
+
+    - name: Assert RBAC certificate verification passed
+      ansible.builtin.assert:
+        that:
+          - cert_verify.rc == 0
+        fail_msg: "RBAC certificate verification failed: {{ cert_verify.stderr }}"
+
+    - name: Verify RBAC cert directory exists with correct permissions
+      become: true
+      ansible.builtin.stat:
+        path: /etc/openvswitch
+      register: rbac_cert_dir
+
+    - name: Assert RBAC cert directory exists
+      ansible.builtin.assert:
+        that:
+          - rbac_cert_dir.stat.exists
+          - rbac_cert_dir.stat.isdir
+          - rbac_cert_dir.stat.mode == '0755'
+        fail_msg: "RBAC cert directory /etc/openvswitch does not exist or has wrong permissions"

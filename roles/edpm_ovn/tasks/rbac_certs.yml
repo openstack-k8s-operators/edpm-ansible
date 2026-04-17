@@ -1,0 +1,136 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Generate per-node RBAC certificates signed by the OVN RBAC PKI CA.
+# The certificate CN is set to edpm_ovn_system_id (a UUID5 derived from
+# the hostname) which must match the OVN chassis system-id for RBAC
+# ownership checks to work.
+# This mirrors the certificate generation done for ovn-controller pods
+# in the ovn-operator (see generate_rbac_certificate() in
+# ovn-operator/templates/ovncontroller/bin/functions).
+
+- name: Generate OVN RBAC certificate
+  when: edpm_ovn_tls_enabled | bool
+  block:
+    - name: Check if RBAC CA cert exists
+      ansible.builtin.stat:
+        path: "{{ edpm_ovn_rbac_ca_cert_src }}"
+      register: rbac_ca_cert_exists
+      delegate_to: localhost
+      become: false
+
+    - name: Check if RBAC CA key exists
+      ansible.builtin.stat:
+        path: "{{ edpm_ovn_rbac_ca_key_src }}"
+      register: rbac_ca_key_exists
+      delegate_to: localhost
+      become: false
+
+    - name: Generate and deploy RBAC certificate
+      when:
+        - rbac_ca_cert_exists.stat.exists
+        - rbac_ca_key_exists.stat.exists
+      block:
+        - name: Check if valid RBAC cert already exists on EDPM node
+          become: true
+          ansible.builtin.shell: |
+            set -o pipefail
+            openssl x509 -in "{{ edpm_ovn_rbac_cert_path }}" -noout -subject 2>/dev/null | \
+              sed -n 's/.*CN *= *\([^ ,]*\).*/\1/p'
+          register: existing_cert_cn
+          changed_when: false
+          failed_when: false
+
+        - name: Generate RBAC certificate for {{ edpm_ovn_system_id }}
+          when: existing_cert_cn.stdout != edpm_ovn_system_id
+          block:
+            - name: Create temporary directory for cert generation
+              ansible.builtin.tempfile:
+                state: directory
+                prefix: ovn-rbac-
+              register: rbac_temp_dir
+              delegate_to: localhost
+              become: false
+
+            - name: Generate private key
+              ansible.builtin.command:
+                cmd: >
+                  openssl genrsa
+                  -out {{ rbac_temp_dir.path }}/ovn-controller-privkey.pem 2048
+              delegate_to: localhost
+              become: false
+              changed_when: true
+
+            - name: Generate CSR with CN={{ edpm_ovn_system_id }}
+              ansible.builtin.command:
+                cmd: >
+                  openssl req -new
+                  -key {{ rbac_temp_dir.path }}/ovn-controller-privkey.pem
+                  -out {{ rbac_temp_dir.path }}/ovn-controller.csr
+                  -subj "/CN={{ edpm_ovn_system_id }}"
+              delegate_to: localhost
+              become: false
+              changed_when: true
+
+            - name: Sign certificate with RBAC CA
+              ansible.builtin.command:
+                cmd: >
+                  openssl x509 -req
+                  -in {{ rbac_temp_dir.path }}/ovn-controller.csr
+                  -CA {{ edpm_ovn_rbac_ca_cert_src }}
+                  -CAkey {{ edpm_ovn_rbac_ca_key_src }}
+                  -CAserial {{ rbac_temp_dir.path }}/ovn-rbac-ca.srl
+                  -CAcreateserial
+                  -out {{ rbac_temp_dir.path }}/ovn-controller-cert.pem
+                  -days 3650
+                  -sha256
+              delegate_to: localhost
+              become: false
+              changed_when: true
+
+            - name: Ensure RBAC cert directory exists on EDPM node
+              become: true
+              ansible.builtin.file:
+                path: "{{ edpm_ovn_rbac_cert_dir }}"
+                state: directory
+                owner: root
+                group: root
+                mode: "0755"
+
+            - name: Copy signed certificate to EDPM node
+              become: true
+              ansible.builtin.copy:
+                src: "{{ rbac_temp_dir.path }}/ovn-controller-cert.pem"
+                dest: "{{ edpm_ovn_rbac_cert_path }}"
+                owner: root
+                group: root
+                mode: "0644"
+
+            - name: Copy private key to EDPM node
+              become: true
+              ansible.builtin.copy:
+                src: "{{ rbac_temp_dir.path }}/ovn-controller-privkey.pem"
+                dest: "{{ edpm_ovn_rbac_key_path }}"
+                owner: root
+                group: root
+                mode: "0600"
+
+            - name: Clean up temporary directory
+              ansible.builtin.file:
+                path: "{{ rbac_temp_dir.path }}"
+                state: absent
+              delegate_to: localhost
+              become: false

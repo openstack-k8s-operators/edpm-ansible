@@ -25,6 +25,9 @@
 - name: Configure OVS
   ansible.builtin.import_tasks: configure.yml
 
+- name: Generate RBAC certificates
+  ansible.builtin.include_tasks: rbac_certs.yml
+
 - name: Ensure ovn_controller is running
   ansible.builtin.import_tasks: run.yml
 

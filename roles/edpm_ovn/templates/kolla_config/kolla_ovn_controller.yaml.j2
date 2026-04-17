@@ -1,1 +1,1 @@
-command: "/usr/bin/ovn-controller --pidfile unix:/run/openvswitch/db.sock {% if edpm_ovn_tls_enabled | bool %} -p /etc/pki/tls/private/ovndb.key -c /etc/pki/tls/certs/ovndb.crt -C /etc/pki/tls/certs/ovndbca.crt {% endif %}"
+command: "/usr/bin/ovn-controller --pidfile unix:/run/openvswitch/db.sock {% if edpm_ovn_tls_enabled | bool %} -p {{ edpm_ovn_controller_privkey }} -c {{ edpm_ovn_controller_cert }} -C {{ edpm_ovn_controller_cacert }} {% endif %}"
