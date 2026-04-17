@@ -35,9 +35,72 @@
   ansible.builtin.set_fact:
     edpm_network_config_mapping_file: /var/lib/edpm-config/template_nic_mapping.yaml
 
+- name: Ensure /var/lib/edpm-config exists
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/edpm-config
+    state: directory
+    mode: "0755"
+
 - name: Create EDPM NIC mapping file (nmstate path)
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
+
+# Check mode: derived NIC mapping is not produced here, and the derived-file slurp is skipped later for the same reason.
+- name: Copy user NIC mapping to derived input and run mapped_nics
+  become: true
+  when: not ansible_check_mode | bool
+
+  block:
+    - name: Stat user NIC mapping file
+      ansible.builtin.stat:
+        path: "{{ edpm_network_config_mapping_file }}"
+      register: edpm_user_nic_mapping_stat
+
+    - name: Copy user_nic_mapping.yaml to derived_nic_mapping.yaml
+      ansible.builtin.copy:
+        src: "{{ edpm_network_config_mapping_file }}"
+        dest: "{{ edpm_network_config_derived_nic_mapping_file }}"
+        remote_src: true
+        force: true
+        mode: "0644"
+      when: edpm_user_nic_mapping_stat.stat.exists | default(false)
+
+    - name: Remove stale derived NIC mapping when template mapping file is absent
+      ansible.builtin.file:
+        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+        state: absent
+      when: not (edpm_user_nic_mapping_stat.stat.exists | default(false))
+
+    - name: Check that Python3 can import yaml (requires python3-pyyaml on the node)
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - "import yaml"
+      register: edpm_derived_nic_mapping_pyyaml_check
+      changed_when: false
+      failed_when: false
+
+    - name: Fail when PyYAML is not available for derived NIC mapping
+      ansible.builtin.fail:
+        msg: >-
+          edpm_derived_nic_mapping.py needs PyYAML. Install the OS package that provides
+          it (on RHEL-like systems: python3-pyyaml), e.g. ensure
+          edpm_network_config_systemrole_nmstate_dependencies includes python3-pyyaml
+          and package installation ran (see role tasks/package_management.yml).
+      when: edpm_derived_nic_mapping_pyyaml_check.rc | int != 0
+
+    - name: Run derived NIC mapping (edpm_derived_nic_mapping.py)
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ role_path }}/files/edpm_derived_nic_mapping.py"
+          - "-f"
+          - "{{ edpm_network_config_derived_nic_mapping_file }}"
+      register: edpm_derived_nic_mapping_result
+      changed_when: >-
+        'edpm_derived_nic_mapping_changed=yes' in (edpm_derived_nic_mapping_result.stdout | default(''))
 
 - name: Check nmstate return code for conditional logic
   become: true
@@ -55,29 +118,56 @@
 
 - name: Configure network with network role from system roles [nmstate]
   become: true
+  # The conditions here are when we want to apply the NetworkConfig:
+  # - If edpm_network_config_update is True
+  # - Or the previous run of NetworkConfig failed
+  # - Or it has never run
+  # This matches the prior behavior of when a Heat SoftwareDeployment was used
   when:
     - (edpm_network_config_update) or
       (nmstate_returncode_stat.stat.exists and
       ((nmstate_returncode_slurp.content | b64decode | int) != 0)) or
       (not nmstate_returncode_stat.stat.exists)
   block:
-    - name: Render network_state variable
+    - name: Stat derived NIC mapping file for nmstate template substitution
+      ansible.builtin.stat:
+        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+      register: edpm_derived_nic_mapping_file_stat
+
+    - name: Read derived NIC mapping for nmstate template substitution
+      ansible.builtin.slurp:
+        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+      register: edpm_derived_nic_mapping_for_template
+      when:
+        - not ansible_check_mode | bool
+        - edpm_derived_nic_mapping_file_stat.stat.exists | default(false)
+
+    - name: Build interface_mapping dict from derived file
       ansible.builtin.set_fact:
-        network_state: "{{ edpm_network_config_template | from_yaml }}"
+        edpm_derived_interface_mapping: >-
+          {{
+            (edpm_derived_nic_mapping_for_template.content | b64decode | from_yaml | default({})).get('interface_mapping', {})
+            if edpm_derived_nic_mapping_for_template is defined
+            and edpm_derived_nic_mapping_for_template.content is defined
+            else {}
+          }}
+
+    - name: Render network_state variable (NIC aliases only under nmstate iface keys)
+      ansible.builtin.set_fact:
+        network_state: >-
+          {{
+            edpm_network_config_template
+            | from_yaml
+            | edpm_substitute_nic_aliases(edpm_derived_interface_mapping | default({}))
+          }}
 
     - name: Load system-roles.network tasks [nmstate]
       ansible.builtin.include_role:
         name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
       register: nmstate_result
 
-    - name: Ensure /var/lib/edpm-config exists
-      ansible.builtin.file:
-        path: /var/lib/edpm-config
-        state: directory
-        mode: "0755"
-
     - name: Write rc of nmstate run
       ansible.builtin.copy:
-        content: "0"
+        content: "{{ '1' if (nmstate_result.failed | default(false)) else '0' }}"
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
