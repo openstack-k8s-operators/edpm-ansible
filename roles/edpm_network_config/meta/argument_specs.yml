@@ -8,7 +8,10 @@ argument_specs:
         type: list
         default:
           - NetworkManager-ovs
-        description: Packages needed by nmstate (via system-role)
+          - python3-pyyaml
+        description: >
+          Packages needed by nmstate (via system-role) on RHEL-family hosts, including
+          python3-pyyaml for edpm_derived_nic_mapping.py on the managed host.
       edpm_network_config_download_delay:
         type: int
         default: 5
