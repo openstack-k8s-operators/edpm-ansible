@@ -8,7 +8,10 @@ argument_specs:
         type: list
         default:
           - NetworkManager-ovs
-        description: Packages needed by nmstate (via system-role)
+          - python3-pyyaml
+        description: >
+          Packages needed by nmstate (via system-role) on RHEL-family hosts, including
+          python3-pyyaml for edpm_derived_nic_mapping.py on the managed host.
       edpm_network_config_download_delay:
         type: int
         default: 5
@@ -64,13 +67,14 @@ argument_specs:
           by MAC address or dmiString+id match and writes the result to
           /etc/os-net-config/mapping.yaml (os-net-config path) or
           /var/lib/edpm-config/template_nic_mapping.yaml (nmstate path).
-          If this and edpm_network_config_mappings are both left at their default ({}), or neither
-          matches this host, no mapping file is written. In that case the os-net-config path falls
-          back to os-net-config's own built-in default nic1/nic2/... numbering (embedded interfaces
-          such as em/eth/eno first, then other active NICs, both ordered alphanumerically); the
-          nmstate path has no equivalent built-in fallback, so nic aliases in
-          edpm_network_config_template are only resolved when a mapping is supplied here (or via
-          edpm_network_config_mappings) — otherwise use real interface names in the template.
+          If this and edpm_network_config_mappings are both left at their default ({}), no mapping
+          file is written. Both paths still apply default nic1/nic2/... numbering in that case
+          (embedded interfaces such as em/eth/eno first, then other active NICs, both ordered
+          alphanumerically): os-net-config via its built-in logic, and the nmstate path via
+          edpm_derived_nic_mapping.py before template alias substitution.
+          If either mapping variable is non-empty but the edpm_os_net_config_mappings module does
+          not match this host, nic_mapping.yml fails the play before os-net-config or nmstate
+          apply — there is no silent fallback to default nic numbering in that case.
         default: {}
       edpm_network_config_mappings:
         type: dict
@@ -78,9 +82,10 @@ argument_specs:
           Optional additional or overriding NIC mapping for the nmstate and os-net-config paths
           (merged in nic_mapping.yml). Merged with edpm_network_config_os_net_config_mappings; this
           variable wins on duplicate keys. See edpm_network_config_os_net_config_mappings above for
-          how the merged mapping is used and what happens when no mapping is provided/matched.
-          Must be a YAML mapping (dict). Do not use a block literal (|) after the key — that
-          produces a string and role validation will fail.
+          how the merged mapping is used: empty defaults still get default nic1/nic2/... numbering
+          on both paths (nmstate via edpm_derived_nic_mapping.py); a non-empty mapping that matches
+          no host fails the play in nic_mapping.yml. Must be a YAML mapping (dict). Do not use a
+          block literal (|) after the key — that produces a string and role validation will fail.
         default: {}
       edpm_network_config_purge_provider:
         type: str
