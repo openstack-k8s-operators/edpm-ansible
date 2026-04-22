@@ -54,3 +54,21 @@
         that:
           # 2: the users in the group
           - "'nova' in libvirt_group.ansible_facts.getent_group.libvirt[2]"
+
+    - name: Check account expiration for system users
+      ansible.builtin.command: "chage -l {{ item }}"
+      register: user_expiration
+      changed_when: false
+      failed_when: false
+      loop:
+        - "qemu"
+        - "libvirt"
+        - "nova"
+
+    - name: Assert that system user accounts never expire
+      ansible.builtin.assert:
+        that:
+          - "'Account expires' in item.stdout"
+          - "'never' in item.stdout"
+        fail_msg: "User {{ item.item }} account should never expire"
+      loop: "{{ user_expiration.results }}"

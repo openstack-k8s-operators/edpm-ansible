@@ -28,3 +28,5 @@ edpm_users_users:
   - {"name": "hugetlbfs", "gid": "42477", "group_only": true}
 edpm_users_extra_dirs:
   - {"path": "/var/lib/vhost_sockets", "owner": "qemu", "group": "qemu", "setype": "virt_cache_t", "seuser": "system_u", "mode": "0755"}
+# Account expiration for system users. -1 means never expire.
+edpm_users_account_expires: -1
