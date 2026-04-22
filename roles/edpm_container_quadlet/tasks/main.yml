@@ -15,8 +15,6 @@
 # under the License.
 
 
-# "edpm_container_quadlet" will search for and load any operating system variable file
-
 - name: "Ensure directory exists: {{ edpm_container_quadlet_kolla_config_dir }}"
   become: true
   ansible.builtin.file:
@@ -32,28 +30,75 @@
     dest: "{{ edpm_container_quadlet_kolla_config_dir ~ '/' ~ item.key ~ '.json' }}"
     mode: "0600"
   loop: "{{ edpm_container_quadlet_kolla_config_files | dict2items }}"
+  register: _edpm_quadlet_kolla_config
 
-- name: Copy systemd service template file
-  ansible.builtin.copy:
-    src: "files/service-template.kube"
-    dest: /etc/containers/systemd/edpm@.kube
-    mode: "0644"
-  become: true
+- name: "Extract config volume paths for {{ edpm_container_quadlet_service }}"
+  ansible.builtin.set_fact:
+    _edpm_quadlet_config_vol_paths: >-
+      {{ (edpm_container_quadlet_common_volumes + edpm_container_quadlet_service_volumes)
+         | map('regex_replace', ':.*$', '')
+         | select('match', '^' ~ edpm_container_quadlet_config_vol_prefix)
+         | unique | list }}
 
-- name: "Render container definitions: [{{ edpm_container_quadlet_service }} ]"
+- name: "Compute config content hash for {{ edpm_container_quadlet_service }}"
+  ansible.builtin.shell:
+    cmd: |
+      set -eo pipefail
+      resolved=()
+      for p in {{ _edpm_quadlet_config_vol_paths | join(' ') }}; do
+        if [ -f "$p" ]; then
+          resolved+=("$(dirname "$p")")
+        elif [ -d "$p" ]; then
+          resolved+=("$p")
+        fi
+      done
+      if [ ${#resolved[@]} -eq 0 ]; then
+        exit 0
+      fi
+      unique=($(printf '%s\n' "${resolved[@]}" | sort -u))
+      find "${unique[@]}" -type f -print0 \
+        | sort -z \
+        | xargs -0 -r sha256sum \
+        | sha256sum \
+        | cut -d' ' -f1
+    executable: /bin/bash
+  register: _edpm_config_hash_result
+  changed_when: false
+  when: _edpm_quadlet_config_vol_paths | length > 0
+
+- name: "Set config content hash for {{ edpm_container_quadlet_service }}"
+  ansible.builtin.set_fact:
+    _edpm_container_quadlet_config_hash: >-
+      {{ _edpm_config_hash_result.stdout | default('') | trim }}
+
+- name: "Render Pod YAML for kube quadlet: {{ edpm_container_quadlet_service }}.yaml"
   become: true
   ansible.builtin.template:
-    src: "service-quadlet-template.yaml.j2"
+    src: "service-quadlet-pod.yaml.j2"
     dest: "{{ edpm_container_quadlet_systemd_config_dir }}/{{ edpm_container_quadlet_service }}.yaml"
     mode: "0644"
-  # NOTE(tkajinam): Some containers can contain secrets in their environments.
-  #                 Hide the output to avoid dumping these to output.
+  when: edpm_container_quadlet_type == 'kube'
   no_log: true
+  register: _edpm_quadlet_pod_yaml
 
-- name: Starting quadlet {{ edpm_container_quadlet_service }}
+- name: "Render quadlet file: edpm@{{ edpm_container_quadlet_service }}.{{ edpm_container_quadlet_type }}"
+  become: true
+  ansible.builtin.template:
+    src: "service-quadlet.{{ edpm_container_quadlet_type }}.j2"
+    dest: "{{ edpm_container_quadlet_systemd_config_dir }}/edpm@{{ edpm_container_quadlet_service }}.{{ edpm_container_quadlet_type }}"
+    mode: "0644"
+  no_log: true
+  register: _edpm_quadlet_rendered
+
+- name: "Start quadlet service edpm@{{ edpm_container_quadlet_service }}"
   ansible.builtin.systemd_service:
-    name: edpm@{{ edpm_container_quadlet_service }}
-    state: restarted
+    name: "edpm@{{ edpm_container_quadlet_service }}"
+    state: >-
+      {{ 'restarted' if (_edpm_quadlet_kolla_config is changed or
+                         _edpm_quadlet_rendered is changed or
+                         _edpm_quadlet_pod_yaml is changed)
+         else 'started' }}
     enabled: true
     daemon_reload: true
   become: true
+  when: not (edpm_container_quadlet_skip_start | default(false) | bool)
