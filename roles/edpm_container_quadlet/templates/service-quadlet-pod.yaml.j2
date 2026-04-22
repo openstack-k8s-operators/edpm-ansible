@@ -1,0 +1,44 @@
+# Managed by edpm_container_quadlet Ansible role
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: {{ edpm_container_quadlet_service }}
+  name: {{ edpm_container_quadlet_service }}
+spec:
+{% if edpm_container_quadlet_service_use_host_network | default(false) | bool %}
+  hostNetwork: true
+{% endif %}
+  containers:
+  - name: {{ edpm_container_quadlet_service }}
+    image: {{ edpm_container_quadlet_service_image }}
+    args:
+    - kolla_start
+    env:
+    - name: KOLLA_CONFIG_STRATEGY
+      value: COPY_ALWAYS
+{% for key, value in (edpm_container_quadlet_service_environment | default({})).items() %}
+    - name: {{ key }}
+      value: "{{ value }}"
+{% endfor %}
+{% if edpm_container_quadlet_service_privileged | default(true) | bool %}
+    securityContext:
+      privileged: true
+{% endif %}
+{% set all_volumes = edpm_container_quadlet_common_volumes + edpm_container_quadlet_service_volumes %}
+    volumeMounts:
+{% for vol in all_volumes %}
+{% set parts = vol.split(':') %}
+    - mountPath: {{ parts[1] }}
+      name: vol-{{ loop.index0 }}
+{% if parts | length > 2 and 'ro' in parts[2] %}
+      readOnly: true
+{% endif %}
+{% endfor %}
+  volumes:
+{% for vol in all_volumes %}
+{% set parts = vol.split(':') %}
+  - hostPath:
+      path: {{ parts[0] }}
+    name: vol-{{ loop.index0 }}
+{% endfor %}

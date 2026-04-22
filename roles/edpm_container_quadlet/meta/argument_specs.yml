@@ -12,69 +12,79 @@ argument_specs:
         default: "/etc/containers/systemd"
         description: The default location for all quadlet related systemd files
         type: path
+      edpm_container_quadlet_type:
+        default: container
+        description: >
+          Quadlet unit type to generate. Supported values: container, kube.
+          Determines the template used and the file extension written to
+          /etc/containers/systemd/.
+        type: str
+        choices:
+          - container
+          - kube
       edpm_container_quadlet_service:
         default: ""
-        description: The name of the service being deployed
+        description: >
+          The name of the service being deployed. Used in the quadlet filename
+          (edpm@<service>.container) and as the Podman container name.
         type: str
-      edpm_container_quadlet_service_volumes:
-        default: []
-        description: A list of key/value pairs for service specific volumes that should be applied
-        type: list
-      edpm_container_quadlet_service_use_host_network:
-        default: false
-        description: Whether the container needs to access hostNetwork capabilities
-        type: bool
       edpm_container_quadlet_service_image:
         default: ""
         description: The container image that is used by the service
         type: str
+      edpm_container_quadlet_service_volumes:
+        default: []
+        description: >
+          A list of service-specific volume mount strings in Podman format
+          (e.g. /host/path:/container/path:ro)
+        type: list
+      edpm_container_quadlet_service_use_host_network:
+        default: false
+        description: Whether the container uses host networking
+        type: bool
+      edpm_container_quadlet_service_privileged:
+        default: true
+        description: Whether the container runs in privileged mode
+        type: bool
+      edpm_container_quadlet_service_environment:
+        default: {}
+        description: >
+          Dictionary of additional environment variables to set in the container.
+          KOLLA_CONFIG_STRATEGY=COPY_ALWAYS is always included.
+        type: dict
+      edpm_container_quadlet_service_healthcheck_cmd:
+        default: ""
+        description: >
+          Health check command to run inside the container.
+          If empty, no health check is configured.
+        type: str
+      edpm_container_quadlet_service_after:
+        default: []
+        description: >
+          List of systemd units this service should start after (After= directives)
+        type: list
+      edpm_container_quadlet_service_wants:
+        default: []
+        description: >
+          List of systemd units this service wants running (Wants= directives)
+        type: list
       edpm_container_quadlet_common_volumes:
         default:
-          - path: /etc/hosts
-            mountPath: /etc/hosts
-            readOnly: true
-            name: etc-hosts
-          - path: /etc/localtime
-            mountPath: /etc/localtime
-            readOnly: true
-            name: etc-localtime
-          # OpenSSL trusted CAs
-          - path: /etc/pki/ca-trust/extracted
-            mountPath: /etc/pki/ca-trust/extracted
-            readOnly: true
-            name: ca-extracted
-          - path: /etc/pki/ca-trust/source/anchors
-            mountPath: /etc/pki/ca-trust/source/anchors
-            readOnly: true
-            name: anchors
-          - path: /etc/pki/tls/certs/ca-bundle.crt
-            mountPath: /etc/pki/tls/certs/ca-bundle.crt
-            readOnly: true
-            name: ca-bundle
-          - path: /etc/pki/tls/certs/ca-bundle.trust.crt
-            mountPath: /etc/pki/tls/certs/ca-bundle.trust.crt
-            readOnly: true
-            name: ca-trust-bundle
-          - path: /etc/pki/tls/cert.pem
-            mountPath: /etc/pki/tls/cert.pem
-            readOnly: true
-            name: tls-cert
-          # Syslog socket
-          - path: /dev/log
-            mountPath: /dev/log
-            readOnly: false
-            name: dev-log
-        description: List of common volumes that are used by most containers
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
+          - /dev/log:/dev/log
+        description: >
+          List of common volume mounts included in all containers.
+          Format: /host/path:/container/path[:options]
         type: list
       edpm_container_quadlet_internal_tls_volumes:
         default:
-          - path: /etc/pki/tls/certs/httpd
-            mountPath: /etc/pki/tls/certs/httpd
-            readOnly: true
-            name: certs-httpd
-          - path: /etc/pki/tls/private/httpd
-            mountPath: /etc/pki/tls/private/httpd
-            readOnly: true
-            name: private-httpd
+          - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
+          - /etc/pki/tls/private/httpd:/etc/pki/tls/private/httpd:ro
         description: List of TLS volumes used by most containers
         type: list

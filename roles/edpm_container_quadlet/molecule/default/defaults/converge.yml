@@ -1,4 +1,4 @@
--
+---
 # Copyright 2020 Red Hat, Inc.
 # All Rights Reserved.
 #
@@ -15,35 +15,122 @@
 # under the License.
 
 
-- name: Converge
+- name: Converge - container quadlet type (default)
   hosts: all
   gather_facts: false
   vars:
-    edpm_container_quadlet_service: test
-    edpm_container_quadlet_container_defs:
-      test:
-        apiVersion: v1
-        kind: Pod
-        metadata:
-          annotations:
-          labels:
-            app: test
-          name: test
-        spec:
-          hostNetwork: true
-          containers:
-          - args:
-            - kolla_start
-            env:
-            - name: KOLLA_CONFIG_STRATEGY
-              value: COPY_ALWAYS
-            image: quay.io/centos/centos:stream9
-            name: test
-            securityContext:
-              privileged: true
-              procMount: Unmasked
+    edpm_container_quadlet_service: test_container
+    edpm_container_quadlet_type: container
+    edpm_container_quadlet_service_image: quay.io/centos/centos:stream9
+    edpm_container_quadlet_service_use_host_network: true
+    edpm_container_quadlet_service_privileged: true
+    edpm_container_quadlet_service_environment:
+      TEST_VAR: test_value
+    edpm_container_quadlet_service_volumes: []
+    edpm_container_quadlet_common_volumes: []
+    edpm_container_quadlet_service_healthcheck_cmd: /openstack/healthcheck
+    edpm_container_quadlet_service_after:
+      - openvswitch.service
+    edpm_container_quadlet_service_wants:
+      - openvswitch.service
+    edpm_container_quadlet_skip_start: true
     edpm_container_quadlet_kolla_config_files:
-      test:
+      test_container:
         command: 'sleep 3600'
-  roles:
-    - "osp.edpm.edpm_container_quadlet"
+  tasks:
+    - name: Run edpm_container_quadlet role
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_quadlet
+        tasks_from: main.yml
+
+    - name: Verify .container quadlet file was rendered
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/edpm@test_container.container
+      register: container_file
+      failed_when: not container_file.stat.exists
+
+    - name: Verify kolla config was created
+      ansible.builtin.stat:
+        path: /var/lib/kolla/config_files/test_container.json
+      register: kolla_file
+      failed_when: not kolla_file.stat.exists
+
+    - name: Read .container file content
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm@test_container.container
+      register: container_content
+
+    - name: Verify .container file contains expected directives
+      ansible.builtin.assert:
+        that:
+          - "'ContainerName=test_container' in container_content.content | b64decode"
+          - "'Image=quay.io/centos/centos:stream9' in container_content.content | b64decode"
+          - "'Exec=kolla_start' in container_content.content | b64decode"
+          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in container_content.content | b64decode"
+          - "'Environment=TEST_VAR=test_value' in container_content.content | b64decode"
+          - "'Network=host' in container_content.content | b64decode"
+          - "'PodmanArgs=--privileged' in container_content.content | b64decode"
+          - "'HealthCmd=/openstack/healthcheck' in container_content.content | b64decode"
+          - "'After=openvswitch.service' in container_content.content | b64decode"
+          - "'Wants=openvswitch.service' in container_content.content | b64decode"
+          - "'WantedBy=multi-user.target' in container_content.content | b64decode"
+
+- name: Converge - kube quadlet type
+  hosts: all
+  gather_facts: false
+  vars:
+    edpm_container_quadlet_service: test_kube
+    edpm_container_quadlet_type: kube
+    edpm_container_quadlet_service_image: quay.io/centos/centos:stream9
+    edpm_container_quadlet_service_use_host_network: true
+    edpm_container_quadlet_service_privileged: true
+    edpm_container_quadlet_service_environment:
+      TEST_VAR: test_value
+    edpm_container_quadlet_service_volumes: []
+    edpm_container_quadlet_common_volumes: []
+    edpm_container_quadlet_skip_start: true
+    edpm_container_quadlet_kolla_config_files:
+      test_kube:
+        command: 'sleep 3600'
+  tasks:
+    - name: Run edpm_container_quadlet role
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_quadlet
+        tasks_from: main.yml
+
+    - name: Verify .kube quadlet file was rendered
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/edpm@test_kube.kube
+      register: kube_file
+      failed_when: not kube_file.stat.exists
+
+    - name: Verify Pod YAML was rendered
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/test_kube.yaml
+      register: pod_yaml_file
+      failed_when: not pod_yaml_file.stat.exists
+
+    - name: Read .kube file content
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm@test_kube.kube
+      register: kube_content
+
+    - name: Verify .kube file contains expected directives
+      ansible.builtin.assert:
+        that:
+          - "'Yaml=/etc/containers/systemd/test_kube.yaml' in kube_content.content | b64decode"
+          - "'WantedBy=multi-user.target' in kube_content.content | b64decode"
+
+    - name: Read Pod YAML content
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/test_kube.yaml
+      register: pod_yaml_content
+
+    - name: Verify Pod YAML contains expected fields
+      ansible.builtin.assert:
+        that:
+          - "'kind: Pod' in pod_yaml_content.content | b64decode"
+          - "'name: test_kube' in pod_yaml_content.content | b64decode"
+          - "'image: quay.io/centos/centos:stream9' in pod_yaml_content.content | b64decode"
+          - "'hostNetwork: true' in pod_yaml_content.content | b64decode"
+          - "'privileged: true' in pod_yaml_content.content | b64decode"
