@@ -131,6 +131,30 @@
         fail_msg: "Kolla config for test_service3_container_a should still exist"
         success_msg: "Kolla config for test_service3_container_a still exists as expected"
 
+    - name: Check if startup config directory for test_service1 container exists
+      ansible.builtin.stat:
+        path: /var/lib/edpm-config/container-startup-config/test_service1_container
+      register: _service1_startup_dir
+
+    - name: Verify startup config directory for test_service1 container was removed
+      ansible.builtin.assert:
+        that:
+          - not _service1_startup_dir.stat.exists
+        fail_msg: "Startup config directory for test_service1_container should not exist"
+        success_msg: "Startup config directory for test_service1_container was removed"
+
+    - name: Check if healthcheck directory for test_service1 container exists
+      ansible.builtin.stat:
+        path: /var/lib/openstack/healthchecks/test_service1_container
+      register: _service1_healthcheck_dir
+
+    - name: Verify healthcheck directory for test_service1 container was removed
+      ansible.builtin.assert:
+        that:
+          - not _service1_healthcheck_dir.stat.exists
+        fail_msg: "Healthcheck directory for test_service1_container should not exist"
+        success_msg: "Healthcheck directory for test_service1_container was removed"
+
 - name: Verify image pruning after service cleanup
   hosts: all
   gather_facts: false
