@@ -65,6 +65,7 @@ EXAMPLES = """
 
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
 BUF_SIZE = 65536
+SHARED_CONFIG_NAMESPACES = ('certs', 'cacerts', 'configs')
 
 
 class ContainerConfigHashManager:
@@ -178,14 +179,15 @@ class ContainerConfigHashManager:
         :param volume: string
         :returns: string
         """
-        # crawl the volume's path upwards until we find the
-        # volume's base, where the hashed config file resides
         path = volume
         base = prefix.rstrip(os.path.sep)
-        base_generated = os.path.join(base, 'ansible-generated')
+        shared_bases = tuple(
+            os.path.join(base, namespace)
+            for namespace in SHARED_CONFIG_NAMESPACES
+        )
         while path.startswith(prefix):
             dirname = os.path.dirname(path)
-            if dirname == base or dirname == base_generated:
+            if dirname == base or dirname in shared_bases:
                 return path
             else:
                 path = dirname
@@ -208,8 +210,12 @@ class ContainerConfigHashManager:
             self.module.fail_json(
                 msg='Error fetching volumes. Prefix: '
                     '{} - Config: {}'.format(prefix, config))
-        return sorted([self._get_config_base(prefix, v.split(":")[0])
-                       for v in volumes if v.startswith(prefix)])
+        matched = set()
+        for v in volumes:
+            host_path = v.split(":")[0]
+            if host_path.startswith(prefix):
+                matched.add(self._get_config_base(prefix, host_path))
+        return sorted(matched)
 
     def _update_hashes(self):
         """Update container startup config with new config hashes if needed.
