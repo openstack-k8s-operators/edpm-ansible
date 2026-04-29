@@ -32,6 +32,10 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Update neutron_dhcp_agent sidecar scripts
+  ansible.builtin.include_tasks:
+    file: sidecar.yml
+
 - name: Run neutron-dhcp-agent container
   debugger: on_failed
   ansible.builtin.include_role:
