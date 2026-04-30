@@ -208,8 +208,8 @@ class ContainerConfigHashManager:
             self.module.fail_json(
                 msg='Error fetching volumes. Prefix: '
                     '{} - Config: {}'.format(prefix, config))
-        return sorted([self._get_config_base(prefix, v.split(":")[0])
-                       for v in volumes if v.startswith(prefix)])
+        return sorted({self._get_config_base(prefix, v.split(":")[0])
+                       for v in volumes if v.startswith(prefix)})
 
     def _update_hashes(self):
         """Update container startup config with new config hashes if needed.
