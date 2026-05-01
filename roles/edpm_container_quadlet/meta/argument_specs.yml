@@ -68,6 +68,12 @@ argument_specs:
         description: >
           List of systemd units this service wants running (Wants= directives)
         type: list
+      edpm_container_quadlet_skip_start:
+        default: false
+        description: >
+          Skip starting the systemd service. Useful for molecule tests
+          or when the service should be rendered but not started.
+        type: bool
       edpm_container_quadlet_common_volumes:
         default:
           - /etc/hosts:/etc/hosts:ro

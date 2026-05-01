@@ -11,6 +11,7 @@ edpm_container_quadlet_service_environment: {}
 edpm_container_quadlet_service_healthcheck_cmd: ""
 edpm_container_quadlet_service_after: []
 edpm_container_quadlet_service_wants: []
+edpm_container_quadlet_skip_start: false
 
 edpm_container_quadlet_config_vol_prefix: /var/lib/openstack
 
