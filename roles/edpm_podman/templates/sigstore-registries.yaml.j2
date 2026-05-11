@@ -1,0 +1,5 @@
+docker:
+{% for mapping in edpm_container_signature_registry_mappings %}
+  {{ mapping.mirror }}:
+    use-sigstore-attachments: true
+{% endfor %}
