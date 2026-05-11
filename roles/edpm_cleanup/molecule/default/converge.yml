@@ -32,7 +32,8 @@
       when:
         - ansible_user is undefined
   vars:
-    edpm_container_standalone_service: test_service1
+    edpm_container_standalone_service: test_service1_container
+    edpm_service_name: test_service1
     edpm_container_standalone_container_defs:
       test_service1_container:
         image: quay.io/centos/centos:stream9
@@ -47,6 +48,13 @@
         command: 'sleep 3600'
   roles:
     - role: "osp.edpm.edpm_container_standalone"
+  tasks:
+    - name: Create container-scoped healthcheck directory for first service
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/openstack/healthchecks/test_service1_container
+        state: directory
+        mode: '0755'
 
 - name: Deploy second service
   hosts: all
@@ -72,7 +80,7 @@
   hosts: all
   gather_facts: false
   vars:
-    edpm_services:
+    edpm_service_types:
       - test_service2
   roles:
     - role: osp.edpm.edpm_cleanup
@@ -141,7 +149,7 @@
       ansible.builtin.include_role:
         name: osp.edpm.edpm_cleanup
       vars:
-        edpm_services:
+        edpm_service_types:
           - test_service2
           - test_service3
         edpm_cleanup_orphaned_containers: true
