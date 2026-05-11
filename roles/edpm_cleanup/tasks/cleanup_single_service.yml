@@ -45,12 +45,26 @@
   # This removes /var/lib/edpm-config/container-startup-config/<service>/
   # including all *.json container definition files within it
 
+- name: Remove container-scoped startup config directories
+  ansible.builtin.file:
+    path: "{{ edpm_container_startup_config_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ _edpm_cleanup_service_containers }}"
+  when: edpm_cleanup_remove_config_dirs | bool
+
 - name: Remove generic service files and directories
   become: true
   ansible.builtin.file:
     path: "{{ item | replace('__SERVICE_NAME__', _edpm_cleanup_service_name) }}"
     state: absent
   loop: "{{ edpm_cleanup_generic_paths }}"
+
+- name: Remove container healthcheck directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_cleanup_healthcheck_base_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ _edpm_cleanup_service_containers }}"
 
 - name: Remove kolla config files for each container
   become: true

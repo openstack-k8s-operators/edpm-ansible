@@ -37,12 +37,12 @@
         combine({'services': {}}, recursive=True)
       }}
 
-- name: Determine services to clean up (services in state file not in edpm_services)
+- name: Determine services to clean up
   ansible.builtin.set_fact:
     _edpm_services_to_cleanup: >-
       {{
         _edpm_cleanup_state_data.services.keys() | default([]) |
-        difference(edpm_services | default([])) |
+        difference(edpm_service_types | unique | list) |
         list
       }}
 
@@ -115,8 +115,7 @@
         _edpm_orphaned_containers: >-
           {{
             _edpm_all_managed_containers |
-            difference(_edpm_tracked_containers) |
-            difference(edpm_cleanup_excluded_containers | default([]))
+            difference(_edpm_tracked_containers)
           }}
 
     - name: Remove orphaned containers
@@ -155,6 +154,21 @@
       when:
         - _edpm_orphaned_containers | length > 0
         - _edpm_orphaned_startup_configs.results is defined
+
+    - name: Remove container-scoped startup config directories for orphaned containers
+      ansible.builtin.file:
+        path: "{{ edpm_container_startup_config_dir }}/{{ item }}"
+        state: absent
+      loop: "{{ _edpm_orphaned_containers }}"
+      when: _edpm_orphaned_containers | length > 0
+
+    - name: Remove healthcheck directories for orphaned containers
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_cleanup_healthcheck_base_dir }}/{{ item }}"
+        state: absent
+      loop: "{{ _edpm_orphaned_containers }}"
+      when: _edpm_orphaned_containers | length > 0
 
 - name: Prune unused container images and volumes
   become: true

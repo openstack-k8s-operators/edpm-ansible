@@ -49,20 +49,19 @@ argument_specs:
           Use with caution - only enable if you want to clean up orphaned containers.
         type: bool
       edpm_cleanup_excluded_containers:
-        default:
-          - nova_compute
-          - nova_compute_init
-          - nova_nvme_cleaner
+        default: []
         description: |
-          List of container names to exclude from orphaned container cleanup.
-          These containers use edpm_container_manage which doesn't track state in the
-          deployed_services.yaml file. Without this exclusion, they would be incorrectly
-          identified as orphaned when edpm_cleanup_orphaned_containers is enabled.
+          Deprecated compatibility variable. Excluded containers are no longer
+          honored during cleanup.
         type: list
         elements: str
+      edpm_cleanup_healthcheck_base_dir:
+        default: /var/lib/openstack/healthchecks
+        description: Base directory containing per-container healthcheck paths.
+        type: path
       edpm_cleanup_generic_paths:
         default:
-          - "/var/lib/openstack/healthchecks/__SERVICE_NAME__"
+          - "{{ edpm_cleanup_healthcheck_base_dir }}/__SERVICE_NAME__"
           - "/var/lib/openstack/__SERVICE_NAME__"
         description: >-
           List of generic file/directory paths to clean up per service.
