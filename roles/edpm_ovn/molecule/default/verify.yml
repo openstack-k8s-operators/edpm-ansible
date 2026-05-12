@@ -18,3 +18,98 @@
         /usr/bin/ovs-vsctl get open . external_ids
       register: output
       failed_when: "'ovn-cms-options' in output.stdout"
+
+    - name: Verify Quadlet deployment
+      block:
+        - name: Check quadlet .container file exists
+          become: true
+          ansible.builtin.stat:
+            path: /etc/containers/systemd/edpm_ovn_controller.container
+          register: _quadlet_file
+
+        - name: Assert quadlet file exists
+          ansible.builtin.assert:
+            that:
+              - _quadlet_file.stat.exists
+            fail_msg: "Quadlet .container file was not created"
+
+        - name: Read quadlet file content
+          become: true
+          ansible.builtin.slurp:
+            src: /etc/containers/systemd/edpm_ovn_controller.container
+          register: _quadlet_content
+
+        - name: Decode quadlet file content
+          ansible.builtin.set_fact:
+            _quadlet_text: "{{ _quadlet_content.content | b64decode }}"
+
+        - name: Verify quadlet file structure
+          ansible.builtin.assert:
+            that:
+              - "'[Unit]' in _quadlet_text"
+              - "'[Container]' in _quadlet_text"
+              - "'ContainerName=ovn_controller' in _quadlet_text"
+              - "'Network=host' in _quadlet_text"
+              - "'PodmanArgs=--privileged' in _quadlet_text"
+              - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in _quadlet_text"
+              - "'[Service]' in _quadlet_text"
+              - "'Restart=always' in _quadlet_text"
+              - "'[Install]' in _quadlet_text"
+              - "'WantedBy=multi-user.target' in _quadlet_text"
+              - "'Label=managed_by=edpm_ansible' in _quadlet_text"
+            fail_msg: "Quadlet file content is incorrect"
+
+        - name: Verify healthcheck is configured in quadlet
+          ansible.builtin.assert:
+            that:
+              - "'HealthCmd=/openstack/healthcheck' in _quadlet_text"
+              - "'/var/lib/openstack/healthchecks/ovn_controller:/openstack:ro,z' in _quadlet_text"
+            fail_msg: "Healthcheck not properly configured in quadlet file"
+
+        - name: Verify kolla config file deployed
+          become: true
+          ansible.builtin.stat:
+            path: /var/lib/kolla/config_files/ovn_controller.json
+          register: _kolla_config
+
+        - name: Assert kolla config exists
+          ansible.builtin.assert:
+            that:
+              - _kolla_config.stat.exists
+            fail_msg: "Kolla config JSON was not deployed"
+
+        - name: Verify healthcheck script deployed
+          become: true
+          ansible.builtin.stat:
+            path: /var/lib/openstack/healthchecks/ovn_controller/healthcheck
+          register: _healthcheck_script
+
+        - name: Assert healthcheck script exists and is executable
+          ansible.builtin.assert:
+            that:
+              - _healthcheck_script.stat.exists
+              - _healthcheck_script.stat.executable
+            fail_msg: "Healthcheck script was not deployed or is not executable"
+
+        - name: Verify state file tracking
+          block:
+            - name: Read deployed services state file
+              become: true
+              ansible.builtin.slurp:
+                src: /var/lib/edpm-config/deployed_services.yaml
+              register: _state_file
+
+            - name: Parse state data
+              ansible.builtin.set_fact:
+                _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
+
+            - name: Assert OVN service is tracked in state file
+              ansible.builtin.assert:
+                that:
+                  - "'ovn' in _state_data.services"
+                  - "'ovn_controller' in _state_data.services.ovn.containers"
+                fail_msg: "OVN service not tracked in state file"
+
+        - name: Check ovn_controller container exists
+          become: true
+          ansible.builtin.command: podman container exists ovn_controller
