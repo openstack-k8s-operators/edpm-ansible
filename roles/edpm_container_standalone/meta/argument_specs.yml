@@ -16,14 +16,6 @@ argument_specs:
           - /dev/log:/dev/log
         description: List of volumes in a mount point format.
         type: list
-      edpm_container_standalone_container_defs:
-        default: {}
-        description: Parsed container definitions.
-        type: dict
-      edpm_container_startup_config_dir:
-        default: /var/lib/edpm-config/container-startup-config
-        description: Path to configuration directory.
-        type: path
       edpm_container_standalone_internal_tls_volumes:
         default:
           - /etc/pki/tls/certs/httpd:/etc/pki/tls/certs/httpd:ro
@@ -92,3 +84,22 @@ argument_specs:
           If true, remove the container from the state file instead of adding/updating.
           Used when a container needs to be removed from state tracking.
         type: bool
+      edpm_container_standalone_quadlet_dir:
+        default: /etc/containers/systemd
+        description: Directory where Quadlet .container unit files are written.
+        type: path
+      edpm_container_standalone_quadlet_defs:
+        default: {}
+        description: |
+          Dict mapping container name to the Jinja2 template path for its
+          Quadlet .container file. Each service role provides its own
+          native templates.
+          Example: { ovn_controller: "quadlet/ovn_controller.container.j2" }
+        type: dict
+      edpm_container_standalone_config_volumes:
+        default: []
+        description: |
+          List of volume mount strings for config hash computation.
+          Only volumes with host paths under /var/lib/openstack are considered.
+          The computed hash is available to quadlet templates as _edpm_config_hash.hash.
+        type: list

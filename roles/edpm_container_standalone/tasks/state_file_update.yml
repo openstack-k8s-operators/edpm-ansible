@@ -110,8 +110,8 @@
             _edpm_state_service_name: {
               'containers': (
                 _edpm_state_data.services.get(_edpm_state_service_name, {}).get('containers', []) +
-                edpm_container_standalone_container_defs.keys() | list
-              ) if edpm_container_state_append else (edpm_container_standalone_container_defs.keys() | list),
+                (edpm_container_standalone_quadlet_defs.keys() | list)
+              ) if edpm_container_state_append else (edpm_container_standalone_quadlet_defs.keys() | list),
               'updated_at': lookup('pipe', 'date -Iseconds')
             }
           }, recursive=True)

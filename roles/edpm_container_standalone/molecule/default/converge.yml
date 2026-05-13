@@ -1,5 +1,5 @@
 ---
-# Copyright 2020 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,8 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-- name: Deploy services and verify state tracking
+- name: Test cleanup of old artifacts + initial deploy with config hash
   hosts: all
   gather_facts: false
   pre_tasks:
@@ -31,200 +30,352 @@
         ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
       when:
         - ansible_user is undefined
+
+    # Create fake old container_manage artifacts to test cleanup
+    - name: Create fake old systemd service file
+      become: true
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=test_service container (fake old)
+          [Service]
+          Type=forking
+          ExecStart=/usr/bin/podman start test_service
+          ExecStop=/usr/bin/podman stop test_service
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/edpm_test_service.service
+        mode: "0644"
+
+    - name: Create fake old PID file
+      become: true
+      ansible.builtin.copy:
+        content: "99999"
+        dest: /run/test_service.pid
+        mode: "0644"
+
+    - name: Create fake old startup config directory
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/edpm-config/container-startup-config
+        state: directory
+        mode: "0755"
+
+    - name: Create fake old startup config
+      become: true
+      ansible.builtin.copy:
+        content: '{"command": "sleep 3600"}'
+        dest: /var/lib/edpm-config/container-startup-config/test_service.json
+        mode: "0600"
+
   tasks:
-    # Deploy a service with single container
-    - name: Deploy service1
+    - name: Deploy test_service via Quadlet
       ansible.builtin.include_role:
         name: osp.edpm.edpm_container_standalone
       vars:
-        edpm_container_standalone_service: service1_container
-        edpm_service_name: service1
-        edpm_container_standalone_container_defs:
-          service1_container:
-            image: quay.io/centos/centos:stream9
-            net: host
-            privileged: true
-            restart: always
-            command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
         edpm_container_standalone_kolla_config_files:
-          service1_container:
+          test_service:
             command: 'sleep 3600'
+        edpm_container_standalone_config_volumes:
+          - "/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z"
 
-    # Deploy a service with multiple containers (like telemetry)
-    - name: Deploy telemetry with first container
-      ansible.builtin.include_role:
-        name: osp.edpm.edpm_container_standalone
-      vars:
-        edpm_container_standalone_service: exporter_a
-        edpm_service_name: telemetry
-        edpm_container_standalone_container_defs:
-          exporter_a:
-            image: quay.io/centos/centos:stream9
-            net: host
-            privileged: true
-            restart: always
-            command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          exporter_a:
-            command: 'sleep 3600'
+  post_tasks:
+    # Verify cleanup removed old artifacts
+    - name: Check old service file was removed
+      ansible.builtin.stat:
+        path: /etc/systemd/system/edpm_test_service.service
+      register: _old_service_file
 
-    - name: Deploy telemetry with second container (append)
-      ansible.builtin.include_role:
-        name: osp.edpm.edpm_container_standalone
-      vars:
-        edpm_container_standalone_service: exporter_b
-        edpm_service_name: telemetry
-        edpm_container_state_append: true
-        edpm_container_standalone_container_defs:
-          exporter_b:
-            image: quay.io/centos/centos:stream9
-            net: host
-            privileged: true
-            restart: always
-            command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          exporter_b:
-            command: 'sleep 3600'
-
-    # Verify state file
-    - name: Read deployed services state file
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file
-
-    - name: Parse state data
-      ansible.builtin.set_fact:
-        _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
-
-    - name: Verify services are tracked
+    - name: Assert old service file is gone
       ansible.builtin.assert:
         that:
-          - "'service1' in _state_data.services"
-          - "'telemetry' in _state_data.services"
-          - "'service1_container' in _state_data.services.service1.containers"
-          - "'exporter_a' in _state_data.services.telemetry.containers"
-          - "'exporter_b' in _state_data.services.telemetry.containers"
-        fail_msg: "Services should be tracked in state file"
-        success_msg: "Services are properly tracked"
+          - not _old_service_file.stat.exists
+        fail_msg: "Old container_manage service file was not cleaned up"
+        success_msg: "Old container_manage service file was cleaned up"
 
-- name: Test service update - remove container_b and add container_c
+    - name: Check old PID file was removed
+      ansible.builtin.stat:
+        path: /run/test_service.pid
+      register: _old_pid_file
+
+    - name: Assert old PID file is gone
+      ansible.builtin.assert:
+        that:
+          - not _old_pid_file.stat.exists
+        fail_msg: "Old PID file was not cleaned up"
+        success_msg: "Old PID file was cleaned up"
+
+    - name: Check old startup config was removed
+      ansible.builtin.stat:
+        path: /var/lib/edpm-config/container-startup-config/test_service.json
+      register: _old_startup_config
+
+    - name: Assert old startup config is gone
+      ansible.builtin.assert:
+        that:
+          - not _old_startup_config.stat.exists
+        fail_msg: "Old container-startup-config was not cleaned up"
+        success_msg: "Old container-startup-config was cleaned up"
+
+    # Verify Quadlet deployment
+    - name: Verify Quadlet .container file was created
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/edpm_test_service.container
+      register: _quadlet_file
+      become: true
+
+    - name: Assert Quadlet file exists
+      ansible.builtin.assert:
+        that:
+          - _quadlet_file.stat.exists
+        fail_msg: "Quadlet .container file was not created"
+        success_msg: "Quadlet .container file exists"
+
+    - name: Read Quadlet file content
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_test_service.container
+      register: _quadlet_content
+      become: true
+
+    - name: Decode Quadlet file content
+      ansible.builtin.set_fact:
+        _quadlet_text: "{{ _quadlet_content.content | b64decode }}"
+
+    - name: Verify Quadlet file content
+      ansible.builtin.assert:
+        that:
+          - "'[Container]' in _quadlet_text"
+          - "'ContainerName=test_service' in _quadlet_text"
+          - "'Image=quay.io/centos/centos:stream9' in _quadlet_text"
+          - "'Network=host' in _quadlet_text"
+          - "'Exec=sleep 3600' in _quadlet_text"
+          - "'PodmanArgs=--privileged' in _quadlet_text"
+          - "'[Service]' in _quadlet_text"
+          - "'Restart=always' in _quadlet_text"
+          - "'[Install]' in _quadlet_text"
+          - "'WantedBy=multi-user.target' in _quadlet_text"
+          - "'Label=managed_by=edpm_ansible' in _quadlet_text"
+        fail_msg: "Quadlet file content is incorrect"
+        success_msg: "Quadlet file content is correct"
+
+    - name: Verify EDPM_CONFIG_HASH is present in Quadlet file
+      ansible.builtin.assert:
+        that:
+          - "'EDPM_CONFIG_HASH=' in _quadlet_text"
+        fail_msg: "EDPM_CONFIG_HASH not found in Quadlet file"
+        success_msg: "EDPM_CONFIG_HASH is present in Quadlet file"
+
+    - name: Check if edpm_test_service systemd service is active
+      ansible.builtin.command: systemctl is-active --quiet edpm_test_service
+      register: _service_active
+      become: true
+
+    - name: Assert systemd service is active
+      ansible.builtin.assert:
+        that:
+          - _service_active.rc == 0
+        fail_msg: "edpm_test_service systemd service is not active"
+        success_msg: "edpm_test_service systemd service is active"
+
+    - name: Check for test_service container
+      ansible.builtin.command: podman container exists test_service
+      become: true
+
+    - name: Verify state file tracking
+      block:
+        - name: Read deployed services state file
+          ansible.builtin.slurp:
+            src: /var/lib/edpm-config/deployed_services.yaml
+          register: _state_file
+
+        - name: Parse state data
+          ansible.builtin.set_fact:
+            _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
+
+        - name: Assert service is tracked in state file
+          ansible.builtin.assert:
+            that:
+              - "'test_service' in _state_data.services"
+              - "'test_service' in _state_data.services.test_service.containers"
+            fail_msg: "Service not tracked in state file"
+            success_msg: "Service is properly tracked in state file"
+
+- name: Test Quadlet idempotency
   hosts: all
   gather_facts: false
   tasks:
-    # Update telemetry: keep exporter_a, remove exporter_b, add exporter_c
-    - name: Update telemetry - replace exporter_b with exporter_c
+    - name: Get container ID before re-run
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_before
+      become: true
+
+    - name: Re-run test_service deployment (no config change)
       ansible.builtin.include_role:
         name: osp.edpm.edpm_container_standalone
       vars:
-        edpm_container_standalone_service: exporter_c
-        edpm_service_name: telemetry
-        edpm_container_standalone_container_defs:
-          exporter_a:
-            image: quay.io/centos/centos:stream9
-            net: host
-            privileged: true
-            restart: always
-            command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-          exporter_c:
-            image: quay.io/centos/centos:stream9
-            net: host
-            privileged: true
-            restart: always
-            command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
         edpm_container_standalone_kolla_config_files:
-          exporter_a:
+          test_service:
             command: 'sleep 3600'
-          exporter_c:
-            command: 'sleep 3600'
+        edpm_container_standalone_config_volumes:
+          - "/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z"
 
-    - name: Verify exporter_c was created
-      command: podman container exists exporter_c
-      changed_when: false
+  post_tasks:
+    - name: Get container ID after re-run
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_after
+      become: true
 
-    - name: Read state file after update
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_updated
-
-    - name: Parse updated state data
-      ansible.builtin.set_fact:
-        _state_data_updated: "{{ _state_file_updated.content | b64decode | from_yaml }}"
-
-    - name: Verify state file reflects the update
+    - name: Assert container was NOT recreated (idempotency)
       ansible.builtin.assert:
         that:
-          - "'telemetry' in _state_data_updated.services"
-          - "'exporter_a' in _state_data_updated.services.telemetry.containers"
-          - "'exporter_b' not in _state_data_updated.services.telemetry.containers"
-          - "'exporter_c' in _state_data_updated.services.telemetry.containers"
-        fail_msg: "State file should have exporter_a and exporter_c but not exporter_b"
-        success_msg: "State file correctly reflects the updated service"
+          - _container_id_before.stdout == _container_id_after.stdout
+        fail_msg: "Container was recreated when nothing changed"
+        success_msg: "Container was not recreated (idempotent)"
+
+    # Verify cleanup did NOT run (no old artifacts exist)
+    - name: Check old service file still absent (cleanup is self-gating)
+      ansible.builtin.stat:
+        path: /etc/systemd/system/edpm_test_service.service
+      register: _old_service_after_idem
+
+    - name: Assert no old service file reappeared
+      ansible.builtin.assert:
+        that:
+          - not _old_service_after_idem.stat.exists
+        fail_msg: "Old service file should not exist after idempotent run"
+        success_msg: "Cleanup correctly skipped on idempotent run"
+
+- name: Test config file change triggers restart
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get container ID before config change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_before_config
+      become: true
+
+    - name: Modify config file to trigger hash change
+      become: true
+      ansible.builtin.copy:
+        content: "updated_config=true"
+        dest: /var/lib/openstack/configs/test_service/test.conf
+        mode: "0644"
+
+    - name: Re-deploy with same template but changed config content
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
+        edpm_container_standalone_kolla_config_files:
+          test_service:
+            command: 'sleep 3600'
+        edpm_container_standalone_config_volumes:
+          - "/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z"
+
+  post_tasks:
+    - name: Get container ID after config change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_after_config
+      become: true
+
+    - name: Assert container was recreated after config file change
+      ansible.builtin.assert:
+        that:
+          - _container_id_before_config.stdout != _container_id_after_config.stdout
+        fail_msg: "Container was NOT recreated after config file change"
+        success_msg: "Container was properly recreated after config file change"
+
+    - name: Check service is still active after config change restart
+      ansible.builtin.command: systemctl is-active --quiet edpm_test_service
+      register: _service_active_config
+      become: true
+
+    - name: Assert service is active after config change restart
+      ansible.builtin.assert:
+        that:
+          - _service_active_config.rc == 0
+        fail_msg: "Service is not active after config change restart"
+        success_msg: "Service is active after config change restart"
+
+- name: Test Quadlet container restart on template change
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get container ID before template change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_before_change
+      become: true
+
+    - name: Re-deploy with changed template (triggers .container file change)
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service_updated.container.j2"
+        edpm_container_standalone_kolla_config_files:
+          test_service:
+            command: 'sleep 7200'
+        edpm_container_standalone_config_volumes:
+          - "/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z"
+
+  post_tasks:
+    - name: Get container ID after template change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_after_change
+      become: true
+
+    - name: Assert container was recreated after template change
+      ansible.builtin.assert:
+        that:
+          - _container_id_before_change.stdout != _container_id_after_change.stdout
+        fail_msg: "Container was NOT recreated after template change"
+        success_msg: "Container was properly recreated after template change"
+
+    - name: Check service is still active after restart
+      ansible.builtin.command: systemctl is-active --quiet edpm_test_service
+      register: _service_active_after
+      become: true
+
+    - name: Assert service is active after restart
+      ansible.builtin.assert:
+        that:
+          - _service_active_after.rc == 0
+        fail_msg: "Service is not active after restart"
+        success_msg: "Service is active after template change restart"
 
 - name: Test state file removal
   hosts: all
   gather_facts: false
   tasks:
-    # Remove one container from multi-container service
-    - name: Remove exporter_c from telemetry
+    - name: Remove test_service from state file
       ansible.builtin.include_role:
         name: osp.edpm.edpm_container_standalone
         tasks_from: state_file_update.yml
       vars:
         edpm_container_state_remove: true
-        edpm_service_name: telemetry
-        edpm_container_standalone_service: exporter_c
+        edpm_container_standalone_service: test_service
 
-    - name: Read state file after container removal
+    - name: Read state file after removal
       ansible.builtin.slurp:
         src: /var/lib/edpm-config/deployed_services.yaml
       register: _state_file_after_remove
 
-    - name: Parse state data
+    - name: Parse state data after removal
       ansible.builtin.set_fact:
         _state_data_after_remove: "{{ _state_file_after_remove.content | b64decode | from_yaml }}"
 
-    - name: Verify container was removed but service remains
+    - name: Verify service was auto-removed from state file
       ansible.builtin.assert:
         that:
-          - "'telemetry' in _state_data_after_remove.services"
-          - "'exporter_a' in _state_data_after_remove.services.telemetry.containers"
-          - "'exporter_c' not in _state_data_after_remove.services.telemetry.containers"
-        fail_msg: "exporter_c should be removed but telemetry and exporter_a should remain"
-        success_msg: "Container was successfully removed from service"
-
-    # Remove last container - service should be auto-removed
-    - name: Remove last container from telemetry
-      ansible.builtin.include_role:
-        name: osp.edpm.edpm_container_standalone
-        tasks_from: state_file_update.yml
-      vars:
-        edpm_container_state_remove: true
-        edpm_service_name: telemetry
-        edpm_container_standalone_service: exporter_a
-
-    - name: Read state file after last container removal
-      ansible.builtin.slurp:
-        src: /var/lib/edpm-config/deployed_services.yaml
-      register: _state_file_final
-
-    - name: Parse state data
-      ansible.builtin.set_fact:
-        _state_data_final: "{{ _state_file_final.content | b64decode | from_yaml }}"
-
-    - name: Verify service was auto-removed when last container removed
-      ansible.builtin.assert:
-        that:
-          - "'telemetry' not in _state_data_final.services"
-          - "'service1' in _state_data_final.services"
-        fail_msg: "telemetry should be auto-removed when last container is removed"
-        success_msg: "Service was automatically removed when last container was removed"
+          - "'test_service' not in _state_data_after_remove.services"
+        fail_msg: "test_service should be removed from state file"
+        success_msg: "Service was successfully removed from state file"
