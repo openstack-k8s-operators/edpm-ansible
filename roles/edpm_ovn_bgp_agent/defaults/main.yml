@@ -69,9 +69,9 @@ edpm_ovn_bgp_agent_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-
 edpm_ovn_bgp_agent_tls_cacert_volumes: []
 
 edpm_ovn_bgp_agent_tls_volumes:
-  - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/cacerts/{{ edpm_ovn_bgp_agent_service_name }}/tls-ca-bundle.pem:/etc/pki/tls/certs/ovndbca.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/rbac/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_bgp_agent_service_name }}/rbac/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
 
 # we need to add the InternalTLSCAFile and do a if/then/else in case tls-e
 
