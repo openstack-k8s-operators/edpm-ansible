@@ -106,6 +106,9 @@ edpm_ovn_ovs_other_config: {}
 # If container health check should be enabled
 edpm_ovn_healthcheck: true
 
+edpm_ovn_controller_healthcheck_volumes:
+  - "/var/lib/openstack/healthchecks/ovn_controller:/openstack:ro,z"
+
 # Resource provider configuration for OVN CMS options
 # Dictionary defining bandwidth limits and hypervisor mappings for resource providers
 # Format: { bridge_name: { ingress: value, egress: value } }
