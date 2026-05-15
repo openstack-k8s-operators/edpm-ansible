@@ -149,24 +149,19 @@ class TestNeutronDHCP(unittest.TestCase):
         self._workaround_sys_mount_permission_problem()
         self._workaround_sys_mount_permission_problem(
             NEUTRON_DHCP_AGENT_CONTAINER)
-        self.host.run_test("/sbin/ip netns add %s" % self.namespace_name)
+        self.host.run_test(
+            "/usr/bin/podman exec %s /sbin/ip netns add %s" % (
+                NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name))
         self.host.run_test(
             "/usr/bin/podman exec %s /sbin/ip netns exec %s haproxy -f %s" % (
                 NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name,
                 haproxy_config_file))
         assert self.host.podman(haproxy_container_name).is_running
-        # Now stop agent container and make sure that sidecar container
-        # with haproxy is still running
-        self.host.run("/usr/bin/systemctl stop %s" %
-                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
-        assert self.host.podman(haproxy_container_name).is_running
-        # Test haproxy-kill script too
-        self.host.run("/usr/bin/systemctl start %s" %
-                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
-        self._workaround_sys_mount_permission_problem(
-            NEUTRON_DHCP_AGENT_CONTAINER)
+
+        # Test haproxy-kill script while the same agent container that
+        # created the namespace is still running. The kill-script uses
+        # nsenter to reach PID 1's podman, which requires being in the
+        # same user namespace as the network namespace creator.
         haproxy_process = self._find_process("haproxy")
         assert haproxy_process
         self.host.run(
@@ -184,6 +179,20 @@ class TestNeutronDHCP(unittest.TestCase):
         ).stdout
         assert haproxy_container_name not in all_containers
 
+        # Recreate sidecar to test that it survives agent container restart
+        self.host.run_test(
+            "/usr/bin/podman exec %s /sbin/ip netns exec %s haproxy -f %s" % (
+                NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name,
+                haproxy_config_file))
+        assert self.host.podman(haproxy_container_name).is_running
+
+        # Now stop agent container and make sure that sidecar container
+        # with haproxy is still running
+        self.host.run("/usr/bin/systemctl stop %s" %
+                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
+        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
+        assert self.host.podman(haproxy_container_name).is_running
+
     def test_dnsmasq_sidecar_container(self):
         dnsmasq_container_name = "neutron-dnsmasq-%s" % self.namespace_name
         dnsmasq_network_config_dir = "%s/%s" % (DNSMASQ_CONFIG_DIR,
@@ -194,7 +203,9 @@ class TestNeutronDHCP(unittest.TestCase):
         self._workaround_sys_mount_permission_problem()
         self._workaround_sys_mount_permission_problem(
             NEUTRON_DHCP_AGENT_CONTAINER)
-        self.host.run_test("/sbin/ip netns add %s" % self.namespace_name)
+        self.host.run_test(
+            "/usr/bin/podman exec %s /sbin/ip netns add %s" % (
+                NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name))
         self.host.run_test(
             "/usr/bin/podman exec %s /sbin/ip netns exec %s "
             "dnsmasq -k --no-hosts --no-resolv "
@@ -203,18 +214,11 @@ class TestNeutronDHCP(unittest.TestCase):
                 NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name,
                 dnsmasq_pid_file))
         assert self.host.podman(dnsmasq_container_name).is_running
-        # Now stop agent container and make sure that sidecar container
-        # with haproxy is still running
-        self.host.run("/usr/bin/systemctl stop %s" %
-                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
-        assert self.host.podman(dnsmasq_container_name).is_running
-        # Test dnsmasq-kill script too
-        self.host.run("/usr/bin/systemctl start %s" %
-                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
-        self._workaround_sys_mount_permission_problem(
-            NEUTRON_DHCP_AGENT_CONTAINER)
+
+        # Test dnsmasq-kill script while the same agent container that
+        # created the namespace is still running. The kill-script uses
+        # nsenter to reach PID 1's podman, which requires being in the
+        # same user namespace as the network namespace creator.
         dnsmasq_process = self._find_process("dnsmasq")
         assert dnsmasq_process
         self.host.run(
@@ -231,6 +235,23 @@ class TestNeutronDHCP(unittest.TestCase):
             "/usr/bin/podman ps --all --format '{{ '{{' }}.Names{{ '}}' }}'"
         ).stdout
         assert dnsmasq_container_name not in all_containers
+
+        # Recreate sidecar to test that it survives agent container restart
+        self.host.run_test(
+            "/usr/bin/podman exec %s /sbin/ip netns exec %s "
+            "dnsmasq -k --no-hosts --no-resolv "
+            "--pid-file=%s --conf-file=/dev/null "
+            "--domain=openstackgate.local" % (
+                NEUTRON_DHCP_AGENT_CONTAINER, self.namespace_name,
+                dnsmasq_pid_file))
+        assert self.host.podman(dnsmasq_container_name).is_running
+
+        # Now stop agent container and make sure that sidecar container
+        # with dnsmasq is still running
+        self.host.run("/usr/bin/systemctl stop %s" %
+                      EDPM_NEUTRON_DHCP_AGENT_SERVICE)
+        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
+        assert self.host.podman(dnsmasq_container_name).is_running
 
     def test_service_host_is_fqdn(self):
         assert "edpm-0.localdomain" in self.host.run(
