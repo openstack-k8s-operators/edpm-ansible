@@ -6,40 +6,26 @@
   when: ansible_local.bootc is defined and ansible_local.bootc
   failed_when: true
 
-- name: Disable GPU modules
-  ansible.builtin.include_tasks: disable_module.yml
-  loop: "{{ edpm_accel_drivers_denylist_modules }}"
+- name: Setup configuration and build enabled vendors list
+  ansible.builtin.import_tasks: setup_config.yml
+
+- name: Install GPU drivers for enabled vendors
+  ansible.builtin.include_tasks: driver_install.yml
+  loop: "{{ _edpm_accel_drivers_enabled_vendors }}"
   loop_control:
-    loop_var: module_name
-
-- name: NVIDIA Driver installation
-  when: edpm_accel_drivers_install_nvidia | bool
-  ansible.builtin.import_tasks: nvidia_drivers.yml
-
-- name: AMD Driver installation
-  when: edpm_accel_drivers_install_amd | bool
-  block:
-    - name: Validate AMD driver custom URL is provided
-      ansible.builtin.assert:
-        that:
-          - edpm_accel_drivers_amd_custom_url != ""
-        fail_msg: |
-          AMD driver installation requires a custom URL.
-          Please set 'edpm_accel_drivers_amd_custom_url' to a valid driver package URL (.rpm file).
-
-    - ansible.builtin.import_tasks: amd_drivers.yml  # noqa: name[missing]
+    loop_var: vendor_name
 
 - name: Clean up temporary directory
-  when: edpm_accel_drivers_cleanup_temp_files | bool
+  when: _edpm_accel_drivers_config.cleanup_temp_files | bool
   become: true
   ansible.builtin.file:
-    path: "{{ edpm_accel_drivers_cache_dir }}"
+    path: "{{ _edpm_accel_drivers_config.cache_dir }}"
     state: absent
 
 - name: Run boot configuration tasks
-  when: edpm_accel_drivers_install_nvidia | bool or edpm_accel_drivers_install_amd | bool or _edpm_accel_drivers_blacklist_result.changed | bool
+  when: _edpm_accel_drivers_enabled_vendors | length > 0
   ansible.builtin.import_tasks: boot_config.yml
 
 - name: Configure MIG partitioning on NVIDIA GPU
-  when: edpm_accel_drivers_nvidia_manage_mig | bool
+  when: _edpm_accel_drivers_config.features.nvidia_mig.manage | bool
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml

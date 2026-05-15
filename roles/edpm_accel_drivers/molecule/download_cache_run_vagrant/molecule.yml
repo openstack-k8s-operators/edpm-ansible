@@ -21,9 +21,9 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    converge: ../custom_url_rpm/converge.yml
-    prepare: ../custom_url_rpm/prepare.yml
-    verify: ../custom_url_rpm/verify.yml
+    converge: ../download_cache_run/converge.yml
+    prepare: ../download_cache_run/prepare.yml
+    verify: ../download_cache_run/verify.yml
 verifier:
   name: ansible
 scenario:

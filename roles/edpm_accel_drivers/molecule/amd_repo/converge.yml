@@ -1,0 +1,21 @@
+---
+# NOTE: This test uses gim-dkms from the AMD MX-GPU repository.
+# GIM (Graphics Virtualization Manager) is the host driver for AMD GPU virtualization.
+# IMPORTANT: DKMS is not supported on RHEL systems in production.
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers:
+          vendors:
+            amd_gpu:
+              enabled: true
+              repo:
+                url: "https://repo.radeon.com/mxgpu/el9/8.7.1/main/"
+                gpgkey: "https://repo.radeon.com/rocm/rocm.gpg.key"
+                module_name: ""
+                module_stream: ""
+                package_name: "gim-dkms"
+                disable_gpg_check: false
+                no_basearch: true
