@@ -36,6 +36,10 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
+- name: Update ovn_metadata_agent sidecar scripts
+  ansible.builtin.include_tasks:
+    file: sidecar.yml
+
 - name: Run ovn_metadata_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone

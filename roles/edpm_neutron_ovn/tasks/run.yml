@@ -32,6 +32,10 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Update ovn_agent sidecar scripts
+  ansible.builtin.include_tasks:
+    file: sidecar.yml
+
 - name: Run ovn_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
