@@ -43,32 +43,13 @@
     mode: "0600"
   loop: "{{ edpm_container_standalone_kolla_config_files | dict2items }}"
 
-- name: "Create config file {{ edpm_container_startup_config_dir + '/' + edpm_container_standalone_service }}"
-  ansible.builtin.file:
-    path: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
-    state: directory
-    mode: "0755"
+- name: Clean up old container_manage artifacts
+  ansible.builtin.include_tasks: cleanup.yml
+  # length > 0 is defensive; quadlet_defs is always populated when called from service roles
+  when: edpm_container_standalone_quadlet_defs | length > 0
 
-- name: "Render container definitions: [{{ edpm_container_standalone_service }} ]"
-  ansible.builtin.copy:
-    content: "{{ item.value | to_nice_json }}"
-    dest: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}/{{ item.key }}.json"
-    mode: "0644"
-  # NOTE(tkajinam): Some containers can contain secrets in their environments.
-  #                 Hide the output to avoid dumping these to output.
-  no_log: true
-  loop: "{{ edpm_container_standalone_container_defs | dict2items }}"
-
-- name: "Run containers: [ {{ edpm_container_standalone_service }} ]"
-  ansible.builtin.include_role:
-    name: edpm_container_manage
-  vars:
-    edpm_container_manage_config: "{{ edpm_container_startup_config_dir }}/{{ edpm_container_standalone_service }}"
-    edpm_container_manage_config_patterns: "*.json"
-    edpm_container_manage_config_id: "{{ edpm_container_standalone_service }}"
-    edpm_container_manage_containers: "{{ edpm_container_standalone_container_defs.keys() | list }}"
-    # Disable deprecated orphan cleanup - use edpm_cleanup role instead
-    edpm_container_manage_clean_orphans: false
+- name: "Deploy containers via Quadlet: [ {{ edpm_container_standalone_service }} ]"
+  ansible.builtin.include_tasks: quadlet.yml
 
 - name: Update service state file
   ansible.builtin.include_tasks: state_file_update.yml

@@ -18,10 +18,8 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-import fnmatch
 import glob
 import hashlib
-import json
 import os
 import yaml
 
@@ -39,40 +37,47 @@ author:
   - "Emilien Macchi (@EmilienM)"
   - "Roberto Alfieri (@rebtoor)"
 version_added: '2.9'
-short_description: Generate config hashes for container startup configs
+short_description: Compute config hash from container volume mounts
 notes: []
 description:
-  - Generate config hashes for container startup configs
+  - Compute a SHA-256 hash from files in config volume mount paths.
+    Returns the hash without modifying any file.
 requirements:
   - None
 options:
-  check_mode:
+  volumes:
     description:
-      - Ansible check mode is enabled
-    type: bool
-    default: False
+      - List of volume mount strings (host:container:opts format).
+        Only volumes with host paths under config_vol_prefix are hashed.
+    type: list
+    default: []
   config_vol_prefix:
     description:
-      - Config volume prefix
+      - Host path prefix used to filter which volumes contain config data.
     type: str
     default: '/var/lib/openstack'
 """
 
 EXAMPLES = """
-- name: Update config hashes for container startup configs
+- name: Compute config hash for a service
   container_config_hash:
+    volumes:
+      - "/var/lib/openstack/certs/ovn/default/ca.crt:/etc/pki/tls/certs/ca.crt:ro,z"
+      - "/var/lib/openstack/healthchecks/ovn_controller:/openstack:ro,z"
+  register: result
+
+# result.hash contains the computed SHA-256 hash string
 """
 
-CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
 BUF_SIZE = 65536
 SHARED_CONFIG_NAMESPACES = ('certs', 'cacerts', 'configs')
 
 
 class ContainerConfigHashManager:
-    """Notes about this module.
+    """Compute config hashes for container volume mounts.
 
-    It will generate container config hash that will be consumed by
-    the edpm-container-manage role that is using podman_container module.
+    Takes a list of volume mount strings, filters for config volumes
+    under config_vol_prefix, and returns a SHA-256 hash of their contents.
     """
 
     def __init__(self, module, results):
@@ -87,65 +92,40 @@ class ContainerConfigHashManager:
         # Set parameters
         self.config_vol_prefix = args['config_vol_prefix']
 
-        # Update container-startup-config with new config hashes
-        self._update_hashes()
+        self._hash_config_volumes(args.get('volumes', []))
 
         self.module.exit_json(**self.results)
 
-    def _remove_file(self, path):
-        """Remove a file.
+    def _hash_config_volumes(self, volumes):
+        """Compute config hash from volume list without writing to any file.
 
-        :param path: string
+        Filters volumes by config_vol_prefix, resolves each to its config
+        base directory via _get_config_base, deduplicates, then computes
+        SHA-256 of all files in each directory.
+
+        :param volumes: list of volume mount strings (host:container:opts)
         """
-        if os.path.exists(path):
-            os.remove(path)
-
-    def _find(self, path, pattern='*.json'):
-        """Returns a list of files in a directory.
-
-        :param path: string
-        :param pattern: string
-        :returns: list
-        """
-        configs = []
-        if os.path.exists(path):
-            for root, dirnames, filenames in os.walk(path):
-                for filename in fnmatch.filter(filenames, pattern):
-                    configs.append(os.path.join(root, filename))
-        else:
-            self.module.warn('{} does not exists'.format(path))
-        return configs
-
-    def _slurp(self, path):
-        """Slurps a file and return its content.
-
-        :param path: string
-        :returns: string
-        """
-        if os.path.exists(path):
-            with open(path, 'r') as f:
-                return f.read()
-        else:
-            self.module.warn('{} was not found.'.format(path))
-            return ''
-
-    def _update_container_config(self, path, config):
-        """Update a container config.
-
-        :param path: string
-        :param config: string
-        """
-        with open(path, 'wb') as f:
-            f.write(json.dumps(config, indent=2).encode('utf-8'))
-        os.chmod(path, 0o600)
-        self.results['changed'] = True
+        prefix = self.config_vol_prefix
+        config_bases = set()
+        for v in volumes:
+            host_path = v.split(":")[0]
+            if host_path.startswith(prefix):
+                config_bases.add(self._get_config_base(prefix, host_path))
+        if not config_bases:
+            self.results['hash'] = ''
+            return
+        hashes = [
+            self._calculate_checksum(vol_path)
+            for vol_path in sorted(config_bases)
+        ]
+        self.results['hash'] = '-'.join(hashes)
 
     def _read_file(self, file):
-        """Read a given file and return its content
+        """Read a given file and return its content.
+
         :param file: string
         :returns: bytes
         """
-
         r = b''
         with open(file, 'rb') as f:
             while True:
@@ -155,21 +135,16 @@ class ContainerConfigHashManager:
                     break
         return r
 
-    def _calculate_checksum(self, config_volume, exclusions=[]):
-        """Calculate an sha256 hash from a list of files from the given folder
-           and if needed exclude files from that list.
+    def _calculate_checksum(self, config_volume):
+        """Calculate a SHA-256 hash from all files in the given directory.
 
         :param config_volume: string
-        :param exclusions: list
         :returns: string
         """
-
         total_hash = hashlib.new('sha256')
         for file in glob.glob(config_volume + '/**/*', recursive=True):
-            file_relpath = '/' + os.path.relpath(file, config_volume)
-            if os.path.isfile(file) and file_relpath not in exclusions:
+            if os.path.isfile(file):
                 total_hash.update(self._read_file(file))
-
         return total_hash.hexdigest()
 
     def _get_config_base(self, prefix, volume):
@@ -194,60 +169,6 @@ class ContainerConfigHashManager:
         self.module.fail_json(
             msg='Could not find config base for: {} '
                 'with prefix: {}'.format(volume, prefix))
-
-    def _match_config_volumes(self, config):
-        """Return a list of volumes that match a config.
-
-        :param config: dict
-        :returns: list
-        """
-        # Match the mounted config volumes - we can't just use the
-        # key as e.g "novacomute" consumes config-data/nova
-        prefix = self.config_vol_prefix
-        try:
-            volumes = config.get('volumes', [])
-        except AttributeError:
-            self.module.fail_json(
-                msg='Error fetching volumes. Prefix: '
-                    '{} - Config: {}'.format(prefix, config))
-        matched = set()
-        for v in volumes:
-            host_path = v.split(":")[0]
-            if host_path.startswith(prefix):
-                matched.add(self._get_config_base(prefix, host_path))
-        return sorted(matched)
-
-    def _update_hashes(self):
-        """Update container startup config with new config hashes if needed.
-        """
-        configs = self._find(CONTAINER_STARTUP_CONFIG)
-        for config in configs:
-            old_config_hash = ''
-            cname = os.path.splitext(os.path.basename(config))[0]
-            if cname.startswith('hashed-'):
-                # Take the opportunity to cleanup old hashed files which
-                # don't exist anymore.
-                self._remove_file(config)
-                continue
-            startup_config_json = json.loads(self._slurp(config))
-            config_volumes = self._match_config_volumes(startup_config_json)
-            if config_volumes:
-                old_config_hash = startup_config_json['environment'].get(
-                    'EDPM_CONFIG_HASH', '')
-                exclude_from_hash = startup_config_json.get(
-                    'edpm_exclude_files_from_hash', [])
-                new_hashes = [
-                    self._calculate_checksum(vol_path, exclude_from_hash) for vol_path in config_volumes
-                ]
-                new_hash = '-'.join(new_hashes)
-                if new_hash != old_config_hash:
-                    startup_config_json['environment']['EDPM_CONFIG_HASH'] = (
-                        new_hash)
-                    self._update_container_config(
-                        config, startup_config_json)
-                else:
-                    # config doesn't need an update
-                    continue
 
 
 def main():

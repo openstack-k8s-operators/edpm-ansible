@@ -28,3 +28,21 @@
   become: true
   roles:
     - role: osp.edpm.env_data
+
+- name: Prepare config data for hash testing
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create test config directory
+      ansible.builtin.file:
+        path: /var/lib/openstack/configs/test_service
+        state: directory
+        mode: "0755"
+        setype: container_file_t
+
+    - name: Create test config file
+      ansible.builtin.copy:
+        content: "initial_config=true"
+        dest: /var/lib/openstack/configs/test_service/test.conf
+        mode: "0644"

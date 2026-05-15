@@ -2,12 +2,13 @@
 
 ## Overview
 
-The `edpm_container_standalone` role provides a unified interface for deploying and managing containerized services in EDPM. It wraps the lower-level `edpm_container_manage` role with additional features including:
+The `edpm_container_standalone` role provides a unified interface for deploying and managing containerized services in EDPM via Podman Quadlet. It handles:
 
+- **Quadlet-based container deployment** using native `.container` unit files
+- **Config hash computation** for automatic restarts on config/cert changes
+- **Automatic cleanup** of old `container_manage` artifacts during migration
 - **Automatic state tracking** of deployed services
-- **Service lifecycle management** (deployment)
 - **Container grouping** under logical service names
-- **Atomic state file operations** for safe concurrent deployments
 
 **Key Concept:** Services are defined at the playbook level, not the role level. When a playbook deploys multiple roles, they can all be tracked under a single service name for unified lifecycle management.
 
@@ -21,43 +22,93 @@ The `edpm_container_standalone` role provides a unified interface for deploying 
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: myservice
-    edpm_container_standalone_container_defs:
-      myservice_container:
-        image: quay.io/myorg/myservice:latest
-        command: /usr/bin/myservice-server
-        net: host
-        privileged: false
-        restart: always
-        environment:
-          KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+    edpm_container_standalone_quadlet_defs:
+      myservice: "{{ role_path }}/templates/quadlet/myservice.container.j2"
     edpm_container_standalone_kolla_config_files:
-      myservice_container:
+      myservice:
         command: /usr/bin/myservice-server
         config_files:
           - source: /var/lib/kolla/config_files/myservice.conf
             dest: /etc/myservice/myservice.conf
             owner: myservice
             perm: "0600"
+    edpm_container_standalone_config_volumes:
+      - "/var/lib/openstack/configs/myservice/myservice.conf:/etc/myservice/myservice.conf:ro,z"
 ```
 
 This will:
 1. Create kolla configuration files in `/var/lib/kolla/config_files/`
-2. Create container definition JSON in `/var/lib/edpm-config/container-startup-config/myservice/`
-3. Use `edpm_container_manage` to create and start the container
-4. Register the service in the state file
-5. Create systemd services for the container
+2. Clean up any old `container_manage` artifacts for this service
+3. Compute a config hash from volumes under `/var/lib/openstack`
+4. Render the Quadlet `.container` template (with the hash baked in)
+5. Reload systemd and start/restart the service as needed
+6. Register the service in the state file
 
 ### Required Variables
 
 - `edpm_container_standalone_service`: Service name (used for directory naming)
-- `edpm_container_standalone_container_defs`: Dictionary of container definitions
+- `edpm_container_standalone_quadlet_defs`: Dict mapping container name to Quadlet template path
 - `edpm_container_standalone_kolla_config_files`: Kolla configuration per container
 
 ### Optional Variables
 
+- `edpm_container_standalone_config_volumes`: Volume mount strings for config hash computation (default: `[]`)
 - `edpm_service_name`: Override service name for state tracking (enables container grouping)
 - `edpm_container_state_append`: Append containers to existing service (default: false)
 - `edpm_container_track_state`: Enable state tracking (default: true)
+
+## Quadlet Templates
+
+Each service role provides its own `.container.j2` template. The template is a standard Podman Quadlet unit file with Jinja2 templating:
+
+```ini
+[Unit]
+Description=myservice container
+
+[Container]
+ContainerName=myservice
+Image={{ edpm_myservice_image }}
+Network=host
+PodmanArgs=--privileged
+Exec=/usr/bin/myservice-server
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% if _edpm_config_hash.hash | default('') | length > 0 -%}
+Environment=EDPM_CONFIG_HASH={{ _edpm_config_hash.hash }}
+{% endif -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The `_edpm_config_hash.hash` variable is computed by the role before template rendering and contains a SHA-256 hash of all config files under `/var/lib/openstack` referenced in `edpm_container_standalone_config_volumes`.
+
+### What Triggers a Container Restart
+
+| Change | Template diff? | Restart? |
+|---|---|---|
+| Image change | Yes (`Image=` line changes) | Yes |
+| Volume added/removed | Yes (`Volume=` line changes) | Yes |
+| Config file content change (cert rotation) | Yes (`EDPM_CONFIG_HASH` value changes) | Yes |
+| Environment variable change | Yes (`Environment=` line changes) | Yes |
+| No change | No (identical output) | No |
+
+## Migration Cleanup
+
+When a service migrates from `container_manage` to Quadlet, old artifacts are automatically detected and removed. The role checks for old unit files at `/etc/systemd/system/edpm_<name>.service` (which Quadlet never writes to) and removes:
+
+- Old systemd service files and `.requires` directories
+- Healthcheck timers and services
+- PID files at `/run/<name>.pid`
+- Container startup configs at `/var/lib/edpm-config/container-startup-config/<name>.json`
+- The old podman container itself
+
+After the first cleanup run, subsequent runs detect nothing and skip cleanup entirely.
 
 ## State File Tracking
 
@@ -75,9 +126,9 @@ When a role uses `edpm_container_standalone`, its containers are automatically r
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_service: myservice
-    edpm_container_standalone_container_defs:
-      myservice_container1: {...}
-      myservice_container2: {...}
+    edpm_container_standalone_quadlet_defs:
+      myservice_container1: "{{ role_path }}/templates/quadlet/myservice_container1.container.j2"
+      myservice_container2: "{{ role_path }}/templates/quadlet/myservice_container2.container.j2"
 ```
 
 This creates an entry in the state file:
@@ -105,8 +156,8 @@ To group multiple containers under a single service, set the `edpm_service_name`
   vars:
     edpm_container_standalone_service: "nova_compute_init"
     edpm_service_name: "{{ edpm_nova_service_name }}"  # Group under "nova"
-    edpm_container_standalone_container_defs:
-      nova_compute_init: {...}
+    edpm_container_standalone_quadlet_defs:
+      nova_compute_init: "{{ role_path }}/templates/quadlet/nova_compute_init.container.j2"
 
 - name: Deploy nova compute container
   ansible.builtin.include_role:
@@ -114,8 +165,8 @@ To group multiple containers under a single service, set the `edpm_service_name`
   vars:
     edpm_container_standalone_service: "nova_compute"
     edpm_service_name: "{{ edpm_nova_service_name }}"  # Group under "nova"
-    edpm_container_standalone_container_defs:
-      nova_compute: {...}
+    edpm_container_standalone_quadlet_defs:
+      nova_compute: "{{ role_path }}/templates/quadlet/nova_compute.container.j2"
 ```
 
 This results in:
@@ -230,9 +281,9 @@ The state file updates are handled in `tasks/state_file_update.yml` which:
   ansible.builtin.include_tasks: state_file_update.yml
   vars:
     _edpm_service_name: nova
-    edpm_container_standalone_container_defs:
-      nova_compute: {...}
-      nova_compute_init: {...}
+    edpm_container_standalone_quadlet_defs:
+      nova_compute: "{{ role_path }}/templates/quadlet/nova_compute.container.j2"
+      nova_compute_init: "{{ role_path }}/templates/quadlet/nova_compute_init.container.j2"
     edpm_container_state_append: false  # Set true to append containers
 ```
 
@@ -281,8 +332,8 @@ When deploying multiple containers under the same service name in separate calls
   vars:
     edpm_service_name: myservice
     edpm_container_state_append: false  # Replace
-    edpm_container_standalone_container_defs:
-      container1: {...}
+    edpm_container_standalone_quadlet_defs:
+      container1: "{{ role_path }}/templates/quadlet/container1.container.j2"
 
 # Subsequent containers: Append to state
 - name: Deploy additional containers
@@ -291,20 +342,13 @@ When deploying multiple containers under the same service name in separate calls
   vars:
     edpm_service_name: myservice
     edpm_container_state_append: true  # Append
-    edpm_container_standalone_container_defs:
-      container2: {...}
+    edpm_container_standalone_quadlet_defs:
+      container2: "{{ role_path }}/templates/quadlet/container2.container.j2"
 ```
 
 **Examples in the codebase:**
 - `edpm_telemetry`: Loops through exporters, replace on first, append on rest
 - `edpm_nova`: Deploys 3 containers sequentially, replace on first, append on rest
-
-### Container Labels
-
-All containers managed by this role include the following labels:
-- `managed_by=edpm_ansible` - Identifies containers managed by EDPM Ansible
-- `container_name=<container_name>`
-- `config_data=<container_definition>` (full definition)
 
 ## Removing Containers from State File
 

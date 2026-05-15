@@ -23,12 +23,8 @@
 edpm_container_standalone_service: ""
 # Directory for kolla config files
 edpm_container_kolla_config_dir: /var/lib/kolla/config_files
-# Directory for container startup configs
-edpm_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
 # Hash with keys of container name and value of YAML kolla config file.
 edpm_container_standalone_kolla_config_files: {}
-# Hash with keys of container name and value of YAML container definition
-edpm_container_standalone_container_defs: {}
 
 # List of common volumes that can be included in the template of a container
 # definition to include the most common volumes.
@@ -64,6 +60,15 @@ edpm_container_standalone_volumes: "{{
   }}"
 
 edpm_deploy_identifier: ''
+
+# Directory where Quadlet .container files are written
+edpm_container_standalone_quadlet_dir: /etc/containers/systemd
+# Dict mapping container name to the Jinja2 template path for its Quadlet
+# .container file. Each service role provides its own templates.
+edpm_container_standalone_quadlet_defs: {}
+# List of volume mount strings for config hash computation.
+# Only volumes with host paths under /var/lib/openstack are hashed.
+edpm_container_standalone_config_volumes: []
 
 # State file tracking
 edpm_container_track_state: true

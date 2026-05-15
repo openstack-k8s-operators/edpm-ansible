@@ -1,0 +1,89 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check for old container_manage service files
+  become: true
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/edpm_{{ item.key }}.service"
+  loop: "{{ edpm_container_standalone_quadlet_defs | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _edpm_old_service_files
+
+- name: Identify services needing cleanup
+  ansible.builtin.set_fact:
+    _edpm_cleanup_services: >-
+      {{ _edpm_old_service_files.results
+         | selectattr('stat.exists')
+         | map(attribute='item.key')
+         | list }}
+
+- name: Check for old healthcheck timers
+  become: true
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/edpm_{{ item }}_healthcheck.timer"
+  loop: "{{ _edpm_cleanup_services }}"
+  register: _edpm_old_healthcheck_timers
+
+- name: Stop and disable old container_manage services
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_{{ item }}.service"
+    state: stopped
+    enabled: false
+  loop: "{{ _edpm_cleanup_services }}"
+
+- name: Stop and disable old healthcheck timers
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_{{ item.item }}_healthcheck.timer"
+    state: stopped
+    enabled: false
+  loop: "{{ _edpm_old_healthcheck_timers.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists
+
+- name: Remove old containers
+  become: true
+  containers.podman.podman_container:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ _edpm_cleanup_services }}"
+
+# file module's state=absent is a no-op for paths that don't exist
+- name: Remove old systemd files, healthchecks, PIDs, and startup configs
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.0 | format(item.1) }}"
+    state: absent
+  loop: "{{ _cleanup_patterns | product(_edpm_cleanup_services) | list }}"
+  loop_control:
+    label: "{{ item.0 | format(item.1) }}"
+  vars:
+    _cleanup_patterns:
+      - "/etc/systemd/system/edpm_%s.service"
+      - "/etc/systemd/system/edpm_%s.service.requires"
+      - "/etc/systemd/system/edpm_%s_healthcheck.timer"
+      - "/etc/systemd/system/edpm_%s_healthcheck.service"
+      - "/run/%s.pid"
+      - "/var/lib/edpm-config/container-startup-config/%s.json"
+
+- name: Reload systemd after cleanup
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _edpm_cleanup_services | length > 0
