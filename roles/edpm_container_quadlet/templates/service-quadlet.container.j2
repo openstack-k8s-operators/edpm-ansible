@@ -1,0 +1,38 @@
+# Managed by edpm_container_quadlet Ansible role
+[Unit]
+Description=EDPM {{ edpm_container_quadlet_service }} container
+{% for unit in edpm_container_quadlet_service_after | default([]) %}
+After={{ unit }}
+{% endfor %}
+{% for unit in edpm_container_quadlet_service_wants | default([]) %}
+Wants={{ unit }}
+{% endfor %}
+
+[Container]
+ContainerName={{ edpm_container_quadlet_service }}
+Image={{ edpm_container_quadlet_service_image }}
+Exec=kolla_start
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for key, value in (edpm_container_quadlet_service_environment | default({})).items() %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% if edpm_container_quadlet_service_use_host_network | default(false) | bool %}
+Network=host
+{% endif %}
+{% if edpm_container_quadlet_service_privileged | default(true) | bool %}
+PodmanArgs=--privileged
+{% endif %}
+{% set all_volumes = edpm_container_quadlet_common_volumes + edpm_container_quadlet_service_volumes %}
+{% for vol in all_volumes %}
+Volume={{ vol }}
+{% endfor %}
+{% if edpm_container_quadlet_service_healthcheck_cmd | default('') | length > 0 %}
+HealthCmd={{ edpm_container_quadlet_service_healthcheck_cmd }}
+{% endif %}
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

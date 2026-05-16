@@ -1,0 +1,19 @@
+# Managed by edpm_container_quadlet Ansible role
+[Unit]
+Description=EDPM {{ edpm_container_quadlet_service }} pod
+{% for unit in edpm_container_quadlet_service_after | default([]) %}
+After={{ unit }}
+{% endfor %}
+{% for unit in edpm_container_quadlet_service_wants | default([]) %}
+Wants={{ unit }}
+{% endfor %}
+
+[Kube]
+Yaml={{ edpm_container_quadlet_systemd_config_dir }}/{{ edpm_container_quadlet_service }}.yaml
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

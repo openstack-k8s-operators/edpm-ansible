@@ -15,8 +15,6 @@
 # under the License.
 
 
-# "edpm_container_quadlet" will search for and load any operating system variable file
-
 - name: "Ensure directory exists: {{ edpm_container_quadlet_kolla_config_dir }}"
   become: true
   ansible.builtin.file:
@@ -33,27 +31,28 @@
     mode: "0600"
   loop: "{{ edpm_container_quadlet_kolla_config_files | dict2items }}"
 
-- name: Copy systemd service template file
-  ansible.builtin.copy:
-    src: "files/service-template.kube"
-    dest: /etc/containers/systemd/edpm@.kube
-    mode: "0644"
-  become: true
-
-- name: "Render container definitions: [{{ edpm_container_quadlet_service }} ]"
+- name: "Render Pod YAML for kube quadlet: {{ edpm_container_quadlet_service }}.yaml"
   become: true
   ansible.builtin.template:
-    src: "service-quadlet-template.yaml.j2"
+    src: "service-quadlet-pod.yaml.j2"
     dest: "{{ edpm_container_quadlet_systemd_config_dir }}/{{ edpm_container_quadlet_service }}.yaml"
     mode: "0644"
-  # NOTE(tkajinam): Some containers can contain secrets in their environments.
-  #                 Hide the output to avoid dumping these to output.
+  when: edpm_container_quadlet_type == 'kube'
   no_log: true
 
-- name: Starting quadlet {{ edpm_container_quadlet_service }}
+- name: "Render quadlet file: edpm@{{ edpm_container_quadlet_service }}.{{ edpm_container_quadlet_type }}"
+  become: true
+  ansible.builtin.template:
+    src: "service-quadlet.{{ edpm_container_quadlet_type }}.j2"
+    dest: "{{ edpm_container_quadlet_systemd_config_dir }}/edpm@{{ edpm_container_quadlet_service }}.{{ edpm_container_quadlet_type }}"
+    mode: "0644"
+  no_log: true
+
+- name: "Start quadlet service edpm@{{ edpm_container_quadlet_service }}"
   ansible.builtin.systemd_service:
-    name: edpm@{{ edpm_container_quadlet_service }}
+    name: "edpm@{{ edpm_container_quadlet_service }}"
     state: restarted
     enabled: true
     daemon_reload: true
   become: true
+  when: not (edpm_container_quadlet_skip_start | default(false) | bool)

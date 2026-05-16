@@ -23,26 +23,46 @@
 
     - name: Set ca_cert mount
       ansible.builtin.set_fact:
-        edpm_ovn_controller_tls_cacert_volumes:
-          - "{{ edpm_ovn_controller_tls_cacert_bundle_src }}:{{ edpm_ovn_controller_tls_cacert_bundle_dest }}:ro,z"
+        edpm_ovn_controller_tls_cacert_quadlet_volumes:
+          - "{{ edpm_ovn_controller_tls_cacert_bundle_src }}:{{
+            edpm_ovn_controller_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
-
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
 
 - name: Update ovn_controller health check script
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
+# Idempotent cleanup of the pre-quadlet edpm_ovn_controller standalone service.
+# Runs on every invocation because we cannot know whether a given node has
+# already been migrated. No-ops gracefully if the old service does not exist.
+- name: Cleanup old standalone ovn_controller container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_quadlet
+    tasks_from: cleanup.yml
+  vars:
+    edpm_container_quadlet_service: ovn_controller
+
+# The old standalone container may leave a stale pidfile that prevents
+# ovn-controller from starting under the new quadlet service.
+- name: Remove stale ovn-controller pidfile from previous standalone container
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/openvswitch/ovn/ovn-controller.pid
+    state: absent
+
 - name: Run ovn_controller container
   ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
+    name: osp.edpm.edpm_container_quadlet
   vars:
-    edpm_container_standalone_service: ovn_controller
-    edpm_service_name: "{{ edpm_ovn_service_name }}"
-    edpm_container_standalone_container_defs:
-      ovn_controller: "{{ lookup('template', 'container_defs/ovn_controller.yaml.j2') | from_yaml }}"
-    edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_config/kolla_ovn_controller.yaml.j2') | from_yaml }}"
+    edpm_container_quadlet_service: ovn_controller
+    edpm_container_quadlet_service_image: "{{ edpm_ovn_controller_agent_image }}"
+    edpm_container_quadlet_service_use_host_network: true
+    edpm_container_quadlet_service_volumes: "{{ edpm_ovn_controller_quadlet_volumes }}"
+    edpm_container_quadlet_service_after:
+      - openvswitch.service
+    edpm_container_quadlet_service_wants:
+      - openvswitch.service
+    edpm_container_quadlet_service_healthcheck_cmd: "{{edpm_ovn_container_quadlet_healthcheck_cmd}}"
+    edpm_container_quadlet_kolla_config_files:
+      ovn_controller: "{{ lookup('template',
+        'kolla_config/kolla_ovn_controller.yaml.j2') | from_yaml }}"
