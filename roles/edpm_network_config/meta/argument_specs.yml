@@ -55,7 +55,20 @@ argument_specs:
         default: true
       edpm_network_config_os_net_config_mappings:
         type: dict
-        description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
+        description: >
+          Legacy role variable: per-node / node-group NIC mapping for the nmstate and os-net-config
+          paths (merged in nic_mapping.yml). Merged with edpm_network_config_mappings; the latter
+          wins on duplicate keys. The merged dict is passed to the edpm_os_net_config_mappings Ansible
+          module as net_config_data_lookup.
+        default: {}
+      edpm_network_config_mappings:
+        type: dict
+        description: >
+          Optional additional or overriding NIC mapping for the nmstate and os-net-config paths
+          (merged in nic_mapping.yml). Merged with edpm_network_config_os_net_config_mappings; this
+          variable wins on duplicate keys.
+          Must be a YAML mapping (dict). Do not use a block literal (|) after the key — that
+          produces a string and role validation will fail.
         default: {}
       edpm_network_config_purge_provider:
         type: str
