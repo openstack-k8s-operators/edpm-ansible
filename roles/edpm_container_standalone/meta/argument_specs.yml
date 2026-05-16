@@ -92,3 +92,23 @@ argument_specs:
           If true, remove the container from the state file instead of adding/updating.
           Used when a container needs to be removed from state tracking.
         type: bool
+      edpm_container_standalone_use_quadlet:
+        default: false
+        description: |
+          When true, container definitions are converted to Podman Quadlet
+          .container files instead of using edpm_container_manage. This can
+          be enabled per-service or globally to incrementally migrate
+          services to Quadlet. Requires Podman 4.4+.
+        type: bool
+      edpm_container_standalone_quadlet_dir:
+        default: /etc/containers/systemd
+        description: Directory where Quadlet .container unit files are written.
+        type: path
+      edpm_container_standalone_quadlet_defs:
+        default: {}
+        description: |
+          Dict mapping container name to the Jinja2 template path for its
+          Quadlet .container file. Each service role provides its own
+          native templates.
+          Example: { ovn_controller: "quadlet/ovn_controller.container.j2" }
+        type: dict

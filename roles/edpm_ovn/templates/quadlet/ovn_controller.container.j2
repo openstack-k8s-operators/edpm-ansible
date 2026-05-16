@@ -1,0 +1,49 @@
+# Quadlet container file for ovn_controller
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set edpm_ovn_controller_volumes = [] %}
+{%- set edpm_ovn_controller_volumes =
+        edpm_ovn_controller_volumes +
+        edpm_ovn_controller_common_volumes +
+        edpm_ovn_controller_tls_cacert_volumes %}
+{%- if edpm_ovn_tls_enabled | bool %}
+{%- set edpm_ovn_controller_volumes =
+        edpm_ovn_controller_volumes +
+        edpm_ovn_controller_tls_volumes %}
+{%- endif %}
+
+[Unit]
+Description=OVN Controller container
+After=openvswitch.service
+Wants=openvswitch.service
+
+[Container]
+ContainerName=ovn_controller
+Image={{ edpm_ovn_controller_agent_image }}
+Network=host
+User=root
+PodmanArgs=--privileged
+LogDriver=journald
+{% if edpm_ovn_cpu_set | default(false) %}
+PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
+{% endif %}
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in edpm_ovn_controller_volumes %}
+Volume={{ vol }}
+{% endfor %}
+{% if edpm_ovn_healthcheck %}
+HealthCmd=/openstack/healthcheck
+Volume=/var/lib/openstack/healthchecks/ovn_controller:/openstack/healthcheck:ro,z
+{% endif %}
+Label=config_id=ovn_controller
+Label=container_name=ovn_controller
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+ExecReload=/usr/bin/podman kill --signal HUP ovn_controller
+
+[Install]
+WantedBy=multi-user.target
