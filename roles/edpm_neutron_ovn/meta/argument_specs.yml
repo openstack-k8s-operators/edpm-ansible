@@ -109,3 +109,11 @@ argument_specs:
           Each bridge connects the OVN overlay from the corresponding EDPM node with a BGP peering switch (leaf, ToR, ...).
           Set this variable when the ovn-agent is configured with the ovn-bgp extension.
         type: str
+      edpm_neutron_ovn_agent_bgp_interconnect_bridge:
+        default: "{{ neutron_physical_bridge_name | default('br-ex') }}"
+        description: >
+          BGP interconnect bridge required for the ovn-bgp extension.
+          This bridge connects the OVN overlay with the BGP fabric on the EDPM node.
+          Defaults to neutron_physical_bridge_name (br-ex if unset).
+          Set this variable when the ovn-agent is configured with the ovn-bgp extension.
+        type: str

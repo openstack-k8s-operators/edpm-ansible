@@ -66,3 +66,7 @@ edpm_neutron_ovn_agent_ovn_ovn_sb_connection: ''
 # BGP peer bridges for the ovn-bgp extension.
 # Set this variable when the ovn-agent is configured with the ovn-bgp extension.
 edpm_neutron_ovn_agent_bgp_peer_bridges: ''
+
+# BGP interconnect bridge for the ovn-bgp extension.
+# Set this variable when the ovn-agent is configured with the ovn-bgp extension.
+edpm_neutron_ovn_agent_bgp_interconnect_bridge: "{{ neutron_physical_bridge_name | default('br-ex') }}"
