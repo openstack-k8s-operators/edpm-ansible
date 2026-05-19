@@ -2,6 +2,7 @@ TEST_ENV_REPOSITORY := https://github.com/openstack-k8s-operators/ci-framework.g
 IMAGE_TAG_BASE ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
 IMAGE_TAG ?= latest
 IMG ?= $(IMAGE_TAG_BASE):$(IMAGE_TAG)
+ANSIBLEEE_BASE_IMG ?= registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 ifndef ENV_DIR
 override ENV_DIR := $(shell mktemp -d)/ci-framework
@@ -42,7 +43,13 @@ execute_molecule: setup_test_environment ## Setup the test environment and execu
 .PHONY: openstack_ansibleee_build
 openstack_ansibleee_build: ## Build the openstack-ansibleee-runner image
 	# Temporary hack until https://issues.redhat.com/browse/RHEL-136313 fixed
-	podman build --network host --no-cache . -f openstack_ansibleee/Containerfile -t ${IMG}
+	podman build \
+		--build-arg ANSIBLEEE_BASE_IMG=registry.access.redhat.com/ubi10/ubi-minimal:latest \
+		--network host \
+		--no-cache \
+		-f openstack_ansibleee/Containerfile \
+		-t ${IMG} \
+		.
 
 .PHONY: openstack_ansibleee_push
 openstack_ansibleee_push: ## Push the openstack-ansibleee-runner image

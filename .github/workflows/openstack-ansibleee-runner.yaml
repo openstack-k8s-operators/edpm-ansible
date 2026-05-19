@@ -55,6 +55,8 @@ jobs:
       with:
         image: openstack-ansibleee-runner
         tags: ${{ env.latesttag }} ${{ github.sha }} current-podified
+        build-args: |
+          ANSIBLEEE_BASE_IMG=registry.access.redhat.com/ubi10/ubi-minimal:latest
         containerfiles: |
           ./openstack_ansibleee/Containerfile
 

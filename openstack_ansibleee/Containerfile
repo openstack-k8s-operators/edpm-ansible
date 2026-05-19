@@ -1,4 +1,6 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as builder
+ARG ANSIBLEEE_BASE_IMG=registry.access.redhat.com/ubi9/ubi-minimal:latest
+FROM $ANSIBLEEE_BASE_IMG as builder
+
 ARG PYV=3.12
 ARG REMOTE_SOURCE=.
 ARG REMOTE_SOURCE_DIR=/var/tmp/edpm-ansible
@@ -13,7 +15,7 @@ RUN cd $REMOTE_SOURCE_DIR/openstack_ansibleee && \
     ansible-galaxy collection install -U $REMOTE_SOURCE_DIR --collections-path "/usr/share/ansible/collections"
 
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as runner
+FROM $ANSIBLEEE_BASE_IMG as runner
 
 ARG PYV=3.12
 ARG REMOTE_SOURCE=.
