@@ -101,6 +101,16 @@
               services: "{{ _edpm_filtered_services | default({}) }}"
 
 # Add/update service in state file
+# TODO(quadlet-migration): Once all services are migrated to quadlet,
+# replace the ternary with: edpm_container_standalone_quadlet_defs.keys() | list
+- name: Determine container names from definitions
+  ansible.builtin.set_fact:
+    _edpm_container_names: >-
+      {{ (edpm_container_standalone_quadlet_defs
+          if edpm_container_standalone_use_quadlet | bool
+          else edpm_container_standalone_container_defs).keys() | list }}
+  when: not (edpm_container_state_remove | bool)
+
 - name: Update service in state data
   ansible.builtin.set_fact:
     _edpm_state_data: >-
@@ -108,10 +118,12 @@
         _edpm_state_data | combine({
           'services': _edpm_state_data.services | combine({
             _edpm_state_service_name: {
-              'containers': (
-                _edpm_state_data.services.get(_edpm_state_service_name, {}).get('containers', []) +
-                edpm_container_standalone_container_defs.keys() | list
-              ) if edpm_container_state_append else (edpm_container_standalone_container_defs.keys() | list),
+              'containers':
+                (_edpm_state_data.services.get(
+                  _edpm_state_service_name, {}).get('containers', []) +
+                  _edpm_container_names
+                ) if edpm_container_state_append
+                else _edpm_container_names,
               'updated_at': lookup('pipe', 'date -Iseconds')
             }
           }, recursive=True)
