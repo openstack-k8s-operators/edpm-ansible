@@ -93,3 +93,12 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_swift
     tasks_from: download_cache.yml
+
+- name: Download images for edpm_cyborg role
+  when: '"cyborg" in edpm_download_cache_running_services'
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_cyborg
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_cyborg
+    - download_cache
