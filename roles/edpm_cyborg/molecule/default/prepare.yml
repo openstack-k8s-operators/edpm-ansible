@@ -1,0 +1,98 @@
+---
+- name: Prepare test_deps
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - jq
+        - podman
+        - rsync
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+
+- name: Prepare env_data
+  hosts: all
+  gather_facts: false
+  become: true
+  roles:
+    - role: osp.edpm.env_data
+
+- name: Setup cyborg test environment
+  hosts: all
+  become: true
+  vars:
+    edpm_cyborg_tls_ca_src_dir: /tmp/pki
+  tasks:
+    - name: create pki temp directory
+      ansible.builtin.file:
+        path: "{{ edpm_cyborg_tls_ca_src_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+
+    - name: Set /etc/localtime
+      ansible.builtin.file:
+        path: /etc/localtime
+        src: /usr/share/zoneinfo/UTC
+        state: link
+
+    - name: Create private key (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: "{{ edpm_cyborg_tls_ca_src_dir }}/ca.key"
+
+    - name: Create a certificate signing request for ca
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ edpm_cyborg_tls_ca_src_dir }}/ca.key"
+        organization_name: fake-corp
+        basic_constraints:
+          - 'CA:TRUE'
+        subject_alt_name:
+          - "DNS:instance.example.com"
+          - "DNS:instance"
+          - "DNS:{{ inventory_hostname }}"
+        key_usage:
+          - keyCertSign
+      register: csr
+
+    - name: Create a certificate authority
+      community.crypto.x509_certificate:
+        path: "{{ edpm_cyborg_tls_ca_src_dir }}/tls-ca-bundle.pem"
+        privatekey_path: "{{ edpm_cyborg_tls_ca_src_dir }}/ca.key"
+        csr_content: "{{ csr.csr }}"
+        provider: selfsigned
+
+    - name: Set permissions for certificate authority public key
+      ansible.builtin.file:
+        path: "{{ edpm_cyborg_tls_ca_src_dir }}/tls-ca-bundle.pem"
+        mode: 0644
+
+    - name: Create container config dirs for test
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: "directory"
+        setype: "container_file_t"
+        mode: "{{ item.mode | default(omit) }}"
+      loop:
+        - {"path": "/var/lib/openstack/cyborg", "mode": "0755"}
+
+    - name: Create /etc/nvme directory
+      ansible.builtin.file:
+        path: /etc/nvme
+        state: directory
+        mode: "0755"
+
+    - name: Create extra bind mount directories for test
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: "directory"
+        mode: "0755"
+      loop:
+        - {"path": "/var/lib/test_accel_device"}
+
+    - name: Create a test file to be deleted by sync
+      ansible.builtin.file:
+        path: '/var/lib/openstack/cyborg/test.conf'
+        state: touch
+        mode: 0644

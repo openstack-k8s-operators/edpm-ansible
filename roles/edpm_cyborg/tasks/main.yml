@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,9 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-collections:
-  - ansible.posix
-  - community.crypto
-  - community.general
-  - containers.podman
-  - fedora.linux_system_roles
+- name: Configure cyborg
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Install cyborg
+  ansible.builtin.include_tasks: install.yml
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Post-install cyborg
+  ansible.builtin.include_tasks: post-install.yml

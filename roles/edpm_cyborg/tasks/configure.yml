@@ -1,0 +1,132 @@
+---
+- name: Validate extra bind mounts if specified
+  when: edpm_cyborg_extra_bind_mounts | length > 0
+  tags:
+    - configure
+    - cyborg
+  block:
+    - name: Get source directory details
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item.src }}"
+      register: source_dir_results
+      loop: "{{ edpm_cyborg_extra_bind_mounts }}"
+      tags:
+        - configure
+        - cyborg
+
+    - name: Assert edpm_cyborg_extra_bind_mounts source directories exist
+      ansible.builtin.assert:
+        that:
+          - "source_dir_results.results | map(attribute='stat.exists') | list"
+      tags:
+        - configure
+        - cyborg
+
+    - name: Assert edpm_cyborg_extra_bind_mounts dest paths do not collide with standard mounts
+      ansible.builtin.assert:
+        that:
+          - "'{{ item }}' not in {{ edpm_cyborg_extra_bind_mounts }} | map(attribute='dest') | list "
+      loop:
+        - /var/lib/cyborg
+        - /var/lib/openstack
+        - /etc/cyborg
+      tags:
+        - configure
+        - cyborg
+
+- name: Create sync config dirs
+  tags:
+    - configure
+    - cyborg
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'HOME') }}/staging"
+    state: "directory"
+    mode: "0766"
+  delegate_to: localhost
+  run_once: true
+
+- name: Gather user fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "user"
+  when:
+    - ansible_user is undefined
+
+- name: Create container config dirs
+  tags:
+    - configure
+    - cyborg
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    setype: "container_file_t"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {"path": "{{ edpm_cyborg_config_dest }}", "mode": "0755"}
+
+- name: Create persistent directories
+  tags:
+    - configure
+    - cyborg
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    setype: "container_file_t"
+    state: "directory"
+    owner: "{{ item.owner | default(ansible_user) | default(ansible_user_id) }}"
+    group: "{{ item.group | default(ansible_user) | default(ansible_user_id) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {"path": "/var/lib/cyborg", "mode": "0755"}
+    - {"path": "/etc/nvme"}
+
+- name: Discover configmaps in {{ edpm_cyborg_config_src }}
+  ansible.builtin.find:
+    paths: "{{ edpm_cyborg_config_src }}"
+    file_type: file
+    recurse: true
+  register: edpm_cyborg_configmaps
+  changed_when: false
+  check_mode: false
+  delegate_to: localhost
+
+- name: Flatten configmaps
+  tags:
+    - configure
+    - cyborg
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ lookup('env', 'HOME') }}/staging/{{ item.path | basename }}"
+    mode: "0644"
+  loop: "{{ edpm_cyborg_configmaps.files }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Configure cyborg user and group on the host
+  ansible.builtin.import_role:
+    name: edpm_users
+  vars:
+    edpm_users_users:
+      # 42592 is matching with the uid and gid created by kolla in the cyborg containers
+      - {"name": "cyborg", "uid": "42592", "gid": "42592", "shell": "/sbin/nologin", "comment": "cyborg user"}
+    edpm_users_extra_dirs: []
+  tags:
+    - edpm_users
+
+- name: Sync cyborg config files
+  tags:
+    - configure
+    - cyborg
+  ansible.posix.synchronize:
+    src: "{{ lookup('env', 'HOME') }}/staging/"
+    dest: "{{ edpm_cyborg_config_dest }}"
+    recursive: true
+    delete: true
+  notify:
+    - Restart cyborg

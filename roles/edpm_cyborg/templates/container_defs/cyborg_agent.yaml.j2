@@ -1,0 +1,24 @@
+image: "{{ edpm_cyborg_agent_image }}"
+privileged: true
+user: cyborg
+restart: always
+command: kolla_start
+net: host
+pid: host
+environment:
+  KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+volumes:
+  - /var/lib/kolla/config_files/cyborg_agent.json:/var/lib/kolla/config_files/config.json:ro
+  - "{{ edpm_cyborg_config_dest }}:/var/lib/kolla/config_files/src:ro"
+{% if ca_bundle_exists|bool %}
+  - "{{ edpm_cyborg_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+{% endif %}
+  - /etc/localtime:/etc/localtime:ro
+  - /lib/modules:/lib/modules:ro
+  - /dev:/dev
+  - /sys:/sys
+  - /var/lib/cyborg:/var/lib/cyborg:shared
+  - /etc/nvme:/etc/nvme
+{% for bind_mount in edpm_cyborg_extra_bind_mounts %}
+  - "{{ bind_mount.src }}:{{ bind_mount.dest }}:{{ bind_mount.options | default('ro') }}"
+{% endfor %}

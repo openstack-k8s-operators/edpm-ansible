@@ -1,0 +1,22 @@
+---
+
+- name: Check if ca bundle exists
+  ansible.builtin.stat:
+    path: "{{ edpm_cyborg_tls_ca_src_dir }}/tls-ca-bundle.pem"
+  register: ca_bundle_stat_res
+
+- name: Deploy cyborg agent container
+  tags:
+    - install
+    - cyborg
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_service: "cyborg_agent"
+    edpm_service_name: "{{ edpm_cyborg_service_name }}"
+    edpm_container_state_append: false
+    edpm_container_standalone_container_defs:
+      cyborg_agent: "{{ lookup('template', 'container_defs/cyborg_agent.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_kolla_config_files:
+      cyborg_agent: "{{ lookup('file', 'files/kolla_config/cyborg_agent.yaml') | from_yaml }}"
+    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"

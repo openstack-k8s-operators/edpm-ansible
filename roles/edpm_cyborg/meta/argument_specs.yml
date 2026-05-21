@@ -1,0 +1,61 @@
+---
+argument_specs:
+  # ./roles/edpm_cyborg/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_cyborg role.
+    options:
+      edpm_cyborg_service_name:
+        type: str
+        default: cyborg
+        description: The service name identifier used for config path construction.
+      edpm_cyborg_image_download_delay:
+        type: int
+        default: 60
+        description: The seconds between retries for failed download tasks.
+      edpm_cyborg_image_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks.
+      edpm_cyborg_config_src:
+        type: str
+        default: /var/lib/openstack/configs/cyborg
+        description: |
+          The path to the directory containing the cyborg config files
+          in the ansibleEE container. This is the directory where all
+          configmaps and secrets containing cyborg config files are mounted.
+      edpm_cyborg_config_dest:
+        type: str
+        default: /var/lib/openstack/cyborg
+        description: |
+          The path to the directory where the cyborg config files
+          will be rendered on the compute node.
+      edpm_cyborg_agent_image:
+        type: str
+        default: "quay.io/openstack.kolla/cyborg-agent:master-rocky-10"
+        description: |
+          The container image to use for the cyborg agent container.
+          This image is used to create the cyborg-agent container
+          on the compute node and generally will be set via the container
+          bundle by the dataplane operator.
+      edpm_cyborg_tls_ca_src_dir:
+        type: str
+        default: /var/lib/openstack/cacerts/cyborg
+        description: |
+          The path to the directory containing the TLS CA bundle
+          to mount into the cyborg agent container.
+      edpm_cyborg_extra_bind_mounts:
+        type: list
+        default: []
+        description: |
+          A list of additional host mounts to be added to the cyborg agent container.
+          This enables passing device paths for accelerators (GPUs, FPGAs, etc.)
+          to the container. Each item should be a dictionary with the following keys:
+          - src: The path to the file or directory on the host
+          - dest: The path to the file or directory in the container
+          - options: The options to set for the bind mount in podman format (optional)
+          src directories must exist on the host.
+          dest must not collide with standard mounts:
+          - /var/lib/cyborg
+          - /var/lib/openstack
+          - /etc/cyborg
+          options defaults to "ro" if not specified.
