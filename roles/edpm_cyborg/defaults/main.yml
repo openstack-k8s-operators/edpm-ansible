@@ -1,0 +1,43 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# All variables intended for modification should be placed in this file.
+
+# service name this role manages
+edpm_cyborg_service_name: cyborg
+
+# seconds between retries for download tasks
+edpm_cyborg_image_download_delay: "{{ edpm_download_delay | default(60) }}"
+
+# number of retries for download tasks
+edpm_cyborg_image_download_retries: "{{ edpm_download_retries | default(5) }}"
+
+# Note that the src dir is in the AEE container but the
+# dest dir is on the target host
+edpm_cyborg_config_src: /var/lib/openstack/configs/{{ edpm_cyborg_service_name }}
+edpm_cyborg_config_dest: /var/lib/openstack/{{ edpm_cyborg_service_name }}
+edpm_cyborg_agent_image: "quay.io/openstack.kolla/cyborg-agent:master-rocky-10"
+
+# TLS CA bundle source directory
+edpm_cyborg_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_cyborg_service_name }}"
+
+# a list of additional host mounts for device access (GPUs, FPGAs, etc.)
+# Each item should be a dict with src, dest, and optional options keys.
+# Example:
+#   edpm_cyborg_extra_bind_mounts:
+#     - {"src": "/dev/dri", "dest": "/dev/dri", "options": "rw"}
+edpm_cyborg_extra_bind_mounts: []
