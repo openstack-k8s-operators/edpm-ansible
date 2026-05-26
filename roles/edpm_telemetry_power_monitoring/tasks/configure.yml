@@ -110,12 +110,6 @@
   when:
     - tls_crt_stat.stat.exists and tls_key_stat.stat.exists
   block:
-    - name: Copy TLS config for ceilometer_prom_exporter
-      ansible.builtin.copy:
-        src: ceilometer_prom_exporter.yaml
-        dest: "{{ edpm_telemetry_config_dest }}/ceilometer_prom_exporter.yaml"
-        mode: 0644
-
     - name: Change the owner of the crt
       become: true
       ansible.builtin.file:

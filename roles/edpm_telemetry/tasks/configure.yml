@@ -124,7 +124,6 @@
       loop:
         - node_exporter
         - podman_exporter
-        - ceilometer_prom_exporter
       loop_control:
         loop_var: exporter
 
