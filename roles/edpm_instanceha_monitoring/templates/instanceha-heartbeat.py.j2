@@ -1,0 +1,19 @@
+#!/usr/bin/python3
+# {{ ansible_managed }}
+# Sends a UDP heartbeat packet to the instanceha pod.
+# Packet format: 4-byte magic number (network byte order) + UTF-8 hostname.
+import os
+import socket
+import struct
+
+MAGIC = struct.pack('!I', 0x48425631)
+HOSTNAME = os.uname().nodename.split('.')[0].encode('utf-8')
+TARGET = ('{{ edpm_instanceha_monitoring_heartbeat_ip }}',
+          {{ edpm_instanceha_monitoring_heartbeat_port }})
+
+info = socket.getaddrinfo(TARGET[0], TARGET[1], type=socket.SOCK_DGRAM)[0]
+sock = socket.socket(info[0], info[1])
+try:
+    sock.sendto(MAGIC + HOSTNAME, info[4])
+finally:
+    sock.close()

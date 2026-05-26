@@ -1,0 +1,101 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check heartbeat script exists
+      become: true
+      ansible.builtin.stat:
+        path: /usr/local/bin/instanceha-heartbeat.py
+      register: heartbeat_script
+
+    - name: Assert heartbeat script is deployed correctly
+      ansible.builtin.assert:
+        that:
+          - heartbeat_script.stat.exists
+          - heartbeat_script.stat.mode == '0755'
+        fail_msg: "Heartbeat script not deployed or wrong permissions"
+
+    - name: Read heartbeat script content
+      become: true
+      ansible.builtin.slurp:
+        src: /usr/local/bin/instanceha-heartbeat.py
+      register: heartbeat_script_content
+
+    - name: Assert heartbeat script has correct content
+      ansible.builtin.assert:
+        that:
+          - "'struct.pack' in heartbeat_script_content.content | b64decode"
+          - "'!I' in heartbeat_script_content.content | b64decode"
+          - "'192.168.122.100' in heartbeat_script_content.content | b64decode"
+          - "'7411' in heartbeat_script_content.content | b64decode"
+        fail_msg: "Heartbeat script content is incorrect"
+
+    - name: Check heartbeat service unit exists
+      become: true
+      ansible.builtin.stat:
+        path: /etc/systemd/system/instanceha-heartbeat.service
+      register: heartbeat_service
+
+    - name: Assert heartbeat service unit is deployed correctly
+      ansible.builtin.assert:
+        that:
+          - heartbeat_service.stat.exists
+          - heartbeat_service.stat.mode == '0644'
+        fail_msg: "Heartbeat service unit not deployed or wrong permissions"
+
+    - name: Read heartbeat service content
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/instanceha-heartbeat.service
+      register: heartbeat_service_content
+
+    - name: Assert heartbeat service has correct content
+      ansible.builtin.assert:
+        that:
+          - "'Type=oneshot' in heartbeat_service_content.content | b64decode"
+          - "'User=nobody' in heartbeat_service_content.content | b64decode"
+          - "'StandardOutput=null' in heartbeat_service_content.content | b64decode"
+        fail_msg: "Heartbeat service content is incorrect"
+
+    - name: Check heartbeat timer unit exists
+      become: true
+      ansible.builtin.stat:
+        path: /etc/systemd/system/instanceha-heartbeat.timer
+      register: heartbeat_timer
+
+    - name: Assert heartbeat timer unit is deployed correctly
+      ansible.builtin.assert:
+        that:
+          - heartbeat_timer.stat.exists
+          - heartbeat_timer.stat.mode == '0644'
+        fail_msg: "Heartbeat timer unit not deployed or wrong permissions"
+
+    - name: Read heartbeat timer content
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/instanceha-heartbeat.timer
+      register: heartbeat_timer_content
+
+    - name: Assert heartbeat timer has correct content
+      ansible.builtin.assert:
+        that:
+          - "'OnBootSec=10s' in heartbeat_timer_content.content | b64decode"
+          - "'OnUnitActiveSec=30s' in heartbeat_timer_content.content | b64decode"
+          - "'RandomizedDelaySec=10s' in heartbeat_timer_content.content | b64decode"
+        fail_msg: "Heartbeat timer content is incorrect"

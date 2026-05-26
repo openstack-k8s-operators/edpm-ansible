@@ -1,0 +1,32 @@
+---
+argument_specs:
+  # ./roles/edpm_instanceha_monitoring/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_instanceha_monitoring role.
+    options:
+      edpm_instanceha_monitoring_heartbeat_enabled:
+        type: bool
+        default: false
+        description: >-
+          Whether to enable the heartbeat sender on compute nodes.
+          When enabled, compute nodes send periodic UDP heartbeat packets
+          to the instanceha pod so it can distinguish host OS failure from
+          nova-compute process crash and avoid unnecessary fencing.
+      edpm_instanceha_monitoring_heartbeat_ip:
+        type: str
+        default: ""
+        description: >-
+          IP address of the instanceha pod on the heartbeat network.
+          Required when heartbeat_enabled is true.
+      edpm_instanceha_monitoring_heartbeat_port:
+        type: int
+        default: 7411
+        description: >-
+          UDP port for heartbeat packets. Must match the instanceha
+          pod's HEARTBEAT_PORT configuration.
+      edpm_instanceha_monitoring_heartbeat_interval:
+        type: int
+        default: 30
+        description: >-
+          Interval in seconds between heartbeat sends. The systemd timer
+          adds jitter of up to 1/3 of this value to prevent thundering herd.

@@ -1,0 +1,22 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: edpm_instanceha_monitoring
+provisioner:
+  log: true
+  name: ansible
+scenario:
+  test_sequence:
+  - destroy
+  - create
+  - converge
+  - verify
+verifier:
+  name: ansible
