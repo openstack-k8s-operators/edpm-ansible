@@ -104,17 +104,11 @@
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
-- name: Create prometheus exporter configuration
+- name: Remove unused ceilometer_prom_exporter configuration
   become: true
-  block:
-    - name: Create prometheus exporter configuration
-      ansible.builtin.include_tasks:
-        file: exporter_tls.yml
-      vars:
-        exporter: "ceilometer_prom_exporter"
-      when:
-        - tls_crt_stat.stat.exists
-        - tls_key_stat.stat.exists
-      tags:
-        - update
-        - telemetry
+  ansible.builtin.file:
+    path: "{{ edpm_telemetry_config_dest }}/ceilometer_prom_exporter.yaml"
+    state: absent
+  tags:
+    - update
+    - telemetry
