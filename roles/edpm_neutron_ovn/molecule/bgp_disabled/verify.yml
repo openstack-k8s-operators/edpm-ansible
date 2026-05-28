@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check neutron-bgp-peer-bridges is not set
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl --if-exists get open_vswitch . external_ids:neutron-bgp-peer-bridges
+      register: output
+      failed_when: output.stdout != ''
+
+    - name: Check neutron-bgp-interconnect-bridge is not set
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl --if-exists get open_vswitch . external_ids:neutron-bgp-interconnect-bridge
+      register: output
+      failed_when: output.stdout != ''
