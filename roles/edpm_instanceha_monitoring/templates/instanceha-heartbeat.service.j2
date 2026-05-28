@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+[Unit]
+Description=InstanceHA heartbeat sender
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=nobody
+Group=nobody
+ExecStart=/usr/local/bin/instanceha-heartbeat.py
+StandardOutput=null
+StandardError=journal

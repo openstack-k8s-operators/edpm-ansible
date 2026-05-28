@@ -1,0 +1,38 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# All variables intended for modification should be placed in this file.
+
+# All variables within this role should have a prefix of
+# "edpm_instanceha_monitoring"
+
+# Whether to enable the heartbeat sender on compute nodes.
+# When enabled, compute nodes send periodic UDP heartbeat packets to the
+# instanceha pod. This allows instanceha to distinguish host OS failure
+# from nova-compute process crash and avoid unnecessary fencing.
+edpm_instanceha_monitoring_heartbeat_enabled: false
+
+# IP address of the instanceha pod on the heartbeat network.
+# Required when heartbeat_enabled is true.
+# This is typically the instanceha pod's IP from a network-attachment-definition.
+edpm_instanceha_monitoring_heartbeat_ip: ""
+
+# UDP port for heartbeat packets (must match instanceha's HEARTBEAT_PORT).
+edpm_instanceha_monitoring_heartbeat_port: 7411
+
+# Interval in seconds between heartbeat sends.
+edpm_instanceha_monitoring_heartbeat_interval: 30

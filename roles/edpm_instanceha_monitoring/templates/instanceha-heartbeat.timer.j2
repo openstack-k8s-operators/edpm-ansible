@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+[Unit]
+Description=InstanceHA heartbeat timer
+
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec={{ edpm_instanceha_monitoring_heartbeat_interval }}s
+RandomizedDelaySec={{ (edpm_instanceha_monitoring_heartbeat_interval | int // 3) }}s
+
+[Install]
+WantedBy=timers.target
