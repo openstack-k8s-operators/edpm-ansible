@@ -20,6 +20,7 @@
   vars:
     edpm_instanceha_monitoring_heartbeat_enabled: true
     edpm_instanceha_monitoring_heartbeat_ip: "192.168.122.100"
+    edpm_instanceha_monitoring_config_src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/test-data"
   tasks:
     - name: Deploy instanceha heartbeat
       ansible.builtin.import_role:

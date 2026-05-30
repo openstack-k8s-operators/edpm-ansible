@@ -40,6 +40,32 @@
     fail_msg: >-
       edpm_instanceha_monitoring_heartbeat_interval must be a positive integer.
 
+- name: Read HMAC key from EDPM-mounted config
+  delegate_to: localhost
+  ansible.builtin.slurp:
+    src: "{{ edpm_instanceha_monitoring_config_src }}/hmac-key"
+  register: _hmac_key_file
+  no_log: true
+
+- name: Ensure instanceha config directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_instanceha_monitoring_heartbeat_hmac_key_file | dirname }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Deploy heartbeat HMAC key file
+  become: true
+  ansible.builtin.copy:
+    content: "{{ _hmac_key_file.content | b64decode | trim }}"
+    dest: "{{ edpm_instanceha_monitoring_heartbeat_hmac_key_file }}"
+    mode: "0400"
+    owner: root
+    group: root
+  no_log: true
+
 - name: Deploy instanceha heartbeat script
   become: true
   ansible.builtin.template:

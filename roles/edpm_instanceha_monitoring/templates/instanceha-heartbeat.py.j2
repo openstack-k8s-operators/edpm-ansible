@@ -1,19 +1,31 @@
 #!/usr/bin/python3
 # {{ ansible_managed }}
-# Sends a UDP heartbeat packet to the instanceha pod.
-# Packet format: 4-byte magic number (network byte order) + UTF-8 hostname.
+# Sends a signed UDP heartbeat packet (HBV2) to the instanceha pod.
+# Packet format: 4-byte magic + 8-byte timestamp + hostname + 32-byte HMAC-SHA256
+import hashlib
+import hmac
 import os
 import socket
 import struct
+import time
 
-MAGIC = struct.pack('!I', 0x48425631)
+KEY_PATH = os.path.join(os.environ['CREDENTIALS_DIRECTORY'], 'hmac-key')
 HOSTNAME = os.uname().nodename.split('.')[0].encode('utf-8')
 TARGET = ('{{ edpm_instanceha_monitoring_heartbeat_ip }}',
           {{ edpm_instanceha_monitoring_heartbeat_port }})
 
+with open(KEY_PATH, 'r') as f:
+    KEY = bytes.fromhex(f.read().strip())
+
+MAGIC = struct.pack('!I', 0x48425632)
+timestamp = struct.pack('!Q', int(time.time()))
+payload = MAGIC + timestamp + HOSTNAME
+signature = hmac.new(KEY, payload, hashlib.sha256).digest()
+packet = payload + signature
+
 info = socket.getaddrinfo(TARGET[0], TARGET[1], type=socket.SOCK_DGRAM)[0]
 sock = socket.socket(info[0], info[1])
 try:
-    sock.sendto(MAGIC + HOSTNAME, info[4])
+    sock.sendto(packet, info[4])
 finally:
     sock.close()

@@ -36,3 +36,11 @@ edpm_instanceha_monitoring_heartbeat_port: 7411
 
 # Interval in seconds between heartbeat sends.
 edpm_instanceha_monitoring_heartbeat_interval: 30
+
+# Path on the compute node where the HMAC key file is stored.
+# The key is read automatically from the EDPM-mounted config path.
+edpm_instanceha_monitoring_heartbeat_hmac_key_file: "/var/lib/openstack/instanceha-monitoring/hmac-key"
+
+# EDPM config source path (where K8s secrets are mounted in ansible-runner).
+# The OpenStackDataPlaneService mounts the heartbeat-hmac secret here.
+edpm_instanceha_monitoring_config_src: "/var/lib/openstack/configs/instanceha-monitoring"

@@ -69,7 +69,8 @@
       ansible.builtin.assert:
         that:
           - "'Type=oneshot' in heartbeat_service_content.content | b64decode"
-          - "'User=nobody' in heartbeat_service_content.content | b64decode"
+          - "'DynamicUser=yes' in heartbeat_service_content.content | b64decode"
+          - "'LoadCredential=hmac-key' in heartbeat_service_content.content | b64decode"
           - "'StandardOutput=null' in heartbeat_service_content.content | b64decode"
         fail_msg: "Heartbeat service content is incorrect"
 
