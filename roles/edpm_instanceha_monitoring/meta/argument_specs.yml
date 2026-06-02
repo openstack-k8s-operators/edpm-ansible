@@ -30,3 +30,14 @@ argument_specs:
         description: >-
           Interval in seconds between heartbeat sends. The systemd timer
           adds jitter of up to 1/3 of this value to prevent thundering herd.
+      edpm_instanceha_monitoring_heartbeat_hmac_key_file:
+        type: str
+        default: "/var/lib/openstack/instanceha-monitoring/hmac-key"
+        description: >-
+          Path on the compute node where the HMAC key file is stored.
+      edpm_instanceha_monitoring_config_src:
+        type: str
+        default: "/var/lib/openstack/configs/instanceha-monitoring"
+        description: >-
+          EDPM config source path where K8s secrets are mounted in the
+          ansible-runner pod. The HMAC key is auto-detected from here.

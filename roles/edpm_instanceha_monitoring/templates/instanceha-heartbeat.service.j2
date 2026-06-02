@@ -5,8 +5,8 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-User=nobody
-Group=nobody
+DynamicUser=yes
+LoadCredential=hmac-key:{{ edpm_instanceha_monitoring_heartbeat_hmac_key_file }}
 ExecStart=/usr/local/bin/instanceha-heartbeat.py
 StandardOutput=null
 StandardError=journal
