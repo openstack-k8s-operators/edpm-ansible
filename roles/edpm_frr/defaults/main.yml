@@ -19,6 +19,7 @@
 
 # All variables within this role should have a prefix of "edpm_frr"
 
+edpm_enable_evpn: false
 edpm_frr_bfd: true
 # Configures the detection multiplier to determine packet loss.
 # The remote transmission interval will be multiplied by this

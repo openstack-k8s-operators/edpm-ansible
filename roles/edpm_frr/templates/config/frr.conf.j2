@@ -148,7 +148,7 @@ router bgp {{ edpm_frr_bgp_asn }}
   exit-address-family
 {% endif %}
 
-{% if edpm_frr_bgp_l2vpn %}
+{% if edpm_frr_bgp_l2vpn or edpm_enable_evpn|bool %}
   address-family l2vpn evpn
 {% if edpm_frr_bgp_l2vpn_uplink_activate|bool %}
     neighbor uplink activate

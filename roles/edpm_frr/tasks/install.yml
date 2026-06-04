@@ -53,6 +53,14 @@
       - "!min"
       - "selinux"
 
+- name: Load VRF kernel module for EVPN mode
+  when: edpm_enable_evpn | bool
+  ansible.builtin.import_role:
+    name: osp.edpm.edpm_module_load
+  vars:
+    modules:
+      - name: vrf
+
 - name: Create directory {{ edpm_frr_config_basedir }}
   become: true
   ansible.builtin.file:

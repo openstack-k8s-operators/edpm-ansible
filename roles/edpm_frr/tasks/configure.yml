@@ -14,42 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Identify the real interfaces via os-net-config
-  become: true
-  ansible.builtin.command: os-net-config -i
-  register: os_net_config_result
-  changed_when: os_net_config_result.rc == 0
-  failed_when: os_net_config_result.rc != 0
-
-- name: Os-net-config from json
-  ansible.builtin.set_fact:
-    iface_map: "{{ os_net_config_result.stdout }}"
-
-
-- name: Assert either edpm_frr_bgp_peers or edpm_frr_bgp_uplinks configured
-  ansible.builtin.assert:
-    that:
-      - edpm_frr_bgp_uplinks | length > 0 or edpm_frr_bgp_peers | length > 0
-
-- name: FRR uplink interfaces
-  # if edpm_frr_bgp_peers are defined, edpm_frr_bgp_uplinks are not used to create frr.conf.j2
-  when:
-    - edpm_frr_bgp_uplinks | length > 0
-    - not edpm_frr_bgp_peers | length > 0
-  block:
-    - name: Construct FRR uplink interfaces from os-net-config mappings
-      ansible.builtin.set_fact:
-        edpm_frr_bgp_uplinks_mapped: "{{ edpm_frr_bgp_uplinks | map('extract', iface_map) | list }}"
-      register: check_edpm_frr_bgp_uplinks_mapped
-      ignore_errors: true
-
-    - name: Failed to construct FRR uplink interfaces
-      ansible.builtin.fail:
-        msg: |
-          Failed to map at least one interface from {{ edpm_frr_bgp_uplinks }} to {{ iface_map }}.
-          Please check value of Ansible variable edpm_frr_bgp_uplinks.
-      when: check_edpm_frr_bgp_uplinks_mapped is failed
-
 - name: Gather facts if they don't exist
   when: "'system' not in ansible_facts"
   ansible.builtin.setup:
@@ -58,14 +22,8 @@
       - "!min"
       - "system"
 
-- name: Configure FRR
-  ansible.builtin.template:
-    src: config/frr.conf.j2
-    dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
-    mode: '0644'
-    selevel: s0
-    setype: container_file_t
-  register: _frr_config_result
+- name: Configure FRR for BGP underlay
+  ansible.builtin.include_tasks: configure_bgp.yml
 
 - name: Configure FRR daemons
   ansible.builtin.template:

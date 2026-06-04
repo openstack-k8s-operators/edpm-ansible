@@ -146,6 +146,12 @@ argument_specs:
         default: traditional
         description: ''
         type: str
+      edpm_enable_evpn:
+        default: false
+        description: |
+          When true, load the vrf kernel module and always render the l2vpn evpn
+          address-family in frr.conf.j2.
+        type: bool
       edpm_frr_hostname:
         default: '{{ ansible_facts["hostname"] | default("")}}'
         description: Dynamically retrieved from ansible facts.
