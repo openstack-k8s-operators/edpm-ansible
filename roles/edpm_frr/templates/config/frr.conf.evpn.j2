@@ -1,0 +1,10 @@
+! This frr.conf is managed by the Neutron frr driver.
+
+frr version {{ edpm_frr_version }}
+frr defaults {{ edpm_frr_defaults }}
+hostname {{ edpm_frr_hostname }}
+log stdout {{ edpm_frr_log_level }}
+log timestamp precision {{ edpm_frr_log_timestamp_precision }}
+service integrated-vtysh-config
+line vty
+{{ edpm_frr_conf_custom_globals }}
