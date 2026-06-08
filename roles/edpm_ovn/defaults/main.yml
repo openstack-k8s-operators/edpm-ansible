@@ -68,13 +68,18 @@ edpm_ovn_controller_tls_cacert_volumes: []
 
 edpm_ovn_controller_tls_volumes:
   - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
-  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/rbac/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
+  - "/var/lib/openstack/certs/{{ edpm_ovn_service_name }}/rbac/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
 
 edpm_ovn_tls_enabled: "{{ edpm_tls_certs_enabled | default(False) }}"
 
+# OVN chassis system-id: a deterministic UUID5 derived from the hostname.
+# Using a UUID is the recommended practice for OVN system-id.
+edpm_ovn_system_id: "{{ canonical_hostname | to_uuid(namespace='6ba7b810-9dad-11d1-80b4-00c04fd430c8') }}"
+
 # Set external_id data from provided variables
 edpm_ovn_ovs_external_ids:
+  system-id: "{{ edpm_ovn_system_id }}"
   hostname: "{{ canonical_hostname }}"
   ovn-bridge: "{{ edpm_ovn_bridge }}"
   ovn-bridge-mappings: >-
