@@ -1,0 +1,35 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  roles:
+    - role: "edpm_ovn_bgp_agent"
+      vars:
+        edpm_ovn_bgp_agent_local_ovn_routing: true
+        edpm_ovn_bgp_agent_config_src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/../default/test-data"
+        # molecule jobs are run with an iproute version that uses /usr/share/iproute2 instead of /etc/iproute2
+        edpm_ovn_bgp_agent_common_volumes:
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /dev/log:/dev/log
+          - /usr/share/iproute2:/usr/share/iproute2
+          - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - "{{ edpm_ovn_bgp_agent_config_basedir }}:/var/lib/kolla/config_files/src:ro"
+          - /run/frr:/run/frr:shared,z
+          - /run/openvswitch:/run/openvswitch:shared,z
