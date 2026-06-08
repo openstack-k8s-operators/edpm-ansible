@@ -13,6 +13,25 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+# Remove old container_manage units from /etc/systemd/system/ so they don't
+# shadow Quadlet-generated units in /run/systemd/generator/ (systemd precedence).
+# No daemon_reload here — quadlet.yml's daemon_reload picks up both changes at once.
+- name: Remove legacy container_manage units that shadow Quadlet
+  tags:
+    - upgrade  # to be removed when upgrade(quadlet) tasks handle this
+    - update
+    - ovn_bgp_agent
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/edpm_{{ item }}.service"
+    state: absent
+  loop:
+    - ovn_bgp_agent
+    - nb_db_server
+    - sb_db_server
+    - northd
+    - bgp_ovn_controller
+
 - name: Ensure new config directory exists
   tags:
     - update
