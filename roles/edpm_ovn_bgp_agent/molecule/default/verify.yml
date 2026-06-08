@@ -1,30 +1,53 @@
 ---
 - name: Verify ovn_bgp_agent
   gather_facts: false
-  hosts: compute-1
+  hosts: all
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
-    - name: ensure expected directories exist
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+    - name: Ensure expected directories exist
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_dir.yaml"
       loop:
         - "/var/lib/openstack/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf"
-        - "/var/lib/edpm-config/container-startup-config/ovn_bgp_agent"
 
-    - name: ensure podman container exists and are running
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+    - name: Ensure Quadlet .container file exists
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/edpm_ovn_bgp_agent.container"
+      register: _quadlet_file
+      failed_when: not _quadlet_file.stat.exists
+
+    - name: Ensure staged Quadlet file exists
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/quadlet-rendered/edpm_ovn_bgp_agent.container"
+      register: _staged_file
+      failed_when: not _staged_file.stat.exists
+
+    - name: Read Quadlet file content
+      become: true
+      ansible.builtin.slurp:
+        src: "/etc/containers/systemd/edpm_ovn_bgp_agent.container"
+      register: _quadlet_content
+
+    - name: Verify config_hash is populated in Quadlet file
+      ansible.builtin.assert:
+        that:
+          - "(_quadlet_content.content | b64decode) is regex('# config_hash=.+')"
+        fail_msg: "config_hash placeholder was not populated in Quadlet file"
+
+    - name: Ensure podman container exists and is running
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
       loop:
         - "ovn_bgp_agent"
 
-    - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+    - name: Ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_ovn_bgp_agent.service"}
 
-    - name: ensure kolla_set_configs copied the expected files
+    - name: Ensure kolla_set_configs copied the expected files
       become: true
       ansible.builtin.shell: |
-        podman logs ovn_bgp_agent 2>&1 | grep "{{item}}" > /dev/null
+        podman logs ovn_bgp_agent 2>&1 | grep "{{ item }}" > /dev/null
       loop:
         - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/bgp-agent.conf to /etc/ovn-bgp-agent/bgp-agent.conf"
         - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/10-neutron-ovn.conf to /etc/ovn-bgp-agent/10-neutron-ovn.conf"
