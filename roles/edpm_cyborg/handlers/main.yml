@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,10 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-collections:
-  - ansible.posix
-  - community.crypto
-  - community.general
-  - containers.podman
-  - fedora.linux_system_roles
+- name: Restart cyborg agent container
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    name: "edpm_cyborg_agent.service"
+  listen: "Restart cyborg"
