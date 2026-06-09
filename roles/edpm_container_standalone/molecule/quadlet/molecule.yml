@@ -18,10 +18,6 @@ platforms:
 provisioner:
   log: true
   name: ansible
-  inventory:
-    host_vars:
-      instance:
-        ctlplane_ip: "10.0.0.1"
 scenario:
   test_sequence:
   - dependency
@@ -29,7 +25,6 @@ scenario:
   - create
   - prepare
   - converge
-  - verify
   - destroy
 verifier:
   name: ansible

@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -68,3 +68,10 @@
         name: "osp.edpm.edpm_frr"
         apply:
           become: true
+
+    - name: Create OVN data directory for local cluster
+      become: true
+      ansible.builtin.file:
+        path: "/var/lib/openvswitch/ovn"
+        state: directory
+        mode: "0755"
