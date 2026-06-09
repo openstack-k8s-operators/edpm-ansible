@@ -14,7 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 - name: Converge
   hosts: all
   gather_facts: false
@@ -30,10 +29,12 @@
           state: up
           ipv4:
             address:
-            - ip: 192.168.180.2
-              prefix-length: 24
+              - ip: 192.168.180.2
+                prefix-length: 24
             dhcp: false
             enabled: true
+          ipv6:
+            enabled: false
   pre_tasks:
     - name: Gather user fact
       ansible.builtin.setup:
