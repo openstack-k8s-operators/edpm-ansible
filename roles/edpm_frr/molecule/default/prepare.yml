@@ -13,9 +13,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-- name: Prepare test_deps
+- name: Prepare
   hosts: all
-  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
@@ -23,65 +22,25 @@
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
       test_deps_edpm_packages:
-          - openvswitch
-          - python3-pip
-          - os-net-config
-  pre_tasks:
-    - name: set basic user fact
-      set_fact:
-        ansible_user: "{{ lookup('env', 'USER') }}"
-      when:
-        - ansible_user is undefined
+        # centos-stream-release provides $releasever for dnf after
+        # test_deps removes redhat-release from the UBI9 image.
+        # Without it, repos using $releasever (e.g. EPEL) break.
+        - centos-stream-release
+        - openvswitch
+        - os-net-config
   tasks:
-    - name: Install os-net-config
-      ansible.builtin.package:
-        name: os-net-config
-      become: true
+    - ansible.builtin.include_role:
+        name: osp.edpm.env_data
 
-    - name: Create persistent directories
+    - name: Ensure /etc/localtime exists
       become: true
       ansible.builtin.file:
-        path: "{{ item.path }}"
-        state: directory
-        setype: "{{ item.setype | default('container_file_t') }}"
-        owner: "{{ item.owner }}"
-        group: "{{ item.group }}"
-        mode: "{{ item.mode }}"
-      loop:
-        - {'path': /etc/tmpfiles.d/, 'owner': 'root', 'group': 'root', 'mode': '0755'}
+        src: /usr/share/zoneinfo/UTC
+        dest: /etc/localtime
+        state: link
+        force: true
 
-    - name: Create firewall directory
+    - name: Force systemd to reread configs
       become: true
-      ansible.builtin.file:
-        path: '/var/lib/edpm-config/firewall'
-        state: directory
-        owner: root
-        group: root
-        mode: 0750
-
-    - name: open port 22 (edpm_nftables will active this later)
-      become: true
-      copy:
-        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
-        content: |
-          - rule_name: 003 Allow SSH
-            rule:
-              proto: tcp
-              dport: 22
-
-    - name: Setup for FRR
-      become: true
-      block:
-      - name: Force systemd to reread configs
-        ansible.builtin.systemd:
-          daemon_reload: true
-
-      - name: "Download required role packages"
-        ansible.builtin.import_role:
-          name: "osp.edpm.edpm_bootstrap"
-          tasks_from: "download_cache.yml"
-
-      - name: "Include edpm_bootstrap"
-        ansible.builtin.import_role:
-          name: "osp.edpm.edpm_bootstrap"
-          tasks_from: "bootstrap.yml"
+      ansible.builtin.systemd:
+        daemon_reload: true
