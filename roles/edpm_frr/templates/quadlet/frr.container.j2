@@ -1,0 +1,33 @@
+# Quadlet container file for frr
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=FRR container (EDPM)
+
+[Container]
+ContainerName=frr
+Image={{ edpm_frr_image }}
+Network=host
+User=frr
+AddCapability=CAP_NET_BIND_SERVICE
+AddCapability=CAP_NET_RAW
+AddCapability=CAP_NET_ADMIN
+AddCapability=CAP_SYS_ADMIN
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in edpm_frr_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

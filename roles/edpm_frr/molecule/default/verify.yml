@@ -1,93 +1,114 @@
 ---
 - name: Verify frr
   gather_facts: false
-  hosts: compute-1
+  hosts: all
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
-    - name: ensure expected directories exist
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_dir.yaml"
+    - name: Ensure expected directories exist
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_dir.yaml"
       loop:
-        - "/var/lib/edpm-config/container-startup-config/frr"
         - "/var/lib/openstack/frr"
         - "/etc/tmpfiles.d/"
         - "/var/lib/openstack/frr/etc/frr"
 
-    - name: ensure that /etc/tmpfiles.d/run-frr.conf file for frr exist
+    - name: Ensure Quadlet .container file exists
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/edpm_frr.container"
+      register: _quadlet_file
+      failed_when: not _quadlet_file.stat.exists
+
+    - name: Ensure staged Quadlet file exists
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/quadlet-rendered/edpm_frr.container"
+      register: _staged_file
+      failed_when: not _staged_file.stat.exists
+
+    - name: Read Quadlet file content
+      become: true
+      ansible.builtin.slurp:
+        src: "/etc/containers/systemd/edpm_frr.container"
+      register: _quadlet_content
+
+    - name: Verify config_hash is populated in Quadlet file
+      ansible.builtin.assert:
+        that:
+          - "(_quadlet_content.content | b64decode) is regex('# config_hash=.+')"
+        fail_msg: "config_hash placeholder was not populated in Quadlet file"
+
+    - name: Ensure /etc/tmpfiles.d/run-frr.conf exists
       become: true
       block:
-        - name: Check if file /etc/tmpfiles.d/run-frr.conf exist
+        - name: Check if /etc/tmpfiles.d/run-frr.conf exists
           ansible.builtin.stat:
             path: /etc/tmpfiles.d/run-frr.conf
           register: check_frr_file
-        - name: Assert file /etc/tmpfiles.d/run-frr.conf exist
+        - name: Assert /etc/tmpfiles.d/run-frr.conf exists
           ansible.builtin.assert:
             that:
               - check_frr_file.stat.exists
             fail_msg: "File /etc/tmpfiles.d/run-frr.conf does not exist"
 
-    - name: ensure that /var/lib/openstack/frr/etc/frr/frr.conf file exist
+    - name: Ensure FRR config files exist
       become: true
       block:
-        - name: Check if file /var/lib/openstack/frr/etc/frr/frr.conf exist
+        - name: Check if frr.conf exists
           ansible.builtin.stat:
             path: /var/lib/openstack/frr/etc/frr/frr.conf
           register: check_frr_conf_file
-        - name: Assert file /var/lib/openstack/frr/etc/frr/frr.conf exist
+        - name: Assert frr.conf exists
           ansible.builtin.assert:
             that:
               - check_frr_conf_file.stat.exists
             fail_msg: "File /var/lib/openstack/frr/etc/frr/frr.conf does not exist"
-
-    - name: ensure that /var/lib/openstack/frr/etc/frr/daemons file exist
-      become: true
-      block:
-        - name: Check if file /var/lib/openstack/frr/etc/frr/daemons exist
+        - name: Check if daemons file exists
           ansible.builtin.stat:
             path: /var/lib/openstack/frr/etc/frr/daemons
           register: check_frr_daemons_file
-        - name: Assert file /var/lib/openstack/frr/etc/frr/daemons exist
+        - name: Assert daemons file exists
           ansible.builtin.assert:
             that:
               - check_frr_daemons_file.stat.exists
             fail_msg: "File /var/lib/openstack/frr/etc/frr/daemons does not exist"
 
-    - name: verify frr BGP and BFD firewall rules are applied
+    - name: Verify FRR BGP and BFD firewall rules are applied
       block:
-        - name: rule source file exists
+        - name: Rule source file exists
           become: true
           ansible.builtin.stat:
             path: "/var/lib/edpm-config/firewall/frr.yaml"
           register: rule_source_exists
 
-        - name: Assert frr BGP and BFD rule source file exists
+        - name: Assert FRR BGP and BFD rule source file exists
           ansible.builtin.assert:
             that:
               - rule_source_exists.stat.exists
-            fail_msg: "frr rules source file does not exist"
+            fail_msg: "FRR rules source file does not exist"
 
         - name: Check if nftables rule exists in /etc/nftables/edpm-rules.nft
           become: true
           ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
           register: rule_exists
           ignore_errors: true
-          with_items:
+          loop:
             - "121 frr bgp port"
             - "122 frr bfd ports"
 
-        - name: Assert nftables rule exists in /etc/nftables/edpm-rules.nft
+        - name: Assert nftables rules exist
           ansible.builtin.assert:
             that:
               - item.rc == 0
             fail_msg: "firewall rule {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
-          with_items: "{{ rule_exists.results }}"
+          loop: "{{ rule_exists.results }}"
+          loop_control:
+            label: "{{ item.item }}"
 
         - name: Check rule content
           become: true
           ansible.builtin.shell: grep -q "{{ item }}" /etc/nftables/edpm-rules.nft
           register: rule_content_exists
           ignore_errors: true
-          with_items:
+          loop:
             - "tcp dport { 179 } ct state new counter accept"
             - "udp dport { 3784, 3785, 4784, 49152, 49153 } ct state new counter accept"
 
@@ -96,30 +117,34 @@
             that:
               - item.rc == 0
             fail_msg: "rule content {{ item.item }} does not exist in /etc/nftables/edpm-rules.nft"
-          with_items: "{{ rule_content_exists.results }}"
+          loop: "{{ rule_content_exists.results }}"
+          loop_control:
+            label: "{{ item.item }}"
 
         - name: Check input chain rules are loaded
           become: true
           ansible.builtin.shell: nft list table inet filter | awk '/chain EDPM_INPUT {/,/}/' | grep -q "{{ item }}.*accept"
           register: input_rules_loaded
           ignore_errors: true
-          with_items:
+          loop:
             - "tcp dport 179 ct state new counter"
             - "udp dport { 3784, 3785, 4784, 49152, 49153 } ct state new counter"
 
-        - name: Assert rule content exists
+        - name: Assert input chain rules are loaded
           ansible.builtin.assert:
             that:
               - item.rc == 0
             fail_msg: "rule {{ item.item }} not loaded"
-          with_items: "{{ input_rules_loaded.results }}"
+          loop: "{{ input_rules_loaded.results }}"
+          loop_control:
+            label: "{{ item.item }}"
 
-    - name: ensure podman container exists and are running
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
+    - name: Ensure podman container exists and is running
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
       loop:
         - "frr"
 
-    - name: ensure systemd services are defined and functional
-      ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
+    - name: Ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_frr.service"}
