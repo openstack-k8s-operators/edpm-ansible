@@ -117,3 +117,21 @@ argument_specs:
           Defaults to neutron_physical_bridge_name (br-ex if unset).
           Set this variable when the ovn-agent is configured with the ovn-bgp extension.
         type: str
+      edpm_neutron_ovn_agent_ovn_evpn_bgp_as:
+        default: ''
+        description: >
+          'BGP Autonomous System number for EVPN.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
+      edpm_neutron_ovn_agent_ovn_evpn_bgp_local_interface:
+        default: ''
+        description: >
+          The local interface name (e.g. eth2) on which to establish BGP peer session.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
+      edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port:
+        default: '49152'
+        description: >
+          UDP port for the child VxLAN device used by EVPN.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
