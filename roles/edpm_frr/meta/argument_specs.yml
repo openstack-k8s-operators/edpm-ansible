@@ -146,6 +146,20 @@ argument_specs:
         default: traditional
         description: ''
         type: str
+      edpm_frr_evpn_mode:
+        default: false
+        description: |
+          When true, generate a minimal frr.conf. and sets OVS external-ids for
+          VXLAN tunnel.
+        type: bool
+      edpm_frr_ovn_evpn_local_ip:
+        default: ''
+        description: IP address that will be used as source for the EVPN traffic egressing through the VXLAN tunnel.
+        type: str
+      edpm_frr_evpn_ovn_vxlan_port:
+        default: 4789
+        description: UDP port that will be used for the EVPN traffic egressing through the VXLAN tunnel.
+        type: int
       edpm_frr_hostname:
         default: '{{ ansible_facts["hostname"] | default("")}}'
         description: Dynamically retrieved from ansible facts.

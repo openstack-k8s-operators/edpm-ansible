@@ -1,0 +1,65 @@
+---
+# Copyright 2026 Red Hat, LLC
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- import_playbook: ../default/verify.yml
+
+- name: Verify EVPN mode frr.conf
+  gather_facts: false
+  hosts: compute-1
+  vars:
+    frr_conf_path: /var/lib/openstack/frr/etc/frr/frr.conf
+  tasks:
+    - name: Assert frr.conf has Neutron driver header
+      become: true
+      ansible.builtin.command: grep -Fq '! This frr.conf is managed by the Neutron frr driver.' {{ frr_conf_path }}
+      changed_when: false
+
+    - name: Check frr.conf does not contain BGP router stanza
+      become: true
+      ansible.builtin.command: grep -Fq 'router bgp' {{ frr_conf_path }}
+      register: bgp_stanza
+      changed_when: false
+      failed_when: bgp_stanza.rc == 0
+
+    - name: Assert frr.conf contains global settings
+      become: true
+      ansible.builtin.command: grep -Fq '{{ item }}' {{ frr_conf_path }}
+      changed_when: false
+      loop:
+        - 'frr version'
+        - 'line vty'
+
+    - name: Verify vrf module will be loaded at boot
+      become: true
+      ansible.builtin.command: grep -q 'vrf' /etc/modules-load.d/vrf.conf
+      changed_when: false
+
+    - name: Verify vrf module is loaded
+      become: true
+      ansible.builtin.command: grep -q '^vrf ' /proc/modules
+      changed_when: false
+
+    - name: Verify ovn-evpn-local-ip
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-evpn-local-ip
+      register: output
+      failed_when: output.stdout != '"10.0.0.1"'
+
+    - name: Verify ovn-evpn-vxlan-ports defaults to 4789
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-evpn-vxlan-ports
+      register: output
+      failed_when: output.stdout != '"4789"'
