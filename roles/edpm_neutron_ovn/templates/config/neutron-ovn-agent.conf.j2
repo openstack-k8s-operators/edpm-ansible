@@ -15,3 +15,11 @@ ovsdb_connection_timeout = {{ edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeou
 ovsdb_probe_interval = {{ edpm_neutron_ovn_agent_ovn_ovsdb_probe_interval }}
 ovn_nb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_nb_connection }}
 ovn_sb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_sb_connection }}
+{% if 'ovn-evpn' in edpm_neutron_ovn_agent_agent_extensions.split(',') | map('trim') | list %}
+
+[ovn_evpn]
+bgp_as = {{ edpm_neutron_ovn_agent_ovn_evpn_bgp_as }}
+bgp_local_interface = {{ edpm_neutron_ovn_agent_ovn_evpn_bgp_local_interface }}
+child_vxlan_port = {{ edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port }}
+frr_vty_socket = {{ edpm_neutron_ovn_agent_frr_vty_socket }}
+{% endif %}

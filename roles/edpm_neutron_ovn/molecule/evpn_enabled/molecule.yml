@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: compute-1
+    groups:
+      - compute
+provisioner:
+  log: true
+  name: ansible
+  playbooks:
+    cleanup: ../common/cleanup.yml
+  inventory:
+    host_vars:
+      compute-1:
+        ctlplane_ip: "10.0.0.1"
+        canonical_hostname: edpm-0.localdomain
+scenario:
+  test_sequence:
+  - dependency
+  - destroy
+  - create
+  - prepare
+  - converge
+  - verify
+  - cleanup
+  - destroy
+verifier:
+  name: ansible
