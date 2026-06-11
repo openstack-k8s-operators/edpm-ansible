@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  vars:
+    neutron_ovn_agent_conf: /var/lib/openstack/neutron-ovn-agent/01-neutron-ovn-agent.conf
+  tasks:
+    - name: Slurp neutron-ovn-agent config
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ neutron_ovn_agent_conf }}"
+      register: agent_config
+
+    - name: Assert [ovn_evpn] section is not present
+      ansible.builtin.assert:
+        that:
+          - "'[ovn_evpn]' not in agent_config.content | b64decode"
