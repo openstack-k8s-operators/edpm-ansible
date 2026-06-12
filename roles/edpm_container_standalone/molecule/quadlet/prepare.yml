@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -18,29 +18,25 @@
   gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - podman
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
-      test_deps_extra_packages:
-        - iproute
-        - podman
-
 - name: Prepare
   hosts: all
   gather_facts: false
+  become: true
+  roles:
+    - role: osp.edpm.env_data
   tasks:
-    - ansible.builtin.include_role:
-        name: osp.edpm.env_data
-
-    - name: Install and modprobe openvswitch
-      ansible.builtin.shell: |
-        sudo dnf -y install openvswitch
-        sudo modprobe openvswitch
-      delegate_to: localhost
-      run_once: true
-
-    - name: Ensure /run/netns exists
-      become: true
+    - name: Create test config directory for hash computation
       ansible.builtin.file:
-        path: /run/netns
+        path: /var/lib/openstack/configs/test_service
         state: directory
         mode: "0755"
+
+    - name: Create test config file for hash computation
+      ansible.builtin.copy:
+        content: "test_config_value=1"
+        dest: /var/lib/openstack/configs/test_service/test.conf
+        mode: "0644"

@@ -104,7 +104,7 @@ class TestNeutronDHCP(unittest.TestCase):
                 "/var/lib/neutron",
                 "/var/lib/neutron/external/pids/",
                 "/var/lib/neutron/ns-metadata-proxy/",
-                "/var/lib/edpm-config/container-startup-config",
+                "/var/lib/edpm-config/quadlet-rendered",
                 "/var/lib/openstack/neutron-dhcp-agent"]:
             assert self.host.file(directory).is_directory
 
@@ -187,10 +187,14 @@ class TestNeutronDHCP(unittest.TestCase):
         assert self.host.podman(haproxy_container_name).is_running
 
         # Now stop agent container and make sure that sidecar container
-        # with haproxy is still running
+        # with haproxy is still running.
+        # Quadlet uses --rm so the container is removed on stop.
         self.host.run("/usr/bin/systemctl stop %s" %
                       EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
+        result = self.host.run(
+            "/usr/bin/podman ps -q --filter name=^%s$" %
+            NEUTRON_DHCP_AGENT_CONTAINER)
+        assert result.stdout.strip() == ""
         assert self.host.podman(haproxy_container_name).is_running
 
     def test_dnsmasq_sidecar_container(self):
@@ -247,10 +251,14 @@ class TestNeutronDHCP(unittest.TestCase):
         assert self.host.podman(dnsmasq_container_name).is_running
 
         # Now stop agent container and make sure that sidecar container
-        # with dnsmasq is still running
+        # with dnsmasq is still running.
+        # Quadlet uses --rm so the container is removed on stop.
         self.host.run("/usr/bin/systemctl stop %s" %
                       EDPM_NEUTRON_DHCP_AGENT_SERVICE)
-        assert not self.host.podman(NEUTRON_DHCP_AGENT_CONTAINER).is_running
+        result = self.host.run(
+            "/usr/bin/podman ps -q --filter name=^%s$" %
+            NEUTRON_DHCP_AGENT_CONTAINER)
+        assert result.stdout.strip() == ""
         assert self.host.podman(dnsmasq_container_name).is_running
 
     def test_service_host_is_fqdn(self):
