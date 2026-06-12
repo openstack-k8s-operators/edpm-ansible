@@ -13,14 +13,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-- name: Ensure that {{ lookup('env', 'USER') }} user exists in the fake node
-  hosts: instance
-  gather_facts: false
-  tasks:
-      - ansible.builtin.user:
-          name: "{{ lookup('env', 'USER') }}"
-        ignore_errors: true
-
 - name: Prepare test_deps
   hosts: all
   gather_facts: false
@@ -40,12 +32,16 @@
     - ansible.builtin.include_role:
         name: osp.edpm.env_data
 
-    # The openvswitch kernel module needs to be loaded on the host
-    - name: install and modprobe openvswitch
-      shell: |
+    - name: Install and modprobe openvswitch
+      ansible.builtin.shell: |
         sudo dnf -y install openvswitch
         sudo modprobe openvswitch
       delegate_to: localhost
       run_once: true
 
-  post_tasks: []
+    - name: Ensure /run/netns exists
+      become: true
+      ansible.builtin.file:
+        path: /run/netns
+        state: directory
+        mode: "0755"

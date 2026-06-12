@@ -1,0 +1,46 @@
+# Quadlet container file for ovn_metadata_agent
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _metadata_volumes = [] -%}
+{%- set _metadata_volumes = _metadata_volumes
+    + edpm_neutron_metadata_common_volumes
+    + edpm_neutron_metadata_tls_cacert_volumes -%}
+{%- if edpm_neutron_metadata_agent_tls_enabled | bool -%}
+{%- set _metadata_volumes = _metadata_volumes
+    + edpm_neutron_metadata_tls_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Neutron OVN Metadata Agent container (EDPM)
+After=openvswitch.service
+Requires=openvswitch.service
+
+[Container]
+ContainerName=ovn_metadata_agent
+Image={{ edpm_neutron_metadata_agent_image }}
+Network=host
+User=root
+PodmanArgs=--privileged
+PodmanArgs=--pid=host
+PodmanArgs=--cgroupns=host
+{% if edpm_neutron_metadata_healthcheck -%}
+HealthCmd=/openstack/healthcheck
+Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:/openstack:ro,z
+{% endif -%}
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in _metadata_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
