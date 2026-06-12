@@ -13,6 +13,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+# Remove old container_manage units from /etc/systemd/system/ so they don't
+# shadow Quadlet-generated units in /run/systemd/generator/ (systemd precedence).
+# No daemon_reload here — quadlet.yml's daemon_reload picks up both changes at once.
+- name: Remove legacy container_manage units that shadow Quadlet
+  tags:
+    - upgrade  # to be removed when upgrade tasks handle this
+    - update
+    - neutron_sriov
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/edpm_neutron_sriov_agent.service"
+    state: absent
+
 - name: Gather user fact
   ansible.builtin.setup:
     gather_subset:
