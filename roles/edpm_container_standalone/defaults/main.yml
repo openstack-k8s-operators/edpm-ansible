@@ -23,6 +23,7 @@
 edpm_container_standalone_service: ""
 # Directory for kolla config files
 edpm_container_kolla_config_dir: /var/lib/kolla/config_files
+# TODO(quadlet-migration): Remove startup_config_dir and container_defs once all services are migrated.
 # Directory for container startup configs
 edpm_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
 # Hash with keys of container name and value of YAML kolla config file.
@@ -64,6 +65,19 @@ edpm_container_standalone_volumes: "{{
   }}"
 
 edpm_deploy_identifier: ''
+
+# Quadlet support
+# TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
+# When true, uses Podman Quadlet (.container files) instead of
+# edpm_container_manage. Can be enabled per-service for incremental migration.
+edpm_container_standalone_use_quadlet: false
+# Directory where Quadlet .container files are written
+edpm_container_standalone_quadlet_dir: /etc/containers/systemd
+# Staging directory for rendered templates before hash injection
+edpm_container_standalone_quadlet_staging_dir: /var/lib/edpm-config/quadlet-rendered
+# Dict mapping container name to Jinja2 template path for its .container file.
+# Each service role provides its own templates.
+edpm_container_standalone_quadlet_defs: {}
 
 # State file tracking
 edpm_container_track_state: true
