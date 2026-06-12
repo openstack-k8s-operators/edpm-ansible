@@ -27,11 +27,6 @@
           - "{{ edpm_neutron_metadata_tls_cacert_bundle_src }}:{{ edpm_neutron_metadata_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
-
 - name: Update ovn_metadata_agent health check script
   ansible.builtin.include_tasks:
     file: healthchecks.yml
@@ -40,13 +35,19 @@
   ansible.builtin.include_tasks:
     file: sidecar.yml
 
+- name: Set role path for template resolution
+  ansible.builtin.set_fact:
+    _edpm_neutron_metadata_role_path: "{{ role_path }}"
+
+# TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run ovn_metadata_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: ovn_metadata_agent
     edpm_service_name: "{{ edpm_neutron_metadata_service_name }}"
-    edpm_container_standalone_container_defs:
-      ovn_metadata_agent: "{{ lookup('template', 'container_defs/ovn_metadata_agent.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      ovn_metadata_agent: "{{ _edpm_neutron_metadata_role_path }}/templates/quadlet/ovn_metadata_agent.container.j2"
     edpm_container_standalone_kolla_config_files:
       ovn_metadata_agent: "{{ lookup('file', 'kolla_config/kolla_ovn_metadata_agent.yaml') | from_yaml }}"
