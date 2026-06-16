@@ -20,12 +20,16 @@
       loop:
         - "ceilometer_agent_compute"
         - "node_exporter"
+        - "podman_exporter"
+        - "openstack_network_exporter"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_ceilometer_agent_compute.service"}
         - {"name": "edpm_node_exporter.service"}
+        - {"name": "edpm_podman_exporter.service"}
+        - {"name": "edpm_openstack_network_exporter.service"}
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
@@ -54,3 +58,111 @@
       ansible.builtin.assert:
         that:
           - "'edpm-0.localdomain' in host_specific_config.content | b64decode"
+
+    - name: Verify config_hash is populated for ceilometer
+      become: true
+      ansible.builtin.shell: >-
+        grep -E '^# config_hash=.+' /etc/containers/systemd/edpm_ceilometer_agent_compute.container
+      register: _config_hash_check
+      failed_when: _config_hash_check.rc != 0
+
+    - name: Verify config_hash placeholder exists for non-kolla exporters
+      become: true
+      ansible.builtin.shell: >-
+        grep -E '^# config_hash=' /etc/containers/systemd/edpm_{{ item }}.container
+      loop:
+        - node_exporter
+        - podman_exporter
+        - openstack_network_exporter
+      register: _config_hash_sentinel_check
+      failed_when: _config_hash_sentinel_check.rc != 0
+
+    - name: Read rendered ceilometer .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_ceilometer_agent_compute.container
+      register: _ceilometer_container
+
+    - name: Verify all ceilometer volumes are rendered
+      ansible.builtin.assert:
+        that:
+          - "'Volume={{ edpm_telemetry_config_dest }}:/var/lib/kolla/config_files/src:z' in _container_content"
+          - "'Volume=/var/lib/kolla/config_files/ceilometer_agent_compute.json:/var/lib/kolla/config_files/config.json:z' in _container_content"
+          - "'Volume=/run/libvirt:/run/libvirt:shared,ro' in _container_content"
+          - "'Volume=/etc/hosts:/etc/hosts:ro' in _container_content"
+          - "'Volume=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro' in _container_content"
+          - "'Volume=/etc/localtime:/etc/localtime:ro' in _container_content"
+          - "'Volume=/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro' in _container_content"
+          - "'Volume=/dev/log:/dev/log' in _container_content"
+          - "'Volume={{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/ceilometer_agent_compute:/openstack:ro,z' in _container_content"
+        fail_msg: "Missing volume in ceilometer .container file"
+      vars:
+        _container_content: "{{ _ceilometer_container.content | b64decode }}"
+
+    - name: Verify CA bundle volume is absent when CA bundle does not exist
+      ansible.builtin.assert:
+        that:
+          - "'tls-ca-bundle.pem' not in _ceilometer_container.content | b64decode"
+        fail_msg: "CA bundle volume should not be present when CA bundle file does not exist"
+
+    - name: Read rendered node_exporter .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_node_exporter.container
+      register: _node_exporter_container
+
+    - name: Verify all node_exporter volumes are rendered
+      ansible.builtin.assert:
+        that:
+          - "'Volume=/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw' in _container_content"
+          - "'Volume=/:/rootfs:ro' in _container_content"
+          - "'Volume={{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z' in _container_content"
+          - "'Volume={{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/node_exporter:/openstack:ro,z' in _container_content"
+        fail_msg: "Missing volume in node_exporter .container file"
+      vars:
+        _container_content: "{{ _node_exporter_container.content | b64decode }}"
+
+    - name: Read rendered podman_exporter .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_podman_exporter.container
+      register: _podman_exporter_container
+
+    - name: Verify all podman_exporter volumes are rendered
+      ansible.builtin.assert:
+        that:
+          - "'Volume=/run/podman/podman.sock:/run/podman/podman.sock:rw,z' in _container_content"
+          - "'Volume={{ edpm_telemetry_config_dest }}/podman_exporter.yaml:/etc/podman_exporter/podman_exporter.yaml:z' in _container_content"
+          - "'Volume={{ edpm_telemetry_certs }}:/etc/podman_exporter/tls:z' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/podman_exporter:/openstack:ro,z' in _container_content"
+        fail_msg: "Missing volume in podman_exporter .container file"
+      vars:
+        _container_content: "{{ _podman_exporter_container.content | b64decode }}"
+
+    - name: Read rendered network_exporter .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_openstack_network_exporter.container
+      register: _network_exporter_container
+
+    - name: Verify all network_exporter volumes are rendered
+      ansible.builtin.assert:
+        that:
+          - "'Volume={{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml:/etc/openstack_network_exporter/openstack_network_exporter.yaml:z' in _container_content"
+          - "'Volume=/proc:/host/proc:ro' in _container_content"
+          - "'Volume={{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/openstack_network_exporter:/openstack:ro,z' in _container_content"
+        fail_msg: "Missing volume in network_exporter .container file"
+      vars:
+        _container_content: "{{ _network_exporter_container.content | b64decode }}"
+
+    - name: Verify OVS volumes are absent in test mode
+      ansible.builtin.assert:
+        that:
+          - "'/var/run/openvswitch:/run/openvswitch' not in _container_content"
+          - "'/var/lib/openvswitch/ovn:/run/ovn' not in _container_content"
+        fail_msg: "OVS/OVN volumes should not be present in test mode"
+      vars:
+        _container_content: "{{ _network_exporter_container.content | b64decode }}"

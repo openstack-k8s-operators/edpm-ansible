@@ -1,0 +1,44 @@
+# Quadlet container file for node_exporter
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _node_exporter_volumes = edpm_telemetry_node_exporter_common_volumes -%}
+{%- if tls_cert_exists | bool -%}
+{%- set _node_exporter_volumes = _node_exporter_volumes +
+        edpm_telemetry_node_exporter_tls_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Node Exporter container (EDPM)
+
+[Container]
+ContainerName=node_exporter
+Image={{ edpm_telemetry_node_exporter_image }}
+Network=host
+User=root
+PodmanArgs=--privileged
+{% if edpm_telemetry_healthcheck -%}
+HealthCmd=/openstack/healthcheck node_exporter
+Volume=/var/lib/openstack/healthchecks/node_exporter:/openstack:ro,z
+{% endif -%}
+LogDriver=journald
+Environment=OS_ENDPOINT_TYPE=internal
+{% if tls_cert_exists | bool -%}
+Exec=--web.config.file=/etc/node_exporter/node_exporter.yaml --web.disable-exporter-metrics --collector.systemd --collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service --no-collector.dmi --no-collector.entropy --no-collector.thermal_zone --no-collector.time --no-collector.timex --no-collector.uname --no-collector.stat --no-collector.hwmon --no-collector.os --no-collector.selinux --no-collector.textfile --no-collector.powersupplyclass --no-collector.pressure --no-collector.rapl --path.rootfs=/rootfs
+{% else -%}
+Exec=--web.disable-exporter-metrics --collector.systemd --collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\\.service --no-collector.dmi --no-collector.entropy --no-collector.thermal_zone --no-collector.time --no-collector.timex --no-collector.uname --no-collector.stat --no-collector.hwmon --no-collector.os --no-collector.selinux --no-collector.textfile --no-collector.powersupplyclass --no-collector.pressure --no-collector.rapl --path.rootfs=/rootfs
+{% endif -%}
+{% for vol in _node_exporter_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

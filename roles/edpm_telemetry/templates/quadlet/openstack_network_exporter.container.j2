@@ -1,0 +1,43 @@
+# Quadlet container file for openstack_network_exporter
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _network_exporter_volumes = edpm_telemetry_network_exporter_common_volumes -%}
+{%- if tls_cert_exists | bool -%}
+{%- set _network_exporter_volumes = _network_exporter_volumes +
+        edpm_telemetry_network_exporter_tls_volumes -%}
+{%- endif -%}
+{%- if telemetry_test is not defined or not telemetry_test | bool -%}
+{%- set _network_exporter_volumes = _network_exporter_volumes +
+        edpm_telemetry_network_exporter_ovs_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=OpenStack Network Exporter container (EDPM)
+
+[Container]
+ContainerName=openstack_network_exporter
+Image={{ edpm_telemetry_openstack_network_exporter_image }}
+Network=host
+PodmanArgs=--privileged
+{% if edpm_telemetry_healthcheck -%}
+HealthCmd=/openstack/healthcheck openstack-netwo
+Volume=/var/lib/openstack/healthchecks/openstack_network_exporter:/openstack:ro,z
+{% endif -%}
+LogDriver=journald
+Environment=OS_ENDPOINT_TYPE=internal
+Environment=OPENSTACK_NETWORK_EXPORTER_YAML=/etc/openstack_network_exporter/openstack_network_exporter.yaml
+{% for vol in _network_exporter_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
