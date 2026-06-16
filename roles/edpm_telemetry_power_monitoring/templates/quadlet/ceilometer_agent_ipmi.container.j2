@@ -1,0 +1,43 @@
+# Quadlet container file for ceilometer_agent_ipmi
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set _ceilometer_ipmi_volumes = edpm_telemetry_ceilometer_agent_ipmi_common_volumes -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set _ceilometer_ipmi_volumes = _ceilometer_ipmi_volumes +
+        edpm_telemetry_ceilometer_agent_ipmi_tls_cacert_volumes -%}
+{%- endif -%}
+{%- if tls_cert_exists | bool -%}
+{%- set _ceilometer_ipmi_volumes = _ceilometer_ipmi_volumes +
+        edpm_telemetry_ceilometer_agent_ipmi_tls_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Ceilometer Agent IPMI container (EDPM)
+
+[Container]
+ContainerName=ceilometer_agent_ipmi
+Image={{ edpm_telemetry_ceilometer_ipmi_image }}
+Network=host
+User=ceilometer
+PodmanArgs=--privileged --security-opt label=type:ceilometer_polling_t --log-driver=journald
+{% if edpm_telemetry_power_monitoring_healthcheck -%}
+PodmanArgs=--health-cmd="/openstack/healthcheck ipmi"
+Volume=/var/lib/openstack/healthchecks/ceilometer_agent_ipmi:/openstack:ro,z
+{% endif -%}
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Environment=OS_ENDPOINT_TYPE=internal
+{% for vol in _ceilometer_ipmi_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
