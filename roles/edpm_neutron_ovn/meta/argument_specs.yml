@@ -85,6 +85,7 @@ argument_specs:
           - /run/openvswitch:/run/openvswitch:z
           - '{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z'
           - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - /run/frr:/run/frr:shared,z
         description: Volume mounts for Neutron OVN agent
         type: list
       edpm_neutron_ovn_tls_enabled:
