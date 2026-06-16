@@ -51,5 +51,49 @@
         - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
         - "Copying /var/lib/kolla/config_files/src/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
 
+    - name: Read rendered ceilometer_agent_ipmi .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_ceilometer_agent_ipmi.container
+      register: _ceilometer_ipmi_container
+
+    - name: Verify ceilometer_agent_ipmi config_hash and volumes
+      ansible.builtin.assert:
+        that:
+          - "'# config_hash=' in _container_content"
+          - "_container_content | regex_search('# config_hash=.+')"
+          - "'Volume={{ edpm_telemetry_config_dest }}:/var/lib/kolla/config_files/src:z' in _container_content"
+          - "'Volume=/var/lib/kolla/config_files/ceilometer_agent_ipmi.json:/var/lib/kolla/config_files/config.json:z' in _container_content"
+          - "'Volume=/etc/hosts:/etc/hosts:ro' in _container_content"
+          - "'Volume=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro' in _container_content"
+          - "'Volume=/etc/localtime:/etc/localtime:ro' in _container_content"
+          - "'Volume=/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro' in _container_content"
+          - "'Volume=/dev/log:/dev/log' in _container_content"
+          - "'Volume={{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/ceilometer_agent_ipmi:/openstack:ro,z' in _container_content"
+          - "'tls-ca-bundle.pem' not in _container_content"
+        fail_msg: "config_hash or volume mismatch in ceilometer_agent_ipmi .container file"
+      vars:
+        _container_content: "{{ _ceilometer_ipmi_container.content | b64decode }}"
+
+    - name: Read rendered kepler .container file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_kepler.container
+      register: _kepler_container
+
+    - name: Verify kepler config_hash and volumes
+      ansible.builtin.assert:
+        that:
+          - "'# config_hash=' in _container_content"
+          - "'Volume=/lib/modules:/lib/modules:ro' in _container_content"
+          - "'Volume=/run/libvirt:/run/libvirt:shared,ro' in _container_content"
+          - "'Volume=/sys:/sys' in _container_content"
+          - "'Volume=/proc:/proc' in _container_content"
+          - "'Volume=/var/lib/openstack/healthchecks/kepler:/openstack:ro,z' in _container_content"
+        fail_msg: "config_hash or volume mismatch in kepler .container file"
+      vars:
+        _container_content: "{{ _kepler_container.content | b64decode }}"
+
     - name: ensure firewall is configured
       ansible.builtin.include_tasks: "test-helpers/kepler.yaml"
