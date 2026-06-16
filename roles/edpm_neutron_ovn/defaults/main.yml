@@ -24,6 +24,7 @@ edpm_neutron_ovn_common_volumes:
   - "{{ edpm_neutron_ovn_agent_lib_dir }}:/var/lib/neutron:shared,z"
   - "{{ edpm_neutron_ovn_agent_lib_dir }}/ovn_agent_haproxy_wrapper:/usr/local/bin/haproxy:ro"
   - "{{ edpm_neutron_ovn_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
+  - /run/frr:/run/frr:shared,z
 
 # Sidecar containers settings
 edpm_neutron_ovn_agent_sidecar_debug: false

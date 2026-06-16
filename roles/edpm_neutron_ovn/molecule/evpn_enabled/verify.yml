@@ -22,6 +22,20 @@
           - "'frr_vty_socket = /run/frr' in agent_config.content | b64decode"
           - "'extensions = ovn-evpn' in agent_config.content | b64decode"
 
+    - name: Collect ovn_agent bind mounts
+      ansible.builtin.shell: |
+        /usr/bin/podman inspect --format '{{ '{{' }}.HostConfig.Binds{{ '}}' }}' ovn_agent
+      register: _edpm_neutron_ovn_ovn_agent_binds
+      changed_when: false
+
+    - name: Assert /run/frr bind is present on ovn_agent
+      ansible.builtin.assert:
+        that:
+          - "'/run/frr:/run/frr:' in _edpm_neutron_ovn_ovn_agent_binds.stdout"
+        fail_msg: >-
+          /run/frr bind not found in ovn_agent HostConfig.Binds
+          (binds: {{ _edpm_neutron_ovn_ovn_agent_binds.stdout }})
+
     - name: Verify vrf module is loaded
       become: true
       ansible.builtin.command: grep -q '^vrf ' /proc/modules
