@@ -1,0 +1,40 @@
+# Quadlet container file for nova_compute
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _nova_compute_volumes = edpm_nova_compute_common_volumes -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set _nova_compute_volumes = _nova_compute_volumes +
+        edpm_nova_compute_tls_cacert_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Nova compute container (EDPM)
+After=edpm_nova_compute_init.service
+Requires=edpm_nova_compute_init.service
+
+[Container]
+ContainerName=nova_compute
+Image={{ edpm_nova_compute_image }}
+Network=host
+User=nova
+PodmanArgs=--privileged --pid=host
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in _nova_compute_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+{% for bind_mount in edpm_nova_extra_bind_mounts -%}
+Volume={{ bind_mount.src }}:{{ bind_mount.dest }}:{{ bind_mount.options | default('ro') }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

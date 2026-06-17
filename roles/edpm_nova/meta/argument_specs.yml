@@ -99,3 +99,30 @@ argument_specs:
         type: str
         description: |
           Destination directory for the cleaner container configs.
+      edpm_nova_compute_init_common_volumes:
+        type: list
+        required: false
+        description: |
+          Volume mounts for the nova_compute_init container.
+      edpm_nova_compute_common_volumes:
+        type: list
+        required: false
+        description: |
+          Volume mounts for the nova_compute container.
+      edpm_nova_compute_tls_cacert_volumes:
+        type: list
+        required: false
+        description: |
+          CA certificate volume mounts for the nova_compute container.
+          Applied when a CA bundle is present.
+      edpm_nova_nvme_cleaner_common_volumes:
+        type: list
+        required: false
+        description: |
+          Volume mounts for the nova_nvme_cleaner container.
+      edpm_nova_nvme_cleaner_tls_cacert_volumes:
+        type: list
+        required: false
+        description: |
+          CA certificate volume mounts for the nova_nvme_cleaner container.
+          Applied when a CA bundle is present.

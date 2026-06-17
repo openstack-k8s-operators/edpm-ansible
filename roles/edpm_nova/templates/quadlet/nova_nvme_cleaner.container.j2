@@ -1,0 +1,35 @@
+# Quadlet container file for nova_nvme_cleaner
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _nvme_cleaner_volumes = edpm_nova_nvme_cleaner_common_volumes -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set _nvme_cleaner_volumes = _nvme_cleaner_volumes +
+        edpm_nova_nvme_cleaner_tls_cacert_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Nova NVMe cleaner container (EDPM)
+
+[Container]
+ContainerName=nova_nvme_cleaner
+Image={{ edpm_nova_compute_image }}
+Network=host
+User=root
+PodmanArgs=--privileged
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in _nvme_cleaner_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

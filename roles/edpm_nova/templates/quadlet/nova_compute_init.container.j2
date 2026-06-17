@@ -1,0 +1,31 @@
+# Quadlet container file for nova_compute_init
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Nova compute init container (EDPM)
+
+[Container]
+ContainerName=nova_compute_init
+Image={{ edpm_nova_compute_image }}
+Network=none
+User=root
+SecurityLabelDisable=true
+LogDriver=journald
+Exec=bash -c $* -- eval python3 /sbin/nova_statedir_ownership.py | logger -t nova_compute_init
+Environment=NOVA_STATEDIR_OWNERSHIP_SKIP=/var/lib/nova/compute_id
+Environment=__OS_DEBUG=false
+{% for vol in edpm_nova_compute_init_common_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+TimeoutStartSec=900
+TimeoutStopSec=84

@@ -31,7 +31,7 @@
 
 - name: Restart nova init container
   become: true
-  containers.podman.podman_container:
-    name: nova_compute_init
-    state: started
+  ansible.builtin.systemd:
+    name: edpm_nova_compute_init.service
+    state: restarted
   listen: "Restart nova init"
