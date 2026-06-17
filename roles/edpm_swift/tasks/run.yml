@@ -14,31 +14,31 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
+- name: Set role path for template resolution
+  ansible.builtin.set_fact:
+    _edpm_swift_role_path: "{{ role_path }}"
 
 - name: Run swift containers
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: swift
-    edpm_container_standalone_container_defs:
-      swift_account_auditor: "{{ lookup('template', 'container_defs/swift_account_auditor.yaml.j2') | from_yaml }}"
-      swift_account_reaper: "{{ lookup('template', 'container_defs/swift_account_reaper.yaml.j2') | from_yaml }}"
-      swift_account_replicator: "{{ lookup('template', 'container_defs/swift_account_replicator.yaml.j2') | from_yaml }}"
-      swift_account_server: "{{ lookup('template', 'container_defs/swift_account_server.yaml.j2') | from_yaml }}"
-      swift_container_auditor: "{{ lookup('template', 'container_defs/swift_container_auditor.yaml.j2') | from_yaml }}"
-      swift_container_replicator: "{{ lookup('template', 'container_defs/swift_container_replicator.yaml.j2') | from_yaml }}"
-      swift_container_server: "{{ lookup('template', 'container_defs/swift_container_server.yaml.j2') | from_yaml }}"
-      swift_container_updater: "{{ lookup('template', 'container_defs/swift_container_updater.yaml.j2') | from_yaml }}"
-      swift_object_auditor: "{{ lookup('template', 'container_defs/swift_object_auditor.yaml.j2') | from_yaml }}"
-      swift_object_expirer: "{{ lookup('template', 'container_defs/swift_object_expirer.yaml.j2') | from_yaml }}"
-      swift_object_replicator: "{{ lookup('template', 'container_defs/swift_object_replicator.yaml.j2') | from_yaml }}"
-      swift_object_server: "{{ lookup('template', 'container_defs/swift_object_server.yaml.j2') | from_yaml }}"
-      swift_object_updater: "{{ lookup('template', 'container_defs/swift_object_updater.yaml.j2') | from_yaml }}"
-      rsync: "{{ lookup('template', 'container_defs/rsync.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      swift_account_auditor: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_account_auditor.container.j2"
+      swift_account_reaper: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_account_reaper.container.j2"
+      swift_account_replicator: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_account_replicator.container.j2"
+      swift_account_server: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_account_server.container.j2"
+      swift_container_auditor: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_container_auditor.container.j2"
+      swift_container_replicator: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_container_replicator.container.j2"
+      swift_container_server: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_container_server.container.j2"
+      swift_container_updater: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_container_updater.container.j2"
+      swift_object_auditor: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_object_auditor.container.j2"
+      swift_object_expirer: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_object_expirer.container.j2"
+      swift_object_replicator: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_object_replicator.container.j2"
+      swift_object_server: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_object_server.container.j2"
+      swift_object_updater: "{{ _edpm_swift_role_path }}/templates/quadlet/swift_object_updater.container.j2"
+      rsync: "{{ _edpm_swift_role_path }}/templates/quadlet/rsync.container.j2"
     edpm_container_standalone_kolla_config_files:
       swift_account_auditor: "{{ lookup('file', 'kolla_config/swift_account_auditor.yaml') | from_yaml }}"
       swift_account_reaper: "{{ lookup('file', 'kolla_config/swift_account_reaper.yaml') | from_yaml }}"
