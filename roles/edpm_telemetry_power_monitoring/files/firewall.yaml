@@ -1,10 +1,5 @@
 ---
 # Generated via edpm_telemetry_power_monitoring
-- rule_name: 000 Allow Kepler traffic
-  rule:
-    proto: tcp
-    dport:
-     - "8888"
 - rule_name: 000 Allow ceilometer_ipmi_prom_exporter traffic
   rule:
     proto: tcp
