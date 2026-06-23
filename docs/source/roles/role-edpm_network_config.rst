@@ -19,10 +19,14 @@ This Ansible role does the following tasks:
   - Checks for the presence of required RPMS
   - Uses "provider" ifcfg/nmstate based on flag "edpm_network_config_nmstate"
 
-Note: By default this role will cleanup devices/interfaces not in
-"edpm_network_config_template". If there is requirement to keep them
-for pre-provisioned nodes, "edpm_network_config_nonconfigured_cleanup"
-ansible var can be set to "false".
+Note: * With nmstate-provider as the default for os-net-config,
+        using "edpm_network_config_nonconfigured_cleanup" is not recommended.
+        Instead, enabling flag "edpm_network_config_remove_config"
+        with appropriate remove_config section added in
+        "edpm_network_config_template" is the supported option
+
+      * "edpm_network_config_nonconfigured_cleanup" SHOULD NOT be set for
+        update/adoption usecase
 
 Here is an example playbook to run os-net-config tool:
 
@@ -37,4 +41,22 @@ Here is an example playbook to run os-net-config tool:
             edpm_network_config_template: "{{ nic_config_file }}"
 
 .. literalinclude:: ../../../roles/edpm_network_config/tasks/os_net_config.yml
+   :language: YAML
+
+Here is an example playbook to run os-net-config tool with --remove_config section:
+
+.. code-block:: YAML
+
+    - name: Cleanup and apply network configuration only
+      include_role:
+        name: edpm_network_config
+      vars:
+        edpm_network_config_template:
+          "{{ nic_config_file }}"
+        edpm_network_config:
+          remove_config: true
+
+An example of using ``remove_config`` is available in:
+
+.. literalinclude:: ../../../roles/edpm_network_config/molecule/default/converge.yml
    :language: YAML

@@ -23,6 +23,21 @@
       test_deps_extra_packages:
         - iproute
         - NetworkManager
+
+- name: Add custom RDO component repository
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Add RDO component/common repository
+      ansible.builtin.yum_repository:
+        name: rdo-component-common
+        description: RDO Trunk Component Common Repository
+        baseurl: https://trunk.rdoproject.org/centos9-master/component/common/current/
+        gpgcheck: no
+        enabled: yes
+        priority: 1
+
 - name: Prepare
   hosts: all
   gather_facts: false
