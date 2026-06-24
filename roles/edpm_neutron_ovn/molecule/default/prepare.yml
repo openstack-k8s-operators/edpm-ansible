@@ -24,19 +24,42 @@
         - openvswitch
         - iproute
         - podman
+
 - name: Prepare
   hosts: all
   gather_facts: false
+  vars:
+    edpm_download_cache_podman_auth_file: ""
   tasks:
     - ansible.builtin.include_role:
         name: osp.edpm.env_data
 
-    # The openvswitch kernel module needs to be loaded on the host
-    - name: install and modprobe openvswitch
-      shell: |
-        sudo dnf -y install openvswitch
-        sudo modprobe openvswitch
-      delegate_to: localhost
-      run_once: true
+    - name: Install and modprobe openvswitch
+      ansible.builtin.shell: |
+        set -eux
+        dnf -y install openvswitch
+        modprobe openvswitch
+      become: true
+      changed_when: true
 
-  post_tasks: []
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true
+      become: true
+
+    - name: Download required role packages
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: download_cache.yml
+
+    - name: Include edpm_bootstrap
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: bootstrap.yml
+      become: true
+
+    - name: Download edpm_neutron_ovn container images
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_neutron_ovn
+        tasks_from: download_cache.yml
+      become: true
