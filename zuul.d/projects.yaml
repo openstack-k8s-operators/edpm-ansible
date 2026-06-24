@@ -21,6 +21,7 @@
         - edpm-ansible-molecule-edpm_iscsid
         - edpm-ansible-molecule-edpm_multipathd
         - edpm-ansible-molecule-edpm_ovn_bgp_agent
+        - edpm-ansible-molecule-edpm_neutron_ovn
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
