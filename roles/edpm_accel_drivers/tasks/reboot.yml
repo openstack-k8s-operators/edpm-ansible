@@ -1,12 +1,23 @@
 ---
-- name: Reboot node to load drivers and initialize vGPU manager
-  become: true
-  ansible.builtin.reboot:
-    reboot_timeout: "{{ _edpm_accel_drivers_config.reboot.timeout }}"
+- name: Check if reboot is needed
+  ansible.builtin.command:
+    cmd: uname -r
+  register: _edpm_accel_drivers_running_kernel
+  changed_when: false
 
-- name: Wait for node to become reachable
-  ansible.builtin.wait_for_connection:
-    timeout: "{{ _edpm_accel_drivers_config.reboot.wait_for_connection_timeout }}"
+- name: Reboot node to load drivers and initialize vGPU manager
+  when: >-
+    not _edpm_accel_drivers_config.kernel.pin | bool or
+    _edpm_accel_drivers_config.kernel.version not in _edpm_accel_drivers_running_kernel.stdout
+  block:
+    - name: Reboot node
+      become: true
+      ansible.builtin.reboot:
+        reboot_timeout: "{{ _edpm_accel_drivers_config.reboot.timeout }}"
+
+    - name: Wait for node to become reachable
+      ansible.builtin.wait_for_connection:
+        timeout: "{{ _edpm_accel_drivers_config.reboot.wait_for_connection_timeout }}"
 
 - name: Verify nvidia-vgpu-mgr service started
   when: _edpm_accel_drivers_config.reboot.verify_vgpu_mgr | bool

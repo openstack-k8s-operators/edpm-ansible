@@ -1,0 +1,75 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Install mock nvidia-smi
+      become: true
+      ansible.builtin.copy:
+        src: /bin/true
+        dest: /usr/bin/nvidia-smi
+        mode: '0755'
+        force: true
+        remote_src: true
+
+    - name: Install mock grubby
+      become: true
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          if [[ "$1" == "--set-default" ]]; then
+            echo "$2" > /tmp/mock-grubby-default
+          elif [[ "$1" == "--default-kernel" ]]; then
+            cat /tmp/mock-grubby-default 2>/dev/null || echo "/boot/vmlinuz-5.14.0-570.26.1.el9_6.x86_64"
+          fi
+        dest: /usr/bin/grubby
+        mode: '0755'
+        force: true
+
+    - name: Install mock uname
+      become: true
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          if [[ "$1" == "-r" ]]; then
+            echo "5.14.0-570.26.1.el9_6.x86_64"
+          elif [[ "$1" == "-m" ]]; then
+            echo "x86_64"
+          else
+            /bin/uname "$@"
+          fi
+        dest: /usr/local/bin/uname
+        mode: '0755'
+        force: true
+
+    - name: Create mock dnf.conf
+      become: true
+      ansible.builtin.copy:
+        content: |
+          [main]
+          gpgcheck=1
+          installonly_limit=3
+          clean_requirements_on_remove=True
+          best=True
+          skip_if_unavailable=False
+        dest: /etc/dnf/dnf.conf
+        mode: '0644'
+        force: true
+
+    - name: Ensure /usr/lib/nvidia directory exists
+      become: true
+      ansible.builtin.file:
+        path: /usr/lib/nvidia
+        state: directory
+        mode: '0755'
+
+    - name: Install mock sriov-manage
+      become: true
+      ansible.builtin.copy:
+        src: /bin/true
+        dest: /usr/lib/nvidia/sriov-manage
+        mode: '0755'
+        force: true
+        remote_src: true

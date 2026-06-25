@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers:
+          kernel:
+            pin: true
+            version: "5.14.0-570.26.1.el9_6"
+            remove_old: true
+          reboot:
+            post_driver: true
+            timeout: 300
+            wait_for_connection_timeout: 120
+            verify_vgpu_mgr: true

@@ -170,6 +170,46 @@ argument_specs:
                         type: bool
                         default: false
                         description: Whether to disable GPG check when installing RPM (not recommended for production)
+          kernel:
+            type: dict
+            description: Kernel version pinning configuration for driver compatibility
+            options:
+              pin:
+                type: bool
+                default: false
+                description: Whether to pin a specific kernel version before driver installation
+              version:
+                type: str
+                default: ""
+                description: >-
+                  Target kernel version to install and pin (e.g. 5.14.0-570.26.1.el9_6).
+                  Required when pin is true.
+              remove_old:
+                type: bool
+                default: true
+                description: Whether to remove non-target kernel packages and orphaned boot files
+          reboot:
+            type: dict
+            description: Post-driver-install reboot configuration
+            options:
+              post_driver:
+                type: bool
+                default: false
+                description: >-
+                  Whether to reboot the node after driver installation and boot configuration.
+                  Required for nvidia-vgpu-mgr to detect MIG instances on NVIDIA GPUs.
+              timeout:
+                type: int
+                default: 1800
+                description: Maximum seconds to wait for the reboot to complete
+              wait_for_connection_timeout:
+                type: int
+                default: 900
+                description: Maximum seconds to wait for the node to become reachable after reboot
+              verify_vgpu_mgr:
+                type: bool
+                default: true
+                description: Whether to verify nvidia-vgpu-mgr service started after reboot
           features:
             type: dict
             description: GPU-specific feature configurations
