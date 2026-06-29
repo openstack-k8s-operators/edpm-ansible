@@ -70,3 +70,12 @@ edpm_neutron_ovn_agent_bgp_peer_bridges: ''
 # BGP interconnect bridge for the ovn-bgp extension.
 # Set this variable when the ovn-agent is configured with the ovn-bgp extension.
 edpm_neutron_ovn_agent_bgp_interconnect_bridge: "{{ neutron_physical_bridge_name | default('br-ex') }}"
+
+# ovn-evpn extension options. Set edpm_neutron_ovn_agent_agent_extensions to include
+# 'ovn-evpn' to load the extension and render the [ovn_evpn] section.
+edpm_neutron_ovn_agent_ovn_evpn_bgp_as: ''
+edpm_neutron_ovn_agent_ovn_evpn_bgp_local_interface: ''
+edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port: '49152'
+edpm_neutron_ovn_agent_frr_vty_socket: '/run/frr'
+edpm_neutron_ovn_evpn_local_ip: ''
+edpm_neutron_ovn_evpn_vxlan_port: 4789

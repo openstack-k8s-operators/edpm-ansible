@@ -1,0 +1,30 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    neutron_ovn_agent_conf: /var/lib/openstack/neutron-ovn-agent/01-neutron-ovn-agent.conf
+  tasks:
+    - name: Slurp neutron-ovn-agent config
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ neutron_ovn_agent_conf }}"
+      register: agent_config
+
+    - name: Assert [ovn_evpn] section is not present
+      ansible.builtin.assert:
+        that:
+          - "'[ovn_evpn]' not in agent_config.content | b64decode"
+
+    - name: Check ovn-evpn-local-ip is not set
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl --if-exists get open_vswitch . external_ids:ovn-evpn-local-ip
+      register: output
+      failed_when: output.stdout != ''
+
+    - name: Check ovn-evpn-vxlan-ports is not set
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl --if-exists get open_vswitch . external_ids:ovn-evpn-vxlan-ports
+      register: output
+      failed_when: output.stdout != ''
