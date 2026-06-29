@@ -38,6 +38,15 @@ edpm_accel_drivers:
         url: ""
         ssl_no_verify: false
         disable_gpg_check: false
+  kernel:
+    pin: false
+    version: ""
+    remove_old: true
+  reboot:
+    post_driver: false
+    timeout: 1800
+    wait_for_connection_timeout: 900
+    verify_vgpu_mgr: true
   features:
     nvidia_mig:
       manage: false

@@ -1,0 +1,25 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read dnf.conf
+      ansible.builtin.slurp:
+        src: /etc/dnf/dnf.conf
+      register: _verify_dnf_conf
+
+    - name: Verify kernel exclude line is present in dnf.conf
+      ansible.builtin.assert:
+        that: "'exclude=kernel,kernel-core,kernel-modules' in (_verify_dnf_conf.content | b64decode)"
+        fail_msg: "dnf.conf does not contain kernel package exclude line"
+
+    - name: Verify grubby default kernel was set
+      ansible.builtin.command:
+        cmd: grubby --default-kernel
+      register: _verify_default_kernel
+      changed_when: false
+
+    - name: Verify default kernel contains target version
+      ansible.builtin.assert:
+        that: "'5.14.0-570.26.1.el9_6' in _verify_default_kernel.stdout"
+        fail_msg: "Default kernel is '{{ _verify_default_kernel.stdout }}', expected 5.14.0-570.26.1.el9_6"

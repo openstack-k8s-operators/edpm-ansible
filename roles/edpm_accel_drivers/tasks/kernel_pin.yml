@@ -1,0 +1,91 @@
+---
+- name: Validate kernel version format
+  ansible.builtin.assert:
+    that:
+      - _edpm_accel_drivers_config.kernel.version | length > 10
+      - _edpm_accel_drivers_config.kernel.version is regex('^[0-9]+\.[0-9]+\.[0-9]+-')
+    fail_msg: >-
+      kernel.version '{{ _edpm_accel_drivers_config.kernel.version }}'
+      does not look like a valid kernel version (e.g. 5.14.0-570.26.1.el9_6)
+
+- name: Detect system architecture
+  ansible.builtin.command:
+    cmd: uname -m
+  register: _edpm_accel_drivers_arch
+  changed_when: false
+
+- name: Install target kernel packages
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - "kernel-{{ _edpm_accel_drivers_config.kernel.version }}"
+      - "kernel-core-{{ _edpm_accel_drivers_config.kernel.version }}"
+      - "kernel-modules-{{ _edpm_accel_drivers_config.kernel.version }}"
+    state: present
+  register: _edpm_accel_drivers_kernel_install
+
+- name: Set target kernel as default boot kernel
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      grubby --set-default
+      /boot/vmlinuz-{{ _edpm_accel_drivers_config.kernel.version }}.{{ _edpm_accel_drivers_arch.stdout }}
+  changed_when: true
+
+- name: Verify default kernel is set correctly
+  become: true
+  ansible.builtin.command:
+    cmd: grubby --default-kernel
+  register: _edpm_accel_drivers_default_kernel
+  changed_when: false
+  failed_when: _edpm_accel_drivers_config.kernel.version not in _edpm_accel_drivers_default_kernel.stdout
+
+- name: Remove old kernel packages
+  when: _edpm_accel_drivers_config.kernel.remove_old | bool
+  block:
+    - name: Get list of non-target kernel packages
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          rpm -qa --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' \
+            'kernel' 'kernel-core' 'kernel-modules' \
+          | grep -v '{{ _edpm_accel_drivers_config.kernel.version }}' || true
+        executable: /bin/bash
+      register: _edpm_accel_drivers_old_kernels
+      become: true
+      changed_when: false
+
+    - name: Remove old kernel packages
+      become: true
+      ansible.builtin.dnf:
+        name: "{{ _edpm_accel_drivers_old_kernels.stdout_lines }}"
+        state: absent
+      when: _edpm_accel_drivers_old_kernels.stdout_lines | length > 0
+
+    - name: Remove orphaned boot files for non-target kernels
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          target="{{ _edpm_accel_drivers_config.kernel.version }}"
+          cd /boot
+          removed=0
+          for file in vmlinuz-* initramfs-* System.map-* config-* symvers-*; do
+            if [[ -f "$file" || -L "$file" ]] && \
+               [[ "$file" != *"${target}"* ]]; then
+              rm -f "$file"
+              removed=$((removed + 1))
+            fi
+          done
+          echo "Removed ${removed} orphaned boot files"
+        executable: /bin/bash
+      register: _edpm_accel_drivers_boot_cleanup
+      changed_when: "'Removed 0' not in _edpm_accel_drivers_boot_cleanup.stdout"
+
+- name: Exclude kernel packages from future updates
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    regexp: '^exclude='
+    line: "exclude=kernel,kernel-core,kernel-modules"
+    create: false

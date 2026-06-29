@@ -9,6 +9,12 @@
 - name: Setup configuration and build enabled vendors list
   ansible.builtin.import_tasks: setup_config.yml
 
+- name: Pin kernel version for driver compatibility
+  when:
+    - _edpm_accel_drivers_config.kernel.pin | bool
+    - _edpm_accel_drivers_config.kernel.version | length > 0
+  ansible.builtin.import_tasks: kernel_pin.yml
+
 - name: Install GPU drivers for enabled vendors
   ansible.builtin.include_tasks: driver_install.yml
   loop: "{{ _edpm_accel_drivers_enabled_vendors }}"
@@ -25,6 +31,10 @@
 - name: Run boot configuration tasks
   when: _edpm_accel_drivers_enabled_vendors | length > 0
   ansible.builtin.import_tasks: boot_config.yml
+
+- name: Reboot node after driver installation
+  when: _edpm_accel_drivers_config.reboot.post_driver | bool
+  ansible.builtin.import_tasks: reboot.yml
 
 - name: Configure MIG partitioning on NVIDIA GPU
   when: _edpm_accel_drivers_config.features.nvidia_mig.manage | bool
