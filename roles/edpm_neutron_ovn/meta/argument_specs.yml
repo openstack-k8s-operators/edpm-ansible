@@ -85,6 +85,7 @@ argument_specs:
           - /run/openvswitch:/run/openvswitch:z
           - '{{ edpm_neutron_ovn_agent_config_dir }}:/etc/neutron.conf.d:z'
           - /var/lib/kolla/config_files/ovn_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - /run/frr:/run/frr:shared,z
         description: Volume mounts for Neutron OVN agent
         type: list
       edpm_neutron_ovn_tls_enabled:
@@ -117,3 +118,42 @@ argument_specs:
           Defaults to neutron_physical_bridge_name (br-ex if unset).
           Set this variable when the ovn-agent is configured with the ovn-bgp extension.
         type: str
+      edpm_neutron_ovn_agent_ovn_evpn_bgp_as:
+        default: ''
+        description: >
+          'BGP Autonomous System number for EVPN.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
+      edpm_neutron_ovn_agent_ovn_evpn_bgp_local_interface:
+        default: ''
+        description: >
+          The local interface name (e.g. eth2) on which to establish BGP peer session.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
+      edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port:
+        default: '49152'
+        description: >
+          UDP port for the child VxLAN device used by EVPN.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+          This port is only used between the vxlan device and the vtep and not for any encapsulation.
+        type: str
+      edpm_neutron_ovn_agent_frr_vty_socket:
+        default: '/run/frr'
+        description: >
+          Path to the vtysh socket directory. Passed as --vty_socket to the vtysh command.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+        type: str
+      edpm_neutron_ovn_evpn_local_ip:
+        default: ''
+        description: >
+          IP address written to OVS external-ids:ovn-evpn-local-ip, used as the source
+          for EVPN traffic egressing through the VXLAN tunnel.
+          When empty, defaults to the BGP IPv4 source network IP on the host.
+        type: str
+      edpm_neutron_ovn_evpn_vxlan_port:
+        default: 4789
+        description: >
+          UDP port written to OVS external-ids:ovn-evpn-vxlan-ports.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'ovn-evpn'.
+          This port is used by vxlan tunnels used for encapsulation.
+        type: int

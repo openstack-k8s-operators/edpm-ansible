@@ -1,0 +1,61 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  vars:
+    neutron_ovn_agent_conf: /var/lib/openstack/neutron-ovn-agent/01-neutron-ovn-agent.conf
+  tasks:
+    - name: Slurp neutron-ovn-agent config
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ neutron_ovn_agent_conf }}"
+      register: agent_config
+
+    - name: Assert [ovn_evpn] section is present with expected values
+      ansible.builtin.assert:
+        that:
+          - "'[ovn_evpn]' in agent_config.content | b64decode"
+          - "'bgp_as = 64999' in agent_config.content | b64decode"
+          - "'bgp_local_interface = eth0' in agent_config.content | b64decode"
+          - "'child_vxlan_port = 49152' in agent_config.content | b64decode"
+          - "'frr_vty_socket = /run/frr' in agent_config.content | b64decode"
+          - "'extensions = ovn-evpn' in agent_config.content | b64decode"
+
+    - name: Collect ovn_agent bind mounts
+      ansible.builtin.shell: |
+        /usr/bin/podman inspect --format '{{ '{{' }}.HostConfig.Binds{{ '}}' }}' ovn_agent
+      register: _edpm_neutron_ovn_ovn_agent_binds
+      changed_when: false
+
+    - name: Assert /run/frr bind is present on ovn_agent
+      ansible.builtin.assert:
+        that:
+          - "'/run/frr:/run/frr:' in _edpm_neutron_ovn_ovn_agent_binds.stdout"
+        fail_msg: >-
+          /run/frr bind not found in ovn_agent HostConfig.Binds
+          (binds: {{ _edpm_neutron_ovn_ovn_agent_binds.stdout }})
+
+    - name: Verify vrf module is loaded
+      become: true
+      ansible.builtin.command: grep -q '^vrf ' /proc/modules
+      changed_when: false
+
+    - name: Verify vrf module persistence config exists
+      become: true
+      ansible.builtin.stat:
+        path: /etc/modules-load.d/vrf.conf
+      register: vrf_conf
+      failed_when: not vrf_conf.stat.exists
+
+    - name: Verify ovn-evpn-local-ip defaults to ctlplane_ip
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-evpn-local-ip
+      register: output
+      failed_when: output.stdout != '"10.0.0.1"'
+
+    - name: Verify ovn-evpn-vxlan-ports defaults to 4789
+      ansible.builtin.shell: >
+        /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-evpn-vxlan-ports
+      register: output
+      failed_when: output.stdout != '"4789"'

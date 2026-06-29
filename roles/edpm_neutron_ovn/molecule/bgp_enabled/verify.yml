@@ -2,6 +2,7 @@
 - name: Verify
   hosts: all
   gather_facts: false
+  become: true
   tasks:
     - name: Verify neutron-bgp-peer-bridges
       ansible.builtin.shell: >

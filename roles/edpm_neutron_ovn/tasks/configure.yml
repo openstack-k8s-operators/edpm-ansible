@@ -68,3 +68,37 @@
       # set when BGP is enabled, so it is used as the gate for this task.
       when: edpm_neutron_ovn_agent_bgp_peer_bridges != ''
       changed_when: true
+
+    - name: EVPN extension configuration
+      when: "'ovn-evpn' in edpm_neutron_ovn_agent_agent_extensions.split(',') | map('trim') | list"
+      block:
+        - name: Gather ansible_local facts
+          ansible.builtin.setup:
+            gather_subset:
+              - "!all"
+              - "!min"
+              - "local"
+          when:
+            - ansible_local is not defined
+
+        - name: Load vrf kernel module
+          ansible.builtin.import_role:
+            name: osp.edpm.edpm_module_load
+          vars:
+            modules:
+              - name: vrf
+
+        - name: Set effective EVPN local IP
+          ansible.builtin.set_fact:
+            _edpm_neutron_ovn_evpn_local_ip_effective: >-
+              {{ edpm_neutron_ovn_evpn_local_ip if edpm_neutron_ovn_evpn_local_ip | length > 0
+                 else hostvars[inventory_hostname][(edpm_frr_bgp_ipv4_src_network | default('ctlplane')) ~ '_ip'] }}
+
+        - name: Set EVPN external-ids in OVS
+          become: true
+          ansible.builtin.command:
+            cmd: >-
+              ovs-vsctl --no-wait -- set Open_vSwitch .
+              external-ids:ovn-evpn-local-ip={{ _edpm_neutron_ovn_evpn_local_ip_effective }}
+              external-ids:ovn-evpn-vxlan-ports={{ edpm_neutron_ovn_evpn_vxlan_port }}
+          changed_when: true
