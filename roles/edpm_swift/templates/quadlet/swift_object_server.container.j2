@@ -1,0 +1,32 @@
+# Quadlet container file for swift_object_server
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+{%- set _volumes = edpm_swift_object_server_volumes +
+        edpm_swift_storage_volumes -%}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Swift object server container (EDPM)
+
+[Container]
+ContainerName=swift_object_server
+Image={{ edpm_swift_object_image }}
+Network=host
+User=swift
+PodmanArgs=--privileged --pid=host --cgroupns=host
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in _volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

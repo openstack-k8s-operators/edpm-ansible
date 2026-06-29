@@ -26,7 +26,6 @@
         - "/var/lib/openstack/swift"
         - "/srv/node"
         - "/var/cache/swift"
-        - "/var/lib/edpm-config/container-startup-config/swift"
         - "/var/lib/kolla/config_files"
         - "/var/lib/edpm-config/firewall"
 
@@ -73,11 +72,11 @@
         fail_msg: "Kolla config file {{ item.item }}.json does not exist"
       loop: "{{ kolla_config.results }}"
 
-    - name: Ensure container startup config files exist
+    - name: Ensure Quadlet container files exist
       become: true
       ansible.builtin.stat:
-        path: "/var/lib/edpm-config/container-startup-config/swift/{{ item }}.json"
-      register: container_config
+        path: "/etc/containers/systemd/edpm_{{ item }}.container"
+      register: quadlet_files
       loop:
         - swift_account_auditor
         - swift_account_reaper
@@ -93,12 +92,61 @@
         - swift_object_server
         - swift_object_updater
         - rsync
-    - name: Assert container startup config files exist
+    - name: Assert Quadlet container files exist
       ansible.builtin.assert:
         that:
           - item.stat.exists
-        fail_msg: "Container startup config {{ item.item }}.json does not exist"
-      loop: "{{ container_config.results }}"
+        fail_msg: "Quadlet file edpm_{{ item.item }}.container does not exist"
+      loop: "{{ quadlet_files.results }}"
+
+    - name: Slurp swift_account_server Quadlet file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_swift_account_server.container
+      register: account_server_quadlet
+
+    - name: Verify swift_account_server Quadlet content
+      vars:
+        content: "{{ account_server_quadlet.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'config_hash=' in content"
+          - "content | regex_search('config_hash=(?!$)') is not none"
+          - "'ContainerName=swift_account_server' in content"
+          - "'openstack-swift-account' in content"
+          - "'Network=host' in content"
+          - "'User=swift' in content"
+          - "'--privileged' in content"
+          - "'--pid=host' in content"
+          - "'--cgroupns=host' in content"
+          - "'LogDriver=journald' in content"
+          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in content"
+          - "'Restart=always' in content"
+          - "'WantedBy=multi-user.target' in content"
+          - "'Label=managed_by=edpm_ansible' in content"
+          - "'Volume=/var/lib/kolla/config_files/swift_account_server.json:/var/lib/kolla/config_files/config.json:ro' in content"
+          - "'Volume=/srv/node:/srv/node' in content"
+          - "'Volume=/dev:/dev' in content"
+          - "'Volume=/var/cache/swift:/var/cache/swift' in content"
+        fail_msg: "swift_account_server Quadlet missing expected content"
+
+    - name: Slurp rsync Quadlet file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_rsync.container
+      register: rsync_quadlet
+
+    - name: Verify rsync Quadlet content
+      vars:
+        content: "{{ rsync_quadlet.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'config_hash=' in content"
+          - "content | regex_search('config_hash=(?!$)') is not none"
+          - "'ContainerName=rsync' in content"
+          - "'AddCapability=NET_BIND_SERVICE' in content"
+          - "'Volume=/var/lib/kolla/config_files/rsync.json:/var/lib/kolla/config_files/config.json:ro' in content"
+        fail_msg: "rsync Quadlet missing expected content"
 
     - name: Ensure firewall rules file exists
       become: true
@@ -146,14 +194,14 @@
         - rsync
 
     # Replicators (account, container) and object-expirer fail with
-    # dummy ring files in molecule. Verify they were created but don't
-    # check running state.
-    - name: Ensure remaining podman containers were created
-      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
+    # dummy ring files in molecule. With Quadlet, crashed containers
+    # are removed (--rm). Verify the systemd units exist instead.
+    - name: Ensure failing services have systemd units
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
-        - { "name": "swift_account_replicator", "running": false }
-        - { "name": "swift_container_replicator", "running": false }
-        - { "name": "swift_object_expirer", "running": false }
+        - { "name": "edpm_swift_account_replicator.service", "running": false }
+        - { "name": "edpm_swift_container_replicator.service", "running": false }
+        - { "name": "edpm_swift_object_expirer.service", "running": false }
 
     - name: Ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
