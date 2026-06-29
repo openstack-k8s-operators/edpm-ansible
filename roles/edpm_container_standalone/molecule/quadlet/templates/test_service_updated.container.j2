@@ -1,0 +1,25 @@
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=test_service container
+
+[Container]
+ContainerName=test_service
+Image=quay.io/centos/centos:stream9
+Network=host
+User=root
+PodmanArgs=--privileged
+LogDriver=journald
+Exec=sleep 7200
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Volume=/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
