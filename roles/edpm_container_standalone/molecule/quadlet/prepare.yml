@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,34 +13,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-- name: Prepare
+- name: Prepare test_deps
   hosts: all
+  gather_facts: false
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
         - podman
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
-      test_deps_edpm_packages:
-        # centos-stream-release provides $releasever for dnf after
-        # test_deps removes redhat-release from the UBI9 image.
-        # Without it, repos using $releasever (e.g. EPEL) break.
-        - centos-stream-release
-        - openvswitch
-        - os-net-config
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  become: true
+  roles:
+    - role: osp.edpm.env_data
   tasks:
-    - ansible.builtin.include_role:
-        name: osp.edpm.env_data
-
-    - name: Ensure /etc/localtime exists
-      become: true
+    - name: Create test config directory for hash computation
       ansible.builtin.file:
-        src: /usr/share/zoneinfo/UTC
-        dest: /etc/localtime
-        state: link
-        force: true
+        path: /var/lib/openstack/configs/test_service
+        state: directory
+        mode: "0755"
 
-    - name: Force systemd to reread configs
-      become: true
-      ansible.builtin.systemd:
-        daemon_reload: true
+    - name: Create test config file for hash computation
+      ansible.builtin.copy:
+        content: "test_config_value=1"
+        dest: /var/lib/openstack/configs/test_service/test.conf
+        mode: "0644"
