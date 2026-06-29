@@ -189,8 +189,12 @@ class TestNeutronOvn(unittest.TestCase):
         assert self.host.podman(haproxy_container_name).is_running
 
         # Now stop agent container and make sure that sidecar container
-        # with haproxy is still running
+        # with haproxy is still running.
+        # Quadlet uses --rm so the container is removed on stop.
         self.host.run("/usr/bin/systemctl stop %s" %
                       EDPM_OVN_AGENT_SERVICE)
-        assert not self.host.podman(OVN_AGENT_CONTAINER).is_running
+        result = self.host.run(
+            "/usr/bin/podman ps -q --filter name=^%s$" %
+            OVN_AGENT_CONTAINER)
+        assert result.stdout.strip() == ""
         assert self.host.podman(haproxy_container_name).is_running
