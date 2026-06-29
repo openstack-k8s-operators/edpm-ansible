@@ -15,26 +15,24 @@
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
-- name: Load container definition for exporter
-  ansible.builtin.set_fact:
-    _exporter_container_def: "{{ lookup('template', 'container_defs/{{ exporter }}.yaml.j2') | from_yaml }}"
-
-- name: Build container defs dict dynamically
-  ansible.builtin.set_fact:
-    _exporter_container_defs: "{{ {} | combine({(exporter | string): _exporter_container_def}) }}"
-
 - name: Build kolla config dict for exporters that need them
   ansible.builtin.set_fact:
     _exporter_kolla_config_dict:
       ceilometer_agent_compute: "{{ lookup('file', 'files/kolla_config/ceilometer_agent_compute.yaml') | from_yaml }}"
   when: exporter == 'ceilometer_agent_compute'
 
+- name: Build quadlet defs dict for exporter
+  ansible.builtin.set_fact:
+    _exporter_quadlet_defs: "{{ {exporter: _edpm_telemetry_role_path ~ '/templates/quadlet/' ~ exporter ~ '.container.j2'} }}"
+
+# TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Deploy exporter container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: "{{ exporter }}"
     edpm_service_name: "{{ edpm_telemetry_service_name }}"
-    edpm_container_state_append: "{{ exporter != edpm_telemetry_enabled_exporters[0] }}"  # Replace on first, append on rest
-    edpm_container_standalone_container_defs: "{{ _exporter_container_defs }}"
+    edpm_container_state_append: "{{ exporter != edpm_telemetry_enabled_exporters[0] }}"
+    edpm_container_standalone_quadlet_defs: "{{ _exporter_quadlet_defs }}"
     edpm_container_standalone_kolla_config_files: "{{ _exporter_kolla_config_dict | default({}) }}"

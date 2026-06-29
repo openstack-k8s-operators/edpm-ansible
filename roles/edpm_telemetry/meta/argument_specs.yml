@@ -77,3 +77,43 @@ argument_specs:
         type: str
         required: false
         description: "Log level for openstack_network_exporter. Supported levels: debug, info, notice, warning, error, critical. Default: info"
+      edpm_telemetry_ceilometer_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for ceilometer_agent_compute"
+      edpm_telemetry_ceilometer_tls_cacert_volumes:
+        type: list
+        required: false
+        description: "List of CA bundle volume mounts for ceilometer_agent_compute, added when CA bundle exists"
+      edpm_telemetry_ceilometer_tls_volumes:
+        type: list
+        required: false
+        description: "List of TLS volume mounts for ceilometer_agent_compute, added when TLS certs exist"
+      edpm_telemetry_node_exporter_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for node_exporter"
+      edpm_telemetry_node_exporter_tls_volumes:
+        type: list
+        required: false
+        description: "List of TLS volume mounts for node_exporter, added when TLS certs exist"
+      edpm_telemetry_podman_exporter_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for podman_exporter"
+      edpm_telemetry_podman_exporter_tls_volumes:
+        type: list
+        required: false
+        description: "List of TLS volume mounts for podman_exporter, added when TLS certs exist"
+      edpm_telemetry_network_exporter_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for openstack_network_exporter"
+      edpm_telemetry_network_exporter_tls_volumes:
+        type: list
+        required: false
+        description: "List of TLS volume mounts for openstack_network_exporter, added when TLS certs exist"
+      edpm_telemetry_network_exporter_ovs_volumes:
+        type: list
+        required: false
+        description: "List of OVS/OVN volume mounts for openstack_network_exporter, added in production deployments"
