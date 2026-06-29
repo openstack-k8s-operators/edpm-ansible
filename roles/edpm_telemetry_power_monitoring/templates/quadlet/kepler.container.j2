@@ -1,0 +1,39 @@
+# Quadlet container file for kepler
+# Managed by edpm_container_standalone - do not edit manually
+# Requires Podman 4.6+ (RHEL 9.4+)
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Kepler power monitoring container (EDPM)
+
+[Container]
+ContainerName=kepler
+Image={{ edpm_telemetry_kepler_image }}
+Network=host
+PodmanArgs=--privileged
+Exec=-v=2
+{% if edpm_telemetry_power_monitoring_healthcheck -%}
+HealthCmd=/openstack/healthcheck kepler
+Volume=/var/lib/openstack/healthchecks/kepler:/openstack:ro,z
+{% endif -%}
+LogDriver=journald
+Environment=ENABLE_GPU=true
+Environment=EXPOSE_CONTAINER_METRICS=true
+Environment=ENABLE_PROCESS_METRICS=true
+Environment=EXPOSE_VM_METRICS=true
+Environment=EXPOSE_ESTIMATED_IDLE_POWER_METRICS=false
+Environment=LIBVIRT_METADATA_URI=http://openstack.org/xmlns/libvirt/nova/1.1
+{% for vol in edpm_telemetry_kepler_common_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

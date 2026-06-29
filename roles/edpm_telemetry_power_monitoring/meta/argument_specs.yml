@@ -54,3 +54,19 @@ argument_specs:
           Contains information about distribution of container health check scripts.
           Keys state for container names and value is name of a script directory
           from module's files directory.
+      edpm_telemetry_ceilometer_agent_ipmi_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for ceilometer_agent_ipmi"
+      edpm_telemetry_ceilometer_agent_ipmi_tls_cacert_volumes:
+        type: list
+        required: false
+        description: "List of CA bundle volume mounts for ceilometer_agent_ipmi, added when CA bundle exists"
+      edpm_telemetry_ceilometer_agent_ipmi_tls_volumes:
+        type: list
+        required: false
+        description: "List of TLS volume mounts for ceilometer_agent_ipmi, added when TLS certs exist"
+      edpm_telemetry_kepler_common_volumes:
+        type: list
+        required: false
+        description: "List of always-present volume mounts for kepler"
