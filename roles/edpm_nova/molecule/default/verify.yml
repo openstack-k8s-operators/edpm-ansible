@@ -68,6 +68,101 @@
         - {"name": "nova_compute", "running": true}
         - {"name": "nova_nvme_cleaner", "running": true}
 
+    - name: Slurp nova_compute_init Quadlet file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_nova_compute_init.container
+      register: init_quadlet
+
+    - name: Verify nova_compute_init Quadlet content
+      vars:
+        init_content: "{{ init_quadlet.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'Type=oneshot' in init_content"
+          - "'RemainAfterExit=yes' in init_content"
+          - "'SecurityLabelDisable=true' in init_content"
+          - "'Network=none' in init_content"
+          - "'nova_statedir_ownership.py' in init_content"
+          - "'config_hash=' in init_content"
+          - "init_content | regex_search('config_hash=(?!$)') is not none"
+        fail_msg: "nova_compute_init Quadlet missing expected directives"
+
+    - name: Slurp nova_compute Quadlet file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_nova_compute.container
+      register: compute_quadlet
+
+    - name: Verify nova_compute Quadlet content
+      vars:
+        compute_content: "{{ compute_quadlet.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'config_hash=' in compute_content"
+          - "compute_content | regex_search('config_hash=(?!$)') is not none"
+          - "'ContainerName=nova_compute' in compute_content"
+          - "'openstack-nova-compute' in compute_content"
+          - "'Network=host' in compute_content"
+          - "'User=nova' in compute_content"
+          - "'PodmanArgs=--privileged --pid=host' in compute_content"
+          - "'LogDriver=journald' in compute_content"
+          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in compute_content"
+          - "'After=edpm_nova_compute_init.service' in compute_content"
+          - "'Requires=edpm_nova_compute_init.service' in compute_content"
+          - "'Restart=always' in compute_content"
+          - "'WantedBy=multi-user.target' in compute_content"
+          - "'Label=managed_by=edpm_ansible' in compute_content"
+          - "'Volume=/var/lib/kolla/config_files/nova_compute.json:/var/lib/kolla/config_files/config.json:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}:/var/lib/kolla/config_files/src:ro' in compute_content"
+          - "'Volume=/etc/localtime:/etc/localtime:ro' in compute_content"
+          - "'Volume=/lib/modules:/lib/modules:ro' in compute_content"
+          - "'Volume=/dev:/dev' in compute_content"
+          - "'Volume=/var/lib/libvirt:/var/lib/libvirt' in compute_content"
+          - "'Volume=/run/libvirt:/run/libvirt:shared' in compute_content"
+          - "'Volume=/var/lib/nova:/var/lib/nova:shared' in compute_content"
+          - "'Volume=/var/lib/iscsi:/var/lib/iscsi' in compute_content"
+          - "'Volume=/etc/multipath:/etc/multipath' in compute_content"
+          - "'Volume=/etc/multipath.conf:/etc/multipath.conf:ro,Z' in compute_content"
+          - "'Volume=/etc/iscsi:/etc/iscsi:ro' in compute_content"
+          - "'Volume=/etc/nvme:/etc/nvme' in compute_content"
+          - "'Volume=/var/lib/openstack/config/ceph:/var/lib/kolla/config_files/src/ceph:ro' in compute_content"
+          - "'Volume=/etc/ssh/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro' in compute_content"
+          - "'Volume={{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in compute_content"
+          - "'Volume=/var/lib/vendor_integration:/var/lib/vendor_integration:ro' in compute_content"
+          - "'Volume=/opt/vendor_integration_2:/opt/vendor_integration_2:shared' in compute_content"
+        fail_msg: "nova_compute Quadlet missing expected content"
+
+    - name: Slurp nova_nvme_cleaner Quadlet file
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_nova_nvme_cleaner.container
+      register: cleaner_quadlet
+
+    - name: Verify nova_nvme_cleaner Quadlet content
+      vars:
+        cleaner_content: "{{ cleaner_quadlet.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'config_hash=' in cleaner_content"
+          - "cleaner_content | regex_search('config_hash=(?!$)') is not none"
+          - "'ContainerName=nova_nvme_cleaner' in cleaner_content"
+          - "'openstack-nova-compute' in cleaner_content"
+          - "'Network=host' in cleaner_content"
+          - "'User=root' in cleaner_content"
+          - "'PodmanArgs=--privileged' in cleaner_content"
+          - "'LogDriver=journald' in cleaner_content"
+          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in cleaner_content"
+          - "'Restart=always' in cleaner_content"
+          - "'WantedBy=multi-user.target' in cleaner_content"
+          - "'Label=managed_by=edpm_ansible' in cleaner_content"
+          - "'Volume=/var/lib/kolla/config_files/nova_nvme_cleaner.json:/var/lib/kolla/config_files/config.json:ro' in cleaner_content"
+          - "'Volume={{ edpm_nova_config_dest }}:/var/lib/kolla/config_files/src/nova_shared:ro' in cleaner_content"
+          - "'Volume=/dev:/dev' in cleaner_content"
+          - "'Volume=/etc/nvme:/etc/nvme' in cleaner_content"
+          - "'Volume={{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in cleaner_content"
+        fail_msg: "nova_nvme_cleaner Quadlet missing expected content"
+
     - name: read nvme cleaner kolla config
       become: true
       ansible.builtin.slurp:
@@ -205,17 +300,17 @@
       failed_when: false
       changed_when: false
 
-    - name: Check service file presence after disable
+    - name: Check Quadlet file presence after disable
       become: true
       ansible.builtin.stat:
-        path: /etc/systemd/system/edpm_nova_nvme_cleaner.service
-      register: nvme_cleaner_service_unit_exists
+        path: /etc/containers/systemd/edpm_nova_nvme_cleaner.container
+      register: nvme_cleaner_quadlet_exists
 
     - name: Assert nvme cleaner removed
       ansible.builtin.assert:
         that:
           - nvme_cleaner_exists.rc != 0
-          - not nvme_cleaner_service_unit_exists.stat.exists
+          - not nvme_cleaner_quadlet_exists.stat.exists
 
     - name: Remove nvme_cleaner config directory to simulate update-only scenario
       become: true
