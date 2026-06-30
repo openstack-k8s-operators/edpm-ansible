@@ -1,0 +1,199 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Test Quadlet container deployment
+  hosts: all
+  gather_facts: false
+  pre_tasks:
+    - name: Gather user fact
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "user"
+
+    - name: Set basic user fact
+      ansible.builtin.set_fact:
+        ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
+      when:
+        - ansible_user is undefined
+  tasks:
+    - name: Deploy test_service via Quadlet
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_use_quadlet: true
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
+        edpm_container_standalone_kolla_config_files:
+          test_service:
+            command: 'sleep 3600'
+
+  post_tasks:
+    - name: Verify Quadlet .container file was created
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/edpm_test_service.container
+      register: _quadlet_file
+      become: true
+
+    - name: Assert Quadlet file exists
+      ansible.builtin.assert:
+        that:
+          - _quadlet_file.stat.exists
+        fail_msg: "Quadlet .container file was not created"
+        success_msg: "Quadlet .container file exists"
+
+    - name: Read Quadlet file content
+      ansible.builtin.slurp:
+        src: /etc/containers/systemd/edpm_test_service.container
+      register: _quadlet_content
+      become: true
+
+    - name: Decode Quadlet file content
+      ansible.builtin.set_fact:
+        _quadlet_text: "{{ _quadlet_content.content | b64decode }}"
+
+    - name: Verify Quadlet file content
+      ansible.builtin.assert:
+        that:
+          - "'[Container]' in _quadlet_text"
+          - "'ContainerName=test_service' in _quadlet_text"
+          - "'Image=quay.io/centos/centos:stream9' in _quadlet_text"
+          - "'Network=host' in _quadlet_text"
+          - "'Exec=sleep 3600' in _quadlet_text"
+          - "'PodmanArgs=--privileged' in _quadlet_text"
+          - "'[Service]' in _quadlet_text"
+          - "'Restart=always' in _quadlet_text"
+          - "'[Install]' in _quadlet_text"
+          - "'WantedBy=multi-user.target' in _quadlet_text"
+          - "'Label=managed_by=edpm_ansible' in _quadlet_text"
+        fail_msg: "Quadlet file content is incorrect"
+        success_msg: "Quadlet file content is correct"
+
+    - name: Check if edpm_test_service systemd service is active
+      ansible.builtin.command: systemctl is-active --quiet edpm_test_service
+      register: _service_active
+      become: true
+
+    - name: Assert systemd service is active
+      ansible.builtin.assert:
+        that:
+          - _service_active.rc == 0
+        fail_msg: "edpm_test_service systemd service is not active"
+        success_msg: "edpm_test_service systemd service is active"
+
+    - name: Check for test_service container
+      ansible.builtin.command: podman container exists test_service
+      become: true
+
+    - name: Verify state file tracking
+      block:
+        - name: Read deployed services state file
+          ansible.builtin.slurp:
+            src: /var/lib/edpm-config/deployed_services.yaml
+          register: _state_file
+
+        - name: Parse state data
+          ansible.builtin.set_fact:
+            _state_data: "{{ _state_file.content | b64decode | from_yaml }}"
+
+        - name: Assert service is tracked in state file
+          ansible.builtin.assert:
+            that:
+              - "'test_service' in _state_data.services"
+            fail_msg: "Service not tracked in state file"
+            success_msg: "Service is properly tracked in state file"
+
+- name: Test Quadlet idempotency
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get container ID before re-run
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_before
+      become: true
+
+    - name: Re-run test_service deployment (no config change)
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_use_quadlet: true
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
+        edpm_container_standalone_kolla_config_files:
+          test_service:
+            command: 'sleep 3600'
+
+  post_tasks:
+    - name: Get container ID after re-run
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_after
+      become: true
+
+    - name: Assert container was NOT recreated (idempotency)
+      ansible.builtin.assert:
+        that:
+          - _container_id_before.stdout == _container_id_after.stdout
+        fail_msg: "Container was recreated when nothing changed"
+        success_msg: "Container was not recreated (idempotent)"
+
+- name: Test Quadlet container restart on config change
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get container ID before config change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_before_change
+      become: true
+
+    - name: Re-deploy with changed template (triggers .container file change)
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_container_standalone
+      vars:
+        edpm_container_standalone_use_quadlet: true
+        edpm_container_standalone_service: test_service
+        edpm_container_standalone_quadlet_defs:
+          test_service: "{{ playbook_dir }}/templates/test_service_updated.container.j2"
+        edpm_container_standalone_kolla_config_files:
+          test_service:
+            command: 'sleep 7200'
+
+  post_tasks:
+    - name: Get container ID after config change
+      ansible.builtin.command: podman inspect --format '{{ '{{' }}.Id{{ '}}' }}' test_service
+      register: _container_id_after_change
+      become: true
+
+    - name: Assert container was recreated after config change
+      ansible.builtin.assert:
+        that:
+          - _container_id_before_change.stdout != _container_id_after_change.stdout
+        fail_msg: "Container was NOT recreated after config change"
+        success_msg: "Container was properly recreated after config change"
+
+    - name: Check service is still active after restart
+      ansible.builtin.command: systemctl is-active --quiet edpm_test_service
+      register: _service_active_after
+      become: true
+
+    - name: Assert service is active after restart
+      ansible.builtin.assert:
+        that:
+          - _service_active_after.rc == 0
+        fail_msg: "Service is not active after restart"
+        success_msg: "Service is active after config change restart"

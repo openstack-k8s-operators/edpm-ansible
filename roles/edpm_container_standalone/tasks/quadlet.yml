@@ -1,0 +1,78 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Quadlet-based container deployment. This task file is used when
+# edpm_container_standalone_use_quadlet is true. Each service role provides
+# its own native .container.j2 templates via edpm_container_standalone_quadlet_defs.
+
+- name: Ensure quadlet directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_container_standalone_quadlet_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "Write Quadlet .container files for {{ edpm_container_standalone_service }}"
+  become: true
+  ansible.builtin.template:
+    src: "{{ item.value }}"
+    dest: "{{ edpm_container_standalone_quadlet_dir }}/edpm_{{ item.key }}.container"
+    mode: "0644"
+  loop: "{{ edpm_container_standalone_quadlet_defs | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _edpm_quadlet_files
+
+# Run container_config_hash to compute hashes from config volumes
+# listed in the .container files and update them with EDPM_CONFIG_HASH.
+- name: "Update config hashes in Quadlet files for {{ edpm_container_standalone_service }}"
+  become: true
+  container_config_hash:
+  register: _edpm_config_hash_result
+
+- name: Reload systemd daemon for quadlet generator
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: _edpm_quadlet_files is changed or _edpm_config_hash_result is changed  # noqa: no-handler
+
+- name: "Start Quadlet container services for {{ edpm_container_standalone_service }}"
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_{{ item.key }}.service"
+    state: started
+    enabled: true
+  loop: "{{ edpm_container_standalone_quadlet_defs | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _edpm_quadlet_start
+  retries: 5
+  delay: 5
+  until: _edpm_quadlet_start is not failed
+
+- name: "Restart Quadlet container services for {{ edpm_container_standalone_service }}"
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_{{ item.item.key }}.service"
+    state: restarted
+  loop: "{{ _edpm_quadlet_files.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  when: item is changed or _edpm_config_hash_result is changed
+  register: _edpm_quadlet_restart
+  retries: 5
+  delay: 5
+  until: _edpm_quadlet_restart is not failed
