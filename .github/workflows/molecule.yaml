@@ -49,11 +49,11 @@ jobs:
         - env_data
         - edpm_pre_adoption_validation
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
       with:
         python-version: '3.9'
     - name: Check whether the role is modified
