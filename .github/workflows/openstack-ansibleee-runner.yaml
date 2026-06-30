@@ -38,7 +38,7 @@ jobs:
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
     - name: Set latest tag for non main branch
       if: github.ref_name != 'main'
@@ -49,7 +49,7 @@ jobs:
 
     - name: Buildah Action
       id: build-openstack-ansibleee-runner
-      uses: redhat-actions/buildah-build@v2
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
       with:
         image: openstack-ansibleee-runner
         tags: ${{ env.latesttag }} ${{ github.sha }} current-podified
@@ -57,7 +57,7 @@ jobs:
           ./openstack_ansibleee/Containerfile
 
     - name: Push openstack-ansibleee-runner To ${{ env.imageregistry }}
-      uses: redhat-actions/push-to-registry@v2
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
       with:
         image: ${{ steps.build-openstack-ansibleee-runner.outputs.image }}
         tags: ${{ steps.build-openstack-ansibleee-runner.outputs.tags }}

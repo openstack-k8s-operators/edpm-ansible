@@ -5,5 +5,12 @@
   "baseBranchPatterns": [
     "main"
   ],
-  "enabledManagers": ["github-actions"]
+  "enabledManagers": ["github-actions"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["python", "ruby"],
+      "enabled": false
+    }
+  ]
 }
