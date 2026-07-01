@@ -33,13 +33,11 @@
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:
         - "ceilometer_agent_ipmi"
-        - "kepler"
 
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_ceilometer_agent_ipmi.service"}
-        - {"name": "edpm_kepler.service"}
 
     - name: ensure kolla_set_configs copied the expected files and started the correct binary
       become: true
@@ -50,6 +48,3 @@
         - "Copying /var/lib/kolla/config_files/src/polling.yaml to /etc/ceilometer/polling.yaml"
         - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
         - "Copying /var/lib/kolla/config_files/src/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
-
-    - name: ensure firewall is configured
-      ansible.builtin.include_tasks: "test-helpers/kepler.yaml"

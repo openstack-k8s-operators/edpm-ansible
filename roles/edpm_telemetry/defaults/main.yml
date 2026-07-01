@@ -49,7 +49,6 @@ edpm_telemetry_healthcheck_sources:
   node_exporter: exporter
   podman_exporter: exporter
   openstack_network_exporter: exporter
-#  kepler: exporter
 # If telemetry services should have health checks enabled
 edpm_telemetry_healthcheck: true
 # List of exporters to be deployed in the compute node
