@@ -74,3 +74,7 @@ edpm_telemetry_openstack_network_exporter_collectors:
 # Supported levels are: debug info notice warning error critical
 # Default: info
 edpm_telemetry_openstack_network_exporter_log_level: info
+# Extra CLI flags passed verbatim to node_exporter (list of strings).
+# Use to disable collectors that generate spurious errors on hardware that
+# does not support them
+edpm_telemetry_node_exporter_extra_args: []
