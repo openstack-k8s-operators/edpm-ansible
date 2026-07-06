@@ -1,0 +1,81 @@
+---
+# Wait until sysfs reports the desired VF count for each PF in phase-1 state.
+# Caller sets edpm_nmstate_sriov_phase_state (parsed dict from phase-1 template).
+
+# Fail before the retries expression (timeout / delay) so a zero delay cannot
+# raise division-by-zero and skip phase 2 via the outer rescue path.
+- name: Validate SR-IOV VF wait timeout and delay
+  ansible.builtin.assert:
+    that:
+      - edpm_network_config_nmstate_sriov_vf_wait_timeout | int >= 0
+      - edpm_network_config_nmstate_sriov_vf_wait_delay | int >= 1
+    fail_msg: >-
+      edpm_network_config_nmstate_sriov_vf_wait_timeout must be >= 0
+      (got {{ edpm_network_config_nmstate_sriov_vf_wait_timeout }}) and
+      edpm_network_config_nmstate_sriov_vf_wait_delay must be >= 1
+      (got {{ edpm_network_config_nmstate_sriov_vf_wait_delay }}).
+
+- name: Reset SR-IOV PF wait list
+  ansible.builtin.set_fact:
+    edpm_nmstate_sriov_pf_wait_list: []
+
+- name: Build SR-IOV PF wait list from phase-1 nmstate state
+  ansible.builtin.set_fact:
+    edpm_nmstate_sriov_pf_wait_list: >-
+      {{
+        edpm_nmstate_sriov_pf_wait_list | default([]) + [{
+          'name': item.name,
+          'total_vfs': item.ethernet['sr-iov']['total-vfs'] | int
+        }]
+      }}
+  loop: "{{ edpm_nmstate_sriov_phase_state.interfaces | default([]) }}"
+  when:
+    - item.name is defined
+    - item.ethernet is defined
+    - item.ethernet['sr-iov'] is defined
+    - item.ethernet['sr-iov']['total-vfs'] is defined
+
+# failed_when: false so a missing sriov_numvfs (cat rc != 0) is polled by
+# until/retries instead of aborting the wait on the first attempt.
+- name: Wait for SR-IOV VFs to appear on each PF
+  become: true
+  ansible.builtin.command:
+    argv:
+      - cat
+      - "{{ edpm_network_config_nmstate_sriov_sysfs_class_net }}/{{ item.name }}/device/sriov_numvfs"
+  register: edpm_nmstate_sriov_numvfs_check
+  failed_when: false
+  # Require rc == 0 so a missing sriov_numvfs (empty stdout -> int 0) cannot
+  # satisfy total_vfs == 0; only a successful read of the expected count wins.
+  until: >-
+    (edpm_nmstate_sriov_numvfs_check.rc | default(1) | int) == 0
+    and (edpm_nmstate_sriov_numvfs_check.stdout | default('') | trim | int)
+    == item.total_vfs
+  retries: >-
+    {{
+      (
+        edpm_network_config_nmstate_sriov_vf_wait_timeout | int
+        / edpm_network_config_nmstate_sriov_vf_wait_delay | int
+      ) | int
+    }}
+  delay: "{{ edpm_network_config_nmstate_sriov_vf_wait_delay }}"
+  changed_when: false
+  loop: "{{ edpm_nmstate_sriov_pf_wait_list | default([]) }}"
+  when: edpm_nmstate_sriov_pf_wait_list | default([]) | length > 0
+
+# With failed_when: false, an exhausted until loop does not fail the task;
+# assert the final reads so a timeout still aborts before phase 2.
+- name: Fail when SR-IOV VF counts were not reached
+  ansible.builtin.assert:
+    that:
+      - (item.rc | default(1) | int) == 0
+      - (item.stdout | default('') | trim | int) == item.item.total_vfs
+    fail_msg: >-
+      Timed out waiting for {{ item.item.name }} sriov_numvfs to reach
+      {{ item.item.total_vfs }} (last read:
+      {{ item.stdout | default('') | trim or 'missing' }}).
+  loop: "{{ edpm_nmstate_sriov_numvfs_check.results }}"
+  when:
+    - edpm_nmstate_sriov_pf_wait_list | default([]) | length > 0
+    - edpm_nmstate_sriov_numvfs_check is defined
+    - edpm_nmstate_sriov_numvfs_check.results is defined
