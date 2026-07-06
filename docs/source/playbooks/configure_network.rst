@@ -26,5 +26,14 @@ Uses value of the `edpm_network_config_tool` variable to determine which tool to
 The `'nmstate'` value will leave the process to the `systemroles.network` role,
 while the `'os-net-config'` will import custom tasks using os-net-config.
 
+For SR-IOV on the nmstate path, set ``edpm_network_config_tool: nmstate``,
+``edpm_network_config_tool_nmstate_override: true``, and use two explicit templates:
+``edpm_network_config_nmstate_sriov_pf_template`` (phase 1, PF SR-IOV) and
+``edpm_network_config_template`` (phase 2, VFs and other network settings). See
+:doc:`../roles/role-edpm_network_config` (sections *nmstate tool* and
+*SR-IOV with the nmstate tool*) and
+``roles/edpm_network_config/examples/nmstate_sriov_phase1.yaml`` /
+``roles/edpm_network_config/examples/nmstate_sriov_phase2.yaml``.
+
 .. literalinclude:: ../../../playbooks/configure_network.yml
    :language: YAML

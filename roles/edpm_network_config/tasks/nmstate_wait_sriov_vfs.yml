@@ -1,0 +1,43 @@
+---
+# Wait until sysfs reports the desired VF count for each PF in phase-1 state.
+# Caller sets edpm_nmstate_sriov_phase_state (parsed dict from phase-1 template).
+
+- name: Reset SR-IOV PF wait list
+  ansible.builtin.set_fact:
+    edpm_nmstate_sriov_pf_wait_list: []
+
+- name: Build SR-IOV PF wait list from phase-1 nmstate state
+  ansible.builtin.set_fact:
+    edpm_nmstate_sriov_pf_wait_list: >-
+      {{
+        edpm_nmstate_sriov_pf_wait_list | default([]) + [{
+          'name': item.name,
+          'total_vfs': item.ethernet['sr-iov']['total-vfs'] | int
+        }]
+      }}
+  loop: "{{ edpm_nmstate_sriov_phase_state.interfaces | default([]) }}"
+  when:
+    - item.name is defined
+    - item.ethernet is defined
+    - item.ethernet['sr-iov'] is defined
+    - item.ethernet['sr-iov']['total-vfs'] is defined
+
+- name: Wait for SR-IOV VFs to appear on each PF
+  become: true
+  ansible.builtin.command:
+    argv:
+      - cat
+      - "/sys/class/net/{{ item.name }}/device/sriov_numvfs"
+  register: edpm_nmstate_sriov_numvfs_check
+  until: edpm_nmstate_sriov_numvfs_check.stdout | trim | int == item.total_vfs
+  retries: >-
+    {{
+      (
+        edpm_network_config_nmstate_sriov_vf_wait_timeout | int
+        / edpm_network_config_nmstate_sriov_vf_wait_delay | int
+      ) | int
+    }}
+  delay: "{{ edpm_network_config_nmstate_sriov_vf_wait_delay }}"
+  changed_when: false
+  loop: "{{ edpm_nmstate_sriov_pf_wait_list | default([]) }}"
+  when: edpm_nmstate_sriov_pf_wait_list | default([]) | length > 0
