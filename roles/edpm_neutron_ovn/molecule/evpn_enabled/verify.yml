@@ -19,7 +19,7 @@
           - "'bgp_as = 64999' in agent_config.content | b64decode"
           - "'bgp_local_interface = eth0' in agent_config.content | b64decode"
           - "'child_vxlan_port = 49152' in agent_config.content | b64decode"
-          - "'frr_vty_socket = /run/frr' in agent_config.content | b64decode"
+          - "'frr_vty_socket = /run/frr/custom' in agent_config.content | b64decode"
           - "'extensions = ovn-evpn' in agent_config.content | b64decode"
 
     - name: Collect ovn_agent bind mounts
@@ -28,12 +28,12 @@
       register: _edpm_neutron_ovn_ovn_agent_binds
       changed_when: false
 
-    - name: Assert /run/frr bind is present on ovn_agent
+    - name: Assert /run/frr:/run/frr/custom bind is present on ovn_agent
       ansible.builtin.assert:
         that:
-          - "'/run/frr:/run/frr:' in _edpm_neutron_ovn_ovn_agent_binds.stdout"
+          - "'/run/frr:/run/frr/custom:' in _edpm_neutron_ovn_ovn_agent_binds.stdout"
         fail_msg: >-
-          /run/frr bind not found in ovn_agent HostConfig.Binds
+          /run/frr:/run/frr/custom bind not found in ovn_agent HostConfig.Binds
           (binds: {{ _edpm_neutron_ovn_ovn_agent_binds.stdout }})
 
     - name: Verify vrf module is loaded

@@ -30,3 +30,4 @@
         edpm_neutron_ovn_agent_ovn_evpn_bgp_as: '64999'
         edpm_neutron_ovn_agent_ovn_evpn_bgp_local_interface: eth0
         edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port: '49152'
+        edpm_neutron_ovn_agent_frr_vty_socket: '/run/frr/custom'

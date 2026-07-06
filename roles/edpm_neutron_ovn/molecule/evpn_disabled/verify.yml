@@ -17,6 +17,20 @@
         that:
           - "'[ovn_evpn]' not in agent_config.content | b64decode"
 
+    - name: Collect ovn_agent bind mounts
+      ansible.builtin.shell: |
+        /usr/bin/podman inspect --format '{{ '{{' }}.HostConfig.Binds{{ '}}' }}' ovn_agent
+      register: _edpm_neutron_ovn_ovn_agent_binds
+      changed_when: false
+
+    - name: Assert /run/frr bind is absent on ovn_agent
+      ansible.builtin.assert:
+        that:
+          - "'/run/frr:' not in _edpm_neutron_ovn_ovn_agent_binds.stdout"
+        fail_msg: >-
+          /run/frr bind unexpectedly found in ovn_agent HostConfig.Binds
+          (binds: {{ _edpm_neutron_ovn_ovn_agent_binds.stdout }})
+
     - name: Check ovn-evpn-local-ip is not set
       ansible.builtin.shell: >
         /usr/bin/ovs-vsctl --if-exists get open_vswitch . external_ids:ovn-evpn-local-ip

@@ -70,7 +70,7 @@
       changed_when: true
 
     - name: EVPN extension configuration
-      when: "'ovn-evpn' in edpm_neutron_ovn_agent_agent_extensions.split(',') | map('trim') | list"
+      when: edpm_neutron_ovn_evpn_extension_enabled | bool
       block:
         - name: Gather ansible_local facts
           ansible.builtin.setup:

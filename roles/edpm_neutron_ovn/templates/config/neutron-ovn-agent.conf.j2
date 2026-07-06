@@ -15,7 +15,7 @@ ovsdb_connection_timeout = {{ edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeou
 ovsdb_probe_interval = {{ edpm_neutron_ovn_agent_ovn_ovsdb_probe_interval }}
 ovn_nb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_nb_connection }}
 ovn_sb_connection = {{ edpm_neutron_ovn_agent_ovn_ovn_sb_connection }}
-{% if 'ovn-evpn' in edpm_neutron_ovn_agent_agent_extensions.split(',') | map('trim') | list %}
+{% if edpm_neutron_ovn_evpn_extension_enabled | bool %}
 
 [ovn_evpn]
 bgp_as = {{ edpm_neutron_ovn_agent_ovn_evpn_bgp_as }}

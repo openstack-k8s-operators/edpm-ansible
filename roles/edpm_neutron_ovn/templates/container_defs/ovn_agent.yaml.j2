@@ -13,6 +13,11 @@ volumes:
           edpm_neutron_ovn_volumes +
           edpm_neutron_ovn_common_volumes +
           edpm_neutron_ovn_tls_cacert_volumes %}
+{%- if edpm_neutron_ovn_evpn_extension_enabled | bool %}
+{%- set edpm_neutron_ovn_volumes =
+        edpm_neutron_ovn_volumes +
+        edpm_neutron_ovn_frr_volumes %}
+{%- endif %}
 {%- if edpm_neutron_ovn_tls_enabled | bool %}
 {%- set edpm_neutron_ovn_volumes =
         edpm_neutron_ovn_volumes +
