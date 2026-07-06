@@ -1,0 +1,12 @@
+---
+# Apply one nmstate desired-state document via linux_system_roles.network.
+# Caller sets edpm_nmstate_apply_template (YAML string) and edpm_nmstate_apply_phase (label for logs).
+
+- name: Render network_state variable [nmstate {{ edpm_nmstate_apply_phase }}]
+  ansible.builtin.set_fact:
+    network_state: "{{ edpm_nmstate_apply_template | from_yaml }}"
+
+- name: Load system-roles.network tasks [nmstate {{ edpm_nmstate_apply_phase }}]
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
+  register: edpm_nmstate_apply_result
