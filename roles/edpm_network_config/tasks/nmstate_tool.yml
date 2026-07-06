@@ -128,6 +128,21 @@
     - name: Create EDPM NIC mapping file (nmstate path)
       ansible.builtin.import_tasks: nic_mapping.yml
 
+    - name: Fail when no nmstate template is defined for apply
+      ansible.builtin.fail:
+        msg: >-
+          Set edpm_network_config_template and/or
+          edpm_network_config_nmstate_sriov_pf_template (non-empty YAML strings).
+      when:
+        - edpm_network_config_nmstate_sriov_pf_template | trim | length == 0
+        - edpm_network_config_template | trim | length == 0
+
+    - name: Ensure /var/lib/edpm-config exists
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        mode: "0755"
+
     - name: Stat derived NIC mapping file for nmstate template substitution
       ansible.builtin.stat:
         path: "{{ edpm_network_config_derived_nic_mapping_file }}"
@@ -151,25 +166,105 @@
             else {}
           }}
 
-    - name: Render network_state variable (NIC aliases only under nmstate iface keys)
-      ansible.builtin.set_fact:
-        network_state: >-
-          {{
-            edpm_network_config_template
-            | from_yaml
-            | edpm_substitute_nic_aliases(edpm_derived_interface_mapping | default({}))
-          }}
+    - name: Apply nmstate phase 1 (SR-IOV on PF)
+      when: edpm_network_config_nmstate_sriov_pf_template | trim | length > 0
+      block:
+        - name: Apply nmstate SR-IOV phase
+          ansible.builtin.include_tasks: nmstate_apply_state.yml
+          vars:
+            edpm_nmstate_apply_template: "{{ edpm_network_config_nmstate_sriov_pf_template }}"
+            edpm_nmstate_apply_phase: sriov
+            edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
 
-    - name: Load system-roles.network tasks [nmstate]
-      ansible.builtin.include_role:
-        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
-      register: nmstate_result
+        # Lets phase 2 below skip the fedora.linux_system_roles.network role's package
+        # install/service enable/no-op network_connections/ping/fingerprint work and call
+        # the network_state module directly, since this phase already did all of that.
+        - name: Mark nmstate role setup as done after phase 1
+          ansible.builtin.set_fact:
+            edpm_nmstate_role_setup_done: true
+
+        - name: Record SR-IOV phase result
+          ansible.builtin.set_fact:
+            nmstate_sriov_result: "{{ edpm_nmstate_apply_result }}"
+
+        - name: Fail when nmstate SR-IOV phase failed
+          ansible.builtin.fail:
+            msg: "nmstate SR-IOV phase (edpm_network_config_nmstate_sriov_pf_template) failed."
+          when: nmstate_sriov_result.failed | default(false)
+
+        - name: Wait for SR-IOV VFs after phase 1
+          when: edpm_network_config_nmstate_sriov_vf_wait | bool
+          block:
+            - name: Parse phase-1 state for VF wait (same NIC alias substitution as the SR-IOV apply)
+              ansible.builtin.set_fact:
+                edpm_nmstate_sriov_phase_state: >-
+                  {{
+                    edpm_network_config_nmstate_sriov_pf_template
+                    | from_yaml
+                    | edpm_substitute_nic_aliases(edpm_derived_interface_mapping | default({}))
+                  }}
+
+            - name: Wait until sysfs reports expected SR-IOV VF counts
+              ansible.builtin.include_tasks: nmstate_wait_sriov_vfs.yml
+
+    - name: Apply nmstate phase 2 (main network template)
+      when: edpm_network_config_template | trim | length > 0
+      block:
+        - name: Apply nmstate main phase
+          ansible.builtin.include_tasks: nmstate_apply_state.yml
+          vars:
+            edpm_nmstate_apply_template: "{{ edpm_network_config_template }}"
+            edpm_nmstate_apply_phase: main
+            edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
+            edpm_nmstate_apply_skip_role_setup: "{{ edpm_nmstate_role_setup_done | default(false) }}"
+
+        - name: Record main nmstate phase result
+          ansible.builtin.set_fact:
+            nmstate_result: "{{ edpm_nmstate_apply_result }}"
+
+        - name: Fail when nmstate main phase failed
+          ansible.builtin.fail:
+            msg: "nmstate main phase (edpm_network_config_template) failed."
+          when: nmstate_result.failed | default(false)
+
+    - name: Set nmstate_result when only SR-IOV phase ran
+      ansible.builtin.set_fact:
+        nmstate_result: "{{ nmstate_sriov_result }}"
+      when:
+        - nmstate_sriov_result is defined
+        - nmstate_result is not defined
 
     - name: Write rc of nmstate run
       ansible.builtin.copy:
-        content: "{{ '1' if (nmstate_result.failed | default(false)) else '0' }}"
+        content: >-
+          {{
+            '1' if (
+              (nmstate_sriov_result.failed | default(false))
+              or (nmstate_result.failed | default(false))
+            ) else '0'
+          }}
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
 
     - name: Refresh nmstate device_map (physical device PCI/driver identity)
       ansible.builtin.include_tasks: nmstate_device_map.yml
+
+  rescue:
+    - name: Ensure /var/lib/edpm-config exists after nmstate failure
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        mode: "0755"
+
+    - name: Write failure rc of nmstate run
+      ansible.builtin.copy:
+        content: "1"
+        dest: /var/lib/edpm-config/nmstate.returncode
+        mode: "0644"
+
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml
+
+    - name: Re-raise nmstate apply failure
+      ansible.builtin.fail:
+        msg: "nmstate network configuration failed; see tasks above."
