@@ -110,4 +110,3 @@ edpm_container_signature_verification: false
 edpm_container_signature_cosign_key_data: ""
 edpm_container_signature_cosign_key_path: "/etc/pki/containers/cosign-redhat.pub"
 edpm_container_signature_registry_mappings: []
-edpm_container_signature_signed_prefix: ""
