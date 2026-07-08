@@ -23,6 +23,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import yaml
 
 
@@ -42,7 +43,12 @@ version_added: '2.9'
 short_description: Generate config hashes for container startup configs
 notes: []
 description:
-  - Generate config hashes for container startup configs
+  - Compute SHA-256 hashes from container config volume mounts.
+    When called with 'quadlet_staging_dir' and 'containers', reads
+    Volume= lines from each staged Quadlet .container file, computes
+    the hash, and writes it into the 'config_hash' comment placeholder
+    (Quadlet path). When called without parameters, scans container
+    startup configs and updates them in place (container_manage path).
 requirements:
   - None
 options:
@@ -51,6 +57,18 @@ options:
       - Ansible check mode is enabled
     type: bool
     default: False
+  quadlet_staging_dir:
+    description:
+      - Path to the directory containing staged Quadlet .container files.
+        Used together with 'containers' to compute and inject config hashes.
+    type: path
+    default: ''
+  containers:
+    description:
+      - List of container names to process in the staging directory.
+        Each name maps to a staged file named edpm_<name>.container.
+    type: list
+    default: []
   config_vol_prefix:
     description:
       - Config volume prefix
@@ -61,18 +79,28 @@ options:
 EXAMPLES = """
 - name: Update config hashes for container startup configs
   container_config_hash:
+
+- name: Inject config hashes into staged Quadlet files
+  container_config_hash:
+    quadlet_staging_dir: /var/lib/edpm-config/quadlet-rendered
+    containers:
+      - ovn_controller
 """
 
 CONTAINER_STARTUP_CONFIG = '/var/lib/edpm-config/container-startup-config'
 BUF_SIZE = 65536
-SHARED_CONFIG_NAMESPACES = ('certs', 'cacerts', 'configs')
+SHARED_CONFIG_NAMESPACES = ('certs', 'cacerts', 'config', 'healthchecks')
 
 
 class ContainerConfigHashManager:
-    """Notes about this module.
+    """Generate config hashes for container change detection.
 
-    It will generate container config hash that will be consumed by
-    the edpm-container-manage role that is using podman_container module.
+    Quadlet path: reads Volume= lines from staged .container files in
+    the staging directory, computes hashes, and writes them into the
+    '# config_hash=' comment placeholder in each file.
+
+    Container_manage path (legacy): scans JSON startup configs and updates
+    EDPM_CONFIG_HASH in place.
     """
 
     def __init__(self, module, results):
@@ -86,11 +114,80 @@ class ContainerConfigHashManager:
 
         # Set parameters
         self.config_vol_prefix = args['config_vol_prefix']
+        staging_dir = args.get('quadlet_staging_dir', '')
+        containers = args.get('containers', [])
 
-        # Update container-startup-config with new config hashes
-        self._update_hashes()
+        # TODO(quadlet-migration): Remove _update_hashes() and its helpers
+        # (_find, _match_config_volumes, _update_container_config, _remove_file)
+        # once all services are migrated to Quadlet.
+        if staging_dir and containers:
+            self._update_hash_from_quadlet(staging_dir, containers)
+        else:
+            self._update_hashes()
 
         self.module.exit_json(**self.results)
+
+    def _update_hash_from_quadlet(self, staging_dir, containers):
+        """Read staged Quadlet .container files, compute config hashes
+        from Volume= lines, and write hashes into the
+        '# config_hash=' comment line in each file.
+
+        :param staging_dir: path to the staging directory
+        :param containers: list of container names to process
+        """
+        hashes = {}
+
+        # edpm_ prefix matches the systemd unit naming convention
+        # used by quadlet.yml when rendering templates.
+        for name in containers:
+            file_path = os.path.join(
+                staging_dir, 'edpm_' + name + '.container')
+
+            if not os.path.exists(file_path):
+                self.module.fail_json(
+                    msg='Quadlet staging file not found: {}'.format(
+                        file_path))
+
+            content = self._slurp(file_path)
+
+            if not re.search(
+                    r'^# config_hash=',
+                    content, re.MULTILINE):
+                self.module.fail_json(
+                    msg='No config_hash placeholder in: {}'.format(
+                        file_path))
+
+            volume_lines = re.findall(
+                r'^Volume=(.+)$', content, re.MULTILINE)
+            prefix = self.config_vol_prefix
+            config_bases = set()
+            for v in volume_lines:
+                host_path = v.split(":")[0]
+                if host_path.startswith(prefix):
+                    config_bases.add(
+                        self._get_config_base(prefix, host_path))
+
+            if config_bases:
+                checksums = [
+                    self._calculate_checksum(vol_path)
+                    for vol_path in sorted(config_bases)
+                ]
+                new_hash = '-'.join(checksums)
+            else:
+                new_hash = ''
+
+            content = re.sub(
+                r'^(# config_hash=).*$',
+                r'\g<1>' + new_hash,
+                content,
+                flags=re.MULTILINE)
+
+            with open(file_path, 'w') as f:
+                f.write(content)
+
+            hashes[name] = new_hash
+
+        self.results['hashes'] = hashes
 
     def _remove_file(self, path):
         """Remove a file.

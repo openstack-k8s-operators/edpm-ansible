@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2026 Red Hat, LLC.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -24,19 +24,82 @@
         - openvswitch
         - iproute
         - podman
+
 - name: Prepare
   hosts: all
   gather_facts: false
+  vars:
+    edpm_download_cache_podman_auth_file: ""
   tasks:
     - ansible.builtin.include_role:
         name: osp.edpm.env_data
 
-    # The openvswitch kernel module needs to be loaded on the host
-    - name: install and modprobe openvswitch
-      shell: |
-        sudo dnf -y install openvswitch
-        sudo modprobe openvswitch
-      delegate_to: localhost
-      run_once: true
+    - name: Install and modprobe openvswitch
+      ansible.builtin.shell: |
+        set -eux
+        dnf -y install openvswitch
+        modprobe openvswitch
+      become: true
+      changed_when: true
 
-  post_tasks: []
+    - name: Force systemd to reread configs
+      ansible.builtin.systemd:
+        daemon_reload: true
+      become: true
+
+    - name: Download required role packages
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: download_cache.yml
+
+    - name: Include edpm_bootstrap
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_bootstrap
+        tasks_from: bootstrap.yml
+      become: true
+
+    - name: Download edpm_neutron_ovn container images
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_neutron_ovn
+        tasks_from: download_cache.yml
+      become: true
+
+    - name: Install os-net-config
+      ansible.builtin.package:
+        name: os-net-config
+        state: present
+      become: true
+
+    - name: Download edpm_frr container images
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_frr
+        tasks_from: download_cache.yml
+
+    - name: Create firewall directory
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/edpm-config/firewall
+        state: directory
+        owner: root
+        group: root
+        mode: "0750"
+
+    - name: open port 22 (edpm_nftables will active this later)
+      become: true
+      ansible.builtin.copy:
+        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
+        content: |
+          - rule_name: 003 Allow SSH
+            rule:
+              proto: tcp
+              dport: 22
+
+    - name: Running FRR
+      vars:
+        edpm_frr_bgp_peers:
+          - 10.64.0.1
+          - 10.65.0.1
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_frr
+        apply:
+          become: true

@@ -11,7 +11,90 @@ The `edpm_container_standalone` role provides a unified interface for deploying 
 
 **Key Concept:** Services are defined at the playbook level, not the role level. When a playbook deploys multiple roles, they can all be tracked under a single service name for unified lifecycle management.
 
-## Basic Usage
+## Deployment Methods
+
+The role supports two container deployment methods, selected via the `edpm_container_standalone_use_quadlet` flag:
+
+- **`false` (default):** Uses `edpm_container_manage` with JSON container definitions — the traditional EDPM approach.
+- **`true`:** Uses Podman Quadlet with native `.container` unit files managed by systemd.
+
+Services can be migrated from `container_manage` to Quadlet one at a time. Both methods share the same state tracking, kolla config, and service lifecycle features.
+
+## Quadlet Deployment
+
+### Deploying a Service with Quadlet
+
+```yaml
+- name: Deploy my service via Quadlet
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_use_quadlet: true
+    edpm_container_standalone_service: myservice
+    edpm_container_standalone_quadlet_defs:
+      myservice: "/path/to/myservice.container.j2"
+    edpm_container_standalone_kolla_config_files:
+      myservice:
+        command: /usr/bin/myservice-server
+        config_files:
+          - source: /var/lib/kolla/config_files/myservice.conf
+            dest: /etc/myservice/myservice.conf
+            owner: myservice
+            perm: "0600"
+```
+
+This will:
+1. Create kolla configuration files in `/var/lib/kolla/config_files/`
+2. Render the Quadlet template to a staging file in `/var/lib/edpm-config/quadlet-rendered/`
+3. Compute a config hash from `Volume=` lines in the staged file and inject it into the `EDPM_CONFIG_HASH=` placeholder
+4. Copy the staged file to `/etc/containers/systemd/edpm_myservice.container` (only if content differs)
+5. Reload systemd and start/restart the service as needed
+6. Register the service in the state file
+
+### Quadlet Template Format
+
+Each service provides a Jinja2 template for its `.container` unit file:
+
+```ini
+[Unit]
+Description=myservice container
+
+[Container]
+ContainerName=myservice
+Image={{ edpm_myservice_image }}
+Network=host
+Exec=/usr/bin/myservice-server
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+# config_hash=
+Volume=/var/lib/openstack/config/myservice:/var/lib/kolla/config_files/src:ro
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
+```
+
+The `# config_hash=` comment placeholder is filled in after template rendering. The hash module reads `Volume=` lines from the staged file, computes a SHA-256 hash from config files under `/var/lib/openstack/`, and writes the hash into the placeholder. The final `.container` file is only updated when the content (including hash) actually changes, providing automatic config change detection with no separate volume variable needed.
+
+### Quadlet Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `edpm_container_standalone_use_quadlet` | `false` | Enable Quadlet deployment path |
+| `edpm_container_standalone_quadlet_dir` | `/etc/containers/systemd` | Directory for `.container` unit files |
+| `edpm_container_standalone_quadlet_staging_dir` | `/var/lib/edpm-config/quadlet-rendered` | Staging directory for rendered templates |
+| `edpm_container_standalone_quadlet_defs` | `{}` | Dict mapping container names to template paths |
+
+### Idempotency
+
+The Quadlet path is idempotent: if neither the template nor the config files change, re-running the role produces no restarts. The template is rendered to a staging directory, the config hash is injected, then the result is copied to the final `.container` file only if content differs.
+
+<!-- TODO(quadlet-migration): Remove this section once all services are migrated to Quadlet. -->
+## Container Manage Deployment (Default)
 
 ### Deploying a Simple Service
 

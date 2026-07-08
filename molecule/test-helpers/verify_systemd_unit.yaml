@@ -1,16 +1,16 @@
 
 - name: verify systemd unit exists
   block:
-    - name: Check if systemd file exists {{ item.name }}
+    - name: Query systemd for unit fragment path {{ item.name }}
       become: true
-      ansible.builtin.stat:
-        path: "/etc/systemd/system/{{ item.name }}"
-      register: unit_exists
+      ansible.builtin.command: systemctl show {{ item.name }} -p FragmentPath --value
+      register: unit_fragment
+      changed_when: false
       when: item.osp_service | default(true)
     - name: Assert systemd unit exists {{ item.name }}
       ansible.builtin.assert:
         that:
-          - unit_exists.stat.exists
+          - unit_fragment.stdout | length > 0
         fail_msg: "Systemd unit file for {{ item.name }} does not exist"
       when: item.osp_service | default(true)
     - name: Check if systemd unit is enabled {{ item.name }}
@@ -21,10 +21,13 @@
       changed_when: false
       ignore_errors: true
     - name: Assert systemd unit is enabled {{ item.name }}
+      vars:
+        _allowed_states: >-
+          {{ item.enabled | default(["enabled", "generated"]) }}
       ansible.builtin.assert:
         that:
-          - unit_enabled.stdout == item.enabled | default("enabled")
-        fail_msg: "Systemd unit {{ item.name }} is not enabled"
+          - unit_enabled.stdout in (_allowed_states if _allowed_states is not string else [_allowed_states])
+        fail_msg: "Systemd unit {{ item.name }} is not enabled (got '{{ unit_enabled.stdout }}')"
     - name: Check if systemd unit is running {{ item.name }}
       when: item.running | default(true)
       ansible.builtin.command: systemctl is-active {{ item.name }}

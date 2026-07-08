@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "github>openstack-k8s-operators/renovate-config:default.json5"
+  ],
+  "baseBranchPatterns": [
+    "main"
+  ],
+  "enabledManagers": ["github-actions"]
+}
