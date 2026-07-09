@@ -57,6 +57,9 @@ edpm_network_config_purge_provider: ""
 edpm_network_config_os_net_config_mappings: {}
 edpm_network_config_safe_defaults: false
 edpm_network_config_template: ""
+# Path to nmstate device_map.yaml: name -> PCI address/driver for physical
+# network devices (nmstate tool path only). Refreshed after a successful apply.
+edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: false
