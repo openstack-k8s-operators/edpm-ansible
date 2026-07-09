@@ -1,0 +1,20 @@
+---
+# Build/refresh a device_map.yaml recording, for every physical network
+# device (PCI ethernet NIC, SR-IOV VF, ...), its current PCI address and
+# bound kernel driver. This is observational only: no filtering or skip
+# decisions are made here.
+
+- name: Ensure /var/lib/edpm-config exists
+  ansible.builtin.file:
+    path: /var/lib/edpm-config
+    state: directory
+    mode: "0755"
+
+- name: Generate nmstate device_map
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ role_path }}/files/edpm_nmstate_device_map.py"
+      - -o
+      - "{{ edpm_network_config_nmstate_device_map_file }}"
+  changed_when: false
