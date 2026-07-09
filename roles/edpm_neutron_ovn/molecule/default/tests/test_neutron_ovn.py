@@ -64,7 +64,7 @@ class TestNeutronOvn(unittest.TestCase):
 
     def setUp(self):
         self.host = testinfra.get_host(
-            "ansible://instance?ansible_inventory=%s" %
+            "ansible://compute-1?ansible_inventory=%s" %
             os.environ['MOLECULE_INVENTORY_FILE'])
 
     def tearDown(self):

@@ -97,6 +97,13 @@
     vars:
       TEST_RUN: edpm_ovn_bgp_agent
 - job:
+    name: edpm-ansible-molecule-edpm_neutron_ovn
+    parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_neutron_ovn/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_neutron_ovn
+- job:
     name: edpm-ansible-molecule-edpm_ovs
     parent: edpm-ansible-molecule-base
     files:
