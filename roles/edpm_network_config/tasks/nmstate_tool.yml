@@ -263,3 +263,5 @@
     - name: Re-raise nmstate apply failure
       ansible.builtin.fail:
         msg: "nmstate network configuration failed; see tasks above."
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml

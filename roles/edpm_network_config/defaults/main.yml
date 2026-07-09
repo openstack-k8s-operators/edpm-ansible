@@ -82,6 +82,9 @@ edpm_network_config_nmstate_sriov_pf_template: ""
 edpm_network_config_nmstate_sriov_vf_wait: true
 edpm_network_config_nmstate_sriov_vf_wait_timeout: 60
 edpm_network_config_nmstate_sriov_vf_wait_delay: 2
+# Path to nmstate device_map.yaml: name -> PCI address/driver for physical
+# network devices (nmstate tool path only). Refreshed after a successful apply.
+edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: false
