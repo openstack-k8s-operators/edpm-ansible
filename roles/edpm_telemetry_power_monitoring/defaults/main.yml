@@ -37,11 +37,8 @@ edpm_telemetry_image_download_retries: "{{ edpm_download_retries | default(5) }}
 # list of tripleo telemetry services to stop during EDPM adoption
 edpm_telemetry_old_tripleo_compute_sevices:
   - tripleo_ceilometer_agent_ipmi.service
-# Image to use for kepler
-edpm_telemetry_kepler_image: "quay.io/sustainable_computing_io/kepler:release-0.7.12"
 # Instruction for distribution of container health check scripts
 edpm_telemetry_power_monitoring_healthcheck_sources:
   ceilometer_agent_ipmi: ceilometer_agent
-  kepler: exporter
 # If telemetry services should have health checks enabled
 edpm_telemetry_power_monitoring_healthcheck: true

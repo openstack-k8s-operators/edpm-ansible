@@ -47,27 +47,11 @@
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
-- name: Deploy Kepler container
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_standalone
-  vars:
-    edpm_container_standalone_service: "kepler"
-    edpm_container_standalone_container_defs:
-      kepler: "{{ lookup('template', 'container_defs/kepler.yaml.j2') | from_yaml }}"
-    ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
-    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
-
 - name: Restart ceilometer ipmi
   become: true
   ansible.builtin.systemd:
     state: restarted
     name: edpm_ceilometer_agent_ipmi.service
-
-- name: Enable and start Kepler service
-  become: true
-  ansible.builtin.systemd:
-    name: edpm_kepler.service
-    state: restarted
 
 - name: List deployed health check scripts
   ansible.builtin.find:
