@@ -14,6 +14,55 @@
         force: true
         remote_src: true
 
+    - name: Get installed kernel-core version
+      become: true
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}\n' 2>/dev/null | head -1 || \
+          rpm -q kernel --qf '%{VERSION}-%{RELEASE}\n' 2>/dev/null | head -1 || \
+          uname -r | sed 's/\.x86_64$//' | sed 's/\.aarch64$//'
+        executable: /bin/bash
+      register: _prepare_kernel_version
+      changed_when: false
+
+    - name: Store kernel version for converge
+      ansible.builtin.set_fact:
+        test_kernel_version: "{{ _prepare_kernel_version.stdout }}"
+
+    - name: Save kernel version to file for converge to read
+      ansible.builtin.copy:
+        content: "{{ test_kernel_version }}"
+        dest: /tmp/test-kernel-version
+        mode: '0644'
+
+    - name: Get system architecture
+      ansible.builtin.command:
+        cmd: uname -m
+      register: _prepare_arch
+      changed_when: false
+
+    - name: Create /boot directory
+      become: true
+      ansible.builtin.file:
+        path: /boot
+        state: directory
+        mode: '0755'
+
+    - name: Create fake vmlinuz for target kernel
+      become: true
+      ansible.builtin.file:
+        path: "/boot/vmlinuz-{{ test_kernel_version }}.{{ _prepare_arch.stdout }}"
+        state: touch
+        mode: '0644'
+
+    - name: Create fake vmlinuz for old kernel (to test cleanup)
+      become: true
+      ansible.builtin.file:
+        path: /boot/vmlinuz-4.18.0-old.el9.x86_64
+        state: touch
+        mode: '0644'
+
     - name: Install mock grubby
       become: true
       ansible.builtin.copy:
@@ -22,26 +71,19 @@
           if [[ "$1" == "--set-default" ]]; then
             echo "$2" > /tmp/mock-grubby-default
           elif [[ "$1" == "--default-kernel" ]]; then
-            cat /tmp/mock-grubby-default 2>/dev/null || echo "/boot/vmlinuz-5.14.0-570.26.1.el9_6.x86_64"
+            cat /tmp/mock-grubby-default 2>/dev/null || echo "none"
           fi
-        dest: /usr/bin/grubby
+          exit 0
+        dest: /usr/sbin/grubby
         mode: '0755'
         force: true
 
-    - name: Install mock uname
+    - name: Symlink mock grubby to /usr/bin
       become: true
-      ansible.builtin.copy:
-        content: |
-          #!/bin/bash
-          if [[ "$1" == "-r" ]]; then
-            echo "5.14.0-570.26.1.el9_6.x86_64"
-          elif [[ "$1" == "-m" ]]; then
-            echo "x86_64"
-          else
-            /bin/uname "$@"
-          fi
-        dest: /usr/local/bin/uname
-        mode: '0755'
+      ansible.builtin.file:
+        src: /usr/sbin/grubby
+        dest: /usr/bin/grubby
+        state: link
         force: true
 
     - name: Create mock dnf.conf
