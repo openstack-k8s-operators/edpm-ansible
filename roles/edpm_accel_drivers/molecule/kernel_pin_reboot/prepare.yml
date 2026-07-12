@@ -69,9 +69,10 @@
         content: |
           #!/bin/bash
           if [[ "$1" == "--set-default" ]]; then
-            echo "$2" > /tmp/mock-grubby-default
+            echo "$2" > /var/tmp/mock-grubby-default
+            chmod 644 /var/tmp/mock-grubby-default
           elif [[ "$1" == "--default-kernel" ]]; then
-            cat /tmp/mock-grubby-default 2>/dev/null || echo "none"
+            cat /var/tmp/mock-grubby-default 2>/dev/null || echo "none"
           fi
           exit 0
         dest: /usr/sbin/grubby
