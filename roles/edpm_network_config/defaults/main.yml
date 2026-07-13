@@ -60,6 +60,11 @@ edpm_network_config_template: ""
 # Path to nmstate device_map.yaml: name -> PCI address/driver for physical
 # network devices (nmstate tool path only). Refreshed after a successful apply.
 edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
+# Optional: bind a kernel driver at a specific PCI address before the nmstate
+# apply (e.g. for DPDK/SR-IOV passthrough). YAML string with an "interfaces"
+# list of {name, pci_address, driver} (nmstate tool path only). See
+# roles/edpm_network_config/files/edpm_driver_bind.py for validation rules.
+edpm_network_config_driver_bind: ""
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: false
