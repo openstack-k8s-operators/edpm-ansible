@@ -114,6 +114,15 @@ argument_specs:
           (PCI ethernet NIC, SR-IOV VF, etc.), its current name, PCI address and bound
           kernel driver. Refreshed after a successful apply (nmstate tool path only).
         default: /var/lib/edpm-config/nmstate_device_map.yaml
+      edpm_network_config_driver_bind:
+        type: str
+        description: >
+          Optional YAML string with an "interfaces" list of {name, pci_address, driver}
+          entries. Before the nmstate apply, each entry's name/pci_address pair is
+          validated against live sysfs (falling back to device_map.yaml when the netdev
+          is no longer present); a mismatch fails the run. Once validated, the given
+          driver is bound at pci_address using driverctl (nmstate tool path only).
+        default: ""
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"
