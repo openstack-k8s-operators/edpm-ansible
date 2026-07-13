@@ -45,6 +45,10 @@
       register: nmstate_returncode_slurp
       when: nmstate_returncode_stat.stat.exists
 
+- name: Validate and bind PCI drivers before applying network state
+  ansible.builtin.include_tasks: driver_bind.yml
+  when: edpm_network_config_driver_bind | trim | length > 0
+
 - name: Configure network with network role from system roles [nmstate]
   become: true
   when:
