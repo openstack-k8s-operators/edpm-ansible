@@ -4,6 +4,7 @@ set -eux pipefail
 microdnf -y makecache
 microdnf install -y \
     gcc \
+    gettext \
     libssh-devel \
     iputils \
     bind-utils \
