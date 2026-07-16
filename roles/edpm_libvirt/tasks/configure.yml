@@ -77,7 +77,7 @@
     - name: Add libvirt password to sasl db
       ansible.builtin.command:
         cmd: saslpasswd2 -f /etc/libvirt/passwd.db -p -a libvirt -u openstack migration
-        stdin: "{{ sasl_password }}"
+        stdin: "{{ sasl_password | trim }}"
       changed_when: true
       when: edpm_libvirt_tls_certs_enabled|bool
     - name: Remove libvirt sasl db
