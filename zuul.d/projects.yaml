@@ -6,6 +6,10 @@
       - podified-multinode-edpm-baremetal-bootc-pipeline
     github-check:
       jobs:
+        # Keep the bootc container image explicit when the templated job resolves from ci-framework main.
+        - cifmw-crc-podified-edpm-baremetal-bootc:
+            vars:
+              cifmw_update_containers_edpm_image_url: quay.io/openstack-k8s-operators/edpm-bootc:latest-qcow2
         - noop
         - edpm-ansible-tempest-multinode
         - edpm-ansible-baremetal-minor-update

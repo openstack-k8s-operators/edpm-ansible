@@ -192,12 +192,7 @@ argument_specs:
           List of source-to-mirror registry mappings for signature
           verification. Each entry is a dict with 'source' (original
           registry prefix, used as policy.json key) and 'mirror' (mirror
-          registry, used for sigstore attachment lookups). Auto-populated
-          by the openstack-operator from IDMS/ICSP and ClusterImagePolicy.
-      edpm_container_signature_signed_prefix:
-        type: str
-        default: ""
-        description: >
-          Optional original registry prefix where images were signed. When set,
-          edpm_podman writes a remapIdentity signedIdentity policy to map mirror
-          registry references back to the original signing identity.
+          registry, used for sigstore attachment lookups). Entries may
+          also include 'signedPrefix' for per-mapping remapIdentity
+          configuration. Auto-populated by the openstack-operator from
+          IDMS/ICSP and ClusterImagePolicy.

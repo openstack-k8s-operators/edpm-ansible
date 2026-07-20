@@ -204,13 +204,13 @@
                       'type': 'sigstoreSigned',
                       'keyPath': edpm_container_signature_cosign_key_path
                     } | combine(
-                      (edpm_container_signature_signed_prefix | length > 0)
+                      ((item.signedPrefix | default('')) | length > 0)
                       | ternary(
                           {
                             'signedIdentity': {
                               'type': 'remapIdentity',
                               'prefix': item.source,
-                              'signedPrefix': edpm_container_signature_signed_prefix
+                              'signedPrefix': item.signedPrefix
                             }
                           },
                           {}

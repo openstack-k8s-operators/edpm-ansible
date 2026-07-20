@@ -31,6 +31,7 @@
         edpm_container_signature_registry_mappings:
           - source: "registry.redhat.io/rhoso"
             mirror: "mirror.example.com:5000/rhoso"
+            signedPrefix: "registry.redhat.io/rhoso"
         edpm_container_signature_cosign_key_data: "{{ test_cosign_key_data }}"
 
     - name: Test podman network ls
@@ -49,7 +50,9 @@
         that:
           - policy.transports.docker["registry.redhat.io/rhoso"][0].type == "sigstoreSigned"
           - policy.transports.docker["registry.redhat.io/rhoso"][0].keyPath == "/etc/pki/containers/cosign-redhat.pub"
-          - "'signedIdentity' not in policy.transports.docker['registry.redhat.io/rhoso'][0]"
+          - policy.transports.docker["registry.redhat.io/rhoso"][0].signedIdentity.type == "remapIdentity"
+          - policy.transports.docker["registry.redhat.io/rhoso"][0].signedIdentity.prefix == "registry.redhat.io/rhoso"
+          - policy.transports.docker["registry.redhat.io/rhoso"][0].signedIdentity.signedPrefix == "registry.redhat.io/rhoso"
           - policy.transports.docker["registry.redhat.io"][0].type == "signedBy"
           - policy.transports.docker["registry.access.redhat.com"][0].type == "signedBy"
       vars:
