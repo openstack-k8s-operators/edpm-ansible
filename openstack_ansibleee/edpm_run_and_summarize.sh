@@ -18,14 +18,37 @@ set -u
 
 write_runner_summary() {
     local summary_helper
+    local helper_path
     local runner_path
-    local runner_python
-    summary_helper="${EDPM_AEE_SUMMARY_HELPER:-/opt/builder/bin/write_runner_summary.py}"
-    runner_path="$(command -v ansible-runner 2>/dev/null || true)"
-    runner_python="$(sed -n '1s/^#!//p' "${runner_path}" 2>/dev/null || true)"
+    local shebang
+    local -a runner_cmd=()
 
-    if [ -n "${runner_python}" ] && [ -x "${runner_python}" ]; then
-        "${runner_python}" "${summary_helper}" >/dev/null 2>&1 || true
+    if [ -n "${EDPM_AEE_SUMMARY_HELPER:-}" ]; then
+        summary_helper="${EDPM_AEE_SUMMARY_HELPER}"
+    else
+        # Support both the upstream repo-built image path and downstream /bin path.
+        for helper_path in \
+            /opt/builder/bin/write_runner_summary.py \
+            /bin/write_runner_summary.py; do
+            if [ -f "${helper_path}" ]; then
+                summary_helper="${helper_path}"
+                break
+            fi
+        done
+    fi
+
+    if [ -z "${summary_helper:-}" ]; then
+        return 0
+    fi
+
+    runner_path="$(command -v ansible-runner 2>/dev/null || true)"
+    if [ -n "${runner_path}" ] && read -r shebang < "${runner_path}" && [[ "${shebang}" == '#!'* ]]; then
+        shebang="${shebang#\#!}"
+        read -r -a runner_cmd <<< "${shebang}"
+    fi
+
+    if [ -f "${summary_helper}" ] && [ "${#runner_cmd[@]}" -gt 0 ] && [ -x "${runner_cmd[0]}" ]; then
+        "${runner_cmd[@]}" "${summary_helper}" >/dev/null 2>&1 || true
     fi
 }
 
