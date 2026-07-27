@@ -5,7 +5,7 @@ FROM {{ item.registry.url }}/{{ item.image }}
 FROM {{ item.image }}
 {% endif %}
 
-RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-master/current/delorean.repo && \
+RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10-master/current/delorean.repo && \
     dnf upgrade -y && \
     dnf -y install sudo python3-libselinux selinux-policy git python3-pip {{ item.pkg_extras | default('') }} && \
     git clone https://github.com/openstack-k8s-operators/repo-setup && \
