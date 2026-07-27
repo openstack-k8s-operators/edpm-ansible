@@ -1,0 +1,43 @@
+# Quadlet container file for node_exporter
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set _node_exporter_volumes = edpm_telemetry_node_exporter_common_volumes -%}
+{%- if tls_cert_exists | bool -%}
+{%- set _node_exporter_volumes = _node_exporter_volumes +
+        edpm_telemetry_node_exporter_tls_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Node Exporter container (EDPM)
+
+[Container]
+ContainerName=node_exporter
+Image={{ edpm_telemetry_node_exporter_image }}
+Network=host
+User=root
+PodmanArgs=--privileged --log-driver=journald
+{% if edpm_telemetry_healthcheck -%}
+PodmanArgs=--health-cmd="/openstack/healthcheck node_exporter"
+Volume=/var/lib/openstack/healthchecks/node_exporter:/openstack:ro,z
+{% endif -%}
+Environment=OS_ENDPOINT_TYPE=internal
+{% if tls_cert_exists | bool -%}
+Exec=--web.config.file=/etc/node_exporter/node_exporter.yaml --web.disable-exporter-metrics --path.rootfs=/rootfs {{ edpm_telemetry_node_exporter_extra_args | map('regex_replace', '\\\\', '\\\\\\\\') | join(' ') }}
+{% else -%}
+Exec=--web.disable-exporter-metrics --path.rootfs=/rootfs {{ edpm_telemetry_node_exporter_extra_args | map('regex_replace', '\\\\', '\\\\\\\\') | join(' ') }}
+{% endif -%}
+{% for vol in _node_exporter_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

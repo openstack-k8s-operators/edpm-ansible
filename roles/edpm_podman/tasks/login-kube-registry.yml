@@ -68,5 +68,6 @@
       --password={{ lookup('ansible.builtin.file', edpm_podman_kube_sa_path + '/token') }}
       {{ edpm_podman_kube_registry_url }}
   register: kube_registry_login_podman
+  no_log: "{{ edpm_podman_hide_sensitive_logs | bool }}"
   changed_when: kube_registry_login_podman.rc == 0
   failed_when: kube_registry_login_podman.rc != 0
