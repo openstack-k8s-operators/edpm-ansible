@@ -26,6 +26,9 @@ command:
   - --no-collector.powersupplyclass
   - --no-collector.pressure
   - --no-collector.rapl
+{% for arg in edpm_telemetry_node_exporter_extra_args %}
+  - {{ arg }}
+{% endfor %}
   - --path.rootfs=/rootfs
 net: host
 environment:
