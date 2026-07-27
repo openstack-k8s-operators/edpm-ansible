@@ -74,7 +74,22 @@ edpm_telemetry_openstack_network_exporter_collectors:
 # Supported levels are: debug info notice warning error critical
 # Default: info
 edpm_telemetry_openstack_network_exporter_log_level: info
-# Extra CLI flags passed verbatim to node_exporter (list of strings).
-# Use to disable collectors that generate spurious errors on hardware that
-# does not support them
-edpm_telemetry_node_exporter_extra_args: []
+# Extra command-line arguments to pass to node_exporter
+# Use this to enable or disable specific collectors per deployment
+edpm_telemetry_node_exporter_extra_args:
+  - --collector.systemd
+  - --collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\.service
+  - --no-collector.dmi
+  - --no-collector.entropy
+  - --no-collector.thermal_zone
+  - --no-collector.time
+  - --no-collector.timex
+  - --no-collector.uname
+  - --no-collector.stat
+  - --no-collector.hwmon
+  - --no-collector.os
+  - --no-collector.selinux
+  - --no-collector.textfile
+  - --no-collector.powersupplyclass
+  - --no-collector.pressure
+  - --no-collector.rapl
