@@ -47,6 +47,10 @@
   become: true
   when: '"podman_exporter" in edpm_telemetry_enabled_exporters'
 
+- name: Set role path for template resolution
+  ansible.builtin.set_fact:
+    _edpm_telemetry_role_path: "{{ role_path }}"
+
 - name: Deploy enabled exporters
   ansible.builtin.include_tasks:
     file: exporter.yml

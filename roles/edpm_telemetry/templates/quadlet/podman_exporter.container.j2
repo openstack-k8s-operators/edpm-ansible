@@ -1,0 +1,42 @@
+# Quadlet container file for podman_exporter
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set _podman_exporter_volumes = edpm_telemetry_podman_exporter_common_volumes -%}
+{%- if tls_cert_exists | bool -%}
+{%- set _podman_exporter_volumes = _podman_exporter_volumes +
+        edpm_telemetry_podman_exporter_tls_volumes -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Podman Exporter container (EDPM)
+
+[Container]
+ContainerName=podman_exporter
+Image={{ edpm_telemetry_podman_exporter_image }}
+Network=host
+User=root
+PodmanArgs=--privileged --log-driver=journald
+{% if edpm_telemetry_healthcheck -%}
+PodmanArgs=--health-cmd="/openstack/healthcheck podman_exporter"
+Volume=/var/lib/openstack/healthchecks/podman_exporter:/openstack:ro,z
+{% endif -%}
+Environment=OS_ENDPOINT_TYPE=internal
+Environment=CONTAINER_HOST=unix:///run/podman/podman.sock
+{% if tls_cert_exists | bool -%}
+Exec=--web.config.file=/etc/podman_exporter/podman_exporter.yaml
+{% endif -%}
+{% for vol in _podman_exporter_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
