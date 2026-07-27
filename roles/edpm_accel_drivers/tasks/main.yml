@@ -32,10 +32,6 @@
   when: _edpm_accel_drivers_enabled_vendors | length > 0
   ansible.builtin.import_tasks: boot_config.yml
 
-- name: Reboot node after driver installation
-  when: _edpm_accel_drivers_config.reboot.post_driver | bool
-  ansible.builtin.import_tasks: reboot.yml
-
 - name: Configure MIG partitioning on NVIDIA GPU
   when: _edpm_accel_drivers_config.features.nvidia_mig.manage | bool
   ansible.builtin.import_tasks: nvidia_mig_partitioning.yml

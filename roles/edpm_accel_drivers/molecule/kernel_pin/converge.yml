@@ -18,6 +18,3 @@
             pin: true
             version: "{{ test_kernel_version }}"
             remove_old: true
-          reboot:
-            post_driver: false
-            verify_vgpu_mgr: false
