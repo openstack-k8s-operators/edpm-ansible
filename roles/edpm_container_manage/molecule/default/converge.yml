@@ -20,7 +20,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: '*.json'
+    edpm_container_manage_config_patterns: '*.yml'
   tasks:
     - include_role:
         name: osp.edpm.edpm_container_manage
@@ -85,7 +85,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: '*.json'
+    edpm_container_manage_config_patterns: '*.yml'
   tasks:
     - name: Gather facts about centos container before new run
       containers.podman.podman_container_info:
@@ -117,7 +117,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: '*.json'
+    edpm_container_manage_config_patterns: '*.yml'
   tasks:
     - name: Stop systemd service for edpm_centos in a manual stop
       systemd:
@@ -148,7 +148,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: 'centos.json'
+    edpm_container_manage_config_patterns: 'centos.yml'
     edpm_container_manage_clean_orphans: false
     edpm_container_manage_config_overrides:
       centos:
@@ -193,7 +193,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: 'centos.json'
+    edpm_container_manage_config_patterns: 'centos.yml'
     edpm_container_manage_clean_orphans: false
   tasks:
     - include_role:
@@ -229,11 +229,11 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: 'centos_*.json'
+    edpm_container_manage_config_patterns: 'centos_*.yml'
   tasks:
     - name: Remove centos container config
       file:
-        path: '/tmp/container-configs/centos.json'
+        path: '/tmp/container-configs/centos.yml'
         state: absent
     - include_role:
         name: osp.edpm.edpm_container_manage
@@ -261,17 +261,15 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: 'centos_*.json'
+    edpm_container_manage_config_patterns: 'centos_*.yml'
   tasks:
     - name: Modify the centos_bis container config
       copy:
         content: |
-          {
-            "image": "quay.io/centos/centos:stream9",
-            "net": "host",
-            "command": "sleep 10"
-          }
-        dest: '/tmp/container-configs/centos_bis.json'
+          image: quay.io/centos/centos:stream9
+          net: host
+          command: sleep 10
+        dest: '/tmp/container-configs/centos_bis.yml'
     - include_role:
         name: osp.edpm.edpm_container_manage
   post_tasks:
@@ -302,7 +300,7 @@
   gather_facts: false
   vars:
     edpm_container_manage_config: '/tmp/container-configs'
-    edpm_container_manage_config_patterns: 'centos_*.json'
+    edpm_container_manage_config_patterns: 'centos_*.yml'
     edpm_container_manage_config_overrides:
       centos_bis:
         image: centos:stream9
