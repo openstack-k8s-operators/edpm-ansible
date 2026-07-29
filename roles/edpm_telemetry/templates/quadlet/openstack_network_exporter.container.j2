@@ -20,7 +20,7 @@ Description=OpenStack Network Exporter container (EDPM)
 [Container]
 ContainerName=openstack_network_exporter
 Image={{ edpm_telemetry_openstack_network_exporter_image }}
-Network=host
+PublishPort={{ ctlplane_ip }}:9105:9105
 PodmanArgs=--privileged --log-driver=journald
 {% if edpm_telemetry_healthcheck -%}
 PodmanArgs=--health-cmd="/openstack/healthcheck openstack-netwo"

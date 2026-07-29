@@ -16,7 +16,7 @@ Description=Node Exporter container (EDPM)
 [Container]
 ContainerName=node_exporter
 Image={{ edpm_telemetry_node_exporter_image }}
-Network=host
+PublishPort={{ ctlplane_ip }}:9100:9100
 User=root
 PodmanArgs=--privileged --log-driver=journald
 {% if edpm_telemetry_healthcheck -%}
