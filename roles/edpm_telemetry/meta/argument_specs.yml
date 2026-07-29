@@ -77,3 +77,10 @@ argument_specs:
         type: str
         required: false
         description: "Log level for openstack_network_exporter. Supported levels: debug, info, notice, warning, error, critical. Default: info"
+      edpm_telemetry_node_exporter_extra_args:
+        type: list
+        required: false
+        description: >
+          Extra command-line arguments to pass to node_exporter. Contains
+          the default set of collector enable/disable flags. Override this
+          per deployment to control which collectors are active.
