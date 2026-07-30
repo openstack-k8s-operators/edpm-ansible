@@ -63,9 +63,11 @@
         state: directory
         mode: "0775"
 
-    - name: Create libvirt user
+    - name: Create libvirt group
       become: true
-      command: groupadd libvirt
+      ansible.builtin.group:
+        name: libvirt
+        state: present
 
     - name: Create firewall directory
       become: true
