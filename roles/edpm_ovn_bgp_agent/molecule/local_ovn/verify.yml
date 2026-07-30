@@ -1,0 +1,109 @@
+---
+- name: Verify ovn_bgp_agent with local OVN routing
+  gather_facts: false
+  hosts: all
+  vars:
+    test_helper_dir: "../../../../molecule/test-helpers"
+    quadlet_containers:
+      - ovn_bgp_agent
+      - nb_db_server
+      - sb_db_server
+      - northd
+      - bgp_ovn_controller
+  tasks:
+    - name: Ensure expected directories exist
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_dir.yaml"
+      loop:
+        - "/var/lib/openstack/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf"
+
+    - name: Check Quadlet .container files exist
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/edpm_{{ item }}.container"
+      register: _quadlet_files
+      loop: "{{ quadlet_containers }}"
+
+    - name: Assert all Quadlet .container files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Quadlet file missing: edpm_{{ item.item }}.container"
+      loop: "{{ _quadlet_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Check staged Quadlet files exist
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/quadlet-rendered/edpm_{{ item }}.container"
+      register: _staged_files
+      loop: "{{ quadlet_containers }}"
+
+    - name: Assert all staged Quadlet files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Staged file missing: edpm_{{ item.item }}.container"
+      loop: "{{ _staged_files.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Read Quadlet file content for config_hash verification
+      become: true
+      ansible.builtin.slurp:
+        src: "/etc/containers/systemd/edpm_{{ item }}.container"
+      register: _quadlet_contents
+      loop: "{{ quadlet_containers }}"
+
+    - name: Verify config_hash is populated for ovn_bgp_agent
+      ansible.builtin.assert:
+        that:
+          - "(_ovn_bgp_agent_content.content | b64decode) is regex('# config_hash=.+')"
+        fail_msg: "config_hash was not populated in ovn_bgp_agent Quadlet file"
+      vars:
+        _ovn_bgp_agent_content: >-
+          {{ _quadlet_contents.results
+             | selectattr('item', 'equalto', 'ovn_bgp_agent')
+             | first }}
+
+    - name: Verify config_hash sentinel exists in cluster Quadlet files
+      ansible.builtin.assert:
+        that:
+          - "(item.content | b64decode) is search('# config_hash=')"
+        fail_msg: "config_hash sentinel missing in {{ item.item }}"
+      loop: "{{ _quadlet_contents.results | rejectattr('item', 'equalto', 'ovn_bgp_agent') | list }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Verify northd has After dependency on DB servers
+      ansible.builtin.assert:
+        that:
+          - "'edpm_nb_db_server.service' in _northd_unit"
+          - "'edpm_sb_db_server.service' in _northd_unit"
+        fail_msg: "northd Quadlet file is missing After= dependency on DB servers"
+      vars:
+        _northd_unit: >-
+          {{ _quadlet_contents.results
+             | selectattr('item', 'equalto', 'northd')
+             | map(attribute='content')
+             | first
+             | b64decode }}
+
+    - name: Ensure podman containers exist and are running
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
+      loop: "{{ quadlet_containers }}"
+
+    - name: Ensure systemd services are defined and functional
+      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
+      loop:
+        - {"name": "edpm_ovn_bgp_agent.service"}
+        - {"name": "edpm_nb_db_server.service"}
+        - {"name": "edpm_sb_db_server.service"}
+        - {"name": "edpm_northd.service"}
+        - {"name": "edpm_bgp_ovn_controller.service"}
+
+    - name: Ensure kolla_set_configs copied the expected files for main agent
+      become: true
+      ansible.builtin.shell: |
+        podman logs ovn_bgp_agent 2>&1 | grep "{{ item }}" > /dev/null
+      loop:
+        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/bgp-agent.conf to /etc/ovn-bgp-agent/bgp-agent.conf"
+        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/10-neutron-ovn.conf to /etc/ovn-bgp-agent/10-neutron-ovn.conf"

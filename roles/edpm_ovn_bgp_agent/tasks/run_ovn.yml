@@ -27,47 +27,51 @@
           - "{{ edpm_ovn_bgp_agent_tls_cacert_bundle_src }}:{{ edpm_ovn_bgp_agent_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
-- name: Ensure /var/local/libexec/edpm-start-podman-container exists
-  ansible.builtin.import_role:
-    name: edpm_container_manage
-    tasks_from: shutdown.yml
+- name: Set role path for template resolution
+  ansible.builtin.set_fact:
+    _edpm_ovn_bgp_agent_role_path: "{{ role_path }}"
 
+# TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run NB DB container
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+    name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: nb_db_server
-    edpm_container_standalone_container_defs:
-      nb_db_server: "{{ lookup('template', 'container_defs/nb_db_server.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      nb_db_server: "{{ _edpm_ovn_bgp_agent_role_path }}/templates/quadlet/nb_db_server.container.j2"
     edpm_container_standalone_kolla_config_files:
       nb_db_server: "{{ lookup('template', 'kolla_config/nb_db_server.yaml.j2') | from_yaml }}"
 
 - name: Run SB DB container
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+    name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: sb_db_server
-    edpm_container_standalone_container_defs:
-      sb_db_server: "{{ lookup('template', 'container_defs/sb_db_server.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      sb_db_server: "{{ _edpm_ovn_bgp_agent_role_path }}/templates/quadlet/sb_db_server.container.j2"
     edpm_container_standalone_kolla_config_files:
       sb_db_server: "{{ lookup('template', 'kolla_config/sb_db_server.yaml.j2') | from_yaml }}"
 
 - name: Run northd container
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+    name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: northd
-    edpm_container_standalone_container_defs:
-      northd: "{{ lookup('template', 'container_defs/northd.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      northd: "{{ _edpm_ovn_bgp_agent_role_path }}/templates/quadlet/northd.container.j2"
     edpm_container_standalone_kolla_config_files:
       northd: "{{ lookup('template', 'kolla_config/northd.yaml.j2') | from_yaml }}"
 
 - name: Run ovn_controller container
   ansible.builtin.include_role:
-    name: edpm_container_standalone
+    name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: bgp_ovn_controller
-    edpm_container_standalone_container_defs:
-      bgp_ovn_controller: "{{ lookup('template', 'container_defs/bgp_ovn_controller.yaml.j2') | from_yaml }}"
+    edpm_container_standalone_quadlet_defs:
+      bgp_ovn_controller: "{{ _edpm_ovn_bgp_agent_role_path }}/templates/quadlet/bgp_ovn_controller.container.j2"
     edpm_container_standalone_kolla_config_files:
       bgp_ovn_controller: "{{ lookup('template', 'kolla_config/bgp_ovn_controller.yaml.j2') | from_yaml }}"
