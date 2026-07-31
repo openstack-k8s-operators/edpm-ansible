@@ -4,8 +4,7 @@ recreate: true
 user: root
 privileged: true
 ports:
-  - "9882:9882"
-net: host
+  - "{{ ctlplane_ip }}:9882:9882"
 {% if tls_cert_exists|bool %}
 command:
   - --web.config.file=/etc/podman_exporter/podman_exporter.yaml

@@ -4,7 +4,7 @@ recreate: true
 user: root
 privileged: true
 ports:
-  - "9100:9100"
+  - "{{ ctlplane_ip }}:9100:9100"
 command:
 {% if tls_cert_exists|bool %}
   - --web.config.file=/etc/node_exporter/node_exporter.yaml
@@ -14,7 +14,6 @@ command:
 {% for arg in edpm_telemetry_node_exporter_extra_args %}
   - {{ arg }}
 {% endfor %}
-net: host
 environment:
   OS_ENDPOINT_TYPE: internal
 {% if edpm_telemetry_healthcheck %}
