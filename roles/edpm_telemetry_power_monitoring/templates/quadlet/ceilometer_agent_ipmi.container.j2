@@ -20,7 +20,7 @@ Description=Ceilometer Agent IPMI container (EDPM)
 [Container]
 ContainerName=ceilometer_agent_ipmi
 Image={{ edpm_telemetry_ceilometer_ipmi_image }}
-Network=host
+PublishPort={{ ctlplane_ip }}:9102:9102
 User=ceilometer
 PodmanArgs=--privileged --security-opt label=type:ceilometer_polling_t --log-driver=journald
 {% if edpm_telemetry_power_monitoring_healthcheck -%}
