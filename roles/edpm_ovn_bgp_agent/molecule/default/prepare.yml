@@ -20,8 +20,13 @@
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
       test_deps_edpm_packages:
+        # centos-stream-release provides $releasever for dnf after
+        # test_deps removes redhat-release from the UBI9 image.
+        # Without it, repos using $releasever (e.g. EPEL) break.
+        - centos-stream-release
         - openvswitch
         - os-net-config
+        - podman
   vars:
     edpm_download_cache_podman_auth_file: "" # Override since the file doesn't exist
   tasks:
@@ -30,16 +35,19 @@
 
     # The openvswitch kernel module needs to be loaded on the host
     - name: Install and modprobe openvswitch
-      shell: |
+      ansible.builtin.shell: |
         sudo dnf -y install openvswitch
         sudo modprobe openvswitch
       delegate_to: localhost
       run_once: true
 
-    - name: Install os-net-config
-      ansible.builtin.package:
-        name: os-net-config
+    - name: Ensure /etc/localtime exists
       become: true
+      ansible.builtin.file:
+        src: /usr/share/zoneinfo/UTC
+        dest: /etc/localtime
+        state: link
+        force: true
 
     - name: Force systemd to reread configs
       ansible.builtin.systemd:
@@ -47,39 +55,9 @@
       become: true
 
     - name: "Download required role packages"
-      ansible.builtin.import_role:
-        name: "osp.edpm.edpm_bootstrap"
-        tasks_from: "download_cache.yml"
-
-    - name: "Include edpm_bootstrap"
-      ansible.builtin.import_role:
-        name: "osp.edpm.edpm_bootstrap"
-        tasks_from: "bootstrap.yml"
-      become: true
-
-    - name: "Download required role packages"
       ansible.builtin.include_role:
         name: "osp.edpm.edpm_frr"
         tasks_from: "download_cache.yml"
-
-    - name: Create firewall directory
-      become: true
-      ansible.builtin.file:
-        path: '/var/lib/edpm-config/firewall'
-        state: directory
-        owner: root
-        group: root
-        mode: 0750
-
-    - name: open port 22 (edpm_nftables will active this later)
-      become: true
-      copy:
-        dest: /var/lib/edpm-config/firewall/sshd-networks.yaml
-        content: |
-          - rule_name: 003 Allow SSH
-            rule:
-              proto: tcp
-              dport: 22
 
     - name: "Running FRR"
       vars:

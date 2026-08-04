@@ -24,6 +24,7 @@ provisioner:
         hosts:
           instance:
             canonical_hostname: edpm-0.localdomain
+            ctlplane_ip: 127.0.0.1
 scenario:
   test_sequence:
   - dependency

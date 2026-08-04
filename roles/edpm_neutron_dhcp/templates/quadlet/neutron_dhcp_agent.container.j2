@@ -1,0 +1,36 @@
+# Quadlet container file for neutron_dhcp_agent
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set _dhcp_volumes = [] -%}
+{%- set _dhcp_volumes = _dhcp_volumes
+    + edpm_neutron_dhcp_common_volumes
+    + edpm_neutron_dhcp_tls_cacert_volumes %}
+
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Neutron DHCP Agent container (EDPM)
+
+[Container]
+ContainerName=neutron_dhcp_agent
+Image={{ edpm_neutron_dhcp_image }}
+Network=host
+User=root
+PodmanArgs=--privileged --log-driver=journald
+PodmanArgs=--pid=host
+PodmanArgs=--cgroupns=host
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in _dhcp_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target

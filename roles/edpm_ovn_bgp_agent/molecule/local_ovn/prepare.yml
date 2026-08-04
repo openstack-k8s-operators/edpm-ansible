@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,8 +17,6 @@
   hosts: all
   roles:
     - role: ../../../../molecule/common/test_deps
-      test_deps_extra_packages:
-        - podman
       test_deps_setup_edpm: true
       test_deps_setup_stream: true
       test_deps_edpm_packages:
@@ -28,9 +26,20 @@
         - centos-stream-release
         - openvswitch
         - os-net-config
+        - podman
+  vars:
+    edpm_download_cache_podman_auth_file: "" # Override since the file doesn't exist
   tasks:
     - ansible.builtin.include_role:
         name: osp.edpm.env_data
+
+    # The openvswitch kernel module needs to be loaded on the host
+    - name: Install and modprobe openvswitch
+      ansible.builtin.shell: |
+        sudo dnf -y install openvswitch
+        sudo modprobe openvswitch
+      delegate_to: localhost
+      run_once: true
 
     - name: Ensure /etc/localtime exists
       become: true
@@ -41,6 +50,28 @@
         force: true
 
     - name: Force systemd to reread configs
-      become: true
       ansible.builtin.systemd:
         daemon_reload: true
+      become: true
+
+    - name: "Download required role packages"
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_frr"
+        tasks_from: "download_cache.yml"
+
+    - name: "Running FRR"
+      vars:
+        edpm_frr_bgp_peers:
+          - 10.64.0.1
+          - 10.65.0.1
+      ansible.builtin.include_role:
+        name: "osp.edpm.edpm_frr"
+        apply:
+          become: true
+
+    - name: Create OVN data directory for local cluster
+      become: true
+      ansible.builtin.file:
+        path: "/var/lib/openvswitch/ovn"
+        state: directory
+        mode: "0755"
