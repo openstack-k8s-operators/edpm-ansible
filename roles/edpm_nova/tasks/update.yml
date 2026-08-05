@@ -1,4 +1,21 @@
 ---
+# Remove old container_manage units from /etc/systemd/system/ so they don't
+# shadow Quadlet-generated units in /run/systemd/generator/ (systemd precedence).
+# No daemon_reload here — quadlet.yml's daemon_reload picks up both changes at once.
+- name: Remove legacy container_manage units that shadow Quadlet
+  tags:
+    - upgrade  # to be removed when upgrade tasks handle this
+    - update
+    - nova
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/edpm_{{ item }}.service"
+    state: absent
+  loop:
+    - nova_compute_init
+    - nova_compute
+    - nova_nvme_cleaner
+
 # NOTE(auniyal): Ensure service config directories exist
 # during minor-update for nvme cleaner. bug: OSPRH-21712
 - name: Ensure service config directories exist
