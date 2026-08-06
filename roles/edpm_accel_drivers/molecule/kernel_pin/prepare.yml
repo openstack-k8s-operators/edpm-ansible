@@ -14,21 +14,20 @@
         force: true
         remote_src: true
 
-    - name: Get installed kernel-core version
-      become: true
-      ansible.builtin.shell:
-        cmd: |
-          set -o pipefail
-          rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}\n' 2>/dev/null | head -1 || \
-          rpm -q kernel --qf '%{VERSION}-%{RELEASE}\n' 2>/dev/null | head -1 || \
-          uname -r | sed 's/\.x86_64$//' | sed 's/\.aarch64$//'
-        executable: /bin/bash
-      register: _prepare_kernel_version
-      changed_when: false
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: rpm
 
-    - name: Store kernel version for converge
+    - name: Determine kernel version
       ansible.builtin.set_fact:
-        test_kernel_version: "{{ _prepare_kernel_version.stdout }}"
+        test_kernel_version: >-
+          {%- if 'kernel-core' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel-core'][0].version }}-{{ ansible_facts.packages['kernel-core'][0].release }}
+          {%- elif 'kernel' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel'][0].version }}-{{ ansible_facts.packages['kernel'][0].release }}
+          {%- else -%}
+            {{ ansible_kernel | regex_replace('\.(x86_64|aarch64)$', '') }}
+          {%- endif -%}
 
     - name: Save kernel version to file for converge to read
       ansible.builtin.copy:
@@ -36,11 +35,6 @@
         dest: /tmp/test-kernel-version
         mode: '0644'
 
-    - name: Get system architecture
-      ansible.builtin.command:
-        cmd: uname -m
-      register: _prepare_arch
-      changed_when: false
 
     - name: Create /boot directory
       become: true
@@ -52,7 +46,7 @@
     - name: Create fake vmlinuz for target kernel
       become: true
       ansible.builtin.file:
-        path: "/boot/vmlinuz-{{ test_kernel_version }}.{{ _prepare_arch.stdout }}"
+        path: "/boot/vmlinuz-{{ test_kernel_version }}.{{ ansible_architecture }}"
         state: touch
         mode: '0644'
 

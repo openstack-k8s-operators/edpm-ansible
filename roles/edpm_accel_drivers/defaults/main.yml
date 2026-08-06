@@ -38,8 +38,8 @@ edpm_accel_drivers:
         url: ""
         ssl_no_verify: false
         disable_gpg_check: false
-  kernel:
-    pin: false
+  kernel_pin:
+    enabled: false
     version: ""
     remove_old: true
   features:
