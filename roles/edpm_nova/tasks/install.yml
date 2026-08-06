@@ -5,6 +5,10 @@
     path: "{{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
+- name: Set role path for template resolution
+  ansible.builtin.set_fact:
+    _edpm_nova_role_path: "{{ role_path }}"
+
 - name: Deploy nova init container
   tags:
     - install
@@ -12,11 +16,12 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: "nova_compute_init"
     edpm_service_name: "{{ edpm_nova_service_name }}"
-    edpm_container_state_append: false  # First container - replace existing state
-    edpm_container_standalone_container_defs:
-      nova_compute_init: "{{ lookup('template', 'container_defs/nova_compute_init.yaml.j2') | from_yaml }}"
+    edpm_container_state_append: false
+    edpm_container_standalone_quadlet_defs:
+      nova_compute_init: "{{ _edpm_nova_role_path }}/templates/quadlet/nova_compute_init.container.j2"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
 
 - name: Deploy nova compute container
@@ -26,11 +31,12 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: "nova_compute"
     edpm_service_name: "{{ edpm_nova_service_name }}"
-    edpm_container_state_append: true  # Append to nova service
-    edpm_container_standalone_container_defs:
-      nova_compute: "{{ lookup('template', 'container_defs/nova_compute.yaml.j2') | from_yaml }}"
+    edpm_container_state_append: true
+    edpm_container_standalone_quadlet_defs:
+      nova_compute: "{{ _edpm_nova_role_path }}/templates/quadlet/nova_compute.container.j2"
     edpm_container_standalone_kolla_config_files:
       nova_compute: "{{ lookup('file', 'files/kolla_config/nova_compute.yaml') | from_yaml }}"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
@@ -43,11 +49,12 @@
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
+    edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: "nova_nvme_cleaner"
     edpm_service_name: "{{ edpm_nova_service_name }}"
-    edpm_container_state_append: true  # Append to nova service
-    edpm_container_standalone_container_defs:
-      nova_nvme_cleaner: "{{ lookup('template', 'container_defs/nova_nvme_cleaner.yaml.j2') | from_yaml }}"
+    edpm_container_state_append: true
+    edpm_container_standalone_quadlet_defs:
+      nova_nvme_cleaner: "{{ _edpm_nova_role_path }}/templates/quadlet/nova_nvme_cleaner.container.j2"
     edpm_container_standalone_kolla_config_files:
       nova_nvme_cleaner: "{{ lookup('template', 'kolla_config/nova_nvme_cleaner.yaml.j2') | from_yaml }}"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
@@ -58,8 +65,26 @@
     - install
     - nova
     - cleanup
-  ansible.builtin.include_role:
-    name: osp.edpm.edpm_container_rm
-  vars:
-    edpm_containers_to_rm:
-      - nova_nvme_cleaner
+  become: true
+  block:
+    - name: Stop nvme cleaner service
+      ansible.builtin.systemd:
+        name: edpm_nova_nvme_cleaner.service
+        state: stopped
+      failed_when: false
+
+    - name: Remove nvme cleaner Quadlet file
+      ansible.builtin.file:
+        path: /etc/containers/systemd/edpm_nova_nvme_cleaner.container
+        state: absent
+      register: _nvme_quadlet_removed
+
+    - name: Reload systemd after Quadlet removal
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: _nvme_quadlet_removed is changed  # noqa: no-handler
+
+    - name: Remove nvme cleaner container
+      containers.podman.podman_container:
+        name: nova_nvme_cleaner
+        state: absent

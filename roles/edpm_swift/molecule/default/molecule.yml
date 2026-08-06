@@ -27,8 +27,6 @@ provisioner:
             ansible_python_interpreter: /usr/bin/python3
   name: ansible
   log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
 
 scenario:
   test_sequence:
