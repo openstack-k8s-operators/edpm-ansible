@@ -14,7 +14,7 @@
     - role: "edpm_accel_drivers"
       vars:
         edpm_accel_drivers:
-          kernel:
-            pin: true
+          kernel_pin:
+            enabled: true
             version: "{{ test_kernel_version }}"
             remove_old: true

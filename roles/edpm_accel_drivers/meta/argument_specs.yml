@@ -170,11 +170,11 @@ argument_specs:
                         type: bool
                         default: false
                         description: Whether to disable GPG check when installing RPM (not recommended for production)
-          kernel:
+          kernel_pin:
             type: dict
             description: Kernel version pinning configuration for driver compatibility
             options:
-              pin:
+              enabled:
                 type: bool
                 default: false
                 description: Whether to pin a specific kernel version before driver installation
@@ -183,7 +183,7 @@ argument_specs:
                 default: ""
                 description: >-
                   Target kernel version to install and pin (e.g. 5.14.0-570.26.1.el9_6).
-                  Required when pin is true.
+                  Required when enabled is true.
               remove_old:
                 type: bool
                 default: true

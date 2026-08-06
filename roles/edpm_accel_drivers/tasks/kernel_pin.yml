@@ -2,10 +2,10 @@
 - name: Validate kernel version format
   ansible.builtin.assert:
     that:
-      - _edpm_accel_drivers_config.kernel.version | length > 10
-      - _edpm_accel_drivers_config.kernel.version is regex('^[0-9]+\.[0-9]+\.[0-9]+-')
+      - _edpm_accel_drivers_config.kernel_pin.version | length > 10
+      - _edpm_accel_drivers_config.kernel_pin.version is regex('^[0-9]+\.[0-9]+\.[0-9]+-')
     fail_msg: >-
-      kernel.version '{{ _edpm_accel_drivers_config.kernel.version }}'
+      kernel.version '{{ _edpm_accel_drivers_config.kernel_pin.version }}'
       does not look like a valid kernel version (e.g. 5.14.0-570.26.1.el9_6)
 
 
@@ -13,9 +13,9 @@
   become: true
   ansible.builtin.dnf:
     name:
-      - "kernel-{{ _edpm_accel_drivers_config.kernel.version }}"
-      - "kernel-core-{{ _edpm_accel_drivers_config.kernel.version }}"
-      - "kernel-modules-{{ _edpm_accel_drivers_config.kernel.version }}"
+      - "kernel-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
+      - "kernel-core-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
+      - "kernel-modules-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
     state: present
   register: _edpm_accel_drivers_kernel_install
 
@@ -24,7 +24,7 @@
   ansible.builtin.command:
     cmd: >-
       grubby --set-default
-      /boot/vmlinuz-{{ _edpm_accel_drivers_config.kernel.version }}.{{ ansible_architecture }}
+      /boot/vmlinuz-{{ _edpm_accel_drivers_config.kernel_pin.version }}.{{ ansible_architecture }}
   changed_when: true
 
 - name: Verify default kernel is set correctly
@@ -33,10 +33,10 @@
     cmd: grubby --default-kernel
   register: _edpm_accel_drivers_default_kernel
   changed_when: false
-  failed_when: _edpm_accel_drivers_config.kernel.version not in _edpm_accel_drivers_default_kernel.stdout
+  failed_when: _edpm_accel_drivers_config.kernel_pin.version not in _edpm_accel_drivers_default_kernel.stdout
 
 - name: Remove old kernel packages
-  when: _edpm_accel_drivers_config.kernel.remove_old | bool
+  when: _edpm_accel_drivers_config.kernel_pin.remove_old | bool
   block:
     - name: Gather kernel package facts
       ansible.builtin.package_facts:
@@ -50,7 +50,7 @@
           {% set result = [] -%}
           {% for pkg_name in ['kernel', 'kernel-core', 'kernel-modules'] -%}
             {% for pkg in ansible_facts.packages.get(pkg_name, []) -%}
-              {% if (pkg.version ~ '-' ~ pkg.release) != _edpm_accel_drivers_config.kernel.version -%}
+              {% if (pkg.version ~ '-' ~ pkg.release) != _edpm_accel_drivers_config.kernel_pin.version -%}
                 {% set _ = result.append(pkg.name ~ '-' ~ pkg.version ~ '-' ~ pkg.release) -%}
               {% endif -%}
             {% endfor -%}
@@ -74,7 +74,7 @@
           - 'config-*'
           - 'symvers-*'
         excludes:
-          - '*{{ _edpm_accel_drivers_config.kernel.version }}*'
+          - '*{{ _edpm_accel_drivers_config.kernel_pin.version }}*'
         file_type: any
       register: _edpm_accel_drivers_orphaned_boot_files
 

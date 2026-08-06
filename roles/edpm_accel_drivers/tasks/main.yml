@@ -11,8 +11,8 @@
 
 - name: Pin kernel version for driver compatibility
   when:
-    - _edpm_accel_drivers_config.kernel.pin | bool
-    - _edpm_accel_drivers_config.kernel.version
+    - _edpm_accel_drivers_config.kernel_pin.enabled | bool
+    - _edpm_accel_drivers_config.kernel_pin.version
   ansible.builtin.import_tasks: kernel_pin.yml
 
 - name: Install GPU drivers for enabled vendors
