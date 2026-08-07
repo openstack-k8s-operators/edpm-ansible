@@ -34,7 +34,7 @@ argument_specs:
         default: {}
       edpm_container_manage_config_patterns:
         type: str
-        default: '*.json'
+        default: '*.yml'
       edpm_container_manage_containers:
         type: list
         elements: str

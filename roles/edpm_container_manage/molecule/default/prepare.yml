@@ -35,32 +35,26 @@
       # ipc mode added as WA for podman 4.1.x
       copy:
         content: |
-          {
-            "image": "quay.io/centos/centos:stream9",
-            "net": "host",
-            "ipc": "shareable",
-            "command": "sleep 3600",
-            "restart": "always",
-            "check_interval": "500s"
-          }
-        dest: '/tmp/container-configs/centos.json'
+          image: quay.io/centos/centos:stream9
+          net: host
+          ipc: shareable
+          command: sleep 3600
+          restart: always
+          check_interval: 500s
+        dest: '/tmp/container-configs/centos.yml'
     - name: Create a secondary configuration file for a centos container
       copy:
         content: |
-          {
-            "image": "quay.io/centos/centos:stream9",
-            "net": "host",
-            "ipc": "shareable",
-            "command": "sleep 5"
-          }
-        dest: '/tmp/container-configs/centos_bis.json'
+          image: quay.io/centos/centos:stream9
+          net: host
+          ipc: shareable
+          command: sleep 5
+        dest: '/tmp/container-configs/centos_bis.yml'
     - name: Create a third configuration file for a centos container
       copy:
         content: |
-          {
-            "image": "quay.io/centos/centos:stream9",
-            "net": "host",
-            "ipc": "shareable",
-            "command": "sleep 5"
-          }
-        dest: '/tmp/container-configs/centos_three.json'
+          image: quay.io/centos/centos:stream9
+          net: host
+          ipc: shareable
+          command: sleep 5
+        dest: '/tmp/container-configs/centos_three.yml'

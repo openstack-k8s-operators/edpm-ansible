@@ -87,3 +87,12 @@
   retries: 5
   delay: 5
   until: _edpm_quadlet_svc is not failed
+
+- name: "Ensure Quadlet services are running for {{ edpm_container_standalone_service }}"
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_{{ item }}.service"
+    state: started
+  loop: "{{ edpm_container_standalone_quadlet_defs.keys() | list }}"
+  loop_control:
+    label: "{{ item }}"

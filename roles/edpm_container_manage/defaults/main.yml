@@ -29,7 +29,7 @@ edpm_container_manage_concurrency: 1
 edpm_container_manage_config: "/var/lib/edpm-config/"
 edpm_container_manage_config_id: edpm
 edpm_container_manage_config_overrides: {}
-edpm_container_manage_config_patterns: '*.json'
+edpm_container_manage_config_patterns: '*.yml'
 edpm_container_manage_containers: []  # If set, only manage these specific containers
 edpm_container_manage_healthcheck_disabled: false
 edpm_container_manage_log_path: '/var/log/containers/stdouts'  # DEPRECATED: ignored, services log to journald

@@ -69,8 +69,8 @@
 
 - name: Check for openstack_network_exporter config
   ansible.builtin.stat:
-    path: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.json"
-  register: openstack_network_exporter_config_json
+    path: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml"
+  register: openstack_network_exporter_config_yaml
 
 - name: Check that tls.crt exists
   become: true
@@ -91,7 +91,7 @@
     - telemetry
 
 - name: Install openstack_network_operator if not present
-  when: not openstack_network_exporter_config_json.stat.exists
+  when: not openstack_network_exporter_config_yaml.stat.exists
   become: true
   block:
     - name: Determine if cacert file exists

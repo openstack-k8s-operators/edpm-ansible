@@ -139,7 +139,9 @@
     - name: Find startup config files for orphaned containers
       ansible.builtin.find:
         paths: "{{ edpm_container_startup_config_dir }}"
-        patterns: "{{ item }}.json"
+        patterns:
+          - "{{ item }}.yml"
+          - "{{ item }}.json"
         recurse: true
       loop: "{{ _edpm_orphaned_containers }}"
       register: _edpm_orphaned_startup_configs

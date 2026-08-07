@@ -40,7 +40,7 @@ argument_specs:
         description: |
           Remove container startup config directories during cleanup.
           Deletes /var/lib/edpm-config/container-startup-config/<service>/
-          including all *.json container definition files within it.
+          including any legacy *.json and current *.yml container definition files within it.
         type: bool
       edpm_cleanup_orphaned_containers:
         default: false
