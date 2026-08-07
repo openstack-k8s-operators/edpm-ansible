@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,9 +14,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-collections:
-  - ansible.posix
-  - community.crypto
-  - community.general
-  - containers.podman
-  - fedora.linux_system_roles
+
+galaxy_info:
+  author: OpenStack
+  description: EDPM OpenStack Role -- edpm_cyborg
+  company: Red Hat
+  license: Apache-2.0
+  min_ansible_version: '2.14'
+  namespace: openstack
+  platforms:
+    - name: 'EL'
+      versions:
+        - '9'
+
+  galaxy_tags:
+    - edpm
+
+
+dependencies: []
