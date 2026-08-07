@@ -37,13 +37,13 @@
     - item['Config']['Labels']['managed_by'] is defined
     - item['Config']['Labels']['managed_by'] == 'edpm_ansible'
 
-- name: Remove container startup config directory and all JSON files
+- name: Remove container startup config directory and all startup files
   ansible.builtin.file:
     path: "{{ edpm_container_startup_config_dir }}/{{ _edpm_cleanup_service_name }}"
     state: absent
   when: edpm_cleanup_remove_config_dirs | bool
   # This removes /var/lib/edpm-config/container-startup-config/<service>/
-  # including all *.json container definition files within it
+  # including any legacy *.json and current *.yml container definition files within it
 
 - name: Remove container-scoped startup config directories
   ansible.builtin.file:

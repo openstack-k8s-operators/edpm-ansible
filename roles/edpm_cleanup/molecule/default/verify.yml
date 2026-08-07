@@ -109,7 +109,7 @@
 
     - name: Check if startup config for container_b exists
       ansible.builtin.stat:
-        path: /var/lib/edpm-config/container-startup-config/test_service3/test_service3_container_b.json
+        path: /var/lib/edpm-config/container-startup-config/test_service3/test_service3_container_b.yml
       register: _container_b_startup_config
 
     - name: Verify startup config for container_b does not exist

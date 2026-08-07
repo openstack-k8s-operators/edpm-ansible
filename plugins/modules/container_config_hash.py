@@ -99,7 +99,7 @@ class ContainerConfigHashManager:
     the staging directory, computes hashes, and writes them into the
     '# config_hash=' comment placeholder in each file.
 
-    Container_manage path (legacy): scans JSON startup configs and updates
+    Container_manage path (legacy): scans YAML or JSON startup configs and updates
     EDPM_CONFIG_HASH in place.
     """
 
@@ -197,7 +197,7 @@ class ContainerConfigHashManager:
         if os.path.exists(path):
             os.remove(path)
 
-    def _find(self, path, pattern='*.json'):
+    def _find(self, path, pattern='*.yml'):
         """Returns a list of files in a directory.
 
         :param path: string
@@ -233,7 +233,12 @@ class ContainerConfigHashManager:
         :param config: string
         """
         with open(path, 'wb') as f:
-            f.write(json.dumps(config, indent=2).encode('utf-8'))
+            if path.endswith(('.yml', '.yaml')):
+                f.write(yaml.safe_dump(
+                    config, default_flow_style=False
+                ).encode('utf-8'))
+            else:
+                f.write(json.dumps(config, indent=2).encode('utf-8'))
         os.chmod(path, 0o600)
         self.results['changed'] = True
 
@@ -317,7 +322,9 @@ class ContainerConfigHashManager:
     def _update_hashes(self):
         """Update container startup config with new config hashes if needed.
         """
-        configs = self._find(CONTAINER_STARTUP_CONFIG)
+        configs = []
+        for pattern in ('*.yml', '*.yaml', '*.json'):
+            configs.extend(self._find(CONTAINER_STARTUP_CONFIG, pattern))
         for config in configs:
             old_config_hash = ''
             cname = os.path.splitext(os.path.basename(config))[0]
@@ -326,7 +333,7 @@ class ContainerConfigHashManager:
                 # don't exist anymore.
                 self._remove_file(config)
                 continue
-            startup_config_json = json.loads(self._slurp(config))
+            startup_config_json = yaml.safe_load(self._slurp(config))
             config_volumes = self._match_config_volumes(startup_config_json)
             if config_volumes:
                 old_config_hash = startup_config_json['environment'].get(

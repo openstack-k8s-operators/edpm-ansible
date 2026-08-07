@@ -41,10 +41,10 @@ module: edpm_container_manage
 author:
   - "Alex Schultz (@mwhahaha)"
 version_added: '2.9'
-short_description: Create containers from a set of json configurations
+short_description: Create containers from a set of JSON or YAML configurations
 notes: []
 description:
-  - Create containers from a set of json configurations
+  - Create containers from a set of JSON or YAML configurations
 requirements:
   - None
 options:
@@ -55,14 +55,14 @@ options:
     required: True
   config_dir:
     description:
-      - Path to the json container definitions
+      - Path to the container definitions
     type: str
     required: True
   config_patterns:
     description:
       - Glob for configuration files
     type: str
-    default: "*.json"
+    default: "*.yml"
   config_overrides:
     description:
       - Allows to override any container configuration which will take
@@ -169,7 +169,7 @@ class EdpmContainerManage:
                     self.module.debug(f'Skipping {name} - not in containers list')
                 continue
             with open(match, 'r') as data:
-                config = json.loads(data.read())
+                config = yaml.safe_load(data.read())
             if self.debug:
                 self.module.debug(f'Config found for {name}: {config}')
             configs.update({name: config})

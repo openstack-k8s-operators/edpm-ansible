@@ -19,7 +19,6 @@ __metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 
 import glob
-import json
 import os
 import yaml
 
@@ -39,19 +38,19 @@ version_added: '2.8'
 short_description: Generates a dictionary which contains all container configs
 notes: []
 description:
-  - This module reads container configs in JSON files and generate a dictionary
-    which later will be used to manage the containers.
+  - This module reads container configs in JSON or YAML files and generates a
+    dictionary which later will be used to manage the containers.
 options:
   config_path:
     description:
-      - The path of a directory or a file where the JSON files are.
+      - The path of a directory or a file where the container config files are.
         This parameter is required.
     required: True
     type: str
   config_pattern:
     description:
-      - Search pattern to find JSON files.
-    default: '*.json'
+      - Search pattern to find container config files.
+    default: '*.yml'
     required: False
     type: str
   config_overrides:
@@ -76,7 +75,7 @@ EXAMPLES = """
 - name: Generate containers configs data for HAproxy and override image
   container_config_data:
     config_path: /var/lib/edpm-config/container-startup-config/step_1
-    config_pattern: 'haproxy.json'
+    config_pattern: 'haproxy.yml'
     config_overrides:
       haproxy:
         image: my-registry.io/edpm/haproxy:mytag
@@ -113,14 +112,14 @@ class ContainerConfigDataManager(object):
         config_overrides = args['config_overrides']
         self.debug = args['debug']
 
-        # Generate dict from JSON files that match search pattern
+        # Generate dict from config files that match search pattern
         if os.path.exists(config_path):
             matched_configs = glob.glob(os.path.join(config_path,
                                                      config_pattern))
             config_dict = {}
             for mc in matched_configs:
                 name = os.path.splitext(os.path.basename(mc))[0]
-                config = json.loads(self._slurp(mc))
+                config = yaml.safe_load(self._slurp(mc))
                 if self.debug:
                     self.module.debug('Config found for {}: {}'.format(name,
                                                                        config))
