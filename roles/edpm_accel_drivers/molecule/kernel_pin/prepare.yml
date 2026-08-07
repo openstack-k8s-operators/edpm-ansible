@@ -1,0 +1,112 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Install mock nvidia-smi
+      become: true
+      ansible.builtin.copy:
+        src: /bin/true
+        dest: /usr/bin/nvidia-smi
+        mode: '0755'
+        force: true
+        remote_src: true
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: rpm
+
+    - name: Determine kernel version
+      ansible.builtin.set_fact:
+        test_kernel_version: >-
+          {%- if 'kernel-core' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel-core'][0].version }}-{{ ansible_facts.packages['kernel-core'][0].release }}
+          {%- elif 'kernel' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel'][0].version }}-{{ ansible_facts.packages['kernel'][0].release }}
+          {%- else -%}
+            {{ ansible_kernel | regex_replace('\.(x86_64|aarch64)$', '') }}
+          {%- endif -%}
+
+    - name: Save kernel version to file for converge to read
+      ansible.builtin.copy:
+        content: "{{ test_kernel_version }}"
+        dest: /tmp/test-kernel-version
+        mode: '0644'
+
+
+    - name: Create /boot directory
+      become: true
+      ansible.builtin.file:
+        path: /boot
+        state: directory
+        mode: '0755'
+
+    - name: Create fake vmlinuz for target kernel
+      become: true
+      ansible.builtin.file:
+        path: "/boot/vmlinuz-{{ test_kernel_version }}.{{ ansible_architecture }}"
+        state: touch
+        mode: '0644'
+
+    - name: Create fake vmlinuz for old kernel (to test cleanup)
+      become: true
+      ansible.builtin.file:
+        path: /boot/vmlinuz-4.18.0-old.el9.x86_64
+        state: touch
+        mode: '0644'
+
+    - name: Install mock grubby
+      become: true
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          if [[ "$1" == "--set-default" ]]; then
+            echo "$2" > /var/tmp/mock-grubby-default
+            chmod 644 /var/tmp/mock-grubby-default
+          elif [[ "$1" == "--default-kernel" ]]; then
+            cat /var/tmp/mock-grubby-default 2>/dev/null || echo "none"
+          fi
+          exit 0
+        dest: /usr/sbin/grubby
+        mode: '0755'
+        force: true
+
+    - name: Symlink mock grubby to /usr/bin
+      become: true
+      ansible.builtin.file:
+        src: /usr/sbin/grubby
+        dest: /usr/bin/grubby
+        state: link
+        force: true
+
+    - name: Create mock dnf.conf
+      become: true
+      ansible.builtin.copy:
+        content: |
+          [main]
+          gpgcheck=1
+          installonly_limit=3
+          clean_requirements_on_remove=True
+          best=True
+          skip_if_unavailable=False
+        dest: /etc/dnf/dnf.conf
+        mode: '0644'
+        force: true
+
+    - name: Ensure /usr/lib/nvidia directory exists
+      become: true
+      ansible.builtin.file:
+        path: /usr/lib/nvidia
+        state: directory
+        mode: '0755'
+
+    - name: Install mock sriov-manage
+      become: true
+      ansible.builtin.copy:
+        src: /bin/true
+        dest: /usr/lib/nvidia/sriov-manage
+        mode: '0755'
+        force: true
+        remote_src: true
