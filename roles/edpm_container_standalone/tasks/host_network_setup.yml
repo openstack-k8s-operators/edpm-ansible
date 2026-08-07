@@ -1,0 +1,53 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Ensures /run/netns exists at boot for containers that mount network
+# namespaces (/run/netns:/run/netns:shared). Required by neutron agents
+# that manage tenant network namespaces (neutron_ovn, neutron_metadata,
+# neutron_dhcp). The placeholder netns is harmless and costs nothing.
+
+- name: Ensure systemd preset directory exists
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: /etc/systemd/system-preset
+    mode: "0755"
+
+- name: Deploy netns-placeholder systemd service
+  become: true
+  ansible.builtin.copy:
+    src: "netns-placeholder-service"
+    dest: "/etc/systemd/system/netns-placeholder.service"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Deploy netns-placeholder systemd preset
+  become: true
+  ansible.builtin.copy:
+    src: "91-netns-placeholder-preset"
+    dest: "/etc/systemd/system-preset/91-netns-placeholder.preset"
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Enable and start netns-placeholder
+  become: true
+  ansible.builtin.systemd:
+    name: netns-placeholder
+    state: started
+    enabled: true
+    daemon_reload: true

@@ -47,6 +47,13 @@
         daemon_reload: true
       become: true
 
+    - name: Ensure openvswitch is running
+      become: true
+      ansible.builtin.systemd:
+        name: openvswitch.service
+        state: started
+        enabled: true
+
     - name: Download required role packages
       ansible.builtin.import_role:
         name: osp.edpm.edpm_bootstrap
