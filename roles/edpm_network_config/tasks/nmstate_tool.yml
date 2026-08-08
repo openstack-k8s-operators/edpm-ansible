@@ -53,14 +53,14 @@
       ((nmstate_returncode_slurp.content | b64decode | int) != 0)) or
       (not nmstate_returncode_stat.stat.exists)
   block:
-    - name: Render network_state variable
-      ansible.builtin.set_fact:
-        network_state: "{{ edpm_network_config_template | from_yaml }}"
-
-    - name: Load system-roles.network tasks [nmstate]
-      ansible.builtin.include_role:
-        name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
-      register: nmstate_result
+    - name: Fail when no nmstate template is defined for apply
+      ansible.builtin.fail:
+        msg: >-
+          Set edpm_network_config_template and/or
+          edpm_network_config_nmstate_sriov_pf_template (non-empty YAML strings).
+      when:
+        - edpm_network_config_nmstate_sriov_pf_template | trim | length == 0
+        - edpm_network_config_template | trim | length == 0
 
     - name: Ensure /var/lib/edpm-config exists
       ansible.builtin.file:
@@ -68,8 +68,85 @@
         state: directory
         mode: "0755"
 
+    - name: Apply nmstate phase 1 (SR-IOV on PF)
+      when: edpm_network_config_nmstate_sriov_pf_template | trim | length > 0
+      block:
+        - name: Apply nmstate SR-IOV phase
+          ansible.builtin.include_tasks: nmstate_apply_state.yml
+          vars:
+            edpm_nmstate_apply_template: "{{ edpm_network_config_nmstate_sriov_pf_template }}"
+            edpm_nmstate_apply_phase: sriov
+
+        - name: Record SR-IOV phase result
+          ansible.builtin.set_fact:
+            nmstate_sriov_result: "{{ edpm_nmstate_apply_result }}"
+
+        - name: Fail when nmstate SR-IOV phase failed
+          ansible.builtin.fail:
+            msg: "nmstate SR-IOV phase (edpm_network_config_nmstate_sriov_pf_template) failed."
+          when: nmstate_sriov_result.failed | default(false)
+
+        - name: Wait for SR-IOV VFs after phase 1
+          when: edpm_network_config_nmstate_sriov_vf_wait | bool
+          block:
+            - name: Parse phase-1 state for VF wait
+              ansible.builtin.set_fact:
+                edpm_nmstate_sriov_phase_state: >-
+                  {{ edpm_network_config_nmstate_sriov_pf_template | from_yaml }}
+
+            - name: Wait until sysfs reports expected SR-IOV VF counts
+              ansible.builtin.include_tasks: nmstate_wait_sriov_vfs.yml
+
+    - name: Apply nmstate phase 2 (main network template)
+      when: edpm_network_config_template | trim | length > 0
+      block:
+        - name: Apply nmstate main phase
+          ansible.builtin.include_tasks: nmstate_apply_state.yml
+          vars:
+            edpm_nmstate_apply_template: "{{ edpm_network_config_template }}"
+            edpm_nmstate_apply_phase: main
+
+        - name: Record main nmstate phase result
+          ansible.builtin.set_fact:
+            nmstate_result: "{{ edpm_nmstate_apply_result }}"
+
+        - name: Fail when nmstate main phase failed
+          ansible.builtin.fail:
+            msg: "nmstate main phase (edpm_network_config_template) failed."
+          when: nmstate_result.failed | default(false)
+
+    - name: Set nmstate_result when only SR-IOV phase ran
+      ansible.builtin.set_fact:
+        nmstate_result: "{{ nmstate_sriov_result }}"
+      when:
+        - nmstate_sriov_result is defined
+        - nmstate_result is not defined
+
     - name: Write rc of nmstate run
       ansible.builtin.copy:
-        content: "0"
+        content: >-
+          {{
+            '1' if (
+              (nmstate_sriov_result.failed | default(false))
+              or (nmstate_result.failed | default(false))
+            ) else '0'
+          }}
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
+
+  rescue:
+    - name: Ensure /var/lib/edpm-config exists after nmstate failure
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        mode: "0755"
+
+    - name: Write failure rc of nmstate run
+      ansible.builtin.copy:
+        content: "1"
+        dest: /var/lib/edpm-config/nmstate.returncode
+        mode: "0644"
+
+    - name: Re-raise nmstate apply failure
+      ansible.builtin.fail:
+        msg: "nmstate network configuration failed; see tasks above."
