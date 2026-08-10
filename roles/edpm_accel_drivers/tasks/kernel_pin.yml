@@ -9,14 +9,14 @@
       does not look like a valid kernel version (e.g. 5.14.0-570.26.1.el9_6)
 
 - name: Install target kernel packages
-  become: true
-  ansible.builtin.dnf:
-    name:
+  vars:
+    _edpm_accel_drivers_package:
       - "kernel-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
       - "kernel-core-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
       - "kernel-modules-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
-    state: present
-  register: _edpm_accel_drivers_kernel_install
+    _edpm_accel_drivers_disable_gpg_check: false
+    _edpm_accel_drivers_allow_downgrade: true
+  ansible.builtin.include_tasks: install_from_rpm.yml
 
 - name: Set target kernel as default boot kernel
   become: true
@@ -37,6 +37,12 @@
 - name: Remove old kernel packages
   when: _edpm_accel_drivers_config.kernel_pin.remove_old | bool
   block:
+    - name: Reboot into target kernel before removing old packages
+      ansible.builtin.import_role:
+        name: edpm_reboot
+      vars:
+        edpm_reboot_strategy: force
+
     - name: Gather kernel package facts
       ansible.builtin.package_facts:
         manager: rpm
@@ -91,7 +97,7 @@
     src: /etc/dnf/dnf.conf
   register: _edpm_accel_drivers_dnf_conf
 
-- name: Build merged exclude list
+- name: Build merged exclude list  # noqa: jinja[invalid]
   ansible.builtin.set_fact:
     _edpm_accel_drivers_merged_excludes: >-
       {{ (_existing + ['kernel', 'kernel-core', 'kernel-modules']) | unique | sort | join(',') }}
