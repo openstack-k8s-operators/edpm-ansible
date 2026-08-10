@@ -1,0 +1,40 @@
+---
+- name: Prepare
+  hosts: all
+  roles:
+    - role: ../../../../molecule/common/test_deps
+    - role: env_data
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: rpm
+
+    - name: Determine kernel version
+      ansible.builtin.set_fact:
+        test_kernel_version: >-
+          {%- if 'kernel-core' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel-core'][0].version }}-{{ ansible_facts.packages['kernel-core'][0].release }}
+          {%- elif 'kernel' in ansible_facts.packages -%}
+            {{ ansible_facts.packages['kernel'][0].version }}-{{ ansible_facts.packages['kernel'][0].release }}
+          {%- else -%}
+            {{ ansible_kernel | regex_replace('\.(x86_64|aarch64)$', '') }}
+          {%- endif -%}
+
+    - name: Save kernel version to file for converge to read
+      ansible.builtin.copy:
+        content: "{{ test_kernel_version }}"
+        dest: /tmp/test-kernel-version
+        mode: '0644'
+
+    - name: Create fake vmlinuz for old kernel (to test cleanup)
+      become: true
+      ansible.builtin.file:
+        path: /boot/vmlinuz-4.18.0-old.el9.x86_64
+        state: touch
+        mode: '0644'
+
+    - name: Make sure grubby is installed
+      become: true
+      ansible.builtin.dnf:
+        name: grubby
+        state: present

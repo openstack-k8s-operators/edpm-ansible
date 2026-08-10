@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read kernel version saved by prepare
+      ansible.builtin.slurp:
+        src: /tmp/test-kernel-version
+      register: _verify_kernel_version_raw
+
+    - name: Set kernel version fact
+      ansible.builtin.set_fact:
+        test_kernel_version: "{{ (_verify_kernel_version_raw.content | b64decode).strip() }}"
+
+    - name: Read dnf.conf
+      ansible.builtin.slurp:
+        src: /etc/dnf/dnf.conf
+      register: _verify_dnf_conf
+
+    - name: Verify kernel exclude line is present in dnf.conf
+      ansible.builtin.assert:
+        that: "'exclude=kernel,kernel-core,kernel-modules' in (_verify_dnf_conf.content | b64decode)"
+        fail_msg: "dnf.conf does not contain kernel package exclude line"
+
+    - name: Verify grubby default kernel was set
+      become: true
+      ansible.builtin.command:
+        cmd: grubby --default-kernel
+      register: _verify_default_kernel
+      changed_when: false
+
+    - name: Verify default kernel contains target version
+      ansible.builtin.assert:
+        that: "test_kernel_version in _verify_default_kernel.stdout"
+        fail_msg: "Default kernel is '{{ _verify_default_kernel.stdout }}', expected {{ test_kernel_version }}"
+
+    - name: Find remaining boot files
+      ansible.builtin.find:
+        paths: /boot
+        patterns:
+          - 'vmlinuz-*'
+          - 'initramfs-*'
+          - 'System.map-*'
+          - 'config-*'
+          - 'symvers-*'
+        file_type: any
+      register: _verify_boot_files
+
+    - name: Verify only target kernel boot files remain
+      ansible.builtin.assert:
+        that: test_kernel_version in item.path
+        fail_msg: "Non-target boot file found: {{ item.path }}"
+      loop: "{{ _verify_boot_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"

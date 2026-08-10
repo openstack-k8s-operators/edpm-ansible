@@ -38,6 +38,10 @@ edpm_accel_drivers:
         url: ""
         ssl_no_verify: false
         disable_gpg_check: false
+  kernel_pin:
+    enabled: false
+    version: ""
+    remove_old: true
   features:
     nvidia_mig:
       manage: false
