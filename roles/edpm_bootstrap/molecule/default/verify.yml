@@ -15,3 +15,15 @@
         path: "{{ edpm_bootstrap_lvm_devices_file }}"
       register: lvm_devices_stat
       failed_when: not lvm_devices_stat.stat.exists
+
+    - name: Verify bootstrap packages are installed
+      ansible.builtin.command: "rpm -q {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
+      register: rpm_query_result
+      failed_when: rpm_query_result.rc != 0
+      changed_when: false
+
+    - name: Verify bootstrap packages pass rpm verification
+      ansible.builtin.command: "rpm -V {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
+      register: rpm_verify_result
+      failed_when: rpm_verify_result.rc != 0
+      changed_when: false
