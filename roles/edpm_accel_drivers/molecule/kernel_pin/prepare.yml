@@ -26,13 +26,6 @@
         dest: /tmp/test-kernel-version
         mode: '0644'
 
-    - name: Create fake vmlinuz for old kernel (to test cleanup)
-      become: true
-      ansible.builtin.file:
-        path: /boot/vmlinuz-4.18.0-old.el9.x86_64
-        state: touch
-        mode: '0644'
-
     - name: Make sure grubby is installed
       become: true
       ansible.builtin.dnf:

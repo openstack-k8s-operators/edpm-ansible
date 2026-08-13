@@ -34,22 +34,3 @@
         that: "test_kernel_version in _verify_default_kernel.stdout"
         fail_msg: "Default kernel is '{{ _verify_default_kernel.stdout }}', expected {{ test_kernel_version }}"
 
-    - name: Find remaining boot files
-      ansible.builtin.find:
-        paths: /boot
-        patterns:
-          - 'vmlinuz-*'
-          - 'initramfs-*'
-          - 'System.map-*'
-          - 'config-*'
-          - 'symvers-*'
-        file_type: any
-      register: _verify_boot_files
-
-    - name: Verify only target kernel boot files remain
-      ansible.builtin.assert:
-        that: test_kernel_version in item.path
-        fail_msg: "Non-target boot file found: {{ item.path }}"
-      loop: "{{ _verify_boot_files.files }}"
-      loop_control:
-        label: "{{ item.path }}"

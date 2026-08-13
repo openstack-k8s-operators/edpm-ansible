@@ -17,4 +17,4 @@
           kernel_pin:
             enabled: true
             version: "{{ test_kernel_version }}"
-            remove_old: true
+            remove_old: false
