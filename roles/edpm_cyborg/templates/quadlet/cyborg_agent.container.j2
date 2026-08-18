@@ -1,0 +1,48 @@
+# Quadlet container file for cyborg_agent
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set cyborg_agent_volumes = [
+  '/var/lib/kolla/config_files/cyborg_agent.json:/var/lib/kolla/config_files/config.json:ro',
+  edpm_cyborg_config_dest ~ ':/var/lib/kolla/config_files/src:ro',
+  '/etc/localtime:/etc/localtime:ro',
+  '/lib/modules:/lib/modules:ro',
+  '/dev:/dev',
+  '/sys:/sys',
+  '/var/lib/cyborg:/var/lib/cyborg:shared',
+  '/etc/nvme:/etc/nvme'
+] -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set cyborg_agent_volumes = cyborg_agent_volumes + [
+  edpm_cyborg_tls_ca_src_dir ~ '/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z'
+] -%}
+{%- endif %}
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=Cyborg Agent container (EDPM)
+
+[Container]
+ContainerName=cyborg_agent
+Image={{ edpm_cyborg_agent_image }}
+Network=host
+User=cyborg
+PodmanArgs=--privileged --pid=host
+LogDriver=journald
+Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{% for vol in cyborg_agent_volumes -%}
+Volume={{ vol }}
+{% endfor -%}
+{% for bind_mount in edpm_cyborg_extra_bind_mounts -%}
+Volume={{ bind_mount.src }}:{{ bind_mount.dest }}:{{ bind_mount.options | default('ro') }}
+{% endfor -%}
+Label=managed_by=edpm_ansible
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+TimeoutStopSec=84
+
+[Install]
+WantedBy=multi-user.target
