@@ -23,3 +23,15 @@
   changed_when: _trust_cmd.rc == 0
   failed_when: _trust_cmd.rc != 0
   listen: "update-ca-trust"
+
+# Reload, not restart, to avoid dropping the Ansible SSH connection.
+- name: Reload sshd to apply crypto-policy
+  become: true
+  ansible.builtin.systemd_service:
+    name: sshd
+    state: reloaded
+  listen: "reload sshd for crypto-policy"
+  when:
+    - ansible_facts.services is defined
+    - "'sshd.service' in ansible_facts.services"
+    - ansible_facts.services['sshd.service'].state == 'running'

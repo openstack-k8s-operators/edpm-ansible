@@ -95,6 +95,10 @@ edpm_bootstrap_fips_fms_status:
   - {exit_code: 1, state: 'inconsistent', message: 'FIPS setup is inconsistent'}
   - {exit_code: 2, state: 'disabled', message: 'FIPS is disabled'}
 
+# Enable sntrup761 post-quantum SSH key exchange via a crypto-policies
+# subpolicy. No-op on FIPS nodes.
+edpm_bootstrap_pq_crypto_policy: false
+
 # Full path name of LVM's default "devicesfile" (see /etc/lvm/lvm.conf)
 edpm_bootstrap_lvm_devices_file: /etc/lvm/devices/system.devices
 

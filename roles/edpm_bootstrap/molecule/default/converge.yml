@@ -21,3 +21,4 @@
         edpm_bootstrap_command: |
           touch /tmp/edpm_bootstrap_command
           ls -l /tmp
+        edpm_bootstrap_pq_crypto_policy: true
