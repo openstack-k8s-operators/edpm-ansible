@@ -113,6 +113,14 @@ argument_specs:
         description: |
           Path of the reboot_required folder used by `edpm_reboot` role
 
+      edpm_bootstrap_pq_crypto_policy:
+        type: bool
+        default: false
+        description: |
+          When true, enable the sntrup761 post-quantum SSH key exchange via a
+          crypto-policies subpolicy composed onto the current base policy.
+          Skipped on FIPS nodes.
+
       edpm_bootstrap_lvm_devices_file:
         type: path
         default: /etc/lvm/devices/system.devices

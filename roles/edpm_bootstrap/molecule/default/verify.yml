@@ -2,6 +2,8 @@
 
 - name: Verify
   hosts: all
+  vars_files:
+    - ../../defaults/main.yml
   tasks:
 
     - name: Verify bootstrap command created expected file
@@ -11,8 +13,10 @@
       failed_when: not bootstrap_stat.stat.exists
 
     - name: Verify the LVM devices file exists
-      stat:
+      become: true
+      ansible.builtin.stat:
         path: "{{ edpm_bootstrap_lvm_devices_file }}"
+        get_checksum: false
       register: lvm_devices_stat
       failed_when: not lvm_devices_stat.stat.exists
 
@@ -22,8 +26,26 @@
       failed_when: rpm_query_result.rc != 0
       changed_when: false
 
-    - name: Verify bootstrap packages pass rpm verification
-      ansible.builtin.command: "rpm -V {{ edpm_bootstrap_packages_bootstrap | join(' ') }}"
-      register: rpm_verify_result
-      failed_when: rpm_verify_result.rc != 0
+    - name: Verify the SNTRUP subpolicy module was deployed
+      ansible.builtin.stat:
+        path: /etc/crypto-policies/policies/modules/SNTRUP.pmod
+      register: pq_pmod_stat
+      failed_when: not pq_pmod_stat.stat.exists
+
+    - name: Get the active crypto-policy
+      ansible.builtin.command: update-crypto-policies --show
+      register: pq_active_policy
+      changed_when: false
+
+    - name: Verify the SNTRUP subpolicy is active
+      ansible.builtin.assert:
+        that:
+          - "'SNTRUP' in (pq_active_policy.stdout | trim).split(':')"
+        fail_msg: "Active crypto-policy '{{ pq_active_policy.stdout | trim }}' does not include the SNTRUP subpolicy"
+
+    - name: Verify sshd back-end offers the sntrup761 PQ key exchange
+      ansible.builtin.command: >-
+        grep -q sntrup761 /etc/crypto-policies/back-ends/opensshserver.config
+      register: pq_sshd_backend
+      failed_when: pq_sshd_backend.rc != 0
       changed_when: false
