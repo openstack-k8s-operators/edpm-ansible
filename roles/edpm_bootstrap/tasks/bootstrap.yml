@@ -129,5 +129,9 @@
   ansible.builtin.import_tasks: fips.yml
   when: edpm_bootstrap_fips_mode != 'check'
 
+- name: PQ crypto-policy tasks
+  ansible.builtin.import_tasks: pq_crypto_policy.yml
+  when: edpm_bootstrap_pq_crypto_policy | bool
+
 - name: LVM tasks
   ansible.builtin.import_tasks: lvm.yml
