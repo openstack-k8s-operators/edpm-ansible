@@ -21,7 +21,7 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    converge: ../kernel_pin/converge.yml
+    converge: converge.yml
     prepare: ../kernel_pin/prepare.yml
     verify: ../kernel_pin/verify.yml
 verifier:
