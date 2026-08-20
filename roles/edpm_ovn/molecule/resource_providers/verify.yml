@@ -27,15 +27,22 @@
           - "'br-storage::' in cms_options_output.stdout"            # Empty config
         fail_msg: "resource_provider_bandwidths configuration not found or format incorrect"
 
+    - name: Gather node fqdn for auto-generated hypervisor assertion
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "machine"
+
     # Test hypervisor configurations with custom and auto-generated mappings
     - name: Verify resource_provider_hypervisors includes custom and auto-generated providers
       ansible.builtin.assert:
         that:
           - "'resource_provider_hypervisors=' in cms_options_output.stdout"
-          - "'br-ex:custom-compute-01' in cms_options_output.stdout"         # Custom hypervisor name
-          - "'rp_tunnelled:tunnel-host' in cms_options_output.stdout"        # Custom hypervisor name
-          - "'br-ext:edpm-0.localdomain' in cms_options_output.stdout"       # Auto-generated FQDN
-          - "'br-storage:edpm-0.localdomain' in cms_options_output.stdout"   # Auto-generated FQDN
+          - "'br-ex:custom-compute-01' in cms_options_output.stdout"
+          - "'rp_tunnelled:tunnel-host' in cms_options_output.stdout"
+          - "('br-ext:' ~ ansible_facts.fqdn) in cms_options_output.stdout"
+          - "('br-storage:' ~ ansible_facts.fqdn) in cms_options_output.stdout"
         fail_msg: "resource_provider_hypervisors configuration not found or incorrect - should include custom and auto-generated hypervisor mappings"
 
     # Test inventory defaults configuration
