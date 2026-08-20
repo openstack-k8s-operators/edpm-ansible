@@ -102,3 +102,60 @@
     remote_src: true
   notify:
     - Restart swift
+
+- name: Discover swift ring files
+  become: true
+  ansible.builtin.find:
+    paths: "{{ edpm_swift_config_dest }}"
+    patterns: "*.ring.gz"
+    file_type: file
+  register: _edpm_swift_rings
+  changed_when: false
+
+- name: Build swift ring volume mounts
+  ansible.builtin.set_fact:
+    edpm_swift_ring_volumes: "{{
+      _edpm_swift_rings.files
+      | map(attribute='path')
+      | map('regex_replace', '^.*/([^/]+)$', '\\g<0>:/etc/swift/\\1:ro')
+      | list
+    }}"
+
+- name: Discover swift service config files
+  become: true
+  ansible.builtin.find:
+    paths: "{{ edpm_swift_config_dest }}"
+    patterns: "*.conf"
+    file_type: file
+  register: _edpm_swift_confs
+  changed_when: false
+
+- name: Build swift service config volume mounts
+  vars:
+    _conf_specs:
+      - fact: edpm_swift_account_conf_volumes
+        match: account-server
+        dest_dir: /etc/swift/account-server.conf.d
+      - fact: edpm_swift_container_conf_volumes
+        match: container-server
+        dest_dir: /etc/swift/container-server.conf.d
+      - fact: edpm_swift_object_expirer_conf_volumes
+        match: object-expirer
+        dest_dir: /etc/swift/object-expirer.conf.d
+      - fact: edpm_swift_object_conf_volumes
+        match: object-server
+        dest_dir: /etc/swift/object-server.conf.d
+    _matched: "{{
+      _edpm_swift_confs.files
+      | map(attribute='path')
+      | select('search', item.match ~ '[^/]*\\.conf$')
+      | list
+    }}"
+  ansible.builtin.set_fact:
+    "{{ item.fact }}": "{{
+      _matched
+      | zip(_matched | map('basename') | map('regex_replace', '^(.*)$', item.dest_dir ~ '/\\1:ro'))
+      | map('join', ':')
+      | list
+    }}"
+  loop: "{{ _conf_specs }}"
