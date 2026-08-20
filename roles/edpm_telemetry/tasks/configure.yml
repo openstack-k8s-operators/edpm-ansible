@@ -75,10 +75,14 @@
   when: custom_ceilometer_conf.stat.exists
 
 - name: Copy generated ceilometer configs
+  become: true
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode | default('0640') }}"
+    owner: ceilometer
+    group: ceilometer
+    setype: container_file_t
     remote_src: "{{ telemetry_test | default('false') }}"
   loop: "{{ configs }}"
 
