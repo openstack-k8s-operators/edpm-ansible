@@ -35,16 +35,20 @@
         - {"name": "nova_compute", "src": "/opt/vendor_integration_2",
             "dest": "/opt/vendor_integration_2", "options": "shared"}
 
-    - name: ensure nova config mounts are present for both nova_compute and nova_nvme_cleaner containers
+    - name: ensure nova config mounts are present
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_mounts.yaml"
       loop:
         - name: "nova_compute"
-          src: "{{ edpm_nova_config_dest }}"
-          dest: "/var/lib/kolla/config_files/src"
+          src: "{{ edpm_nova_config_dest }}/nova-blank.conf"
+          dest: "/etc/nova/nova.conf"
           options: "ro"
-        - name: "nova_nvme_cleaner"
-          src: "{{ edpm_nova_config_dest }}"
-          dest: "/var/lib/kolla/config_files/src/nova_shared"
+        - name: "nova_compute"
+          src: "{{ edpm_nova_config_dest }}/run-on-host"
+          dest: "/usr/sbin/iscsiadm"
+          options: "ro"
+        - name: "nova_compute"
+          src: "/var/lib/openstack/config/ceph"
+          dest: "/etc/ceph"
           options: "ro"
 
     - name: ensure nvme cleaner container has /dev mounted
@@ -84,6 +88,8 @@
           - "'--security-opt label=disable' in init_content"
           - "'Network=none' in init_content"
           - "'nova_statedir_ownership.py' in init_content"
+          - "'chown -R nova:nova /var/lib/openstack/config/ceph' in init_content"
+          - "'Volume=/var/lib/openstack/config/ceph:/var/lib/openstack/config/ceph' in init_content"
           - "'config_hash=' in init_content"
           - "init_content | regex_search('config_hash=(?!$)') is not none"
         fail_msg: "nova_compute_init Quadlet missing expected directives"
@@ -106,14 +112,19 @@
           - "'Network=host' in compute_content"
           - "'User=nova' in compute_content"
           - "'PodmanArgs=--privileged --pid=host --log-driver=journald' in compute_content"
-          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in compute_content"
+          - "'Exec=/usr/bin/nova-compute' in compute_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in compute_content"
+          - "'/var/lib/kolla' not in compute_content"
           - "'After=edpm_nova_compute_init.service' in compute_content"
           - "'Requires=edpm_nova_compute_init.service' in compute_content"
           - "'Restart=always' in compute_content"
           - "'WantedBy=multi-user.target' in compute_content"
           - "'Label=managed_by=edpm_ansible' in compute_content"
-          - "'Volume=/var/lib/kolla/config_files/nova_compute.json:/var/lib/kolla/config_files/config.json:ro' in compute_content"
-          - "'Volume={{ edpm_nova_config_dest }}:/var/lib/kolla/config_files/src:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}/nova-blank.conf:/etc/nova/nova.conf:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}/run-on-host:/usr/sbin/iscsiadm:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}/01-nova.conf:/etc/nova/nova.conf.d/01-nova.conf:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}/02-nova-host-specific.conf:/etc/nova/nova.conf.d/02-nova-host-specific.conf:ro' in compute_content"
+          - "'Volume={{ edpm_nova_config_dest }}/provider1.yaml:/etc/nova/provider_config/provider1.yaml:ro' in compute_content"
           - "'Volume=/etc/localtime:/etc/localtime:ro' in compute_content"
           - "'Volume=/lib/modules:/lib/modules:ro' in compute_content"
           - "'Volume=/dev:/dev' in compute_content"
@@ -125,7 +136,7 @@
           - "'Volume=/etc/multipath.conf:/etc/multipath.conf:ro,Z' in compute_content"
           - "'Volume=/etc/iscsi:/etc/iscsi:ro' in compute_content"
           - "'Volume=/etc/nvme:/etc/nvme' in compute_content"
-          - "'Volume=/var/lib/openstack/config/ceph:/var/lib/kolla/config_files/src/ceph:ro' in compute_content"
+          - "'Volume=/var/lib/openstack/config/ceph:/etc/ceph:ro' in compute_content"
           - "'Volume=/etc/ssh/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro' in compute_content"
           - "'Volume={{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in compute_content"
           - "'Volume=/var/lib/vendor_integration:/var/lib/vendor_integration:ro' in compute_content"
@@ -150,34 +161,18 @@
           - "'Network=host' in cleaner_content"
           - "'User=root' in cleaner_content"
           - "'PodmanArgs=--privileged --log-driver=journald' in cleaner_content"
-          - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in cleaner_content"
+          - "'Exec=/usr/bin/sleep infinity' in cleaner_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in cleaner_content"
+          - "'/var/lib/kolla' not in cleaner_content"
           - "'Restart=always' in cleaner_content"
           - "'WantedBy=multi-user.target' in cleaner_content"
           - "'Label=managed_by=edpm_ansible' in cleaner_content"
-          - "'Volume=/var/lib/kolla/config_files/nova_nvme_cleaner.json:/var/lib/kolla/config_files/config.json:ro' in cleaner_content"
-          - "'Volume={{ edpm_nova_config_dest }}:/var/lib/kolla/config_files/src/nova_shared:ro' in cleaner_content"
+          - "'Volume={{ edpm_nova_config_dest }}/nova-blank.conf:/etc/nova/nova.conf:ro' in cleaner_content"
+          - "'Volume={{ edpm_nova_config_dest }}/01-nova.conf:/etc/nova/nova.conf.d/01-nova.conf:ro' in cleaner_content"
           - "'Volume=/dev:/dev' in cleaner_content"
           - "'Volume=/etc/nvme:/etc/nvme' in cleaner_content"
           - "'Volume={{ edpm_nova_tls_ca_src_dir }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in cleaner_content"
         fail_msg: "nova_nvme_cleaner Quadlet missing expected content"
-
-    - name: read nvme cleaner kolla config
-      become: true
-      ansible.builtin.slurp:
-        src: /var/lib/kolla/config_files/nova_nvme_cleaner.json
-      register: cleaner_kolla_cfg
-
-    - name: parse nvme cleaner kolla config
-      ansible.builtin.set_fact:
-        cleaner_cfg_json: "{{ cleaner_kolla_cfg.content | b64decode | from_json }}"
-
-    - name: Assert nvme cleaner kolla command content
-      vars:
-        cleaner_cmd: "{{ cleaner_cfg_json.command }}"
-      ansible.builtin.assert:
-        that:
-          - "'/usr/bin/sleep infinity' in cleaner_cmd"
-        fail_msg: "Cleaner kolla config missing expected command (/usr/bin/sleep infinity)"
 
     - name: Check nvme cleaner service active state
       become: true
@@ -190,18 +185,35 @@
           - "cleaner_unit_state.stdout == 'active'"
         fail_msg: "Cleaner service not active: {{ cleaner_unit_state.stdout }}"
 
-    - name: ensure kolla_set_configs copied the expected files
+    - name: Stat nova container ssh directory
       become: true
-      ansible.builtin.shell: |
-        podman logs nova_compute 2>&1 | grep "{{item}}" > /dev/null
+      ansible.builtin.stat:
+        path: /var/lib/nova/.ssh
+      register: nova_ssh_dir
+
+    - name: Assert nova container ssh directory exists
+      ansible.builtin.assert:
+        that:
+          - nova_ssh_dir.stat.exists
+          - nova_ssh_dir.stat.mode == '0700'
+          - nova_ssh_dir.stat.uid == 42436
+
+    - name: Stat nova container ssh files
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: nova_ssh_files
       loop:
-        - "Copying /var/lib/kolla/config_files/src/nova-blank.conf to /etc/nova/nova.conf"
-        - "Copying /var/lib/kolla/config_files/src/01-nova.conf to /etc/nova/nova.conf.d/01-nova.conf"
-        - "Copying /var/lib/kolla/config_files/src/ssh-config to /var/lib/nova/.ssh/config"
-        - "Copying /var/lib/kolla/config_files/src/ssh-privatekey to /var/lib/nova/.ssh/ssh-privatekey"
-        - "Copying /var/lib/kolla/config_files/src/02-nova-host-specific.conf to /etc/nova/nova.conf.d/02-nova-host-specific.conf"
-        - "Copying /var/lib/kolla/config_files/src/provider1.yaml to /etc/nova/provider_config/provider1.yaml"
-        - "Copying /var/lib/kolla/config_files/src/run-on-host to /usr/sbin/iscsiadm"
+        - /var/lib/nova/.ssh/config
+        - /var/lib/nova/.ssh/ssh-privatekey
+
+    - name: Assert nova container ssh files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == '0600'
+          - item.stat.uid == 42436
+      loop: "{{ nova_ssh_files.results }}"
 
     - name: slurp host specific config
       ansible.builtin.slurp:
@@ -316,6 +328,12 @@
         path: /var/lib/openstack/nova_nvme_cleaner
         state: absent
 
+    - name: Remove nova ssh directory to simulate pre-kolla-removal node
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/nova/.ssh
+        state: absent
+
     - name: Run updates to simulate minor update
       ansible.builtin.include_role:
         name: osp.edpm.edpm_nova
@@ -338,3 +356,34 @@
           - nvme_cleaner_dir_after_update.stat.exists
           - nvme_cleaner_dir_after_update.stat.isdir
         fail_msg: "nvme_cleaner config directory does not exist after update"
+
+    - name: Stat nova ssh directory after update
+      become: true
+      ansible.builtin.stat:
+        path: /var/lib/nova/.ssh
+      register: nova_ssh_dir_after_update
+
+    - name: Assert nova ssh directory recreated by update
+      ansible.builtin.assert:
+        that:
+          - nova_ssh_dir_after_update.stat.exists
+          - nova_ssh_dir_after_update.stat.mode == '0700'
+          - nova_ssh_dir_after_update.stat.uid == 42436
+        fail_msg: "Update path did not recreate /var/lib/nova/.ssh"
+
+    - name: Stat nova ssh files after update
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: nova_ssh_files_after_update
+      loop:
+        - /var/lib/nova/.ssh/config
+        - /var/lib/nova/.ssh/ssh-privatekey
+
+    - name: Assert nova ssh files recreated by update
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.mode == '0600'
+          - item.stat.uid == 42436
+      loop: "{{ nova_ssh_files_after_update.results }}"
