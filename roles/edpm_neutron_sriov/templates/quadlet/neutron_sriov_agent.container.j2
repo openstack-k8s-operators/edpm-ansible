@@ -11,6 +11,8 @@
 
 [Unit]
 Description=Neutron SR-IOV Agent container (EDPM)
+After=edpm_neutron_sriov_agent_init.service
+Requires=edpm_neutron_sriov_agent_init.service
 
 [Container]
 ContainerName=neutron_sriov_agent
@@ -18,7 +20,7 @@ Image={{ edpm_neutron_sriov_image }}
 Network=host
 User=neutron
 PodmanArgs=--privileged --log-driver=journald
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/neutron-sriov-nic-agent
 {% for vol in _sriov_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
