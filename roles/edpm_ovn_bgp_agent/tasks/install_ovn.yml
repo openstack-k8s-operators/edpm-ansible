@@ -43,6 +43,14 @@
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
 
+- name: Ensure /var/local/libexec directory exists
+  become: true
+  ansible.builtin.file:
+    path: /var/local/libexec
+    state: directory
+    mode: '0755'
+    setype: container_file_t
+
 - name: Copy in cleanup script
   become: true
   ansible.builtin.copy:
@@ -50,6 +58,7 @@
     dest: '/var/local/libexec/ovn-bgp-agent-cleanup'
     force: true
     mode: '0755'
+    setype: container_file_t
 
 - name: Copy in cleanup service
   become: true
