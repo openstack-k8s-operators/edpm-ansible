@@ -1,0 +1,26 @@
+# Quadlet container file for frr_init
+# Managed by edpm_container_standalone - do not edit manually
+# Podman 4.4+ keys only (RHEL 9.2 compat)
+
+# DO NOT REMOVE - used by container_config_hash module
+# config_hash=
+
+[Unit]
+Description=FRR init container (EDPM)
+
+[Container]
+ContainerName=frr_init
+Image={{ edpm_frr_image }}
+Network=none
+User=root
+PodmanArgs=--security-opt label=disable --log-driver=journald
+Exec=/usr/bin/chown -R frr:frrvty /run/frr
+Volume=/run/frr:/run/frr:shared,z
+Label=managed_by=edpm_ansible
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+TimeoutStartSec=900
+TimeoutStopSec=84

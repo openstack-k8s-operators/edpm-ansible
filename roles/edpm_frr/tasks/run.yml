@@ -19,13 +19,24 @@
     _edpm_frr_role_path: "{{ role_path }}"
 
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
+- name: Run frr init container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_use_quadlet: true
+    edpm_container_standalone_service: frr_init
+    edpm_service_name: frr
+    edpm_container_state_append: false
+    edpm_container_standalone_quadlet_defs:
+      frr_init: "{{ _edpm_frr_role_path }}/templates/quadlet/frr_init.container.j2"
+
 - name: Run frr container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: frr
+    edpm_service_name: frr
+    edpm_container_state_append: true
     edpm_container_standalone_quadlet_defs:
       frr: "{{ _edpm_frr_role_path }}/templates/quadlet/frr.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      frr: "{{ lookup('file', 'kolla_config/frr.yaml') | from_yaml }}"
