@@ -36,13 +36,24 @@
     _edpm_neutron_dhcp_role_path: "{{ role_path }}"
 
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
+- name: Run neutron-dhcp-agent init container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_use_quadlet: true
+    edpm_container_standalone_service: neutron_dhcp_init
+    edpm_service_name: neutron_dhcp
+    edpm_container_state_append: false
+    edpm_container_standalone_quadlet_defs:
+      neutron_dhcp_init: "{{ _edpm_neutron_dhcp_role_path }}/templates/quadlet/neutron_dhcp_init.container.j2"
+
 - name: Run neutron-dhcp-agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: neutron_dhcp
+    edpm_service_name: neutron_dhcp
+    edpm_container_state_append: true
     edpm_container_standalone_quadlet_defs:
       neutron_dhcp_agent: "{{ _edpm_neutron_dhcp_role_path }}/templates/quadlet/neutron_dhcp_agent.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      neutron_dhcp_agent: "{{ lookup('file', 'kolla_config/neutron_dhcp_agent.yaml') | from_yaml }}"

@@ -108,9 +108,24 @@ class TestNeutronDHCP(unittest.TestCase):
                 "/var/lib/openstack/neutron-dhcp-agent"]:
             assert self.host.file(directory).is_directory
 
-    def test_kolla_config_file_was_created(self):
-        assert self.host.file(
-            "/var/lib/kolla/config_files/neutron_dhcp_agent.json").exists
+    def test_quadlet_file(self):
+        content = self.host.file(
+            "/etc/containers/systemd/edpm_neutron_dhcp_agent.container").content_string
+        assert "Exec=/usr/bin/neutron-dhcp-agent" in content
+        assert "After=edpm_neutron_dhcp_init.service" in content
+        assert "Requires=edpm_neutron_dhcp_init.service" in content
+        assert "KOLLA_CONFIG_STRATEGY" not in content
+        assert "/var/lib/kolla/config_files" not in content
+        assert ("Volume=/var/lib/openstack/neutron-dhcp-agent/"
+                "01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro") in content
+
+    def test_dhcp_agent_init_container_file(self):
+        file = self.host.file(
+            "/etc/containers/systemd/edpm_neutron_dhcp_init.container")
+        assert file.exists
+        content = file.content_string
+        assert "User=root" in content
+        assert "Exec=/usr/bin/chown -R neutron:neutron /var/lib/neutron" in content
 
     def test_neutron_dhcp_agent_conf_was_copied_into_container(self):
         assert self.host.file(
