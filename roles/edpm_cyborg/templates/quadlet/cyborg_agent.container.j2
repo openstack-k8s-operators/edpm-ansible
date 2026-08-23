@@ -2,15 +2,13 @@
 # Managed by edpm_container_standalone - do not edit manually
 # Podman 4.4+ keys only (RHEL 9.2 compat)
 {%- set cyborg_agent_volumes = [
-  '/var/lib/kolla/config_files/cyborg_agent.json:/var/lib/kolla/config_files/config.json:ro',
-  edpm_cyborg_config_dest ~ ':/var/lib/kolla/config_files/src:ro',
   '/etc/localtime:/etc/localtime:ro',
   '/lib/modules:/lib/modules:ro',
   '/dev:/dev',
   '/sys:/sys',
   '/var/lib/cyborg:/var/lib/cyborg:shared',
   '/etc/nvme:/etc/nvme'
-] -%}
+] + edpm_cyborg_conf_d_volumes -%}
 {%- if ca_bundle_exists | bool -%}
 {%- set cyborg_agent_volumes = cyborg_agent_volumes + [
   edpm_cyborg_tls_ca_src_dir ~ '/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z'
@@ -22,6 +20,8 @@
 
 [Unit]
 Description=Cyborg Agent container (EDPM)
+After=edpm_cyborg_agent_init.service
+Requires=edpm_cyborg_agent_init.service
 
 [Container]
 ContainerName=cyborg_agent
@@ -30,7 +30,7 @@ Network=host
 User=cyborg
 PodmanArgs=--privileged --pid=host
 LogDriver=journald
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/cyborg-agent
 {% for vol in cyborg_agent_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
