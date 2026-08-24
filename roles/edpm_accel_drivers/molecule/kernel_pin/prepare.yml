@@ -9,9 +9,9 @@
       ansible.builtin.package_facts:
         manager: rpm
 
-    - name: Determine kernel version
+    - name: Determine current kernel version
       ansible.builtin.set_fact:
-        test_kernel_version: >-
+        current_kernel_version: >-
           {%- if 'kernel-core' in ansible_facts.packages -%}
             {{ ansible_facts.packages['kernel-core'][0].version }}-{{ ansible_facts.packages['kernel-core'][0].release }}
           {%- elif 'kernel' in ansible_facts.packages -%}
@@ -20,11 +20,33 @@
             {{ ansible_kernel | regex_replace('\.(x86_64|aarch64)$', '') }}
           {%- endif -%}
 
+    - name: List all available kernel versions
+      ansible.builtin.set_fact:
+        available_kernel_versions: >-
+          {% set versions = [] -%}
+          {%- for pkg_name in ['kernel', 'kernel-core'] -%}
+            {%- for pkg in ansible_facts.packages.get(pkg_name, []) -%}
+              {%- set ver = pkg.version ~ '-' ~ pkg.release -%}
+              {%- if ver not in versions -%}
+                {%- set _ = versions.append(ver) -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ versions | sort | reverse }}
+
+    - name: Select a random target kernel version
+      ansible.builtin.set_fact:
+        test_kernel_version: "{{ (available_kernel_versions | reject('equalto', current_kernel_version) | list | default([current_kernel_version]) | random) }}"
+
     - name: Save kernel version to file for converge to read
       ansible.builtin.copy:
         content: "{{ test_kernel_version }}"
         dest: /tmp/test-kernel-version
         mode: '0644'
+
+    - name: Report selected kernel for testing
+      ansible.builtin.debug:
+        msg: "Current kernel: {{ current_kernel_version }}, Target kernel: {{ test_kernel_version }}"
 
     - name: Make sure grubby is installed
       become: true
