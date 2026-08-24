@@ -33,4 +33,3 @@
       ansible.builtin.assert:
         that: "test_kernel_version in _verify_default_kernel.stdout"
         fail_msg: "Default kernel is '{{ _verify_default_kernel.stdout }}', expected {{ test_kernel_version }}"
-
