@@ -17,10 +17,18 @@
         src: /etc/dnf/dnf.conf
       register: _verify_dnf_conf
 
-    - name: Verify kernel exclude line is present in dnf.conf
+    - name: Parse exclude line from dnf.conf
+      ansible.builtin.set_fact:
+        _verify_dnf_excludes: >-
+          {{ ((_verify_dnf_conf.content | b64decode) | regex_search('^exclude=(.*)$', '\\1', multiline=True))[0].split(',') | map('trim') | list }}
+
+    - name: Verify kernel packages are excluded in dnf.conf
       ansible.builtin.assert:
-        that: "'exclude=kernel,kernel-core,kernel-modules' in (_verify_dnf_conf.content | b64decode)"
-        fail_msg: "dnf.conf does not contain kernel package exclude line"
+        that:
+          - "'kernel' in _verify_dnf_excludes"
+          - "'kernel-core' in _verify_dnf_excludes"
+          - "'kernel-modules' in _verify_dnf_excludes"
+        fail_msg: "dnf.conf exclude line does not contain all required kernel packages: {{ _verify_dnf_excludes }}"
 
     - name: Verify grubby default kernel was set
       become: true
