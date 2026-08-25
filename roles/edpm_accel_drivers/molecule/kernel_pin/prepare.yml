@@ -36,7 +36,13 @@
 
     - name: Select a random target kernel version
       ansible.builtin.set_fact:
-        test_kernel_version: "{{ (available_kernel_versions | reject('equalto', current_kernel_version) | list | default([current_kernel_version]) | random) }}"
+        test_kernel_version: >-
+          {%- set other_kernels = available_kernel_versions | reject('equalto', current_kernel_version) | list -%}
+          {%- if other_kernels | length > 0 -%}
+            {{ other_kernels | random }}
+          {%- else -%}
+            {{ current_kernel_version }}
+          {%- endif -%}
 
     - name: Save kernel version to file for converge to read
       ansible.builtin.copy:
