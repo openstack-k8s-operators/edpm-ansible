@@ -17,14 +17,6 @@
 # Network configuration using nmstate as the primary tool (via linux-system-roles)
 # This is for edpm_network_config_tool: 'nmstate' (not os-net-config with nmstate provider)
 
-- name: Fail when edpm_network_config_tool=nmstate unless override is set
-  ansible.builtin.fail:
-    msg: |
-      edpm_network_config_tool=nmstate is experimental and not supported.
-      Set edpm_network_config_tool_nmstate_override=true to continue anyway.
-  when:
-    - not edpm_network_config_tool_nmstate_override|bool
-
 - name: Configure NetworkManager for nmstate
   ansible.builtin.include_tasks: nm_config.yml
   vars:
