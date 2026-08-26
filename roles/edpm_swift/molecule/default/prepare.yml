@@ -54,7 +54,7 @@
 
     - name: Create dummy account-server.conf
       ansible.builtin.copy:
-        dest: "{{ edpm_swift_molecule_config_src }}/account-server.conf"
+        dest: "{{ edpm_swift_molecule_config_src }}/00-account-server.conf"
         mode: "0644"
         content: |
           [DEFAULT]
@@ -70,7 +70,7 @@
 
     - name: Create dummy container-server.conf
       ansible.builtin.copy:
-        dest: "{{ edpm_swift_molecule_config_src }}/container-server.conf"
+        dest: "{{ edpm_swift_molecule_config_src }}/00-container-server.conf"
         mode: "0644"
         content: |
           [DEFAULT]
@@ -86,7 +86,7 @@
 
     - name: Create dummy object-server.conf
       ansible.builtin.copy:
-        dest: "{{ edpm_swift_molecule_config_src }}/object-server.conf"
+        dest: "{{ edpm_swift_molecule_config_src }}/00-object-server.conf"
         mode: "0644"
         content: |
           [DEFAULT]
@@ -102,7 +102,7 @@
 
     - name: Create dummy object-expirer.conf
       ansible.builtin.copy:
-        dest: "{{ edpm_swift_molecule_config_src }}/object-expirer.conf"
+        dest: "{{ edpm_swift_molecule_config_src }}/00-object-expirer.conf"
         mode: "0644"
         content: |
           [DEFAULT]
