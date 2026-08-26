@@ -184,10 +184,6 @@ argument_specs:
                 description: >-
                   Target kernel version to install and pin (e.g. 5.14.0-570.26.1.el9_6).
                   Required when enabled is true.
-              remove_old:
-                type: bool
-                default: true
-                description: Whether to remove non-target kernel packages and orphaned boot files
           features:
             type: dict
             description: GPU-specific feature configurations

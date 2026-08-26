@@ -41,7 +41,6 @@ edpm_accel_drivers:
   kernel_pin:
     enabled: false
     version: ""
-    remove_old: true
   features:
     nvidia_mig:
       manage: false

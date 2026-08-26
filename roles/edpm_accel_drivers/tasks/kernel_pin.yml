@@ -34,63 +34,12 @@
   changed_when: false
   failed_when: _edpm_accel_drivers_config.kernel_pin.version not in _edpm_accel_drivers_default_kernel.stdout
 
-- name: Remove old kernel packages
-  when: _edpm_accel_drivers_config.kernel_pin.remove_old | bool
-  block:
-    - name: Reboot into target kernel before removing old packages
-      ansible.builtin.import_role:
-        name: edpm_reboot
-      vars:
-        edpm_reboot_strategy: force
-
-    - name: Gather kernel package facts
-      ansible.builtin.package_facts:
-        manager: rpm
-
-    - name: Build list of non-target kernel packages
-      ansible.builtin.set_fact:
-        _edpm_accel_drivers_old_kernels_list: "{{ _old_pkgs }}"
-      vars:
-        _old_pkgs: >-
-          {% set result = [] -%}
-          {% for pkg_name in ['kernel', 'kernel-core', 'kernel-modules'] -%}
-            {% for pkg in ansible_facts.packages.get(pkg_name, []) -%}
-              {% if (pkg.version ~ '-' ~ pkg.release) != _edpm_accel_drivers_config.kernel_pin.version -%}
-                {% set _ = result.append(pkg.name ~ '-' ~ pkg.version ~ '-' ~ pkg.release) -%}
-              {% endif -%}
-            {% endfor -%}
-          {% endfor -%}
-          {{ result }}
-
-    - name: Remove old kernel packages
-      become: true
-      ansible.builtin.dnf:
-        name: "{{ _edpm_accel_drivers_old_kernels_list }}"
-        state: absent
-      when: _edpm_accel_drivers_old_kernels_list | length > 0
-
-    - name: Find orphaned boot files for non-target kernels
-      ansible.builtin.find:
-        paths: /boot
-        patterns:
-          - 'vmlinuz-*'
-          - 'initramfs-*'
-          - 'System.map-*'
-          - 'config-*'
-          - 'symvers-*'
-        excludes:
-          - '*{{ _edpm_accel_drivers_config.kernel_pin.version }}*'
-        file_type: any
-      register: _edpm_accel_drivers_orphaned_boot_files
-
-    - name: Remove orphaned boot files for non-target kernels
-      become: true
-      ansible.builtin.file:
-        path: "{{ item.path }}"
-        state: absent
-      loop: "{{ _edpm_accel_drivers_orphaned_boot_files.files }}"
-      loop_control:
-        label: "{{ item.path }}"
+- name: Notify that target kernel will be active on next reboot
+  ansible.builtin.debug:
+    msg: >-
+      Kernel {{ _edpm_accel_drivers_config.kernel_pin.version }} is set as default.
+      It will be active after the next reboot orchestrated by the reboot-os service.
+      Old kernel packages will remain installed and can be manually removed if needed.
 
 - name: Read current dnf.conf for existing excludes
   ansible.builtin.slurp:
