@@ -53,7 +53,7 @@
   vars:
     _content: "{{ _edpm_accel_drivers_dnf_conf.content | b64decode }}"
     _match: "{{ _content | regex_search('^exclude=(.*)$', '\\1', multiline=True) }}"
-    _existing: "{{ (_match[0] | default('')).split(',') | select | list }}"
+    _existing: "{{ (_match[0] if _match else '').split(',') | select | list }}"
 
 - name: Exclude kernel packages from future updates
   become: true
