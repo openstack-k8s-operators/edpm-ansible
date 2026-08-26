@@ -15,12 +15,6 @@
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
-- name: Build kolla config dict for exporters that need them
-  ansible.builtin.set_fact:
-    _exporter_kolla_config_dict:
-      ceilometer_agent_compute: "{{ lookup('file', 'files/kolla_config/ceilometer_agent_compute.yaml') | from_yaml }}"
-  when: exporter == 'ceilometer_agent_compute'
-
 - name: Build quadlet defs dict for exporter
   ansible.builtin.set_fact:
     _exporter_quadlet_defs: "{{ {exporter: _edpm_telemetry_role_path ~ '/templates/quadlet/' ~ exporter ~ '.container.j2'} }}"
@@ -35,4 +29,3 @@
     edpm_service_name: "{{ edpm_telemetry_service_name }}"
     edpm_container_state_append: "{{ exporter != edpm_telemetry_enabled_exporters[0] }}"
     edpm_container_standalone_quadlet_defs: "{{ _exporter_quadlet_defs }}"
-    edpm_container_standalone_kolla_config_files: "{{ _exporter_kolla_config_dict | default({}) }}"
