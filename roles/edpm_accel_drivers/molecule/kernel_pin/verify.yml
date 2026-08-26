@@ -20,7 +20,12 @@
     - name: Parse exclude line from dnf.conf
       ansible.builtin.set_fact:
         _verify_dnf_excludes: >-
-          {{ ((_verify_dnf_conf.content | b64decode) | regex_search('^exclude=(.*)$', '\\1', multiline=True))[0].split(',') | map('trim') | list }}
+          {%- set match = ((_verify_dnf_conf.content | b64decode) | regex_search('^exclude=(.*)$', '\\1', multiline=True)) -%}
+          {%- if match -%}
+            {{ match[0].split(',') | map('trim') | list }}
+          {%- else -%}
+            []
+          {%- endif -%}
 
     - name: Verify kernel packages are excluded in dnf.conf
       ansible.builtin.assert:
