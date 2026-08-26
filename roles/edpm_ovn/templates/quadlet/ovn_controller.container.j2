@@ -29,7 +29,7 @@ PodmanArgs=--privileged --log-driver=journald
 {% if edpm_ovn_cpu_set | default(false) -%}
 PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
 {% endif -%}
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/ovn-controller --pidfile unix:/run/openvswitch/db.sock{{ ' -p /etc/pki/tls/private/ovndb.key -c /etc/pki/tls/certs/ovndb.crt -C /etc/pki/tls/certs/ovndbca.crt' if edpm_ovn_tls_enabled | bool else '' }}
 {% for vol in edpm_ovn_controller_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

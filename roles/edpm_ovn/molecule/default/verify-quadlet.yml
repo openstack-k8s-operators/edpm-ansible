@@ -44,7 +44,9 @@
       - "'ContainerName=ovn_controller' in _quadlet_text"
       - "'Network=host' in _quadlet_text"
       - "'PodmanArgs=--privileged' in _quadlet_text"
-      - "'Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS' in _quadlet_text"
+      - "'Exec=/usr/bin/ovn-controller' in _quadlet_text"
+      - "_quadlet_text is not regex('Exec=.*Volume=')"
+      - "'KOLLA_CONFIG_STRATEGY' not in _quadlet_text"
       - "'[Service]' in _quadlet_text"
       - "'Restart=always' in _quadlet_text"
       - "'[Install]' in _quadlet_text"
@@ -70,17 +72,17 @@
       - _staged_file.stat.exists
     fail_msg: "Staged .container file was not created in rendering directory"
 
-- name: Verify kolla config file deployed
+- name: Verify kolla config file is NOT deployed
   become: true
   ansible.builtin.stat:
     path: /var/lib/kolla/config_files/ovn_controller.json
   register: _kolla_config
 
-- name: Assert kolla config exists
+- name: Assert kolla config does not exist (kolla dependency removed)
   ansible.builtin.assert:
     that:
-      - _kolla_config.stat.exists
-    fail_msg: "Kolla config JSON was not deployed"
+      - not _kolla_config.stat.exists
+    fail_msg: "Kolla config JSON should not be generated after kolla removal"
 
 - name: Verify healthcheck script deployed
   become: true
