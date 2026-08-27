@@ -52,13 +52,13 @@
       {{ (_existing + ['kernel', 'kernel-core', 'kernel-modules']) | unique | sort | join(',') }}
   vars:
     _content: "{{ _edpm_accel_drivers_dnf_conf.content | b64decode }}"
-    _match: "{{ _content | regex_search('^exclude=(.*)$', '\\1', multiline=True) }}"
-    _existing: "{{ (_match[0] if _match else '').split(',') | select | list }}"
+    _match: "{{ _content | regex_search('^exclude\\s*=\\s*(.*)$', '\\1', multiline=True) }}"
+    _existing: "{{ (_match[0] if _match else '').split(',') | map('trim') | select | list }}"
 
 - name: Exclude kernel packages from future updates
   become: true
   ansible.builtin.lineinfile:
     path: /etc/dnf/dnf.conf
-    regexp: '^exclude='
+    regexp: '^exclude\s*='
     line: "exclude={{ _edpm_accel_drivers_merged_excludes }}"
     create: false

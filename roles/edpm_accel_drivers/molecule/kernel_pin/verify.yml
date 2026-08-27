@@ -20,7 +20,7 @@
     - name: Parse exclude line from dnf.conf
       ansible.builtin.set_fact:
         _verify_dnf_excludes: >-
-          {%- set match = ((_verify_dnf_conf.content | b64decode) | regex_search('^exclude=(.*)$', '\\1', multiline=True)) -%}
+          {%- set match = ((_verify_dnf_conf.content | b64decode) | regex_search('^exclude\\s*=\\s*(.*)$', '\\1', multiline=True)) -%}
           {%- if match -%}
             {{ match[0].split(',') | map('trim') | list }}
           {%- else -%}
