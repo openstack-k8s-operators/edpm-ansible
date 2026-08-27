@@ -43,49 +43,19 @@ edpm_swift_storage_volumes:
   - /srv/node:/srv/node
   - /dev:/dev
   - /var/cache/swift:/var/cache/swift
-  - "{{ edpm_swift_config_dest }}:/var/lib/kolla/config_files/src:ro"
+  - "{{ edpm_swift_config_dest }}/swift.conf:/etc/swift/swift.conf:ro"
 
-edpm_swift_account_auditor_volumes:
-  - /var/lib/kolla/config_files/swift_account_auditor.json:/var/lib/kolla/config_files/config.json:ro
+# Populated dynamically in tasks/configure.yml
+edpm_swift_ring_volumes: []
 
-edpm_swift_account_reaper_volumes:
-  - /var/lib/kolla/config_files/swift_account_reaper.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_account_replicator_volumes:
-  - /var/lib/kolla/config_files/swift_account_replicator.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_account_server_volumes:
-  - /var/lib/kolla/config_files/swift_account_server.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_container_auditor_volumes:
-  - /var/lib/kolla/config_files/swift_container_auditor.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_container_replicator_volumes:
-  - /var/lib/kolla/config_files/swift_container_replicator.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_container_server_volumes:
-  - /var/lib/kolla/config_files/swift_container_server.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_container_updater_volumes:
-  - /var/lib/kolla/config_files/swift_container_updater.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_object_auditor_volumes:
-  - /var/lib/kolla/config_files/swift_object_auditor.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_object_expirer_volumes:
-  - /var/lib/kolla/config_files/swift_object_expirer.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_object_replicator_volumes:
-  - /var/lib/kolla/config_files/swift_object_replicator.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_object_server_volumes:
-  - /var/lib/kolla/config_files/swift_object_server.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_swift_object_updater_volumes:
-  - /var/lib/kolla/config_files/swift_object_updater.json:/var/lib/kolla/config_files/config.json:ro
+# Populated dynamically in tasks/configure.yml (operator ships 00-*.conf)
+edpm_swift_account_conf_volumes: []
+edpm_swift_container_conf_volumes: []
+edpm_swift_object_conf_volumes: []
+edpm_swift_object_expirer_conf_volumes: []
 
 edpm_swift_rsync_volumes:
-  - /var/lib/kolla/config_files/rsync.json:/var/lib/kolla/config_files/config.json:ro
+  - "{{ edpm_swift_config_dest }}/rsyncd.conf:/etc/swift/rsyncd.conf:ro"
 
 edpm_swift_services:
   - edpm_rsync

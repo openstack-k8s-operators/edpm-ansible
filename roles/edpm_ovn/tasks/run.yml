@@ -45,5 +45,3 @@
     edpm_service_name: "{{ edpm_ovn_service_name }}"
     edpm_container_standalone_quadlet_defs:
       ovn_controller: "{{ _edpm_ovn_role_path }}/templates/quadlet/ovn_controller.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      ovn_controller: "{{ lookup('template', 'kolla_config/kolla_ovn_controller.yaml.j2') | from_yaml }}"
