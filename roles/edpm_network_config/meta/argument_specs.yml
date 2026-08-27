@@ -145,6 +145,15 @@ argument_specs:
           is no longer present); a mismatch fails the run. Once validated, the given
           driver is bound at pci_address using driverctl (nmstate tool path only).
         default: ""
+      edpm_network_config_vf_driver_bind_script:
+        type: str
+        description: >
+          Path where the edpm-vf-driver-bind helper script is installed (nmstate tool path
+          only). Used for SR-IOV VF driver binding in NIC Partitioning setups: a PF's nmstate
+          "dispatch.post-activation" script (authored by the operator) calls this script to
+          bind each VF to vfio-pci (DPDK/passthrough) or its default kernel driver, via
+          driverctl.
+        default: /usr/local/bin/edpm-vf-driver-bind
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"

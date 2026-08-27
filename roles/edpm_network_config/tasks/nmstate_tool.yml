@@ -38,6 +38,9 @@
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
 
+- name: Install VF driver bind helper script (NIC Partitioning)
+  ansible.builtin.import_tasks: vf_driver_bind_script.yml
+
 # Check mode: derived NIC mapping is not produced here, and the derived-file slurp is skipped later for the same reason.
 - name: Copy user NIC mapping to derived input and run mapped_nics
   become: true

@@ -35,6 +35,7 @@ edpm_network_config_tool: os-net-config
 edpm_network_config_systemrole_nmstate_dependencies:
   - NetworkManager-ovs
   - python3-pyyaml
+  - driverctl
 
 # seconds between retries for download tasks
 edpm_network_config_download_delay: "{{ edpm_download_delay | default(60) }}"
@@ -75,6 +76,28 @@ edpm_network_config_mappings: {}
 edpm_network_config_derived_nic_mapping_file: /var/lib/edpm-config/derived_nic_mapping.yaml
 edpm_network_config_safe_defaults: false
 edpm_network_config_template: ""
+# Path to nmstate device_map.yaml: name -> PCI address/driver for physical
+# network devices (nmstate tool path only). Refreshed after a successful apply.
+edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
+# When true, an nmstate "interfaces" entry whose name is not currently present
+# in sysfs (e.g. already handed to vfio-pci for DPDK/SR-IOV passthrough) is
+# skipped rather than failing the apply, as long as device_map.yaml has a
+# recorded identity for that name. Also drops the name from any bond/bridge
+# port list so a vanished port does not leave a dangling reference.
+edpm_network_config_nmstate_skip_unavailable_interfaces: true
+# Optional: bind a kernel driver at a specific PCI address before the nmstate
+# apply (e.g. for DPDK/SR-IOV passthrough). YAML string with an "interfaces"
+# list of {name, pci_address, driver} (nmstate tool path only). See
+# roles/edpm_network_config/files/edpm_driver_bind.py for validation rules.
+edpm_network_config_driver_bind: ""
+# Path where the edpm-vf-driver-bind helper script is installed (nmstate tool
+# path only). Used for SR-IOV VF driver binding in NIC Partitioning setups: a
+# PF's nmstate "dispatch.post-activation" script (authored by the operator in
+# edpm_network_config_nmstate_sriov_pf_template / edpm_network_config_template)
+# calls this script to bind each VF to vfio-pci (DPDK/passthrough) or its
+# default kernel driver, via driverctl. See
+# roles/edpm_network_config/files/edpm_vf_driver_bind.sh.
+edpm_network_config_vf_driver_bind_script: /usr/local/bin/edpm-vf-driver-bind
 # Phase 1 (optional): nmstate YAML to create SR-IOV VFs on PF(s) (total-vfs only).
 # Per-VF vfs settings belong in edpm_network_config_template (phase 2).
 edpm_network_config_nmstate_sriov_pf_template: ""
