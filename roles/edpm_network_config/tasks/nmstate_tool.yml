@@ -47,6 +47,9 @@
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
 
+- name: Install VF driver bind helper script (NIC Partitioning)
+  ansible.builtin.import_tasks: vf_driver_bind_script.yml
+
 # Check mode: derived NIC mapping is not regenerated here; apply still slurps any
 # existing derived file so alias substitution can use the prior mapping.
 - name: Copy user NIC mapping to derived input and run mapped_nics

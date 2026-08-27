@@ -242,3 +242,105 @@ does not leave earlier entries half-applied. Once validated, each entry is
 bound with ``driverctl set-override <pci_address> <driver>`` (idempotent:
 if the PCI address is already bound to the requested driver, that entry is
 a no-op). See ``edpm_driver_bind.py``.
+
+SR-IOV VF driver binding for NIC Partitioning (dispatcher script)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For NIC Partitioning, some VFs of a PF are meant to stay on the host under
+their default kernel driver (e.g. as bond/OVS members), while others are
+meant to be handed to ``vfio-pci`` for DPDK or SR-IOV passthrough to a guest.
+nmstate's VF schema has no ``driver`` field, so this binding is done via a
+helper script the role installs at ``edpm_network_config_vf_driver_bind_script``
+(default ``/usr/local/bin/edpm-vf-driver-bind``), invoked from a
+NetworkManager dispatcher script attached to the PF via nmstate's native
+``dispatch.post-activation`` interface property. Since NetworkManager
+re-runs dispatcher scripts every time the PF activates (including across
+reboots), the binding is self-healing and does not depend on an
+edpm-ansible run having just happened.
+
+The operator adds the ``dispatch.post-activation`` block directly to the
+PF's entry in ``edpm_network_config_nmstate_sriov_pf_template`` (or
+``edpm_network_config_template``), passing the PF name and the desired VF
+ids (space-separated) via the ``--pf``/``--dpdk-vfs``/``--linux-vfs`` flags
+(``--pf`` required, the VF-id flags each optional):
+
+.. code-block:: yaml
+
+    edpm_network_config_nmstate_sriov_pf_template: |
+      ---
+      interfaces:
+        - name: nic3
+          type: ethernet
+          ethernet:
+            sr-iov:
+              total-vfs: 4
+          dispatch:
+            post-activation: |
+              /usr/local/bin/edpm-vf-driver-bind --pf "$1" --dpdk-vfs "0 1" --linux-vfs "2 3"
+
+In this example, VFs 0 and 1 are bound to ``vfio-pci`` and VFs 2 and 3 are
+(re-)bound to their default kernel driver. NetworkManager invokes
+dispatcher scripts as ``<script> <interface> <action> ...``, so ``$1`` is
+always the activated PF's interface name; it is forwarded to ``--pf``
+rather than relied upon positionally, so every argument is self-describing.
+
+The VF-id flags may each be omitted when there is nothing for them to do,
+with no risk of a list landing in the wrong slot, e.g. a PF with only Linux
+VFs (no DPDK passthrough) needs just:
+
+.. code-block:: yaml
+
+            post-activation: |
+              /usr/local/bin/edpm-vf-driver-bind --pf "$1" --linux-vfs "0 1 2 3"
+
+For each listed VF id, the script:
+
+* Resolves the VF's PCI address via
+  ``/sys/class/net/<pf>/device/virtfn<vfid>``.
+* Computes the VF's default kernel driver via
+  ``modprobe -R $(cat .../virtfn<vfid>/modalias)``.
+* Binds to ``vfio-pci`` if the VF is in ``dpdk_vfs`` (unless its default
+  driver is a Mellanox driver, which manages its own VFs in-kernel and must
+  not be overridden), otherwise binds to the computed default driver.
+* Only calls ``driverctl --nosave set-override`` when the VF's currently
+  bound driver differs from the target, so re-runs (e.g. on every PF
+  activation) are no-ops once correctly bound. Explicitly (re-)binding
+  ``linux_vfs`` too matters when ``sriov_drivers_autoprobe`` is disabled on
+  the PF, since nothing gets bound automatically in that case.
+
+This mirrors ``os-net-config``'s ``_VF_BIND_DRV_SCRIPT``/dispatcher-script
+approach (``os_net_config/impl_nmstate.py``). ``driverctl`` is required on
+the host; it is included in
+``edpm_network_config_systemrole_nmstate_dependencies``. See
+``edpm_vf_driver_bind.sh``.
+
+Skipping unavailable interfaces (device_map)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A NIC handed to ``vfio-pci`` (via ``edpm_network_config_driver_bind`` in the
+same run, or by an earlier run) is no longer a netdev, so any ``interfaces``
+entry in ``edpm_network_config_template`` / ``edpm_network_config_nmstate_sriov_pf_template``
+that still references it by name would otherwise fail the nmstate apply.
+
+When ``edpm_network_config_nmstate_skip_unavailable_interfaces`` is ``true``
+(the default), such entries are skipped instead of failing: for every
+top-level ``interfaces`` entry whose ``name`` is not currently present in
+sysfs, the role checks ``edpm_network_config_nmstate_device_map_file`` for a
+recorded identity (PCI address) of that name. If found, the entry is
+dropped from the desired state before it is applied (and the name is also
+removed from any bond/bridge ``port``/``ports`` list, so a vanished port
+does not leave a dangling reference). The skip reason printed for
+visibility includes the currently bound driver, looked up live via the
+recorded PCI address (not the possibly-stale ``driver`` value cached in
+device_map.yaml, e.g. if ``edpm_network_config_driver_bind`` rebound it
+earlier in this same run).
+
+If ``name`` is absent from sysfs **and** absent from ``device_map.yaml``,
+the entry is left untouched — there is no evidence this is a known device
+that moved off the host network stack, so nmstate's own validation remains
+the safety net for genuinely wrong or misspelled interface names.
+
+This runs for both phases (SR-IOV PF template and main template); set
+``edpm_network_config_nmstate_skip_unavailable_interfaces: false`` to
+restore strict behavior (fail on any unresolvable interface). See
+``edpm_nmstate_filter_unavailable.py``.
