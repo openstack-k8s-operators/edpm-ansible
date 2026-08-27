@@ -49,6 +49,29 @@
         mode: "0644"
       loop: "{{ edpm_neutron_ovn_secrets.files }}"
 
+    - name: Discover ovn-bgp-agent conf files
+      become: true
+      ansible.builtin.find:
+        paths: "{{ edpm_ovn_bgp_agent_config_basedir }}/etc/ovn-bgp-agent"
+        file_type: file
+      register: _edpm_ovn_bgp_agent_confs
+      changed_when: false
+
+    - name: Build ovn-bgp-agent config volume mounts
+      ansible.builtin.set_fact:
+        edpm_ovn_bgp_agent_conf_volumes: "{{
+          _edpm_ovn_bgp_agent_confs.files
+          | map(attribute='path')
+          | sort
+          | zip(_edpm_ovn_bgp_agent_confs.files
+            | map(attribute='path')
+            | sort
+            | map('basename')
+            | map('regex_replace', '^(.*)$', '/etc/ovn-bgp-agent/\\1:ro'))
+          | map('join', ':')
+          | list
+        }}"
+
 - name: Add OVS Manager
   become: true
   block:

@@ -14,7 +14,6 @@ exclude_paths:
   - plugins/tests/molecule
   - contribute
   - .venv
-parseable: true
 quiet: false
 verbosity: 1
 use_default_rules: true
