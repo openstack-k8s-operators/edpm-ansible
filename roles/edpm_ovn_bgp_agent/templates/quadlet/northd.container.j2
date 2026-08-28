@@ -4,9 +4,8 @@
 {%- set _northd_volumes = [] -%}
 {%- set _northd_volumes = _northd_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes
-    + edpm_ovn_bgp_agent_local_ovn_northd_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes -%}
-{%- if edpm_enable_internal_tls | bool -%}
+{%- if edpm_ovn_bgp_agent_internal_tls_enable | bool -%}
 {%- set _northd_volumes = _northd_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes -%}
 {%- endif %}
@@ -28,7 +27,11 @@ PodmanArgs=--privileged --log-driver=journald
 {% if edpm_ovn_cpu_set | default(false) -%}
 PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
 {% endif -%}
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{%- if edpm_ovn_bgp_agent_internal_tls_enable | bool -%}
+Exec=/usr/bin/ovn-northd --ovnnb-db=unix:/var/run/ovn/ovnnb_db.sock --ovnsb-db=unix:/var/run/ovn/ovnsb_db.sock -p /etc/pki/tls/private/ovndb.key -c /etc/pki/tls/certs/ovndb.crt -C /etc/pki/tls/certs/ovndbca.crt
+{%- else -%}
+Exec=/usr/bin/ovn-northd --ovnnb-db=unix:/var/run/ovn/ovnnb_db.sock --ovnsb-db=unix:/var/run/ovn/ovnsb_db.sock
+{%- endif %}
 {% for vol in _northd_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

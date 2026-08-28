@@ -59,10 +59,11 @@ edpm_ovn_bgp_agent_common_volumes:
   - /etc/localtime:/etc/localtime:ro
   - /dev/log:/dev/log
   - /etc/iproute2:/etc/iproute2
-  - /var/lib/kolla/config_files/ovn_bgp_agent.json:/var/lib/kolla/config_files/config.json:ro
-  - "{{ edpm_ovn_bgp_agent_config_basedir }}:/var/lib/kolla/config_files/src:ro"
   - /run/frr:/run/frr:shared,z
   - /run/openvswitch:/run/openvswitch:shared,z
+
+# Populated dynamically in tasks/configure.yml
+edpm_ovn_bgp_agent_conf_volumes: []
 
 edpm_ovn_bgp_agent_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_ovn_bgp_agent_service_name }}/tls-ca-bundle.pem"
 edpm_ovn_bgp_agent_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
@@ -114,18 +115,6 @@ edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes:
   - /lib/modules:/lib/modules:ro
   - /run:/run
   - /var/lib/openvswitch/ovn:/run/ovn:shared,z
-
-edpm_ovn_bgp_agent_local_ovn_controller_volumes:
-  - /var/lib/kolla/config_files/bgp_ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_ovn_bgp_agent_local_ovn_nb_volumes:
-  - /var/lib/kolla/config_files/nb_db_server.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_ovn_bgp_agent_local_ovn_sb_volumes:
-  - /var/lib/kolla/config_files/sb_db_server.json:/var/lib/kolla/config_files/config.json:ro
-
-edpm_ovn_bgp_agent_local_ovn_northd_volumes:
-  - /var/lib/kolla/config_files/northd.json:/var/lib/kolla/config_files/config.json:ro
 
 edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes: "{{ edpm_ovn_bgp_agent_tls_volumes }}"
 edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes: "{{ edpm_ovn_bgp_agent_tls_cacert_volumes }}"

@@ -12,7 +12,6 @@
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_dir.yaml"
       loop:
         - "/var/lib/neutron"
-        - "/var/lib/kolla/config_files/neutron_sriov_agent.json"
         - "/var/lib/openstack/neutron-sriov-agent"
 
     - name: Ensure Quadlet .container file exists
@@ -39,10 +38,43 @@
           - "(_quadlet_content.content | b64decode) is regex('# config_hash=.+')"
         fail_msg: "config_hash placeholder was not populated in Quadlet file"
 
+    - name: Verify sriov agent Quadlet file is kolla-free
+      ansible.builtin.assert:
+        that:
+          - "'Exec=/usr/bin/neutron-sriov-nic-agent' in _sriov_container_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in _sriov_container_content"
+          - "'/var/lib/kolla/config_files' not in _sriov_container_content"
+          - "'Volume=/var/lib/openstack/neutron-sriov-agent/01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro' in _sriov_container_content"
+          - "'Requires=edpm_neutron_sriov_agent_init.service' in _sriov_container_content"
+      vars:
+        _sriov_container_content: "{{ _quadlet_content.content | b64decode }}"
+
+    - name: Ensure sriov agent init Quadlet file exists
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/edpm_neutron_sriov_agent_init.container"
+      register: _sriov_init_quadlet_file
+      failed_when: not _sriov_init_quadlet_file.stat.exists
+
+    - name: Read sriov agent init Quadlet file content
+      become: true
+      ansible.builtin.slurp:
+        src: "/etc/containers/systemd/edpm_neutron_sriov_agent_init.container"
+      register: _sriov_init_quadlet_content
+
+    - name: Verify sriov agent init container chowns the state dir
+      ansible.builtin.assert:
+        that:
+          - "'Exec=/usr/bin/chown -R neutron:neutron /var/lib/neutron' in _sriov_init_container_content"
+          - "'User=root' in _sriov_init_container_content"
+          - "'Type=oneshot' in _sriov_init_container_content"
+      vars:
+        _sriov_init_container_content: "{{ _sriov_init_quadlet_content.content | b64decode }}"
+
     - name: Ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
         - {"name": "edpm_neutron_sriov_agent.service"}
+        - {"name": "edpm_neutron_sriov_agent_init.service", "running": false}
 
     - name: Ensure podman container exists and is running
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"

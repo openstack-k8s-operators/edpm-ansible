@@ -19,8 +19,8 @@
 
 [Unit]
 Description=Neutron OVN Agent container (EDPM)
-After=openvswitch.service
-Requires=openvswitch.service
+After=openvswitch.service edpm_ovn_agent_init.service
+Requires=openvswitch.service edpm_ovn_agent_init.service
 
 [Container]
 ContainerName=ovn_agent
@@ -30,7 +30,7 @@ User=root
 PodmanArgs=--privileged --log-driver=journald
 PodmanArgs=--pid=host
 PodmanArgs=--cgroupns=host
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/neutron-ovn-agent
 {% for vol in _ovn_agent_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
