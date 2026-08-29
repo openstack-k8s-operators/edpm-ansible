@@ -29,6 +29,13 @@ argument_specs:
         description: |
           The path to the directory where the cyborg config files
           will be rendered on the compute node.
+      edpm_cyborg_conf_d_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for config files discovered in the cyborg config
+          directory, mounted into /etc/cyborg/cyborg.conf.d.
+          Populated dynamically in tasks/configure.yml.
       edpm_cyborg_agent_image:
         type: str
         default: "quay.io/openstack.kolla/cyborg-agent:master-rocky-10"

@@ -136,6 +136,13 @@ argument_specs:
           - /run/frr:/run/frr:shared,z
           - /run/openvswitch:/run/openvswitch:shared,z
 
+      edpm_ovn_bgp_agent_conf_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for config files discovered in the ovn-bgp-agent
+          config directory, mounted into /etc/ovn-bgp-agent.
+          Populated dynamically in tasks/configure.yml.
       edpm_ovn_bgp_agent_tls_volumes:
         type: list
         description: list of mounted TLS certificate volumes

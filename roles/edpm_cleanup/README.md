@@ -96,7 +96,7 @@ The cleanup process automatically removes:
 - Container startup config directory and all JSON files within:
   - `/var/lib/edpm-config/container-startup-config/<service>/` (entire directory)
   - Contains all `<container>.json` files for the service
-- Kolla config files for each container:
+- Legacy kolla config files for each container (left behind by pre-upgrade kolla-based deployments, removed if present):
   - `/var/lib/kolla/config_files/<container>.json` (one per container)
 - Healthcheck scripts:
   - `/var/lib/openstack/healthchecks/<service>`

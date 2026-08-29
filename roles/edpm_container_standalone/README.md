@@ -18,7 +18,7 @@ The role supports two container deployment methods, selected via the `edpm_conta
 - **`false` (default):** Uses `edpm_container_manage` with JSON container definitions — the traditional EDPM approach.
 - **`true`:** Uses Podman Quadlet with native `.container` unit files managed by systemd.
 
-Services can be migrated from `container_manage` to Quadlet one at a time. Both methods share the same state tracking, kolla config, and service lifecycle features.
+Services can be migrated from `container_manage` to Quadlet one at a time. Both methods share the same state tracking and service lifecycle features.
 
 ## Quadlet Deployment
 
@@ -33,23 +33,14 @@ Services can be migrated from `container_manage` to Quadlet one at a time. Both 
     edpm_container_standalone_service: myservice
     edpm_container_standalone_quadlet_defs:
       myservice: "/path/to/myservice.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      myservice:
-        command: /usr/bin/myservice-server
-        config_files:
-          - source: /var/lib/kolla/config_files/myservice.conf
-            dest: /etc/myservice/myservice.conf
-            owner: myservice
-            perm: "0600"
 ```
 
 This will:
-1. Create kolla configuration files in `/var/lib/kolla/config_files/`
-2. Render the Quadlet template to a staging file in `/var/lib/edpm-config/quadlet-rendered/`
-3. Compute a config hash from `Volume=` lines in the staged file and inject it into the `EDPM_CONFIG_HASH=` placeholder
-4. Copy the staged file to `/etc/containers/systemd/edpm_myservice.container` (only if content differs)
-5. Reload systemd and start/restart the service as needed
-6. Register the service in the state file
+1. Render the Quadlet template to a staging file in `/var/lib/edpm-config/quadlet-rendered/`
+2. Compute a config hash from `Volume=` lines in the staged file and inject it into the `EDPM_CONFIG_HASH=` placeholder
+3. Copy the staged file to `/etc/containers/systemd/edpm_myservice.container` (only if content differs)
+4. Reload systemd and start/restart the service as needed
+5. Register the service in the state file
 
 ### Quadlet Template Format
 
@@ -64,9 +55,8 @@ ContainerName=myservice
 Image={{ edpm_myservice_image }}
 Network=host
 Exec=/usr/bin/myservice-server
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
 # config_hash=
-Volume=/var/lib/openstack/config/myservice:/var/lib/kolla/config_files/src:ro
+Volume=/var/lib/openstack/config/myservice:/etc/myservice:ro
 Label=managed_by=edpm_ansible
 
 [Service]
@@ -111,30 +101,18 @@ The Quadlet path is idempotent: if neither the template nor the config files cha
         net: host
         privileged: false
         restart: always
-        environment:
-          KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      myservice_container:
-        command: /usr/bin/myservice-server
-        config_files:
-          - source: /var/lib/kolla/config_files/myservice.conf
-            dest: /etc/myservice/myservice.conf
-            owner: myservice
-            perm: "0600"
 ```
 
 This will:
-1. Create kolla configuration files in `/var/lib/kolla/config_files/`
-2. Create container definition JSON in `/var/lib/edpm-config/container-startup-config/myservice/`
-3. Use `edpm_container_manage` to create and start the container
-4. Register the service in the state file
-5. Create systemd services for the container
+1. Create container definition JSON in `/var/lib/edpm-config/container-startup-config/myservice/`
+2. Use `edpm_container_manage` to create and start the container
+3. Register the service in the state file
+4. Create systemd services for the container
 
 ### Required Variables
 
 - `edpm_container_standalone_service`: Service name (used for directory naming)
 - `edpm_container_standalone_container_defs`: Dictionary of container definitions
-- `edpm_container_standalone_kolla_config_files`: Kolla configuration per container
 
 ### Optional Variables
 

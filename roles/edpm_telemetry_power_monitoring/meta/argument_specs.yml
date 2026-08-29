@@ -53,12 +53,31 @@ argument_specs:
       edpm_telemetry_ceilometer_agent_ipmi_common_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/ceilometer.conf:/etc/ceilometer/ceilometer.conf:ro"
+          - "{{ edpm_telemetry_config_dest }}/polling.yaml:/etc/ceilometer/polling.yaml:ro"
+          - "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf:/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf:ro"
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /dev/log:/dev/log
         description: "List of always-present volume mounts for ceilometer_agent_ipmi"
+      edpm_telemetry_ceilometer_agent_ipmi_custom_conf_volumes:
+        type: list
+        required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/custom.conf:/etc/ceilometer/ceilometer.conf.d/01-ceilometer-custom.conf:ro"
+        description: "List of volume mounts for the custom ceilometer.conf.d drop-in in ceilometer_agent_ipmi"
       edpm_telemetry_ceilometer_agent_ipmi_tls_cacert_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
         description: "List of CA bundle volume mounts for ceilometer_agent_ipmi, added when CA bundle exists"
       edpm_telemetry_ceilometer_agent_ipmi_tls_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z"
         description: "List of TLS volume mounts for ceilometer_agent_ipmi, added when TLS certs exist"

@@ -46,11 +46,6 @@
             privileged: true
             restart: always
             command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          service1_container:
-            command: 'sleep 3600'
 
     # Deploy a service with multiple containers (like telemetry)
     - name: Deploy telemetry with first container
@@ -66,11 +61,6 @@
             privileged: true
             restart: always
             command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          exporter_a:
-            command: 'sleep 3600'
 
     - name: Deploy telemetry with second container (append)
       ansible.builtin.include_role:
@@ -86,11 +76,6 @@
             privileged: true
             restart: always
             command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          exporter_b:
-            command: 'sleep 3600'
 
     # Verify state file
     - name: Read deployed services state file
@@ -131,21 +116,12 @@
             privileged: true
             restart: always
             command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
           exporter_c:
             image: quay.io/centos/centos:stream9
             net: host
             privileged: true
             restart: always
             command: sleep 3600
-            environment:
-              KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-        edpm_container_standalone_kolla_config_files:
-          exporter_a:
-            command: 'sleep 3600'
-          exporter_c:
-            command: 'sleep 3600'
 
     - name: Verify exporter_c was created
       command: podman container exists exporter_c

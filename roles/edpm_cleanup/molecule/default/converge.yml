@@ -41,11 +41,6 @@
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service1_container:
-        command: 'sleep 3600'
   roles:
     - role: "osp.edpm.edpm_container_standalone"
   tasks:
@@ -68,11 +63,6 @@
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service2_container:
-        command: 'sleep 3600'
   roles:
     - role: "osp.edpm.edpm_container_standalone"
 
@@ -97,21 +87,12 @@
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
       test_service3_container_b:
         image: quay.io/centos/centos:stream10
         net: host
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service3_container_a:
-        command: 'sleep 3600'
-      test_service3_container_b:
-        command: 'sleep 3600'
   roles:
     - role: osp.edpm.edpm_container_standalone
 
@@ -127,24 +108,32 @@
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
       test_service3_container_c:
         image: quay.io/centos/centos:stream10
         net: host
         privileged: true
         restart: always
         command: sleep 3600
-        environment:
-            KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
-    edpm_container_standalone_kolla_config_files:
-      test_service3_container_a:
-        command: 'sleep 3600'
-      test_service3_container_c:
-        command: 'sleep 3600'
   roles:
     - role: osp.edpm.edpm_container_standalone
   tasks:
+    - name: Simulate legacy kolla config files from pre-upgrade deployment
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/kolla/config_files
+        state: directory
+        mode: "0755"
+
+    - name: Create simulated legacy kolla config files
+      become: true
+      ansible.builtin.copy:
+        content: "{{ {} | to_nice_json }}"
+        dest: "/var/lib/kolla/config_files/{{ item }}.json"
+        mode: "0600"
+      loop:
+        - test_service3_container_a
+        - test_service3_container_b
+
     - name: Cleanup orphaned containers (will remove container_b)
       ansible.builtin.include_role:
         name: osp.edpm.edpm_cleanup

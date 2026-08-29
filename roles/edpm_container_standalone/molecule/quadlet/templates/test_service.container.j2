@@ -12,7 +12,6 @@ User=root
 PodmanArgs=--privileged
 LogDriver=journald
 Exec=sleep 3600
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
 Volume=/var/lib/openstack/configs/test_service/test.conf:/etc/test_service/test.conf:ro,z
 Label=managed_by=edpm_ansible
 

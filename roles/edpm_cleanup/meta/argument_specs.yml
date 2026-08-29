@@ -33,7 +33,9 @@ argument_specs:
         type: path
       edpm_container_kolla_config_dir:
         default: /var/lib/kolla/config_files
-        description: Directory for kolla config files
+        description: |
+          Directory for legacy kolla config files left behind by pre-upgrade
+          (kolla-based) deployments. Files are removed during cleanup if present.
         type: path
       edpm_cleanup_remove_config_dirs:
         default: true

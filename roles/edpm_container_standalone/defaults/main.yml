@@ -21,13 +21,9 @@
 
 # Service name. Use for creating directories, container labels, etc
 edpm_container_standalone_service: ""
-# Directory for kolla config files
-edpm_container_kolla_config_dir: /var/lib/kolla/config_files
 # TODO(quadlet-migration): Remove startup_config_dir and container_defs once all services are migrated.
 # Directory for container startup configs
 edpm_container_startup_config_dir: /var/lib/edpm-config/container-startup-config
-# Hash with keys of container name and value of YAML kolla config file.
-edpm_container_standalone_kolla_config_files: {}
 # Hash with keys of container name and value of YAML container definition
 edpm_container_standalone_container_defs: {}
 

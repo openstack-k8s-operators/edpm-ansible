@@ -99,6 +99,22 @@ argument_specs:
         type: str
         description: |
           Destination directory for the cleaner container configs.
+      edpm_nova_conf_d_volumes:
+        type: list
+        required: false
+        default: []
+        description: |
+          Volume mounts for *.conf files discovered in the nova config
+          directory, mounted into /etc/nova/nova.conf.d.
+          Populated dynamically in tasks/configure.yml.
+      edpm_nova_provider_volumes:
+        type: list
+        required: false
+        default: []
+        description: |
+          Volume mounts for provider*.yaml files discovered in the nova
+          config directory, mounted into /etc/nova/provider_config.
+          Populated dynamically in tasks/configure.yml.
       edpm_nova_compute_init_common_volumes:
         type: list
         required: false

@@ -4,4 +4,35 @@ argument_specs:
   main:
     short_description: The main entry point for the edpm_swift role.
     description: Multiple lines description
-    options: {}
+    options:
+      edpm_swift_account_conf_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for account-server config files discovered in the
+          swift config directory. Populated dynamically in tasks/configure.yml.
+      edpm_swift_container_conf_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for container-server config files discovered in the
+          swift config directory. Populated dynamically in tasks/configure.yml.
+      edpm_swift_object_conf_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for object-server config files discovered in the
+          swift config directory. Populated dynamically in tasks/configure.yml.
+      edpm_swift_object_expirer_conf_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for object-expirer config files discovered in the
+          swift config directory. Populated dynamically in tasks/configure.yml.
+      edpm_swift_ring_volumes:
+        type: list
+        default: []
+        description: |
+          Volume mounts for *.ring.gz files discovered in the swift config
+          directory, mounted into /etc/swift.
+          Populated dynamically in tasks/configure.yml.
