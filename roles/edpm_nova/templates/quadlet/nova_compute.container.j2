@@ -1,11 +1,17 @@
 # Quadlet container file for nova_compute
 # Managed by edpm_container_standalone - do not edit manually
 # Podman 4.4+ keys only (RHEL 9.2 compat)
-{%- set _nova_compute_volumes = edpm_nova_compute_common_volumes -%}
+{%- set _nova_compute_volumes = edpm_nova_compute_common_volumes +
+        edpm_nova_conf_d_volumes +
+        edpm_nova_provider_volumes -%}
 {%- if ca_bundle_exists | bool -%}
 {%- set _nova_compute_volumes = _nova_compute_volumes +
         edpm_nova_compute_tls_cacert_volumes -%}
-{%- endif %}
+{%- endif -%}
+{%- if ceph_config_exists | default(false) -%}
+{%- set _nova_compute_volumes = _nova_compute_volumes +
+        ['/var/lib/openstack/config/ceph:/etc/ceph:ro'] -%}
+{%- endif -%}
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=
@@ -21,7 +27,7 @@ Image={{ edpm_nova_compute_image }}
 Network=host
 User=nova
 PodmanArgs=--privileged --pid=host --log-driver=journald
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/nova-compute
 {% for vol in _nova_compute_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

@@ -1,6 +1,11 @@
 # Quadlet container file for nova_compute_init
 # Managed by edpm_container_standalone - do not edit manually
 # Podman 4.4+ keys only (RHEL 9.2 compat)
+{%- set _init_volumes = edpm_nova_compute_init_common_volumes -%}
+{%- if ceph_config_exists | default(false) -%}
+{%- set _init_volumes = _init_volumes +
+        ['/var/lib/openstack/config/ceph:/var/lib/openstack/config/ceph'] -%}
+{%- endif -%}
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=
@@ -14,10 +19,10 @@ Image={{ edpm_nova_compute_image }}
 Network=none
 User=root
 PodmanArgs=--security-opt label=disable --log-driver=journald
-Exec=bash -c 'python3 /sbin/nova_statedir_ownership.py | logger -t nova_compute_init'
+Exec=bash -c 'set -eo pipefail; python3 /sbin/nova_statedir_ownership.py | logger -t nova_compute_init; if [ -d /var/lib/openstack/config/ceph ]; then chown -R nova:nova /var/lib/openstack/config/ceph; fi'
 Environment=NOVA_STATEDIR_OWNERSHIP_SKIP=/var/lib/nova/compute_id
 Environment=__OS_DEBUG=false
-{% for vol in edpm_nova_compute_init_common_volumes -%}
+{% for vol in _init_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
 Label=managed_by=edpm_ansible

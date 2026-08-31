@@ -1,7 +1,8 @@
 # Quadlet container file for nova_nvme_cleaner
 # Managed by edpm_container_standalone - do not edit manually
 # Podman 4.4+ keys only (RHEL 9.2 compat)
-{%- set _nvme_cleaner_volumes = edpm_nova_nvme_cleaner_common_volumes -%}
+{%- set _nvme_cleaner_volumes = edpm_nova_nvme_cleaner_common_volumes +
+        edpm_nova_conf_d_volumes -%}
 {%- if ca_bundle_exists | bool -%}
 {%- set _nvme_cleaner_volumes = _nvme_cleaner_volumes +
         edpm_nova_nvme_cleaner_tls_cacert_volumes -%}
@@ -19,7 +20,7 @@ Image={{ edpm_nova_compute_image }}
 Network=host
 User=root
 PodmanArgs=--privileged --log-driver=journald
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec={{ edpm_nova_nvme_cleaner_command }} {{ edpm_nova_nvme_cleaner_args }}
 {% for vol in _nvme_cleaner_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
