@@ -35,6 +35,9 @@ edpm_cyborg_agent_image: "quay.io/openstack-k8s-operators/openstack-cyborg-agent
 # TLS CA bundle source directory
 edpm_cyborg_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_cyborg_service_name }}"
 
+# Populated dynamically in tasks/configure.yml
+edpm_cyborg_conf_d_volumes: []
+
 # a list of additional host mounts for device access (GPUs, FPGAs, etc.)
 # Each item should be a dict with src, dest, and optional options keys.
 # Example:
