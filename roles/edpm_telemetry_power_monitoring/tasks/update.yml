@@ -66,3 +66,102 @@
       ansible.builtin.file:
         path: "/var/lib/openstack/config/{{ edpm_telemetry_service_name }}"
         state: absent
+
+- name: Check if Kepler systemd service exists
+  tags:
+    - update
+    - telemetry_power_monitoring
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/edpm_kepler.service"
+  register: edpm_kepler_service_file
+
+- name: Check if Kepler quadlet file exists
+  tags:
+    - update
+    - telemetry_power_monitoring
+  ansible.builtin.stat:
+    path: "/etc/containers/systemd/edpm_kepler.container"
+  register: edpm_kepler_quadlet_file
+
+- name: Remove Kepler service and artifacts if present
+  tags:
+    - update
+    - telemetry_power_monitoring
+  become: true
+  when: edpm_kepler_service_file.stat.exists or edpm_kepler_quadlet_file.stat.exists
+  block:
+    - name: Stop and disable Kepler service
+      ansible.builtin.systemd:
+        name: edpm_kepler.service
+        state: stopped
+        enabled: false
+      register: edpm_kepler_service_stop
+      failed_when:
+        - edpm_kepler_service_stop is failed
+        - "'could not find the requested service' not in edpm_kepler_service_stop.msg | default('') | lower"
+
+    - name: Remove Kepler podman container
+      ansible.builtin.command:
+        cmd: podman rm -f kepler
+      register: edpm_kepler_podman_rm
+      changed_when: edpm_kepler_podman_rm.rc == 0
+      failed_when:
+        - edpm_kepler_podman_rm.rc != 0
+        - "'no such container' not in edpm_kepler_podman_rm.stderr | default('') | lower"
+
+    - name: Remove Kepler systemd unit file
+      ansible.builtin.file:
+        path: "/etc/systemd/system/edpm_kepler.service"
+        state: absent
+
+    - name: Remove Kepler quadlet file
+      ansible.builtin.file:
+        path: "/etc/containers/systemd/edpm_kepler.container"
+        state: absent
+
+    - name: Remove Kepler quadlet staging file
+      ansible.builtin.file:
+        path: "/var/lib/edpm-config/quadlet-rendered/edpm_kepler.container"
+        state: absent
+
+    - name: Reload systemd after Kepler unit removal
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Remove Kepler container startup config
+      ansible.builtin.file:
+        path: "/var/lib/edpm-config/container-startup-config/kepler"
+        state: absent
+
+    - name: Remove Kepler kolla config
+      ansible.builtin.file:
+        path: "/var/lib/kolla/config_files/kepler.json"
+        state: absent
+
+    - name: Check if Kepler firewall config exists
+      ansible.builtin.stat:
+        path: "/var/lib/edpm-config/firewall/kepler.yaml"
+      register: edpm_kepler_firewall_config
+
+    - name: Remove Kepler firewall config
+      ansible.builtin.file:
+        path: "/var/lib/edpm-config/firewall/kepler.yaml"
+        state: absent
+
+    - name: Reload firewall after Kepler rule removal
+      when: edpm_kepler_firewall_config.stat.exists
+      block:
+        - name: Reconfigure firewall rules
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_nftables
+            tasks_from: "configure.yml"
+
+        - name: Apply firewall rules
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_nftables
+            tasks_from: "run.yml"
+
+    - name: Remove Kepler healthcheck directory
+      ansible.builtin.file:
+        path: "/var/lib/openstack/healthchecks/kepler"
+        state: absent
