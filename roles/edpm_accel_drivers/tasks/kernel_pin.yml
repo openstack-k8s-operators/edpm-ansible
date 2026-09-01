@@ -1,0 +1,64 @@
+---
+- name: Validate kernel version format
+  ansible.builtin.assert:
+    that:
+      - _edpm_accel_drivers_config.kernel_pin.version | length > 10
+      - _edpm_accel_drivers_config.kernel_pin.version is regex('^[0-9]+\.[0-9]+\.[0-9]+-')
+    fail_msg: >-
+      kernel.version '{{ _edpm_accel_drivers_config.kernel_pin.version }}'
+      does not look like a valid kernel version (e.g. 5.14.0-570.26.1.el9_6)
+
+- name: Install target kernel packages
+  vars:
+    _edpm_accel_drivers_package:
+      - "kernel-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
+      - "kernel-core-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
+      - "kernel-modules-{{ _edpm_accel_drivers_config.kernel_pin.version }}"
+    _edpm_accel_drivers_disable_gpg_check: false
+    _edpm_accel_drivers_allow_downgrade: true
+  ansible.builtin.include_tasks: install_from_rpm.yml
+
+- name: Set target kernel as default boot kernel
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      grubby --set-default
+      /boot/vmlinuz-{{ _edpm_accel_drivers_config.kernel_pin.version }}.{{ ansible_architecture }}
+  changed_when: true
+
+- name: Verify default kernel is set correctly
+  become: true
+  ansible.builtin.command:
+    cmd: grubby --default-kernel
+  register: _edpm_accel_drivers_default_kernel
+  changed_when: false
+  failed_when: _edpm_accel_drivers_config.kernel_pin.version not in _edpm_accel_drivers_default_kernel.stdout
+
+- name: Notify that target kernel will be active on next reboot
+  ansible.builtin.debug:
+    msg: >-
+      Kernel {{ _edpm_accel_drivers_config.kernel_pin.version }} is set as default.
+      It will be active after the next reboot orchestrated by the reboot-os service.
+      Old kernel packages will remain installed and can be manually removed if needed.
+
+- name: Read current dnf.conf for existing excludes
+  ansible.builtin.slurp:
+    src: /etc/dnf/dnf.conf
+  register: _edpm_accel_drivers_dnf_conf
+
+- name: Build merged exclude list  # noqa: jinja[invalid]
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_merged_excludes: >-
+      {{ (_existing + ['kernel', 'kernel-core', 'kernel-modules']) | unique | sort | join(',') }}
+  vars:
+    _content: "{{ _edpm_accel_drivers_dnf_conf.content | b64decode }}"
+    _match: "{{ _content | regex_search('^exclude\\s*=\\s*(.*)$', '\\1', multiline=True) }}"
+    _existing: "{{ (_match[0] if _match else '').split(',') | map('trim') | select | list }}"
+
+- name: Exclude kernel packages from future updates
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    regexp: '^exclude\s*='
+    line: "exclude={{ _edpm_accel_drivers_merged_excludes }}"
+    create: false

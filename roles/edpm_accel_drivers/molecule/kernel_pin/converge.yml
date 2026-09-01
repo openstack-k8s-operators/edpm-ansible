@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  pre_tasks:
+    - name: Read kernel version saved by prepare
+      ansible.builtin.slurp:
+        src: /tmp/test-kernel-version
+      register: _converge_kernel_version
+
+    - name: Set kernel version fact
+      ansible.builtin.set_fact:
+        test_kernel_version: "{{ (_converge_kernel_version.content | b64decode).strip() }}"
+  roles:
+    - role: "edpm_accel_drivers"
+      vars:
+        edpm_accel_drivers:
+          kernel_pin:
+            enabled: true
+            version: "{{ test_kernel_version }}"
