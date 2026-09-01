@@ -34,7 +34,7 @@ argument_specs:
           - /dev:/dev
           - "{{ edpm_neutron_sriov_agent_config_dir }}:/etc/neutron.conf.d:z"
           - /var/lib/neutron:/var/lib/neutron:shared,z
-          - /var/lib/kolla/config_files/neutron_sriov_agent.json:/var/lib/kolla/config_files/config.json:ro
+          - '{{ edpm_neutron_sriov_agent_config_dir }}/01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro'
         description: List of volumes in a mount point form.
         type: list
       edpm_neutron_sriov_DEFAULT_debug:

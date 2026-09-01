@@ -41,5 +41,3 @@
     edpm_container_standalone_service: ovn_bgp_agent
     edpm_container_standalone_quadlet_defs:
       ovn_bgp_agent: "{{ _edpm_ovn_bgp_agent_role_path }}/templates/quadlet/ovn_bgp_agent.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      ovn_bgp_agent: "{{ lookup('file', 'kolla_config/ovn_bgp_agent.yaml') | from_yaml }}"

@@ -7,6 +7,8 @@
 
 [Unit]
 Description=FRR container (EDPM)
+After=edpm_frr_init.service
+Requires=edpm_frr_init.service
 
 [Container]
 ContainerName=frr
@@ -18,7 +20,7 @@ AddCapability=CAP_NET_RAW
 AddCapability=CAP_NET_ADMIN
 AddCapability=CAP_SYS_ADMIN
 PodmanArgs=--log-driver=journald
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=bash -c 'if [ -f /usr/libexec/frr/frrinit.sh ]; then /usr/libexec/frr/frrinit.sh start; else /usr/lib/frr/frr start; fi && exec /bin/sleep infinity'
 {% for vol in edpm_frr_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

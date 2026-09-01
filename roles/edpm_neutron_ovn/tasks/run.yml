@@ -41,13 +41,24 @@
     _edpm_neutron_ovn_role_path: "{{ role_path }}"
 
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
+- name: Run ovn_agent init container
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_container_standalone
+  vars:
+    edpm_container_standalone_use_quadlet: true
+    edpm_container_standalone_service: ovn_agent_init
+    edpm_service_name: ovn_agent
+    edpm_container_state_append: false
+    edpm_container_standalone_quadlet_defs:
+      ovn_agent_init: "{{ _edpm_neutron_ovn_role_path }}/templates/quadlet/ovn_agent_init.container.j2"
+
 - name: Run ovn_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone
   vars:
     edpm_container_standalone_use_quadlet: true
     edpm_container_standalone_service: ovn_agent
+    edpm_service_name: ovn_agent
+    edpm_container_state_append: true
     edpm_container_standalone_quadlet_defs:
       ovn_agent: "{{ _edpm_neutron_ovn_role_path }}/templates/quadlet/ovn_agent.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      ovn_agent: "{{ lookup('file', 'kolla_config/kolla_ovn_agent.yaml') | from_yaml }}"

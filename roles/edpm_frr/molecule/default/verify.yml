@@ -36,6 +36,39 @@
           - "(_quadlet_content.content | b64decode) is regex('# config_hash=.+')"
         fail_msg: "config_hash placeholder was not populated in Quadlet file"
 
+    - name: Verify frr Quadlet file is kolla-free
+      ansible.builtin.assert:
+        that:
+          - "'Exec=bash -c' in _frr_container_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in _frr_container_content"
+          - "'/var/lib/kolla/config_files' not in _frr_container_content"
+          - "'Volume=/var/lib/openstack/frr/etc/frr/frr.conf:/etc/frr/frr.conf:ro' in _frr_container_content"
+          - "'Volume=/var/lib/openstack/frr/etc/frr/daemons:/etc/frr/daemons:ro' in _frr_container_content"
+          - "'Requires=edpm_frr_init.service' in _frr_container_content"
+      vars:
+        _frr_container_content: "{{ _quadlet_content.content | b64decode }}"
+
+    - name: Ensure frr init Quadlet file exists
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/edpm_frr_init.container"
+      register: _frr_init_quadlet_file
+      failed_when: not _frr_init_quadlet_file.stat.exists
+
+    - name: Read frr init Quadlet file content
+      become: true
+      ansible.builtin.slurp:
+        src: "/etc/containers/systemd/edpm_frr_init.container"
+      register: _frr_init_quadlet_content
+
+    - name: Verify frr init container chowns the runtime directory
+      ansible.builtin.assert:
+        that:
+          - "'Exec=/usr/bin/chown -R frr:frrvty /run/frr' in _frr_init_container_content"
+          - "'User=root' in _frr_init_container_content"
+          - "'Type=oneshot' in _frr_init_container_content"
+      vars:
+        _frr_init_container_content: "{{ _frr_init_quadlet_content.content | b64decode }}"
+
     - name: Ensure /etc/tmpfiles.d/run-frr.conf exists
       become: true
       block:
@@ -143,6 +176,18 @@
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_podman.yaml"
       loop:
         - "frr"
+
+    - name: Verify container /etc/frr contains only expected files
+      become: true
+      ansible.builtin.command: podman exec frr ls /etc/frr
+      register: frr_container_etc
+      changed_when: false
+
+    - name: Assert container /etc/frr has only frr.conf, daemons, vtysh.conf
+      ansible.builtin.assert:
+        that:
+          - frr_container_etc.stdout_lines | sort == ["daemons", "frr.conf", "vtysh.conf"]
+        fail_msg: "Unexpected files in container /etc/frr: {{ frr_container_etc.stdout_lines }}"
 
     - name: Ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"

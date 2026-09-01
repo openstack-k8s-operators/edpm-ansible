@@ -110,17 +110,6 @@
   delegate_to: localhost
   run_once: true
 
-- name: Configure cyborg user and group on the host
-  ansible.builtin.import_role:
-    name: edpm_users
-  vars:
-    edpm_users_users:
-      # 42485 is matching with the uid and gid created in the cyborg containers
-      - {"name": "cyborg", "uid": "42485", "gid": "42485", "shell": "/sbin/nologin", "comment": "cyborg user"}
-    edpm_users_extra_dirs: []
-  tags:
-    - edpm_users
-
 - name: Sync cyborg config files
   tags:
     - configure
@@ -132,3 +121,34 @@
     delete: true
   notify:
     - Restart cyborg
+
+- name: Discover cyborg conf files
+  become: true
+  ansible.builtin.find:
+    paths: "{{ edpm_cyborg_config_dest }}"
+    patterns:
+      - "*.conf"
+    file_type: file
+  register: _edpm_cyborg_confs
+  changed_when: false
+  tags:
+    - configure
+    - cyborg
+
+- name: Build cyborg config volume mounts
+  ansible.builtin.set_fact:
+    edpm_cyborg_conf_d_volumes: "{{
+      _edpm_cyborg_confs.files
+      | map(attribute='path')
+      | sort
+      | zip(_edpm_cyborg_confs.files
+        | map(attribute='path')
+        | sort
+        | map('basename')
+        | map('regex_replace', '^(.*)$', '/etc/cyborg/cyborg.conf.d/\\1:ro'))
+      | map('join', ':')
+      | list
+    }}"
+  tags:
+    - configure
+    - cyborg

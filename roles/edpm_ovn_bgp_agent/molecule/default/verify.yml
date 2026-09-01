@@ -44,10 +44,13 @@
       loop:
         - {"name": "edpm_ovn_bgp_agent.service"}
 
-    - name: Ensure kolla_set_configs copied the expected files
-      become: true
-      ansible.builtin.shell: |
-        podman logs ovn_bgp_agent 2>&1 | grep "{{ item }}" > /dev/null
-      loop:
-        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/bgp-agent.conf to /etc/ovn-bgp-agent/bgp-agent.conf"
-        - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/10-neutron-ovn.conf to /etc/ovn-bgp-agent/10-neutron-ovn.conf"
+    - name: Verify ovn_bgp_agent Quadlet file has no kolla references
+      ansible.builtin.assert:
+        that:
+          - "'Exec=/usr/bin/ovn-bgp-agent --config-dir /etc/ovn-bgp-agent' in _ovn_bgp_agent_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in _ovn_bgp_agent_content"
+          - "'/var/lib/kolla/config_files' not in _ovn_bgp_agent_content"
+          - "'Volume=/var/lib/openstack/ovn-bgp-agent/etc/ovn-bgp-agent/bgp-agent.conf:/etc/ovn-bgp-agent/bgp-agent.conf:ro' in _ovn_bgp_agent_content"
+          - "'Volume=/var/lib/openstack/ovn-bgp-agent/etc/ovn-bgp-agent/10-neutron-ovn.conf:/etc/ovn-bgp-agent/10-neutron-ovn.conf:ro' in _ovn_bgp_agent_content"
+      vars:
+        _ovn_bgp_agent_content: "{{ _quadlet_content.content | b64decode }}"

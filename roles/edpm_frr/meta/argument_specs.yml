@@ -192,8 +192,8 @@ argument_specs:
           - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
           - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
           - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
-          - /var/lib/kolla/config_files/frr.json:/var/lib/kolla/config_files/config.json:ro
-          - /var/lib/openstack/frr:/var/lib/kolla/config_files/src:ro
+          - /var/lib/openstack/frr/etc/frr/frr.conf:/etc/frr/frr.conf:ro
+          - /var/lib/openstack/frr/etc/frr/daemons:/etc/frr/daemons:ro
           - /run/frr:/run/frr:shared,z
         description: List of FRR volumes in a mountpoint form.
         type: list

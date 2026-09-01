@@ -4,9 +4,8 @@
 {%- set _nb_db_volumes = [] -%}
 {%- set _nb_db_volumes = _nb_db_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes
-    + edpm_ovn_bgp_agent_local_ovn_nb_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes -%}
-{%- if edpm_enable_internal_tls | bool -%}
+{%- if edpm_ovn_bgp_agent_internal_tls_enable | bool -%}
 {%- set _nb_db_volumes = _nb_db_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes -%}
 {%- endif %}
@@ -28,7 +27,11 @@ PodmanArgs=--privileged --log-driver=journald
 {% if edpm_ovn_cpu_set | default(false) -%}
 PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
 {% endif -%}
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+{%- if edpm_ovn_bgp_agent_internal_tls_enable | bool -%}
+Exec=/usr/share/ovn/scripts/ovn-ctl --no-monitor run_nb_ovsdb --ovn-nb-db-ssl-key=/etc/pki/tls/private/ovndb.key --ovn-nb-db-ssl-cert=/etc/pki/tls/certs/ovndb.crt --ovn-nb-db-ssl-ca-cert=/etc/pki/tls/certs/ovndbca.crt --db-nb-cluster-local-proto=ssl --db-nb-cluster-remote-proto=ssl --db-nb-create-insecure-remote=no
+{%- else -%}
+Exec=/usr/share/ovn/scripts/ovn-ctl --no-monitor run_nb_ovsdb --db-nb-create-insecure-remote=yes
+{%- endif %}
 {% for vol in _nb_db_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

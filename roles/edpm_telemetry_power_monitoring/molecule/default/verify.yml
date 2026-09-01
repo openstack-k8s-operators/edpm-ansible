@@ -39,16 +39,6 @@
       loop:
         - {"name": "edpm_ceilometer_agent_ipmi.service"}
 
-    - name: ensure kolla_set_configs copied the expected files and started the correct binary
-      become: true
-      ansible.builtin.shell: |
-        podman logs ceilometer_agent_ipmi 2>&1 | grep "{{item}}" > /dev/null
-      loop:
-        - "Copying /var/lib/kolla/config_files/src/ceilometer.conf to /etc/ceilometer/ceilometer.conf"
-        - "Copying /var/lib/kolla/config_files/src/polling.yaml to /etc/ceilometer/polling.yaml"
-        - "/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout"
-        - "Copying /var/lib/kolla/config_files/src/ceilometer-host-specific.conf to /etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf"
-
     - name: Read rendered ceilometer_agent_ipmi .container file
       become: true
       ansible.builtin.slurp:
@@ -60,8 +50,12 @@
         that:
           - "'# config_hash=' in _container_content"
           - "_container_content | regex_search('# config_hash=.+')"
-          - "'Volume={{ edpm_telemetry_config_dest }}:/var/lib/kolla/config_files/src:z' in _container_content"
-          - "'Volume=/var/lib/kolla/config_files/ceilometer_agent_ipmi.json:/var/lib/kolla/config_files/config.json:z' in _container_content"
+          - "'Exec=/usr/bin/ceilometer-polling' in _container_content"
+          - "'KOLLA_CONFIG_STRATEGY' not in _container_content"
+          - "'/var/lib/kolla/config_files' not in _container_content"
+          - "':/etc/ceilometer/ceilometer.conf:ro' in _container_content"
+          - "':/etc/ceilometer/polling.yaml:ro' in _container_content"
+          - "'/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf:ro' in _container_content"
           - "'Volume=/etc/hosts:/etc/hosts:ro' in _container_content"
           - "'Volume=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro' in _container_content"
           - "'Volume=/etc/localtime:/etc/localtime:ro' in _container_content"
