@@ -143,7 +143,82 @@
     mode: "0644"
   loop:
     - {"src": "nova_statedir_ownership.py", "dest": "nova_statedir_ownership.py"}
-    - {"src": "run-on-host", "dest": "run-on-host"}
+
+- name: Copy run-on-host script
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.copy:
+    src: "run-on-host"
+    dest: "{{ edpm_nova_config_dest }}/run-on-host"
+    setype: "container_file_t"
+    mode: "0755"
+    owner: root
+    group: root
+
+# Relevant only for upgrade from kolla deployments (fresh deploys are handled
+# by configure.yml). Move to the upgrade tasks when those land.
+- name: Check for ssh private key in config dest
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.stat:
+    path: "{{ edpm_nova_config_dest }}/ssh-privatekey"
+  register: nova_ssh_privatekey
+
+- name: Restrict permissions on the migration ssh private key
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.file:
+    path: "{{ edpm_nova_config_dest }}/ssh-privatekey"
+    mode: '0600'
+  when: nova_ssh_privatekey.stat.exists
+
+- name: Create .ssh directory for the nova container
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/nova/.ssh
+    state: directory
+    owner: nova
+    group: nova
+    mode: '0700'
+    setype: container_file_t
+
+- name: Copy the migration ssh config for the nova container
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.copy:
+    src: "{{ edpm_nova_config_dest }}/ssh-config"
+    remote_src: true
+    dest: /var/lib/nova/.ssh/config
+    owner: nova
+    group: nova
+    mode: '0600'
+    setype: container_file_t
+
+- name: Copy the migration ssh private key for the nova container
+  tags:
+    - update
+    - nova
+  become: true
+  ansible.builtin.copy:
+    src: "{{ edpm_nova_config_dest }}/ssh-privatekey"
+    remote_src: true
+    dest: /var/lib/nova/.ssh/ssh-privatekey
+    owner: nova
+    group: nova
+    mode: '0600'
+    setype: container_file_t
+  when: nova_ssh_privatekey.stat.exists
 
 - name: Run LVM bootstrap tasks
   tags:

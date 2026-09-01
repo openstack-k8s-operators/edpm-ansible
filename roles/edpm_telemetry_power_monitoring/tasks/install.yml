@@ -49,8 +49,6 @@
     edpm_service_name: "{{ edpm_telemetry_service_name }}"
     edpm_container_standalone_quadlet_defs:
       ceilometer_agent_ipmi: "{{ _edpm_telemetry_power_monitoring_role_path }}/templates/quadlet/ceilometer_agent_ipmi.container.j2"
-    edpm_container_standalone_kolla_config_files:
-      ceilometer_agent_ipmi: "{{ lookup('file', 'files/kolla_config/ceilometer_agent_ipmi.yaml') | from_yaml }}"
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 

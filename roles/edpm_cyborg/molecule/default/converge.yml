@@ -10,17 +10,3 @@
           - src: /var/lib/test_accel_device
             dest: /var/lib/test_accel_device
             options: "rw"
-        # Override kolla command to keep the container running without
-        # real OpenStack services so verify can assert on its state.
-        edpm_cyborg_kolla_config:
-          command: sleep infinity
-          config_files:
-            - source: /var/lib/kolla/config_files/src/*.conf
-              dest: /etc/cyborg/cyborg.conf.d/
-              owner: cyborg
-              perm: "0600"
-              optional: true
-          permissions:
-            - path: /var/lib/cyborg
-              owner: cyborg:cyborg
-              recurse: true

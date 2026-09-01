@@ -15,8 +15,8 @@
 
 [Unit]
 Description=Neutron OVN Metadata Agent container (EDPM)
-After=openvswitch.service
-Requires=openvswitch.service
+After=openvswitch.service edpm_ovn_metadata_agent_init.service
+Requires=openvswitch.service edpm_ovn_metadata_agent_init.service
 
 [Container]
 ContainerName=ovn_metadata_agent
@@ -30,7 +30,7 @@ PodmanArgs=--cgroupns=host
 PodmanArgs=--health-cmd="/openstack/healthcheck"
 Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:/openstack:ro,z
 {% endif -%}
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/neutron-ovn-metadata-agent
 {% for vol in _metadata_volumes -%}
 Volume={{ vol }}
 {% endfor -%}

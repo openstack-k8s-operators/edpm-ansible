@@ -9,6 +9,10 @@
 {%- if tls_cert_exists | bool -%}
 {%- set _ceilometer_ipmi_volumes = _ceilometer_ipmi_volumes +
         edpm_telemetry_ceilometer_agent_ipmi_tls_volumes -%}
+{%- endif -%}
+{%- if custom_ceilometer_conf.stat.exists | default(false) -%}
+{%- set _ceilometer_ipmi_volumes = _ceilometer_ipmi_volumes +
+        edpm_telemetry_ceilometer_agent_ipmi_custom_conf_volumes -%}
 {%- endif %}
 
 # DO NOT REMOVE - used by container_config_hash module
@@ -27,7 +31,7 @@ PodmanArgs=--privileged --security-opt label=type:ceilometer_polling_t --log-dri
 PodmanArgs=--health-cmd="/openstack/healthcheck ipmi"
 Volume=/var/lib/openstack/healthchecks/ceilometer_agent_ipmi:/openstack:ro,z
 {% endif -%}
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/ceilometer-polling --polling-namespaces ipmi --logfile /dev/stdout
 Environment=OS_ENDPOINT_TYPE=internal
 {% for vol in _ceilometer_ipmi_volumes -%}
 Volume={{ vol }}

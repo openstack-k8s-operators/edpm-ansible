@@ -12,6 +12,8 @@
 
 [Unit]
 Description=Neutron DHCP Agent container (EDPM)
+After=edpm_neutron_dhcp_init.service
+Requires=edpm_neutron_dhcp_init.service
 
 [Container]
 ContainerName=neutron_dhcp_agent
@@ -21,7 +23,7 @@ User=root
 PodmanArgs=--privileged --log-driver=journald
 PodmanArgs=--pid=host
 PodmanArgs=--cgroupns=host
-Environment=KOLLA_CONFIG_STRATEGY=COPY_ALWAYS
+Exec=/usr/bin/neutron-dhcp-agent
 {% for vol in _dhcp_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
