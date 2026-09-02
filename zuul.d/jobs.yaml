@@ -137,3 +137,51 @@
 - job:
     name: edpm-ansible-baremetal-minor-update
     parent: cifmw-crc-podified-edpm-baremetal-minor-update
+
+# CS10 jobs
+- job:
+    name: edpm-ansible-content-provider-cs10
+    parent: openstack-k8s-operators-content-provider
+    nodeset: centos-stream-10
+    timeout: 7200
+    vars:
+      cifmw_repo_setup_dist_major_version: 10
+      cifmw_repo_setup_branch: master
+      cifmw_repo_setup_promotion: current
+      # Force image build till CS10 images are built, promoted and
+      # used in CI by default.
+      cifmw_edpm_build_images_force: true
+      cifmw_edpm_build_images_base_image: quay.io/centos/centos:stream10-minimal
+      cifmw_edpm_build_images_bootc: true
+      cifmw_edpm_build_images_bootc_base_image: quay.io/centos-bootc/centos-bootc:stream10
+
+- job:
+    name: edpm-ansible-tempest-multinode-cs10
+    parent: openstack-operator-tempest-multinode
+    dependencies: ["edpm-ansible-content-provider-cs10"]
+    vars:
+      cifmw_install_yamls_vars_patch_cs10:
+        dataplane_repo_setup_repo: current
+        dataplane_repo_setup_branch: master
+
+- job:
+    name: edpm-ansible-crc-podified-edpm-baremetal-cs10
+    parent: cifmw-crc-podified-edpm-baremetal
+    dependencies: ["edpm-ansible-content-provider-cs10"]
+    vars:
+      # Skip default 'sudo dnf -y update' bootstrap: fails on CS10 due to
+      # python3-setuptools conflict between delorean-master-testing and
+      # @System. Freshly built qcow2 is already up to date.
+      cifmw_edpm_deploy_baremetal_custom_bootstrap: true
+      cifmw_install_yamls_vars_patch_cs10:
+        dataplane_repo_setup_repo: current
+        dataplane_repo_setup_branch: master
+
+- job:
+    name: edpm-ansible-crc-podified-edpm-baremetal-bootc-cs10
+    parent: cifmw-crc-podified-edpm-baremetal-bootc
+    dependencies: ["edpm-ansible-content-provider-cs10"]
+    vars:
+      cifmw_install_yamls_vars_patch_cs10:
+        dataplane_repo_setup_repo: current
+        dataplane_repo_setup_branch: master
