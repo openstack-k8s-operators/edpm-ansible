@@ -1,4 +1,14 @@
 ---
+- name: Assert kernel pinning is not used on RHEL systems
+  ansible.builtin.assert:
+    that:
+      - not (ansible_facts['distribution'] | lower == 'redhat')
+    fail_msg: >-
+      Kernel pinning is not supported on RHEL production systems.
+      Pinning kernels prevents security updates and CVE fixes during RHOSO upgrades.
+      This feature is only for CI/development environments (CentOS/Fedora).
+    success_msg: "Kernel pinning is UNSUPPORTED on production systems and may result in missed security updates."
+
 - name: Validate kernel version format
   ansible.builtin.assert:
     that:

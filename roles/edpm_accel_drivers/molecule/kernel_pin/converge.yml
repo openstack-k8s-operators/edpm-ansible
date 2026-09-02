@@ -1,5 +1,5 @@
 ---
-- name: Converge
+- name: Converge - Test kernel pinning on supported OS
   hosts: all
   pre_tasks:
     - name: Read kernel version saved by prepare
@@ -17,3 +17,35 @@
           kernel_pin:
             enabled: true
             version: "{{ test_kernel_version }}"
+
+- name: Converge - Test RHEL restriction
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Override distribution fact to simulate RHEL
+      ansible.builtin.set_fact:
+        ansible_facts:
+          distribution: "RedHat"
+
+    - name: Attempt kernel pinning on RHEL (should fail)
+      block:
+        - name: Run edpm_accel_drivers with kernel_pin enabled
+          ansible.builtin.include_role:
+            name: edpm_accel_drivers
+          vars:
+            edpm_accel_drivers:
+              kernel_pin:
+                enabled: true
+                version: "5.14.0-570.26.1.el9_6"
+
+        - name: Fail if kernel pinning was allowed on RHEL
+          ansible.builtin.fail:
+            msg: "Kernel pinning should have failed on RHEL systems but did not!"
+
+      rescue:
+        - name: Verify failure message contains expected text
+          ansible.builtin.assert:
+            that:
+              - "'Kernel pinning is not supported on RHEL production systems' in ansible_failed_result.msg"
+            fail_msg: "Expected failure message not found. Got: {{ ansible_failed_result.msg }}"
+            success_msg: "Kernel pinning correctly blocked on RHEL systems"
