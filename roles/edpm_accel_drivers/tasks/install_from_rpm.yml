@@ -6,6 +6,7 @@
     name: "{{ _edpm_accel_drivers_package }}"
     state: present
     disable_gpg_check: "{{ _edpm_accel_drivers_disable_gpg_check }}"
+    allow_downgrade: "{{ _edpm_accel_drivers_allow_downgrade | default(false) }}"
     download_only: "{{ _edpm_accel_drivers_download_only | default(false) }}"
   register: _edpm_accel_drivers_install_packages_result
   until: _edpm_accel_drivers_install_packages_result is succeeded
