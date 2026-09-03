@@ -42,7 +42,7 @@
     dest: /etc/tmpfiles.d/run-frr.conf
     mode: "0755"
     content: |
-      d /run/frr 0755 root root - -
+      d /run/frr 0755 42484 42483 - -
 
 - name: Gather SELinux fact if needed
   when:
