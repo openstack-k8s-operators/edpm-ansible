@@ -66,7 +66,7 @@
     state: absent
   loop: "{{ _edpm_cleanup_service_containers }}"
 
-- name: Remove kolla config files for each container
+- name: Remove legacy kolla config files for each container (pre-upgrade nodes)
   become: true
   ansible.builtin.file:
     path: "{{ edpm_container_kolla_config_dir }}/{{ item }}.json"

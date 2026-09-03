@@ -69,6 +69,16 @@ argument_specs:
       edpm_telemetry_openstack_network_exporter_collectors:
         type: list
         required: false
+        default:
+          - bridge
+          - coverage
+          - datapath
+          - interface
+          - memory
+          - ovn
+          - pmd-perf
+          - pmd-rxq
+          - vswitch
         description: >
           List of collectors to be enabled in openstack_network_exporter. Defaults to
           EDPM-compatible collectors (excludes ovnnorthd, ovsdbserver). Set to
@@ -76,10 +86,28 @@ argument_specs:
       edpm_telemetry_openstack_network_exporter_log_level:
         type: str
         required: false
+        default: info
         description: "Log level for openstack_network_exporter. Supported levels: debug, info, notice, warning, error, critical. Default: info"
       edpm_telemetry_node_exporter_extra_args:
         type: list
         required: false
+        default:
+          - --collector.systemd
+          - '--collector.systemd.unit-include=(edpm_.*|ovs.*|openvswitch|virt.*|rsyslog)\.service'
+          - --no-collector.dmi
+          - --no-collector.entropy
+          - --no-collector.thermal_zone
+          - --no-collector.time
+          - --no-collector.timex
+          - --no-collector.uname
+          - --no-collector.stat
+          - --no-collector.hwmon
+          - --no-collector.os
+          - --no-collector.selinux
+          - --no-collector.textfile
+          - --no-collector.powersupplyclass
+          - --no-collector.pressure
+          - --no-collector.rapl
         description: >
           Extra command-line arguments to pass to node_exporter. Contains
           the default set of collector enable/disable flags. Override this
@@ -87,40 +115,79 @@ argument_specs:
       edpm_telemetry_ceilometer_common_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/ceilometer.conf:/etc/ceilometer/ceilometer.conf:ro"
+          - "{{ edpm_telemetry_config_dest }}/polling.yaml:/etc/ceilometer/polling.yaml:ro"
+          - "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf:/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf:ro"
+          - /run/libvirt:/run/libvirt:shared,ro
+          - /etc/hosts:/etc/hosts:ro
+          - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
+          - /etc/localtime:/etc/localtime:ro
+          - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
+          - /dev/log:/dev/log
         description: "List of always-present volume mounts for ceilometer_agent_compute"
+      edpm_telemetry_ceilometer_custom_conf_volumes:
+        type: list
+        required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/custom.conf:/etc/ceilometer/ceilometer.conf.d/01-ceilometer-custom.conf:ro"
+        description: "List of volume mounts for the custom ceilometer.conf.d drop-in in ceilometer_agent_compute"
       edpm_telemetry_ceilometer_tls_cacert_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
         description: "List of CA bundle volume mounts for ceilometer_agent_compute, added when CA bundle exists"
       edpm_telemetry_ceilometer_tls_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z"
         description: "List of TLS volume mounts for ceilometer_agent_compute, added when TLS certs exist"
       edpm_telemetry_node_exporter_common_volumes:
         type: list
         required: false
+        default:
+          - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw
+          - /:/rootfs:ro
         description: "List of always-present volume mounts for node_exporter"
       edpm_telemetry_node_exporter_tls_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
+          - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
         description: "List of TLS volume mounts for node_exporter, added when TLS certs exist"
       edpm_telemetry_podman_exporter_common_volumes:
         type: list
         required: false
+        default:
+          - /run/podman/podman.sock:/run/podman/podman.sock:rw,z
         description: "List of always-present volume mounts for podman_exporter"
       edpm_telemetry_podman_exporter_tls_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/podman_exporter.yaml:/etc/podman_exporter/podman_exporter.yaml:z"
+          - "{{ edpm_telemetry_certs }}:/etc/podman_exporter/tls:z"
         description: "List of TLS volume mounts for podman_exporter, added when TLS certs exist"
       edpm_telemetry_network_exporter_common_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml:/etc/openstack_network_exporter/openstack_network_exporter.yaml:z"
+          - /proc:/host/proc:ro
         description: "List of always-present volume mounts for openstack_network_exporter"
       edpm_telemetry_network_exporter_tls_volumes:
         type: list
         required: false
+        default:
+          - "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z"
         description: "List of TLS volume mounts for openstack_network_exporter, added when TLS certs exist"
       edpm_telemetry_network_exporter_ovs_volumes:
         type: list
         required: false
+        default:
+          - /var/run/openvswitch:/run/openvswitch:rw,z
+          - /var/lib/openvswitch/ovn:/run/ovn:rw,z
         description: "List of OVS/OVN volume mounts for openstack_network_exporter, added in production deployments"

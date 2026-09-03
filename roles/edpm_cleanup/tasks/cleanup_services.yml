@@ -128,7 +128,7 @@
         loop_var: _edpm_orphaned_container
       when: _edpm_orphaned_containers | length > 0
 
-    - name: Remove kolla config files for orphaned containers
+    - name: Remove legacy kolla config files for orphaned containers (pre-upgrade nodes)
       become: true
       ansible.builtin.file:
         path: "{{ edpm_container_kolla_config_dir }}/{{ item }}.json"

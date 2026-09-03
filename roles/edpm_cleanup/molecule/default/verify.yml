@@ -95,17 +95,17 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Check if kolla config for container_b exists
+    - name: Check if legacy kolla config for container_b exists
       ansible.builtin.stat:
         path: /var/lib/kolla/config_files/test_service3_container_b.json
       register: _container_b_kolla_config
 
-    - name: Verify kolla config for container_b does not exist
+    - name: Verify legacy kolla config for container_b does not exist
       ansible.builtin.assert:
         that:
           - not _container_b_kolla_config.stat.exists
-        fail_msg: "Kolla config for test_service3_container_b should not exist"
-        success_msg: "Kolla config for test_service3_container_b does not exist as expected"
+        fail_msg: "Legacy kolla config for test_service3_container_b should not exist"
+        success_msg: "Legacy kolla config for test_service3_container_b does not exist as expected"
 
     - name: Check if startup config for container_b exists
       ansible.builtin.stat:
@@ -119,17 +119,17 @@
         fail_msg: "Startup config for test_service3_container_b should not exist"
         success_msg: "Startup config for test_service3_container_b does not exist as expected"
 
-    - name: Check if kolla config for container_a still exists
+    - name: Check if legacy kolla config for container_a still exists
       ansible.builtin.stat:
         path: /var/lib/kolla/config_files/test_service3_container_a.json
       register: _container_a_kolla_config
 
-    - name: Verify kolla config for container_a still exists
+    - name: Verify legacy kolla config for container_a still exists
       ansible.builtin.assert:
         that:
           - _container_a_kolla_config.stat.exists
-        fail_msg: "Kolla config for test_service3_container_a should still exist"
-        success_msg: "Kolla config for test_service3_container_a still exists as expected"
+        fail_msg: "Legacy kolla config for test_service3_container_a should still exist"
+        success_msg: "Legacy kolla config for test_service3_container_a still exists as expected"
 
     - name: Check if startup config directory for test_service1 container exists
       ansible.builtin.stat:

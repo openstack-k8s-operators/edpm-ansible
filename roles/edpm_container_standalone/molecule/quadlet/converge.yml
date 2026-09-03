@@ -40,9 +40,6 @@
         edpm_container_standalone_service: test_service
         edpm_container_standalone_quadlet_defs:
           test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
-        edpm_container_standalone_kolla_config_files:
-          test_service:
-            command: 'sleep 3600'
 
   post_tasks:
     - name: Verify Quadlet .container file was created
@@ -104,18 +101,6 @@
       become: true
       ansible.builtin.command: podman container exists test_service
 
-    - name: Verify kolla config file deployed
-      become: true
-      ansible.builtin.stat:
-        path: /var/lib/kolla/config_files/test_service.json
-      register: _kolla_config
-
-    - name: Assert kolla config exists
-      ansible.builtin.assert:
-        that:
-          - _kolla_config.stat.exists
-        fail_msg: "Kolla config JSON was not deployed"
-
     - name: Verify state file tracking
       block:
         - name: Read deployed services state file
@@ -151,9 +136,6 @@
         edpm_container_standalone_service: test_service
         edpm_container_standalone_quadlet_defs:
           test_service: "{{ playbook_dir }}/templates/test_service.container.j2"
-        edpm_container_standalone_kolla_config_files:
-          test_service:
-            command: 'sleep 3600'
 
   post_tasks:
     - name: Get container ID after re-run
@@ -184,9 +166,6 @@
         edpm_container_standalone_service: test_service
         edpm_container_standalone_quadlet_defs:
           test_service: "{{ playbook_dir }}/templates/test_service_updated.container.j2"
-        edpm_container_standalone_kolla_config_files:
-          test_service:
-            command: 'sleep 7200'
 
   post_tasks:
     - name: Get container ID after config change

@@ -38,3 +38,8 @@
       ansible.builtin.file:
         path: /var/lib/openstack/healthchecks/iscsid
         state: absent
+
+    - name: Delete legacy kolla config file from pre-upgrade containerized deployment
+      ansible.builtin.file:
+        path: /var/lib/kolla/config_files/iscsid.json
+        state: absent
