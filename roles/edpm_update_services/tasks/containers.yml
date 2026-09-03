@@ -215,6 +215,28 @@
     - edpm_update_services
   when: '"telemetry" in edpm_update_services_running_services'
 
+- name: Apply updates for edpm_telemetry_power_monitoring role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_telemetry_power_monitoring
+    tasks_from: update.yml
+    apply:
+      become: true
+  tags:
+    - edpm_telemetry_power_monitoring
+    - edpm_update_services
+  when: '"telemetry" in edpm_update_services_running_services'
+
+- name: Updates containers for edpm_telemetry_power_monitoring role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_telemetry_power_monitoring
+    tasks_from: install.yml
+    apply:
+      become: true
+  tags:
+    - edpm_telemetry_power_monitoring
+    - edpm_update_services
+  when: '"telemetry" in edpm_update_services_running_services'
+
 - name: Prune unused container images and volumes after update
   become: true
   containers.podman.podman_prune:
