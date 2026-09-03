@@ -6,6 +6,10 @@
 {%- set _podman_exporter_volumes = _podman_exporter_volumes +
         edpm_telemetry_podman_exporter_tls_volumes -%}
 {%- endif %}
+{%- if ca_bundle_exists | bool -%}
+{%- set _podman_exporter_volumes = _podman_exporter_volumes +
+        edpm_telemetry_podman_exporter_tls_cacert_volumes -%}
+{%- endif %}
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=

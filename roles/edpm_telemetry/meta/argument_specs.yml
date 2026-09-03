@@ -164,6 +164,10 @@ argument_specs:
         default:
           - /run/podman/podman.sock:/run/podman/podman.sock:rw,z
         description: "List of always-present volume mounts for podman_exporter"
+      edpm_telemetry_podman_exporter_tls_cacert_volumes:
+        type: list
+        required: false
+        description: "List of CA bundle volume mounts for podman_exporter, added when CA bundle exists"
       edpm_telemetry_podman_exporter_tls_volumes:
         type: list
         required: false

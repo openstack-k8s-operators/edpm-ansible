@@ -15,6 +15,19 @@
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
+# NOTE(jwysogla): This shouldn't fail, we should always have the CA certs
+# available when we have the server TLS certs. But check it just in case of
+# some unexpected failure and fail early rather than the containers failing
+# to start later.
+- name: Fail when TLS certs exist without CA bundle
+  ansible.builtin.fail:
+    msg: >-
+      TLS certificates were found but the CA bundle is missing.
+      mTLS requires the CA bundle to verify client certificates.
+  when:
+    - tls_cert_exists | bool
+    - not (ca_bundle_exists | bool)
+
 - name: Build quadlet defs dict for exporter
   ansible.builtin.set_fact:
     _exporter_quadlet_defs: "{{ {exporter: _edpm_telemetry_role_path ~ '/templates/quadlet/' ~ exporter ~ '.container.j2'} }}"
