@@ -114,6 +114,7 @@
           - "'Volume=/:/rootfs:ro' in _container_content"
           - "'Volume={{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z' in _container_content"
           - "'Volume={{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z' in _container_content"
+          - "'Volume={{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in _container_content"
           - "'Volume=/var/lib/openstack/healthchecks/node_exporter:/openstack:ro,z' in _container_content"
         fail_msg: "Missing volume in node_exporter .container file"
       vars:
