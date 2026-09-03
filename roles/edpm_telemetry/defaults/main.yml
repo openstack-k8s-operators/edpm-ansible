@@ -117,6 +117,8 @@ edpm_telemetry_ceilometer_tls_volumes:
 edpm_telemetry_node_exporter_common_volumes:
   - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw
   - /:/rootfs:ro
+edpm_telemetry_node_exporter_tls_cacert_volumes:
+  - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 edpm_telemetry_node_exporter_tls_volumes:
   - "{{ edpm_telemetry_config_dest }}/node_exporter.yaml:/etc/node_exporter/node_exporter.yaml:z"
   - "{{ edpm_telemetry_certs }}:/etc/node_exporter/tls:z"
