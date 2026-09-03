@@ -29,7 +29,10 @@
 
     - name: Append other_config with PMD cores
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ {} | combine(pmd_cpu_mask) }}"
+        # Seed from edpm_ovs_other_config (user-supplied extra other_config
+        # settings) instead of {}, so dedicated settings below are combined
+        # on top of it rather than discarding it.
+        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_cpu_mask) }}"
 
 - name: Add memory channels to dpdk extra
   ansible.builtin.set_fact:
