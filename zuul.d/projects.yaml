@@ -9,6 +9,10 @@
         - noop
         - edpm-ansible-tempest-multinode
         - edpm-ansible-baremetal-minor-update
+        - edpm-ansible-content-provider-cs10
+        - edpm-ansible-tempest-multinode-cs10
+        - edpm-ansible-crc-podified-edpm-baremetal-cs10
+        - edpm-ansible-crc-podified-edpm-baremetal-bootc-cs10
         - edpm-ansible-molecule-edpm_accel_drivers
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_cleanup
