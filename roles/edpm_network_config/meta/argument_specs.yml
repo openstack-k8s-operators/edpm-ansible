@@ -79,6 +79,13 @@ argument_specs:
         type: str
         description: "Which settings template should be rendered."
         default: ""
+      edpm_network_config_nmstate_device_map_file:
+        type: str
+        description: >
+          Path to nmstate device_map.yaml recording, for every physical network device
+          (PCI ethernet NIC, SR-IOV VF, etc.), its current name, PCI address and bound
+          kernel driver. Refreshed after a successful apply (nmstate tool path only).
+        default: /var/lib/edpm-config/nmstate_device_map.yaml
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"
