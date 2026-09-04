@@ -101,9 +101,12 @@
 
     - name: Render openstack_network_exporter config
       ansible.builtin.template:
-        src: "config/openstack_network_exporter.yaml.j2"
-        dest: "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml"
+        src: "{{ item.src }}"
+        dest: "{{ edpm_telemetry_config_dest }}/{{ item.dest }}"
         mode: 0644
+      loop:
+        - {"src": "config/openstack_network_exporter.yaml.j2", "dest": "openstack_network_exporter.yaml"}
+        - {"src": "config/web_config.yaml.j2", "dest": "web_config.yaml"}
       vars:
         ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
         tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"

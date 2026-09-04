@@ -134,6 +134,7 @@ edpm_telemetry_network_exporter_common_volumes:
   - /proc:/host/proc:ro
 edpm_telemetry_network_exporter_tls_volumes:
   - "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z"
+  - "{{ edpm_telemetry_config_dest }}/web_config.yaml:/etc/openstack_network_exporter/web_config.yaml:z"
 edpm_telemetry_network_exporter_ovs_volumes:
   - /var/run/openvswitch:/run/openvswitch:rw,z
   - /var/lib/openvswitch/ovn:/run/ovn:rw,z
