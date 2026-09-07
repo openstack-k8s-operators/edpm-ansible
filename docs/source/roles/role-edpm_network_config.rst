@@ -180,13 +180,18 @@ the ``edpm_derive_pci_device_spec`` role and ``neutron_sriov`` playbook
 PCI device_map (nmstate tool)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After a successful nmstate apply, the role records the PCI address and
-currently bound kernel driver of every physical network device (PCI
-ethernet NIC or SR-IOV VF) in ``edpm_network_config_nmstate_device_map_file``
-(default ``/var/lib/edpm-config/nmstate_device_map.yaml``). Devices are
-identified by the presence of a ``device`` symlink in sysfs, which naturally
-excludes virtual netdevs (bond, bridge, dummy, vlan, veth, loopback). This is
-observational only; see ``edpm_nmstate_device_map.py``.
+The role records the PCI address and currently bound kernel driver of every
+physical network device (PCI ethernet NIC or SR-IOV VF) in
+``edpm_network_config_nmstate_device_map_file`` (default
+``/var/lib/edpm-config/nmstate_device_map.yaml``). Devices are identified by
+the presence of a ``device`` symlink in sysfs, which naturally excludes
+virtual netdevs (bond, bridge, dummy, vlan, veth, loopback). The map is
+refreshed immediately before ``edpm_network_config_driver_bind`` (so NICs
+about to leave sysfs are captured) and again after nmstate apply (or on
+apply failure). When a device later leaves sysfs (for example after a
+vfio-pci bind), its previous entries are retained and the driver field is
+updated via a live PCI lookup. This is observational only; see
+``edpm_nmstate_device_map.py``.
 
 PCI driver binding (driverctl)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
