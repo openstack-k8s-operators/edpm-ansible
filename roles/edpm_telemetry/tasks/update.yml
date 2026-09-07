@@ -90,8 +90,11 @@
     - update
     - telemetry
 
+# TODO(jwysogla): This section could probably be refactored to reuse a lot
+#                 of the ansible already present for node-exporter and
+#                 prometheus-exporter, since the deployment and configs
+#                 are very similar now.
 - name: Install openstack_network_operator if not present
-  when: not openstack_network_exporter_config_yaml.stat.exists
   become: true
   block:
     - name: Determine if cacert file exists
