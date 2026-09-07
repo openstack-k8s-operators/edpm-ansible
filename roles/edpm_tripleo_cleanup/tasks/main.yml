@@ -94,3 +94,45 @@
         cmd: /usr/bin/systemctl reset-failed {{ item }}  # noqa: command-instead-of-module no-changed-when
       loop: "{{ tripleo_services }}"
       failed_when: false
+
+- name: Check /var/lib/edpm-config/os-net-config.returncode exist
+  become: true
+  ansible.builtin.stat:
+    path: /var/lib/edpm-config/os-net-config.returncode
+  register: edpm_os_net_config_returncode_stat
+
+- name: Check for previous run of NetworkConfig
+  become: true
+  ansible.builtin.stat:
+    path: /var/lib/tripleo-config/os-net-config.returncode
+  when: not edpm_os_net_config_returncode_stat.stat.exists
+  register: tripleo_os_net_config_returncode_stat
+
+- name: Copy os-net-config return code file and cleanup
+  become: true
+  tags:
+    - adoption
+  when:
+    - ((not edpm_os_net_config_returncode_stat.stat.exists) and
+      tripleo_os_net_config_returncode_stat.stat.exists)
+  block:
+    - name: Ensure /var/lib/edpm-config directory exists
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        owner: "{{ ansible_user | default(ansible_user_id) }}"
+        group: "{{ ansible_user | default(ansible_user_id) }}"
+        setype: container_file_t
+        selevel: s0
+        mode: "0755"
+    - name: Ensure /var/lib/edpm-config/os-net-config.returncode exist
+      ansible.builtin.copy:
+        src: /var/lib/tripleo-config/os-net-config.returncode
+        dest: /var/lib/edpm-config/os-net-config.returncode
+        remote_src: true
+        setype: "container_file_t"
+        mode: "0644"
+    - name: Delete tripleo os-net-config return code
+      ansible.builtin.file:
+        path: /var/lib/tripleo-config/os-net-config.returncode
+        state: absent
