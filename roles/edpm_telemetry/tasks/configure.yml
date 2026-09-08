@@ -107,6 +107,7 @@
   loop:
     - {"src": "config/ceilometer-host-specific.conf.j2", "dest": "ceilometer-host-specific.conf"}
     - {"src": "config/openstack_network_exporter.yaml.j2", "dest": "openstack_network_exporter.yaml"}
+    - {"src": "config/web_config.yaml.j2", "dest": "web_config.yaml"}
   vars:
     ca_bundle_exists: "{{ ca_bundle_stat_res.stat.exists }}"
     tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"

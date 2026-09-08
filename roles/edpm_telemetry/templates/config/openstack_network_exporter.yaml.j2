@@ -26,22 +26,14 @@ http-listen: ":9105"
 #
 #http-path: /metrics
 
-# The path to a TLS certificate to enable HTTPS support.
+# Path to a Prometheus exporter-toolkit web configuration file to enable HTTPS
+# support. The referenced file carries the TLS cert/key under tls_server_config.
 #
-# Env: OPENSTACK_NETWORK_EXPORTER_TLS_CERT
+# Env: OPENSTACK_NETWORK_EXPORTER_WEB_CONFIG
 # Default: ""
 #
 {% if tls_cert_exists|bool %}
-tls-cert: "/etc/openstack_network_exporter/tls/tls.crt"
-{% endif %}
-
-# The path to a TLS certificate secret key to enable HTTPS support.
-#
-# Env: OPENSTACK_NETWORK_EXPORTER_TLS_KEY
-# Default: ""
-#
-{% if tls_cert_exists|bool %}
-tls-key: "/etc/openstack_network_exporter/tls/tls.key"
+web-config: "/etc/openstack_network_exporter/web_config.yaml"
 {% endif %}
 
 # Space separated list of valid users and passwords. Leave empty to disable
