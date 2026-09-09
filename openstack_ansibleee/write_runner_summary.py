@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Summarize ansible-runner artifacts for pod termination logs."""
+"""Summarize ansible-runner artifacts for the pod termination log and stdout."""
 
 from __future__ import annotations
 
@@ -35,9 +35,13 @@ def _latest_run_dir(artifacts_root: Path) -> Path | None:
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _latest_stats_event(job_events_dir: Path) -> dict[str, Any]:
@@ -46,15 +50,55 @@ def _latest_stats_event(job_events_dir: Path) -> dict[str, Any]:
 
     for event_file in job_events_dir.glob("*.json"):
         try:
-            event_data = _load_json(event_file)
-            if event_data.get("event") != "playbook_on_stats":
-                continue
-
-            return event_data
-        except (json.JSONDecodeError, OSError, TypeError):
+            event = _load_json(event_file)
+        except (json.JSONDecodeError, OSError, TypeError, UnicodeDecodeError):
+            continue
+        if not isinstance(event, dict):
+            continue
+        if event.get("event") != "playbook_on_stats":
             continue
 
+        return event
+
     return {}
+
+
+def _load_status(run_dir: Path) -> dict[str, Any]:
+    """Read the run verdict from ansible-runner artifacts.
+
+    ansible-runner writes ``status`` (e.g. ``successful``, ``failed``,
+    ``timeout``) and ``rc`` as plain-text files.
+    """
+    try:
+        status = (run_dir / "status").read_text(encoding="utf-8").strip() or None
+    except (OSError, UnicodeDecodeError):
+        status = None
+
+    try:
+        rc = int((run_dir / "rc").read_text(encoding="utf-8").strip())
+    except (OSError, ValueError, UnicodeDecodeError):
+        rc = None
+
+    return {"status": status, "rc": rc}
+
+
+def _last_event(job_events_dir: Path) -> dict[str, Any]:
+    last: dict[str, Any] = {}
+    if not job_events_dir.exists():
+        return last
+    for event_file in job_events_dir.glob("*.json"):
+        try:
+            event = _load_json(event_file)
+        except (OSError, json.JSONDecodeError, TypeError, UnicodeDecodeError):
+            continue
+        if not isinstance(event, dict):
+            continue
+        counter = event.get("counter", 0)
+        if isinstance(counter, bool) or not isinstance(counter, (int, float)):
+            continue
+        if counter >= last.get("counter", 0):
+            last = event
+    return last
 
 
 def _host_keys(stats_dict: Any) -> set[str]:
@@ -66,7 +110,7 @@ def _host_keys(stats_dict: Any) -> set[str]:
 
 def build_summary(run_dir: Path) -> dict[str, Any]:
     stats_event = _latest_stats_event(run_dir / "job_events")
-    event_data = stats_event.get("event_data", {})
+    event_data = _as_dict(stats_event.get("event_data"))
 
     total_hosts = _host_keys(event_data.get("processed"))
     failure_hosts = _host_keys(event_data.get("failures"))
@@ -113,6 +157,24 @@ def main() -> int:
 
     summary = build_summary(run_dir)
     _write_summary(summary, output_path)
+
+    status = _load_status(run_dir)
+    if status.get("status") == "successful":
+        return 0
+
+    event_data = _as_dict(_last_event(run_dir / "job_events").get("event_data"))
+    task = event_data.get("task")
+    rc = status.get("rc")
+    print(
+        "EDPM AEE SUMMARY: "
+        f"status={status.get('status') or '-'} "
+        f"rc={rc if rc is not None else '-'} "
+        f"total_hosts={summary['totalHosts']} "
+        f"failed_hosts={summary['failedHosts']} "
+        f"unreachable_hosts={summary['unreachableHosts']} "
+        f"last_task={task.get('name') if isinstance(task, dict) else '-'} "
+        f"last_host={event_data.get('host') or '-'}"
+    )
     return 0
 
 

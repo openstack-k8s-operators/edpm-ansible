@@ -48,7 +48,7 @@ write_runner_summary() {
     fi
 
     if [ -f "${summary_helper}" ] && [ "${#runner_cmd[@]}" -gt 0 ] && [ -x "${runner_cmd[0]}" ]; then
-        "${runner_cmd[@]}" "${summary_helper}" >/dev/null 2>&1 || true
+        "${runner_cmd[@]}" "${summary_helper}" || true
     fi
 }
 
