@@ -130,6 +130,12 @@
         state: directory
         mode: "0775"
 
+    - name: Create cacerts directory
+      ansible.builtin.file:
+        path: "{{ edpm_telemetry_cacerts }}"
+        state: directory
+        mode: "0775"
+
     - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
       community.crypto.openssl_privatekey:
         path: "{{ edpm_telemetry_certs }}/tls.key"
@@ -143,5 +149,14 @@
         privatekey_path: "{{ edpm_telemetry_certs }}/tls.key"
         provider: selfsigned
         mode: "0600"
+        owner: root
+        group: root
+
+    - name: Copy self-signed certificate as CA bundle
+      ansible.builtin.copy:
+        src: "{{ edpm_telemetry_certs }}/tls.crt"
+        dest: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
+        remote_src: true
+        mode: "0644"
         owner: root
         group: root
