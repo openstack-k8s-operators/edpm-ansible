@@ -29,7 +29,10 @@
 
     - name: Append other_config with PMD cores
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ {} | combine(pmd_cpu_mask) }}"
+        # Seed from edpm_ovs_dpdk_other_config (user-supplied extra other_config
+        # settings) instead of {}, so dedicated settings below are combined
+        # on top of it rather than discarding it.
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(pmd_cpu_mask) }}"
 
 - name: Add memory channels to dpdk extra
   ansible.builtin.set_fact:
@@ -44,7 +47,7 @@
 
     - name: Append other_config with DPDK extra
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_extra) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(dpdk_extra) }}"
 
 - name: Set socket-mem and socket-limit config
   when: edpm_ovs_dpdk_socket_memory|string|length > 0
@@ -61,7 +64,7 @@
 
     - name: Append other_config with socket-mem and socket-limit
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_socket_mem) | combine(dpdk_socket_limit) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(dpdk_socket_mem) | combine(dpdk_socket_limit) }}"
 
 - name: Set Revalidator threads config
   when: edpm_ovs_dpdk_revalidator_cores|string|length > 0
@@ -73,7 +76,7 @@
 
     - name: Append other_config with Revalidator threads
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(n_revalidator_threads) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(n_revalidator_threads) }}"
 
 - name: Set Handler threads config
   when: edpm_ovs_dpdk_handler_cores|string|length > 0
@@ -85,7 +88,7 @@
 
     - name: Append other_config with Handler thread
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(n_handler_threads) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(n_handler_threads) }}"
 
 - name: Set EMC Insertion Probability config
   when: edpm_ovs_dpdk_emc_insertion_probablity|string|length > 0
@@ -97,7 +100,7 @@
 
     - name: Append other_config with EMC Insertion Probability
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(emc_insert_inv_prob) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(emc_insert_inv_prob) }}"
 
 - name: Enable TSO in datapath
   when: edpm_ovs_dpdk_enable_tso|bool
@@ -109,7 +112,7 @@
 
     - name: Append other_config with TSO flag
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(userspace_tso_enable) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(userspace_tso_enable) }}"
 
 - name: Enable postcopy support
   when: edpm_ovs_dpdk_vhost_postcopy_support|bool
@@ -121,7 +124,7 @@
 
     - name: Append other_config with postcopy support flag
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(vhost_postcopy_support) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(vhost_postcopy_support) }}"
 
     - name: Disable mlockall in ovs
       ansible.builtin.replace:
@@ -146,7 +149,7 @@
 
     - name: Append other_config with PMD Auto Load Balance
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(pmd_auto_lb) }}"
 
 - name: Set minimum PMD thread load threshold
   when: edpm_ovs_dpdk_pmd_load_threshold|string|length > 0
@@ -158,7 +161,7 @@
 
     - name: Append other_config with minimum PMD thread load threshold
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_load_threshold) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(pmd_auto_lb_load_threshold) }}"
 
 - name: Set PMD load variance improvement threshold
   when: edpm_ovs_dpdk_pmd_improvement_threshold|string|length > 0
@@ -170,7 +173,7 @@
 
     - name: Append other_config with PMD load variance improvement threshold
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_improvement_threshold) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(pmd_auto_lb_improvement_threshold) }}"
 
 - name: Set PMD auto load balancing interval
   when: edpm_ovs_dpdk_pmd_rebal_interval|string|length > 0
@@ -182,7 +185,7 @@
 
     - name: Append other_config with PMD auto load balancing interval
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(pmd_auto_lb_rebal_interval) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(pmd_auto_lb_rebal_interval) }}"
 
 - name: OVN bridge datapath type config
   when: edpm_ovn_datapath_type|string|length > 0
@@ -206,7 +209,7 @@
 
     - name: Append other_config with shared memory pool
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_shared_mem_pool) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(dpdk_shared_mem_pool) }}"
 
 - name: Set PMD maximum sleep time
   when: edpm_ovs_dpdk_pmd_sleep_max|string|length > 0
@@ -218,15 +221,15 @@
 
     - name: Append other_config with max sleep time
       ansible.builtin.set_fact:
-        edpm_ovs_other_config: "{{ edpm_ovs_other_config | combine(dpdk_pmd_sleep_max) }}"
+        edpm_ovs_dpdk_other_config: "{{ edpm_ovs_dpdk_other_config | combine(dpdk_pmd_sleep_max) }}"
 
 - name: Configure OVS other_config
   ansible.builtin.shell: >
-    ovs-vsctl set open . {% for key, value in edpm_ovs_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
+    ovs-vsctl set open . {% for key, value in edpm_ovs_dpdk_other_config.items() %} other_config:{{ key }}={{ value }} {% endfor %}
   register: ovs_other_config
   changed_when: ovs_other_config.rc == 0
   failed_when: ovs_other_config.rc != 0
-  when: edpm_ovs_other_config | length > 0
+  when: edpm_ovs_dpdk_other_config | length > 0
 
 - name: Configure OVS external_ids
   ansible.builtin.shell: >
