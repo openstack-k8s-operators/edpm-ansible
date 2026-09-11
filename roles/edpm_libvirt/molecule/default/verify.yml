@@ -168,6 +168,38 @@
         that:
           - "'migration@openstack: userPassword' in saslusers.stdout_lines"
 
+    - name: Gather distribution fact
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - "distribution"
+    - name: Expected owner for confined virtproxyd configs
+      ansible.builtin.set_fact:
+        edpm_libvirt_confined_conf_owner: "{{ 'root' if ansible_facts['distribution_major_version'] is version('10', '>=') else 'libvirt' }}"
+    - name: Stat templated libvirt config files
+      become: true
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      register: libvirt_conf_stat
+      loop:
+        - {"path": "/etc/libvirt/virtproxyd.conf", "owner": "{{ edpm_libvirt_confined_conf_owner }}"}
+        - {"path": "/etc/libvirt/virtnodedevd.conf", "owner": "{{ edpm_libvirt_confined_conf_owner }}"}
+        - {"path": "/etc/libvirt/virtsecretd.conf", "owner": "{{ edpm_libvirt_confined_conf_owner }}"}
+        - {"path": "/etc/sasl2/libvirt.conf", "owner": "{{ edpm_libvirt_confined_conf_owner }}"}
+        - {"path": "/etc/libvirt/virtlogd.conf", "owner": "libvirt"}
+        - {"path": "/etc/libvirt/virtqemud.conf", "owner": "libvirt"}
+        - {"path": "/etc/libvirt/qemu.conf", "owner": "libvirt"}
+        - {"path": "/etc/libvirt/auth.conf", "owner": "libvirt"}
+    - name: Assert libvirt config ownership
+      ansible.builtin.assert:
+        that:
+          - item.stat.pw_name == item.item.owner
+        fail_msg: "{{ item.item.path }} is {{ item.stat.pw_name }}, expected {{ item.item.owner }}"
+      loop: "{{ libvirt_conf_stat.results }}"
+      loop_control:
+        label: "{{ item.item.path }}"
+
     - name: Load /etc/libvirt/virtproxyd.conf
       become: true
       ansible.builtin.slurp:

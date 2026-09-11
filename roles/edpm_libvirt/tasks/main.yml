@@ -26,6 +26,9 @@
 - name: Configure libvirt
   ansible.builtin.include_tasks: configure.yml
 
+- name: Allow confined virtproxyd to read its configs on RHEL 10
+  ansible.builtin.include_tasks: confined_config_owner.yml
+
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
