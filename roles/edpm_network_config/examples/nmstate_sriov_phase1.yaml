@@ -1,0 +1,19 @@
+---
+# Phase 1: create SR-IOV VFs on the PF (total-vfs only).
+#
+# Per-VF settings (trust, spoof-check, MAC, etc.) belong in phase 2 — they cannot
+# be applied reliably in the same pass as initial VF creation.
+#
+# Use with edpm_network_config_nmstate_sriov_pf_template (nmstate tool path).
+# Phase 2: examples/nmstate_sriov_phase2.yaml via edpm_network_config_template.
+#
+# See https://nmstate.io/devel/yaml_api.html (Ethernet interface, SR-IOV).
+interfaces:
+  - name: eno12399np0
+    type: ethernet
+    state: up
+    mtu: 1500
+    ethernet:
+      sr-iov:
+        drivers-autoprobe: true
+        total-vfs: 2

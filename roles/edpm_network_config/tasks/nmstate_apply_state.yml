@@ -1,0 +1,19 @@
+---
+# Apply one nmstate desired-state document via linux_system_roles.network.
+# Caller sets edpm_nmstate_apply_template (YAML string), edpm_nmstate_apply_phase
+# (label for logs), and optionally edpm_nmstate_apply_interface_mapping (nic
+# alias -> Linux interface name dict, from the derived NIC mapping).
+
+- name: Render network_state variable [nmstate {{ edpm_nmstate_apply_phase }}] (NIC aliases only under nmstate iface keys)
+  ansible.builtin.set_fact:
+    network_state: >-
+      {{
+        edpm_nmstate_apply_template
+        | from_yaml
+        | edpm_substitute_nic_aliases(edpm_nmstate_apply_interface_mapping | default({}))
+      }}
+
+- name: Load system-roles.network tasks [nmstate {{ edpm_nmstate_apply_phase }}]
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
+  register: edpm_nmstate_apply_result
