@@ -5,6 +5,10 @@
 {%- if tls_cert_exists | bool -%}
 {%- set _node_exporter_volumes = _node_exporter_volumes +
         edpm_telemetry_node_exporter_tls_volumes -%}
+{%- endif -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set _node_exporter_volumes = _node_exporter_volumes +
+        edpm_telemetry_node_exporter_tls_cacert_volumes -%}
 {%- endif %}
 
 # DO NOT REMOVE - used by container_config_hash module

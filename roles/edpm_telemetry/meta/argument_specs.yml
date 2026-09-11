@@ -151,6 +151,10 @@ argument_specs:
           - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:rw
           - /:/rootfs:ro
         description: "List of always-present volume mounts for node_exporter"
+      edpm_telemetry_node_exporter_tls_cacert_volumes:
+        type: list
+        required: false
+        description: "List of CA bundle volume mounts for node_exporter, added when CA bundle exists"
       edpm_telemetry_node_exporter_tls_volumes:
         type: list
         required: false
