@@ -1,0 +1,33 @@
+---
+# Validate and apply edpm_network_config_driver_bind: for each declared
+# {name, pci_address, driver}, confirm "name" really identifies "pci_address"
+# (live sysfs first, falling back to the persisted nmstate device_map.yaml
+# when the netdev is no longer present), then bind "driver" at "pci_address"
+# via driverctl. Runs before the main nmstate apply so devices are already
+# under their target kernel driver (or already detached from the host, e.g.
+# vfio-pci) by the time the network state is configured.
+
+- name: Ensure /var/lib/edpm-config exists
+  ansible.builtin.file:
+    path: /var/lib/edpm-config
+    state: directory
+    mode: "0755"
+
+- name: Write edpm_network_config_driver_bind template
+  ansible.builtin.copy:
+    content: "{{ edpm_network_config_driver_bind }}"
+    dest: /var/lib/edpm-config/.driver_bind_in.yaml
+    mode: "0644"
+
+- name: Validate and bind PCI drivers
+  become: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ role_path }}/files/edpm_driver_bind.py"
+      - -f
+      - /var/lib/edpm-config/.driver_bind_in.yaml
+      - -m
+      - "{{ edpm_network_config_nmstate_device_map_file }}"
+  register: edpm_driver_bind_cmd
+  changed_when: "'edpm_driver_bind_changed=yes' in edpm_driver_bind_cmd.stdout"
