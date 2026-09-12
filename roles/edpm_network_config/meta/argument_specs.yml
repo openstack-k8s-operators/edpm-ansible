@@ -77,8 +77,30 @@ argument_specs:
         default: false
       edpm_network_config_template:
         type: str
-        description: "Which settings template should be rendered."
+        description: >
+          Nmstate desired-state YAML (phase 2). With edpm_network_config_tool=nmstate, applied after
+          edpm_network_config_nmstate_sriov_pf_template when that is set. For os-net-config, the os-net-config
+          network config template.
         default: ""
+      edpm_network_config_nmstate_sriov_pf_template:
+        type: str
+        description: >
+          Nmstate desired-state YAML phase 1 (SR-IOV VF creation on PF). Set ethernet.sr-iov.total-vfs
+          only; do not include per-VF vfs settings here. Optional; when non-empty, applied before
+          edpm_network_config_template on the nmstate tool path.
+        default: ""
+      edpm_network_config_nmstate_sriov_vf_wait:
+        type: bool
+        description: After phase 1, wait until sysfs sriov_numvfs matches total-vfs in the SR-IOV template.
+        default: true
+      edpm_network_config_nmstate_sriov_vf_wait_timeout:
+        type: int
+        description: Seconds to wait for SR-IOV VFs to appear after phase 1.
+        default: 60
+      edpm_network_config_nmstate_sriov_vf_wait_delay:
+        type: int
+        description: Seconds between SR-IOV VF wait polls.
+        default: 2
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"
