@@ -24,6 +24,10 @@
   loop:
     - ksm.service
     - ksmtuned.service
+  register: _ksm_disable_result
+  failed_when:
+    - _ksm_disable_result is failed
+    - "'Could not find the requested service' not in _ksm_disable_result.msg"
   # NOTE(bogdando): when KSM is disabled, any memory pages that were shared
   # prior to deactivating KSM are still shared. So delete them all
   notify: Delete PageKSM
@@ -38,3 +42,7 @@
   loop:
     - ksm.service
     - ksmtuned.service
+  register: _ksm_enable_result
+  failed_when:
+    - _ksm_enable_result is failed
+    - "'Could not find the requested service' not in _ksm_enable_result.msg"
