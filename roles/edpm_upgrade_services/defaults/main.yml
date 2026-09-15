@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,4 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# Tasks for 19.0.x -> 20 minor_updates only
+
+# All variables intended for modification should be placed in this file.
+
+# Used to select which service types are upgraded on the machine.
+# The list is provided by openstack-operator.
+edpm_upgrade_services_running_services: "{{ edpm_service_types }}"
