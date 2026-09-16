@@ -179,6 +179,13 @@
             edpm_nmstate_apply_phase: sriov
             edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
 
+        # Lets phase 2 below skip the fedora.linux_system_roles.network role's package
+        # install/service enable/no-op network_connections/ping/fingerprint work and call
+        # the network_state module directly, since this phase already did all of that.
+        - name: Mark nmstate role setup as done after phase 1
+          ansible.builtin.set_fact:
+            edpm_nmstate_role_setup_done: true
+
         - name: Record SR-IOV phase result
           ansible.builtin.set_fact:
             nmstate_sriov_result: "{{ edpm_nmstate_apply_result }}"
@@ -212,6 +219,7 @@
             edpm_nmstate_apply_template: "{{ edpm_network_config_template }}"
             edpm_nmstate_apply_phase: main
             edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
+            edpm_nmstate_apply_skip_role_setup: "{{ edpm_nmstate_role_setup_done | default(false) }}"
 
         - name: Record main nmstate phase result
           ansible.builtin.set_fact:
