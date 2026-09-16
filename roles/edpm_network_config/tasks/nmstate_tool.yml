@@ -190,6 +190,7 @@
           vars:
             edpm_nmstate_apply_template: "{{ edpm_network_config_nmstate_sriov_pf_template }}"
             edpm_nmstate_apply_phase: sriov
+            edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
 
         - name: Record SR-IOV phase result
           ansible.builtin.set_fact:
@@ -203,10 +204,14 @@
         - name: Wait for SR-IOV VFs after phase 1
           when: edpm_network_config_nmstate_sriov_vf_wait | bool
           block:
-            - name: Parse phase-1 state for VF wait
+            - name: Parse phase-1 state for VF wait (same NIC alias substitution as the SR-IOV apply)
               ansible.builtin.set_fact:
                 edpm_nmstate_sriov_phase_state: >-
-                  {{ edpm_network_config_nmstate_sriov_pf_template | from_yaml }}
+                  {{
+                    edpm_network_config_nmstate_sriov_pf_template
+                    | from_yaml
+                    | osp.edpm.edpm_substitute_nic_aliases(edpm_derived_interface_mapping | default({}))
+                  }}
 
             - name: Wait until sysfs reports expected SR-IOV VF counts
               ansible.builtin.include_tasks: nmstate_wait_sriov_vfs.yml
@@ -219,6 +224,7 @@
           vars:
             edpm_nmstate_apply_template: "{{ edpm_network_config_template }}"
             edpm_nmstate_apply_phase: main
+            edpm_nmstate_apply_interface_mapping: "{{ edpm_derived_interface_mapping | default({}) }}"
 
         - name: Record main nmstate phase result
           ansible.builtin.set_fact:
@@ -248,6 +254,9 @@
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
 
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml
+
   rescue:
     - name: Ensure /var/lib/edpm-config exists after nmstate failure
       ansible.builtin.file:
@@ -261,8 +270,9 @@
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
 
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml
+
     - name: Re-raise nmstate apply failure
       ansible.builtin.fail:
         msg: "nmstate network configuration failed; see tasks above."
-    - name: Refresh nmstate device_map (physical device PCI/driver identity)
-      ansible.builtin.include_tasks: nmstate_device_map.yml
