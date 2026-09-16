@@ -17,7 +17,7 @@
     network_state: >-
       {{
         edpm_nmstate_apply_template
-        | from_yaml
+        | osp.edpm.edpm_safe_from_yaml
         | osp.edpm.edpm_substitute_nic_aliases(edpm_nmstate_apply_interface_mapping | default({}))
       }}
 

@@ -203,7 +203,7 @@
                 edpm_nmstate_sriov_phase_state: >-
                   {{
                     edpm_network_config_nmstate_sriov_pf_template
-                    | from_yaml
+                    | osp.edpm.edpm_safe_from_yaml
                     | osp.edpm.edpm_substitute_nic_aliases(edpm_derived_interface_mapping | default({}))
                   }}
 
