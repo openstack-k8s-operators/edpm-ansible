@@ -190,6 +190,58 @@ class TestEdpmDriverBind(unittest.TestCase):
             self.mod._driver_for_pci(self.pci_devices, "0000:8a:00.0"), "vfio-pci"
         )
 
+    def test_cli_end_to_end_pci_address_looking_like_sexagesimal_number(self):
+        # A PCI address like "0000:19:00.1" is all-digit colon-separated groups
+        # plus a decimal fraction, which plain yaml.safe_load would silently
+        # misparse as the float 1140.1 (YAML 1.1's legacy base-60 grammar).
+        # Written unquoted here on purpose to prove the loader itself no
+        # longer needs the caller to quote it.
+        self._set_pci_driver("0000:19:00.1", "i40e")
+        template_path = os.path.join(self.tmp, "driver_bind.yaml")
+        with open(template_path, "w", encoding="utf-8") as fh:
+            fh.write(
+                "---\n"
+                "interfaces:\n"
+                "  - name: nic2\n"
+                "    pci_address: 0000:19:00.1\n"
+                "    driver: vfio-pci\n"
+            )
+        map_path = self._write_device_map({})
+
+        result = subprocess.run(
+            [sys.executable, SCRIPT_PATH, "-f", template_path, "-m", map_path],
+            env=dict(os.environ),
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("edpm_driver_bind_changed=yes", result.stdout)
+        self.assertEqual(
+            self.mod._driver_for_pci(self.pci_devices, "0000:19:00.1"), "vfio-pci"
+        )
+
+    def test_load_yaml_keeps_sexagesimal_looking_pci_address_as_string(self):
+        template_path = os.path.join(self.tmp, "raw.yaml")
+        with open(template_path, "w", encoding="utf-8") as fh:
+            fh.write("interfaces:\n  - pci_address: 0000:19:00.1\n")
+        state = self.mod._load_yaml(template_path)
+        self.assertEqual(
+            state["interfaces"][0]["pci_address"], "0000:19:00.1"
+        )
+
+    def test_load_yaml_still_resolves_normal_ints(self):
+        template_path = os.path.join(self.tmp, "raw.yaml")
+        with open(template_path, "w", encoding="utf-8") as fh:
+            fh.write("total_vfs: 4\n")
+        state = self.mod._load_yaml(template_path)
+        self.assertEqual(state["total_vfs"], 4)
+
+    def test_normalize_interfaces_stringifies_non_string_fields(self):
+        normalized = self.mod._normalize_interfaces(
+            [{"name": "nic2", "pci_address": 1140.1, "driver": "vfio-pci"}]
+        )
+        self.assertEqual(normalized[0]["pci_address"], "1140.1")
+
     def test_cli_end_to_end_validation_failure(self):
         self._mk_physical_netdev("eno12399np0", "0000:01:00.0")
         template = self._write_template(
