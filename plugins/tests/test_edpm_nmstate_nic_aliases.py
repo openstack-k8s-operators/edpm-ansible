@@ -65,6 +65,40 @@ class TestEdpmNmstateNicAliases(unittest.TestCase):
         result = self.filter_fn(data, {})
         self.assertEqual(result, data)
 
+    def test_devargs_float_from_sexagesimal_misparse_is_stringified(self):
+        # If a template author leaves a PCI-shaped devargs unquoted and it
+        # still reaches this filter as a YAML-1.1-mangled float (e.g. because
+        # from_yaml was used instead of edpm_safe_from_yaml), the filter
+        # should not propagate that number - it must come out as a string.
+        data = {"interfaces": [{"name": "dpdk0", "dpdk": {"devargs": 1140.1}}]}
+        result = self.filter_fn(data, {})
+        self.assertEqual(result["interfaces"][0]["dpdk"]["devargs"], "1140.1")
+
+    def test_pci_address_int_is_stringified(self):
+        data = {
+            "interfaces": [
+                {
+                    "name": "nic3",
+                    "ethernet": {
+                        "sr-iov": {"vfs": [{"id": 0, "pci_address": 123}]}
+                    },
+                }
+            ]
+        }
+        result = self.filter_fn(data, {})
+        vf = result["interfaces"][0]["ethernet"]["sr-iov"]["vfs"][0]
+        self.assertEqual(vf["pci_address"], "123")
+
+    def test_devargs_string_is_left_unchanged(self):
+        data = {"interfaces": [{"name": "dpdk0", "dpdk": {"devargs": "0000:19:00.1"}}]}
+        result = self.filter_fn(data, self.mapping)
+        self.assertEqual(result["interfaces"][0]["dpdk"]["devargs"], "0000:19:00.1")
+
+    def test_pci_like_stringification_runs_even_with_empty_mapping(self):
+        data = {"interfaces": [{"name": "dpdk0", "dpdk": {"devargs": 1140.1}}]}
+        result = self.filter_fn(data, {})
+        self.assertEqual(result["interfaces"][0]["dpdk"]["devargs"], "1140.1")
+
 
 if __name__ == "__main__":
     unittest.main()

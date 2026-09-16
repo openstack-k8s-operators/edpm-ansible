@@ -76,7 +76,34 @@ def _is_nic_name_key(key: str) -> bool:
     return _normalize_key(key) in _NIC_NAME_KEYS
 
 
+# Keys whose values are PCI addresses / DPDK devargs and must stay strings.
+# These are BDF-shaped ("0000:19:00.1"), always a single scalar (nmstate's
+# dpdk.devargs is one BDF per port; our own driver_bind pci_address is one
+# per interface entry - never a list), and, if ever loaded by a YAML parser
+# that still applies the legacy base-60 int/float grammar (colon-separated,
+# all-digit groups), would silently become a number (see edpm_safe_yaml.py,
+# used when rendering these templates, and edpm_driver_bind.py's loader).
+# This is belt-and-suspenders for values that reach this filter as
+# already-non-string (e.g. built up programmatically) rather than parsed
+# from raw YAML text.
+_PCI_LIKE_KEYS = frozenset({"pci-address", "devargs"})
+
+
+def _is_pci_like_key(key: str) -> bool:
+    return _normalize_key(key) in _PCI_LIKE_KEYS
+
+
+def _stringify_pci_like(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return str(value)
+    return value
+
+
 def _subst_value(key: str, value, mapping: dict):
+    if _is_pci_like_key(key):
+        return _stringify_pci_like(value)
     if not _is_nic_name_key(key):
         if isinstance(value, dict):
             return _walk_dict(value, mapping)
@@ -129,10 +156,11 @@ class FilterModule:
 
         :param data: Parsed nmstate/network_state (dict or list), typically from_yaml.
         :param mapping: dict mapping alias -> interface name (e.g. nic1 -> eth0).
-        :returns: New structure with substitutions applied; unchanged if mapping empty.
+        :returns: New structure with substitutions applied. Always walked (even
+            with an empty mapping) since PCI-like fields (see _PCI_LIKE_KEYS)
+            are normalized to strings regardless of alias substitution.
         """
-        if not mapping:
-            return data
+        mapping = mapping or {}
         if isinstance(data, dict):
             return _walk_dict(data, mapping)
         if isinstance(data, list):

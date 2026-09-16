@@ -32,6 +32,50 @@ PCI_DEVICES = os.environ.get("EDPM_TEST_PCI_DEVICES", "/sys/bus/pci/devices")
 DRIVERCTL_BIN = os.environ.get("EDPM_TEST_DRIVERCTL_BIN", "driverctl")
 CHANGED_MARKER = "edpm_driver_bind_changed="
 
+# String fields that must never come out of YAML loading as anything other
+# than str (see _NoSexagesimalLoader below for why this can otherwise happen).
+_STRING_FIELDS = ("name", "pci_address", "driver")
+
+
+def _string_or_original(base_constructor):
+    """Wrap a PyYAML scalar constructor so that colon-containing values fall
+    back to a plain string instead of being resolved as int/float.
+
+    YAML 1.1 (which PyYAML implements) auto-converts unquoted scalars like
+    "0000:19:00.1" into numbers via a legacy base-60 ("H:MM:SS") notation:
+    all-digit groups joined by colons, optionally with a decimal fraction,
+    resolve to tag:yaml.org,2002:int or :float. A PCI address such as
+    "0000:19:00.1" matches that pattern exactly and silently becomes the
+    float 1140.1. Neither the int nor the float grammar ever matches a
+    colon-containing scalar any other way, so if the raw text contains ':'
+    here, it can only be that legacy notation kicking in - return the
+    original string instead of trusting the resolved numeric tag.
+    """
+
+    def _construct(loader, node):
+        raw = loader.construct_scalar(node)
+        if ":" in raw:
+            return raw
+        return base_constructor(loader, node)
+
+    return _construct
+
+
+class _NoSexagesimalLoader(yaml.SafeLoader):
+    """SafeLoader that never turns a colon-containing scalar (e.g. a PCI
+    address like "0000:19:00.1") into a number. See _string_or_original.
+    """
+
+
+_NoSexagesimalLoader.add_constructor(
+    "tag:yaml.org,2002:int",
+    _string_or_original(yaml.SafeLoader.construct_yaml_int),
+)
+_NoSexagesimalLoader.add_constructor(
+    "tag:yaml.org,2002:float",
+    _string_or_original(yaml.SafeLoader.construct_yaml_float),
+)
+
 
 def _device_dir(sys_class_net: str, name: str) -> str:
     return os.path.join(sys_class_net, name, "device")
@@ -60,8 +104,31 @@ def _load_yaml(path: str) -> dict:
     if not path:
         return {}
     with open(path, encoding="utf-8") as fh:
-        data = yaml.safe_load(fh)
+        data = yaml.load(fh, Loader=_NoSexagesimalLoader)  # noqa: S506
     return data if isinstance(data, dict) else {}
+
+
+def _normalize_interfaces(interfaces: list) -> list:
+    """Force name/pci_address/driver to str(), in case some other unforeseen
+    path (not just plain-unquoted PCI addresses, which _NoSexagesimalLoader
+    already handles) hands us a non-string, e.g. an int/float/bool from a
+    YAML anchor or a caller that builds this file programmatically. Belt and
+    suspenders: fail validation with a clear message rather than crashing
+    with a TypeError deep inside os.path.join().
+    """
+    normalized = []
+    for entry in interfaces:
+        if isinstance(entry, dict):
+            entry = {
+                key: (
+                    str(value)
+                    if key in _STRING_FIELDS and value is not None
+                    else value
+                )
+                for key, value in entry.items()
+            }
+        normalized.append(entry)
+    return normalized
 
 
 def _validate_schema(interfaces: list) -> List[str]:
@@ -142,7 +209,7 @@ def main() -> int:
     args = parser.parse_args()
 
     state = _load_yaml(args.template)
-    interfaces = state.get("interfaces") or []
+    interfaces = _normalize_interfaces(state.get("interfaces") or [])
     device_map = _load_yaml(args.map) if args.map and os.path.isfile(args.map) else {}
 
     errors = validate_interfaces(interfaces, SYS_CLASS_NET, device_map)
