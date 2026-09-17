@@ -1,0 +1,37 @@
+---
+- name: EDPM upgrade
+  hosts: "{{ edpm_override_hosts | default('all', true) }}"
+  strategy: linear
+  gather_facts: "{{ gather_facts | default(false) }}"
+  any_errors_fatal: "{{ edpm_any_errors_fatal | default(true) }}"
+  max_fail_percentage: "{{ edpm_max_fail_percentage | default(0) }}"
+  environment: "{{ edpm_playbook_environment | default({}) }}"
+  tasks:
+    # Task 1: run every per-service major-version upgrade. If any role fails,
+    # any_errors_fatal stops the play here and Task 2 is never reached, so no
+    # completion marker is written and a re-run safely retries all steps.
+    - name: Upgrade EDPM services
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_upgrade_services
+      tags:
+        - edpm_upgrade_services
+
+    # Task 2: only reached when Task 1 fully succeeded on all hosts in the batch.
+    - name: Record upgrade completion
+      become: true
+      tags:
+        - edpm_upgrade_services
+      block:
+        - name: Ensure ansible facts directory exists
+          ansible.builtin.file:
+            state: directory
+            path: /etc/ansible/facts.d
+            mode: "0755"
+
+        - name: Mark 18->19 upgrade complete on node
+          ansible.builtin.copy:
+            dest: /etc/ansible/facts.d/edpm_upgrade.fact
+            content: |
+              [upgrade]
+              to_version=19
+            mode: "0644"
