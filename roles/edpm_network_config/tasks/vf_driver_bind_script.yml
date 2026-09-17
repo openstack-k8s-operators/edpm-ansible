@@ -1,0 +1,16 @@
+---
+# Install the edpm-vf-driver-bind helper script used for SR-IOV VF driver
+# binding in NIC Partitioning setups. The script itself does nothing unless
+# invoked; it is meant to be called from a NetworkManager dispatcher script
+# attached to a PF interface via nmstate's "dispatch.post-activation" (set by
+# the operator in edpm_network_config_nmstate_sriov_pf_template /
+# edpm_network_config_template). See docs/source/roles/role-edpm_network_config.rst.
+
+- name: Install edpm-vf-driver-bind helper script
+  become: true
+  ansible.builtin.copy:
+    src: edpm_vf_driver_bind.sh
+    dest: "{{ edpm_network_config_vf_driver_bind_script }}"
+    mode: "0755"
+    owner: root
+    group: root
