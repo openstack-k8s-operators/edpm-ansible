@@ -1,14 +1,19 @@
 ---
 - project:
     name: openstack-k8s-operators/edpm-ansible
-    templates:
-      - podified-multinode-edpm-baremetal-pipeline
-      - podified-multinode-edpm-baremetal-bootc-pipeline
     github-check:
       jobs:
         - noop
         - edpm-ansible-tempest-multinode
         - edpm-ansible-baremetal-minor-update
+        - edpm-ansible-content-provider-cs10
+        # From dropped baremetal pipeline templates; baremetal jobs now
+        # use cs10
+        - podified-multinode-edpm-deployment-crc:
+            dependencies:
+              - openstack-k8s-operators-content-provider
+        - edpm-ansible-crc-podified-edpm-baremetal
+        - edpm-ansible-crc-podified-edpm-baremetal-bootc
         - edpm-ansible-molecule-edpm_accel_drivers
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_cleanup
