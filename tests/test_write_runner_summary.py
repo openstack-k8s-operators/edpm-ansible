@@ -187,3 +187,135 @@ def test_main_returns_zero_when_no_artifacts_exist(tmp_path, monkeypatch):
 
     assert write_runner_summary.main() == 0
     assert not output_path.exists()
+
+
+def _create_malformed_run_dir(tmp_path):
+    run_dir = tmp_path / "artifacts" / "run-one"
+    events_dir = run_dir / "job_events"
+    events_dir.mkdir(parents=True)
+    (run_dir / "status").write_text("", encoding="utf-8")
+    (events_dir / "1-list.json").write_text(
+        json.dumps([1, 2]), encoding="utf-8"
+    )
+    (events_dir / "2-string-counter.json").write_text(
+        json.dumps({"counter": "high", "event": "task_start"}),
+        encoding="utf-8",
+    )
+    (events_dir / "3-bool-counter.json").write_text(
+        json.dumps({"counter": True, "event": "task_start"}),
+        encoding="utf-8",
+    )
+    (events_dir / "4-non-mapping-event-data.json").write_text(
+        json.dumps(
+            {"counter": 4, "event": "task_start", "event_data": "unexpected"}
+        ),
+        encoding="utf-8",
+    )
+    (events_dir / "5-binary.json").write_bytes(b"\xff\xfe\x00not-utf8")
+    return run_dir
+
+
+def test_main_prints_summary_with_malformed_artifacts(
+    tmp_path, monkeypatch, capsys
+):
+    _create_malformed_run_dir(tmp_path)
+    output_path = tmp_path / "termination.log"
+
+    monkeypatch.setenv("EDPM_AEE_ARTIFACTS_ROOT", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("EDPM_AEE_TERMINATION_LOG", str(output_path))
+
+    assert write_runner_summary.main() == 0
+
+    captured = capsys.readouterr()
+    assert "EDPM AEE SUMMARY:" in captured.out
+    assert "status=-" in captured.out
+    assert "rc=-" in captured.out
+    assert "last_task=-" in captured.out
+    assert "last_host=-" in captured.out
+
+
+def test_main_stays_silent_on_successful_run(tmp_path, monkeypatch, capsys):
+    _create_run_dir(
+        tmp_path,
+        "run-one",
+        5,
+        {"host-a": 1},
+        {},
+        {},
+    )
+    run_dir = tmp_path / "artifacts" / "run-one"
+    (run_dir / "status").write_text("successful", encoding="utf-8")
+    (run_dir / "rc").write_text("0", encoding="utf-8")
+    output_path = tmp_path / "termination.log"
+
+    monkeypatch.setenv("EDPM_AEE_ARTIFACTS_ROOT", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("EDPM_AEE_TERMINATION_LOG", str(output_path))
+
+    assert write_runner_summary.main() == 0
+
+    assert capsys.readouterr().out == ""
+    written_summary = json.loads(output_path.read_text(encoding="utf-8"))
+    assert written_summary["totalHosts"] == 1
+
+
+def test_main_prints_plain_text_status_and_rc(tmp_path, monkeypatch, capsys):
+    _create_run_dir(
+        tmp_path,
+        "run-one",
+        3,
+        {"host-a": 1, "host-b": 1},
+        {"host-b": 1},
+        {},
+    )
+    run_dir = tmp_path / "artifacts" / "run-one"
+    (run_dir / "status").write_text("failed", encoding="utf-8")
+    (run_dir / "rc").write_text("2", encoding="utf-8")
+    events_dir = run_dir / "job_events"
+    (events_dir / "4-task-start.json").write_text(
+        json.dumps(
+            {
+                "counter": 4,
+                "event": "task_start",
+                "event_data": {
+                    "task": {"name": "Install packages"},
+                    "host": "host-b",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "termination.log"
+
+    monkeypatch.setenv("EDPM_AEE_ARTIFACTS_ROOT", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("EDPM_AEE_TERMINATION_LOG", str(output_path))
+
+    assert write_runner_summary.main() == 0
+
+    captured = capsys.readouterr()
+    assert "EDPM AEE SUMMARY:" in captured.out
+    assert "status=failed" in captured.out
+    assert "rc=2" in captured.out
+    assert "last_task=Install packages" in captured.out
+    assert "last_host=host-b" in captured.out
+
+
+def test_build_summary_handles_non_mapping_event_data(tmp_path):
+    run_dir = tmp_path / "artifacts" / "run-one"
+    events_dir = run_dir / "job_events"
+    events_dir.mkdir(parents=True)
+    (events_dir / "1-stats.json").write_text(
+        json.dumps(
+            {
+                "counter": 1,
+                "event": "playbook_on_stats",
+                "event_data": ["unexpected"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    summary = write_runner_summary.build_summary(run_dir)
+
+    assert summary["totalHosts"] == 0
+    assert summary["failedHostList"] == []
+    assert summary["unreachableHostList"] == []
