@@ -97,6 +97,25 @@
       changed_when: >-
         'edpm_derived_nic_mapping_changed=yes' in (edpm_derived_nic_mapping_result.stdout | default(''))
 
+    - name: Slurp derived NIC mapping for display
+      ansible.builtin.slurp:
+        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+      register: edpm_derived_nic_mapping_display_slurp
+
+    - name: Display resolved NIC mapping (nicN alias -> interface name)
+      ansible.builtin.debug:
+        msg: >-
+          {{
+            (edpm_derived_nic_mapping_display_slurp.content | b64decode | from_yaml | default({})).get('interface_mapping', {})
+          }}
+
+- name: Note that resolved NIC mapping is unavailable in check mode
+  ansible.builtin.debug:
+    msg: >-
+      Resolved NIC mapping is not recomputed in --check mode; run without --check to see the
+      current nicN alias -> interface name mapping.
+  when: ansible_check_mode | bool
+
 - name: Check nmstate return code for conditional logic
   become: true
   block:
