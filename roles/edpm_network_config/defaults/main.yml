@@ -35,6 +35,7 @@ edpm_network_config_tool: os-net-config
 edpm_network_config_systemrole_nmstate_dependencies:
   - NetworkManager-ovs
   - python3-pyyaml
+  - driverctl
 
 # seconds between retries for download tasks
 edpm_network_config_download_delay: "{{ edpm_download_delay | default(60) }}"
@@ -83,6 +84,14 @@ edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device
 # list of {name, pci_address, driver} (nmstate tool path only). See
 # roles/edpm_network_config/files/edpm_driver_bind.py for validation rules.
 edpm_network_config_driver_bind: ""
+# Path where the edpm-vf-driver-bind helper script is installed (nmstate tool
+# path only). Used for SR-IOV VF driver binding in NIC Partitioning setups: a
+# PF's nmstate "dispatch.post-activation" script (authored by the operator in
+# edpm_network_config_nmstate_sriov_pf_template / edpm_network_config_template)
+# calls this script to bind each VF to vfio-pci (DPDK/passthrough) or its
+# default kernel driver, via driverctl. See
+# roles/edpm_network_config/files/edpm_vf_driver_bind.sh.
+edpm_network_config_vf_driver_bind_script: /usr/local/bin/edpm-vf-driver-bind
 # Phase 1 (optional): nmstate YAML to create SR-IOV VFs on PF(s) (total-vfs only).
 # Per-VF vfs settings belong in edpm_network_config_template (phase 2).
 edpm_network_config_nmstate_sriov_pf_template: ""
