@@ -12,3 +12,9 @@
   until: _edpm_accel_drivers_install_packages_result is succeeded
   retries: "{{ _edpm_accel_drivers_config.download.retries }}"
   delay: "{{ _edpm_accel_drivers_config.download.delay }}"
+
+- name: Accumulate driver package changes
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_install_packages_changed: >-
+      {{ (_edpm_accel_drivers_install_packages_changed | default(false) | bool) or
+      (_edpm_accel_drivers_install_packages_result.changed | bool) }}
