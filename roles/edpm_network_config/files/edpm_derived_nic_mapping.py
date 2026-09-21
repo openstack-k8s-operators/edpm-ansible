@@ -16,6 +16,17 @@
 # interfaces get nic1, nic2, ... per embedded-first then natural sort ordering.
 # Kernel dummy interfaces (dummy0, …) are included for Molecule/lab; they have no
 # PCI device/ in sysfs — see _is_available_nic.
+#
+# Stability across runs: this file (-f/--file) is never blindly overwritten with
+# the operator's raw mapping before this script runs; it is read here as the
+# *previous* run's derived mapping. When an alias's target NIC has since left
+# sysfs (e.g. handed to vfio-pci by edpm_network_config_driver_bind, or by an
+# external tool, for DPDK/SR-IOV passthrough), the nmstate device_map.yaml
+# (-m/--device-map) is used to confirm that via a live PCI driver lookup, and
+# the alias is kept pointing at that device name rather than dropped — dropping
+# it would free up its "nicN" slot and reshuffle every other auto-derived
+# alias's number on the very next run. See --user-mapping for the operator's
+# fresh input (re-validated against live sysfs/MAC every run, always wins).
 
 import argparse
 import glob
@@ -28,7 +39,8 @@ from typing import Dict, List, Optional
 LOG = logging.getLogger(__name__)
 
 DEFAULT_PATH = "/var/lib/edpm-config/derived_nic_mapping.yaml"
-SYS_CLASS_NET = "/sys/class/net"
+SYS_CLASS_NET = os.environ.get("EDPM_TEST_SYS_CLASS_NET", "/sys/class/net")
+PCI_DEVICES = os.environ.get("EDPM_TEST_PCI_DEVICES", "/sys/bus/pci/devices")
 
 
 def _natural_sort_key(s):
@@ -97,7 +109,9 @@ def _is_real_nic(interface_name: str) -> bool:
 
 
 def _is_vf_by_name(interface_name: str) -> bool:
-    physfn = os.path.join(SYS_CLASS_NET, interface_name, "physfn")
+    # The physfn symlink (present only on SR-IOV VF netdevs, pointing at the PF's
+    # PCI device) lives under device/, not directly under the net class dir.
+    physfn = os.path.join(SYS_CLASS_NET, interface_name, "device", "physfn")
     return os.path.isdir(physfn)
 
 
@@ -126,6 +140,30 @@ def _is_available_nic(interface_name: str, check_active: bool) -> bool:
     return True
 
 
+def _device_map_pci(device_map: Optional[dict], name: str) -> Optional[str]:
+    devices = (device_map or {}).get("devices") or {}
+    info = devices.get(name)
+    return info.get("pci") if isinstance(info, dict) else None
+
+
+def _live_driver_for_pci(pci_address: Optional[str]) -> Optional[str]:
+    if not pci_address:
+        return None
+    driver_link = os.path.join(PCI_DEVICES, pci_address, "driver")
+    try:
+        return os.path.basename(os.readlink(driver_link))
+    except OSError:
+        return None
+
+
+def _is_passthrough(name: str, device_map: Optional[dict]) -> bool:
+    """True if `name` is a known physical device (per device_map.yaml) whose PCI
+    address is currently bound to vfio-pci, i.e. intentionally taken off the
+    host network stack for DPDK/SR-IOV passthrough, rather than genuinely
+    missing/renamed/misconfigured hardware."""
+    return _live_driver_for_pci(_device_map_pci(device_map, name)) == "vfio-pci"
+
+
 def _ordered_nics(check_active: bool) -> List[str]:
     embedded_nics: List[str] = []
     nics: List[str] = []
@@ -142,57 +180,95 @@ def _ordered_nics(check_active: bool) -> List[str]:
     return active_nics
 
 
-def derive_nic_mapping(nic_mapping: Optional[dict]) -> Dict[str, str]:
-    """Resolve user interface_mapping to Linux names; assign nicN for leftovers."""
-    mapping = dict(nic_mapping or {})
+def derive_nic_mapping(
+    user_mapping: Optional[dict],
+    previous_mapping: Optional[dict] = None,
+    device_map: Optional[dict] = None,
+) -> Dict[str, str]:
+    """Resolve NIC aliases to Linux interface names; assign nicN for leftovers.
+
+    :param user_mapping: alias -> MAC/interface name from the operator's
+        edpm_network_config_mappings / edpm_network_config_os_net_config_mappings.
+        Always re-validated against live sysfs/MAC this run; wins over
+        previous_mapping on a matching alias.
+    :param previous_mapping: this role's own interface_mapping output from the
+        last run. Used only as a fallback: an alias whose target NIC is no
+        longer in sysfs is kept (instead of dropped) when device_map confirms
+        it is vfio-pci passthrough, so unrelated aliases don't get renumbered.
+    :param device_map: parsed nmstate device_map.yaml (name -> pci/driver),
+        used to confirm a NIC absent from sysfs was handed to vfio-pci rather
+        than genuinely removed/renamed/misconfigured.
+    """
+    user_mapping = dict(user_mapping or {})
+    previous_mapping = dict(previous_mapping or {})
     mapped: Dict[str, str] = {}
+    available_nics = _ordered_nics(check_active=False)
 
-    if mapping:
-        available_nics = _ordered_nics(check_active=False)
-        for nic_alias, nic_mapped in mapping.items():
-            nm = nic_mapped
-            nm_mac = _normalize_mac(str(nm))
-            if nm_mac:
-                found = False
-                for nic in available_nics:
-                    mac = _read_mac(nic)
-                    mac_norm = _normalize_mac(mac) if mac else None
-                    if mac_norm and nm_mac == mac_norm:
-                        nm = nic
-                        found = True
-                        break
-                if not found:
-                    LOG.error(
-                        "mac %s not found in available nics %s",
-                        nic_mapped,
-                        ", ".join(available_nics),
-                    )
-                    continue
-            elif nm not in available_nics:
-                LOG.error(
-                    "nic %s not found in available nics %s",
-                    nic_mapped,
-                    ", ".join(available_nics),
-                )
-                continue
+    def _resolve(nic_alias: str, nic_mapped: str) -> Optional[str]:
+        nm = nic_mapped
+        nm_mac = _normalize_mac(str(nm))
+        if nm_mac:
+            for nic in available_nics:
+                mac_norm = _normalize_mac(_read_mac(nic) or "")
+                if mac_norm and nm_mac == mac_norm:
+                    return nic
+            LOG.error(
+                "mac %s not found in available nics %s",
+                nic_mapped,
+                ", ".join(available_nics),
+            )
+            return None
+        if nm in available_nics:
+            return nm
+        if _is_passthrough(nm, device_map):
+            LOG.info(
+                "%s => %s (not present in sysfs; keeping mapping, bound to "
+                "vfio-pci per device_map)",
+                nic_alias,
+                nm,
+            )
+            return nm
+        LOG.error(
+            "nic %s not found in available nics %s", nic_mapped, ", ".join(available_nics)
+        )
+        return None
 
-            if nm in mapped.values():
-                raise ValueError(
-                    "interface %s already mapped, check mapping file for duplicates"
-                    % nm
-                )
-            if _is_available_nic(nic_alias, check_active=True):
-                raise ValueError(
-                    "cannot map %s to alias %s, alias overlaps with active NIC."
-                    % (nm, nic_alias)
-                )
-            if _is_real_nic(nic_alias) or _is_kernel_dummy(nic_alias):
-                LOG.warning(
-                    "Mapped nic %s overlaps with name of inactive NIC.", nic_alias
-                )
+    for nic_alias, nic_mapped in user_mapping.items():
+        nm = _resolve(nic_alias, nic_mapped)
+        if nm is None:
+            continue
 
-            mapped[nic_alias] = nm
-            LOG.info("%s => %s", nic_alias, nm)
+        if nm in mapped.values():
+            raise ValueError(
+                "interface %s already mapped, check mapping file for duplicates"
+                % nm
+            )
+        if _is_available_nic(nic_alias, check_active=True):
+            raise ValueError(
+                "cannot map %s to alias %s, alias overlaps with active NIC."
+                % (nm, nic_alias)
+            )
+        if _is_real_nic(nic_alias) or _is_kernel_dummy(nic_alias):
+            LOG.warning(
+                "Mapped nic %s overlaps with name of inactive NIC.", nic_alias
+            )
+
+        mapped[nic_alias] = nm
+        LOG.info("%s => %s", nic_alias, nm)
+
+    # Aliases this role auto-assigned on a previous run (nic5, nic6, ...), not
+    # re-specified by the operator this run: keep them if the target NIC is
+    # still around, or if it is now known-vfio-pci per device_map. This avoids
+    # reshuffling every other alias's number just because one device left the
+    # host network stack.
+    for nic_alias, nic_mapped in previous_mapping.items():
+        if nic_alias in mapped or nic_alias in user_mapping:
+            continue
+        if nic_mapped in mapped.values():
+            continue
+        if nic_mapped in available_nics or _is_passthrough(nic_mapped, device_map):
+            mapped[nic_alias] = nic_mapped
+            LOG.info("%s => %s (retained from previous run)", nic_alias, nic_mapped)
 
     active_nics = _ordered_nics(check_active=True)
     for nic_mapped in set(active_nics).difference(set(mapped.values())):
@@ -213,8 +289,8 @@ def derive_nic_mapping(nic_mapping: Optional[dict]) -> Dict[str, str]:
     return mapped
 
 
-def load_yaml(path: str) -> Dict[str, str]:
-    if not os.path.isfile(path):
+def _load_yaml_file(path: str) -> dict:
+    if not path or not os.path.isfile(path):
         return {}
     try:
         import yaml
@@ -224,14 +300,23 @@ def load_yaml(path: str) -> Dict[str, str]:
             "(see edpm_network_config_systemrole_nmstate_dependencies)."
         ) from exc
     with open(path, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    if not data:
-        return {}
+        return yaml.safe_load(f) or {}
+
+
+def load_yaml(path: str) -> Dict[str, str]:
+    """Load an alias -> MAC/name mapping (interface_mapping: / mapped_nics: key)."""
+    data = _load_yaml_file(path)
     if "interface_mapping" in data:
         return dict(data["interface_mapping"])
     if "mapped_nics" in data:
         return dict(data["mapped_nics"])
     return {}
+
+
+def load_device_map(path: str) -> dict:
+    """Load nmstate device_map.yaml ({"devices": {name: {pci, driver}, ...}})."""
+    data = _load_yaml_file(path)
+    return data if isinstance(data, dict) else {}
 
 
 def save_yaml(path: str, mapped: Dict[str, str]) -> bool:
@@ -262,7 +347,25 @@ def main() -> int:
         "-f",
         "--file",
         default=DEFAULT_PATH,
-        help=f"Read/write derived mapping YAML (default: {DEFAULT_PATH})",
+        help=f"Read previous run's / write this run's derived mapping YAML "
+        f"(default: {DEFAULT_PATH}); never overwritten by the caller before "
+        f"this script runs.",
+    )
+    parser.add_argument(
+        "-u",
+        "--user-mapping",
+        default="",
+        help="Path to the operator-provided raw NIC mapping YAML "
+        "(interface_mapping: alias -> MAC/name); re-validated against live "
+        "sysfs/MAC every run and always wins over the previous derived mapping.",
+    )
+    parser.add_argument(
+        "-m",
+        "--device-map",
+        default="",
+        help="Path to nmstate device_map.yaml (name -> pci/driver); used to keep "
+        "an alias whose target NIC left sysfs because it is bound to vfio-pci "
+        "(DPDK/SR-IOV passthrough), instead of dropping it.",
     )
     parser.add_argument(
         "-n", "--dry-run", action="store_true", help="Do not write the output file."
@@ -274,8 +377,10 @@ def main() -> int:
         format="%(levelname)s %(message)s",
     )
 
-    nic_mapping = load_yaml(args.file)
-    result = derive_nic_mapping(nic_mapping)
+    user_mapping = load_yaml(args.user_mapping) if args.user_mapping else {}
+    previous_mapping = load_yaml(args.file)
+    device_map = load_device_map(args.device_map) if args.device_map else {}
+    result = derive_nic_mapping(user_mapping, previous_mapping, device_map)
 
     LOG.debug("derived mapping: %r", result)
     if not args.dry_run:
