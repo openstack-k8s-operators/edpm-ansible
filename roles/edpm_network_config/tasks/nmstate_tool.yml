@@ -38,32 +38,17 @@
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
 
-# Check mode: derived NIC mapping is not produced here, and the derived-file slurp is skipped later for the same reason.
-- name: Copy user NIC mapping to derived input and run mapped_nics
+# edpm_network_config_derived_nic_mapping_file (-f) is intentionally NEVER overwritten
+# with the raw user mapping before edpm_derived_nic_mapping.py runs: the script reads it
+# as the *previous* run's derived mapping (stability fallback for aliases whose target
+# NIC has since been handed to vfio-pci, confirmed via -m/device_map.yaml) while the
+# operator's fresh mapping is passed separately via -u/--user-mapping and always wins.
+# Check mode: derived NIC mapping is not (re)computed here.
+- name: Run derived NIC mapping (edpm_derived_nic_mapping.py)
   become: true
   when: not ansible_check_mode | bool
 
   block:
-    - name: Stat user NIC mapping file
-      ansible.builtin.stat:
-        path: "{{ edpm_network_config_mapping_file }}"
-      register: edpm_user_nic_mapping_stat
-
-    - name: Copy user_nic_mapping.yaml to derived_nic_mapping.yaml
-      ansible.builtin.copy:
-        src: "{{ edpm_network_config_mapping_file }}"
-        dest: "{{ edpm_network_config_derived_nic_mapping_file }}"
-        remote_src: true
-        force: true
-        mode: "0644"
-      when: edpm_user_nic_mapping_stat.stat.exists | default(false)
-
-    - name: Remove stale derived NIC mapping when template mapping file is absent
-      ansible.builtin.file:
-        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
-        state: absent
-      when: not (edpm_user_nic_mapping_stat.stat.exists | default(false))
-
     - name: Check that Python3 can import yaml (requires python3-pyyaml on the node)
       ansible.builtin.command:
         argv:
@@ -90,6 +75,10 @@
           - "{{ role_path }}/files/edpm_derived_nic_mapping.py"
           - "-f"
           - "{{ edpm_network_config_derived_nic_mapping_file }}"
+          - "-u"
+          - "{{ edpm_network_config_mapping_file }}"
+          - "-m"
+          - "{{ edpm_network_config_nmstate_device_map_file }}"
       register: edpm_derived_nic_mapping_result
       changed_when: >-
         'edpm_derived_nic_mapping_changed=yes' in (edpm_derived_nic_mapping_result.stdout | default(''))

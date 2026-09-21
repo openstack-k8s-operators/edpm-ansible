@@ -73,6 +73,12 @@ edpm_network_config_mappings: {}
 # way to forbid extra vars; avoid documenting this key for operators.
 # Resolved NIC mapping (mapped_nics); written by files/edpm_derived_nic_mapping.py on nmstate path.
 edpm_network_config_derived_nic_mapping_file: /var/lib/edpm-config/derived_nic_mapping.yaml
+# Path to nmstate device_map.yaml: name -> PCI address/driver for physical
+# network devices (nmstate tool path only), consulted by
+# files/edpm_derived_nic_mapping.py to keep a nicN alias stable when its
+# target NIC has left sysfs for a confirmed reason (e.g. vfio-pci
+# passthrough), instead of dropping the alias and reshuffling others.
+edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
 edpm_network_config_safe_defaults: false
 edpm_network_config_template: ""
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
