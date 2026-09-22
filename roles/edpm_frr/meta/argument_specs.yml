@@ -213,6 +213,14 @@ argument_specs:
         default: true
         description: ''
         type: bool
+      edpm_frr_bgp_graceful_shutdown:
+        default: true
+        description: >-
+          Enable BGP graceful-shutdown (RFC 8326), adding the
+          GRACEFUL_SHUTDOWN community to advertised routes. Set to
+          false for eBGP nodes where graceful-shutdown should not
+          apply during normal operation.
+        type: bool
       edpm_frr_zebra_graceful_restart_time:
         default: ''
         description: Zebra graceful_restart time (seconds)

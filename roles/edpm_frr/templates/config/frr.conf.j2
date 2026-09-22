@@ -68,7 +68,9 @@ router bgp {{ edpm_frr_bgp_asn }} vrf {{ edpm_frr_ovn_vrf_advertise }}
 router bgp {{ edpm_frr_bgp_asn }}
   bgp router-id {{ hostvars[inventory_hostname][edpm_frr_bgp_ipv4_src_network ~ '_ip'] }}
   bgp log-neighbor-changes
+{% if edpm_frr_bgp_graceful_shutdown | default(true) %}
   bgp graceful-shutdown
+{% endif %}
   no bgp default ipv4-unicast
   no bgp ebgp-requires-policy
   {{ edpm_frr_conf_custom_router_bgp }}
