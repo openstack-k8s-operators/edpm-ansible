@@ -19,3 +19,13 @@
       ansible.builtin.assert:
         that: not _edpm_accel_drivers_nvidia_mig_removed_unit_stat.stat.exists
         fail_msg: "edpm_nvidia_mig_apply_1.service should have been removed when GPU 1 was removed from geometry list"
+
+    - name: Check that removed GPU path unit file (edpm_nvidia_mig_apply_1.path) is absent
+      ansible.builtin.stat:
+        path: /etc/systemd/system/edpm_nvidia_mig_apply_1.path
+      register: _edpm_accel_drivers_nvidia_mig_removed_path_unit_stat
+
+    - name: Assert removed GPU path unit file is absent on disk
+      ansible.builtin.assert:
+        that: not _edpm_accel_drivers_nvidia_mig_removed_path_unit_stat.stat.exists
+        fail_msg: "edpm_nvidia_mig_apply_1.path should have been removed when GPU 1 was removed from geometry list"

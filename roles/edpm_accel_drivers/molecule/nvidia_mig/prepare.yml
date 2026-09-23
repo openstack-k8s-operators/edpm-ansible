@@ -13,6 +13,22 @@
         mode: '0755'
         force: true
 
+    - name: Backup readlink binary
+      become: true
+      ansible.builtin.copy:
+        src: /usr/bin/readlink
+        dest: /usr/bin/readlink.bak
+        mode: '0755'
+        force: true
+
+    - name: Install mock readlink -e for MIG scenarios
+      become: true
+      ansible.builtin.copy:
+        src: "./test_package/mock-readlink.sh"
+        dest: /usr/bin/readlink
+        mode: '0755'
+        force: true
+
     - name: Ensure /usr/lib/nvidia directory exists
       become: true
       ansible.builtin.file:
