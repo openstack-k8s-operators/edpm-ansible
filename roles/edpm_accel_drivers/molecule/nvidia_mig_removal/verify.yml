@@ -5,10 +5,10 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
-    - name: Verify remaining MIG unit (GPU 0) exists and is enabled
+    - name: Verify remaining MIG unit (GPU 0) exists
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
-        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
+        - {"name": "edpm_nvidia_mig_apply_0.service", "enabled": "disabled", "running": false}
 
     - name: Check that removed GPU unit file (edpm_nvidia_mig_apply_1.service) is absent
       ansible.builtin.stat:

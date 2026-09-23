@@ -1,14 +1,20 @@
 [Unit]
 Description=Apply NVIDIA MIG layout
 Before=edpm_libvirt.target
-After=edpm_nvidia_sriov_manage@{{ bdf }}.path
-Requires=edpm_nvidia_sriov_manage@{{ bdf }}.path
+After=nvidia-persistenced.service
+After=nvidia-fabricmanager.service
+# Wait for the MIG activation trigger until SR-IOV management target reports healthy (best effort)
+# Do not block if the target is not available (the SR-IOV management service failed then recovered).
+After=edpm_nvidia_sriov_manage.target
+Wants=edpm_nvidia_sriov_manage.target
 
 [Service]
 Type=oneshot
 User = root
 Group = root
-ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -pm 1
+# Guard against running MIG apply by the path trigger if any compute instances are in use on the GPU
+ExecCondition=/bin/bash -c 'if [ -n "$(nvidia-smi -i {{ index }} --query-compute-apps=pid --format=csv,noheader)" ]; then echo "ERROR: Compute instances are in use on GPU {{ index }}, refusing to apply MIG layout" >&2; exit 255; fi'
+ExecStartPre=-/usr/bin/nvidia-smi -i {{ index }} -pm 1
 ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -mig 1
 # Testing shows that it's possible to run the `-cgi` command below, have it "succeed", and the MIG
 # instances still are not actually created. This loop will retry for up to 30 seconds to ensure
@@ -17,6 +23,8 @@ ExecStartPre=/usr/bin/nvidia-smi -i {{ index }} -mig 1
 ExecStart=/bin/bash -c 'for _ in $(seq 1 30); do /usr/bin/nvidia-smi mig -i {{ index }} -cgi {{ geometry }} -C; sleep 1; nvidia-smi mig -lgi -i {{ index }} 2>/dev/null | grep -q "MIG " && exit 0; done; exit 1'
 
 RemainAfterExit=true
+Restart=on-failure
+RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target
