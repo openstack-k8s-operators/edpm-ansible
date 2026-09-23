@@ -8,7 +8,7 @@
     - name: Verify remaining MIG unit (GPU 0) exists and is enabled
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
-        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
+        - {"name": "edpm_nvidia_mig_apply_0.service", "enabled": "enabled", "active": ["active"]}
 
     - name: Check that removed GPU unit file (edpm_nvidia_mig_apply_1.service) is absent
       ansible.builtin.stat:
