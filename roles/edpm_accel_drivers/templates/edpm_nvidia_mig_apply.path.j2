@@ -1,0 +1,16 @@
+[Unit]
+Before=edpm_libvirt.target
+After=edpm_nvidia_sriov_manage.target
+Wants=edpm_nvidia_sriov_manage.target
+Description = Wait for a 1st VF to appear before running MIG apply
+
+[Path]
+# vfio-pci VF path by PF
+DirectoryNotEmpty=/sys/bus/pci/devices/{{ bdf }}/virtfn0
+# vfio-mdev VF paths by VF
+DirectoryNotEmpty=/sys/class/mdev_bus/{{ vf0_bdf }}
+# vfio-pci variant driver path by VF
+DirectoryNotEmpty=/sys/bus/pci/devices/{{ vf0_bdf }}/nvidia
+
+[Install]
+WantedBy = multi-user.target
