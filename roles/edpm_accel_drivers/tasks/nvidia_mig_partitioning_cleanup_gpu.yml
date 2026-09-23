@@ -4,18 +4,25 @@
   vars:
     _edpm_accel_drivers_nvidia_mig_check_gpu_index: "{{ _edpm_accel_drivers_nvidia_mig_remove_index }}"
 
-- name: Stop and disable MIG apply service for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+- name: Stop and disable MIG apply services for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
   become: true
   ansible.builtin.systemd:
-    name: "edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}"
+    name: "edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}.{{ item }}"
     state: stopped
     enabled: false
+    daemon_reload: true
+  loop:
+    - "service"
+    - "path"
 
-- name: Remove MIG apply systemd unit file for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
+- name: Remove MIG apply systemd unit files for GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
   become: true
   ansible.builtin.file:
-    path: "/etc/systemd/system/edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}.service"
+    path: "/etc/systemd/system/edpm_nvidia_mig_apply_{{ _edpm_accel_drivers_nvidia_mig_remove_index }}.{{ item }}"
     state: absent
+  loop:
+    - "service"
+    - "path"
 
 - name: Reset MIG mode on (no longer configured) GPU {{ _edpm_accel_drivers_nvidia_mig_remove_index }}
   become: true
