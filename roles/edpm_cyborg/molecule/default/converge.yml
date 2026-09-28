@@ -5,7 +5,7 @@
       vars:
         edpm_cyborg_config_src: "{{lookup('env', 'MOLECULE_PROJECT_DIRECTORY')}}/molecule/default/test-data"
         edpm_cyborg_tls_ca_src_dir: /tmp/pki
-        edpm_cyborg_agent_image: "quay.io/amoralej/openstack-cyborg-agent:master-latest"
+        edpm_cyborg_agent_image: "quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest"
         edpm_cyborg_extra_bind_mounts:
           - src: /var/lib/test_accel_device
             dest: /var/lib/test_accel_device
