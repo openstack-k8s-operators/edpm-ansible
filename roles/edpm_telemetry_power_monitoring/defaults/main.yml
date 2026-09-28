@@ -49,7 +49,6 @@ edpm_telemetry_ceilometer_agent_ipmi_common_volumes:
   - "{{ edpm_telemetry_config_dest }}/polling.yaml:/etc/ceilometer/polling.yaml:ro"
   - "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf:/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf:ro"
   - /etc/hosts:/etc/hosts:ro
-  - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
   - /etc/localtime:/etc/localtime:ro
   - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
   - /dev/log:/dev/log
