@@ -70,8 +70,8 @@ argument_specs:
       edpm_ovn_bridge_mappings:
         default:
           - datacentre:br-ex
-        description: ''
-        type: list
+        description: A bridge mapping string or list of bridge mapping strings.
+        type: raw
       edpm_ovn_controller_agent_image:
         default: quay.io/podified-antelope-centos9/openstack-ovn-controller:current-podified
         description: URL of the controller agent image.
