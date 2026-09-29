@@ -20,14 +20,32 @@ argument_specs:
         default: 'True'
         description: Enable debug mode
         type: str
+      edpm_neutron_ovn_agent_DEFAULT_metadata_workers:
+        default: '1'
+        description: >
+          Number of separate worker processes for the metadata server.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'metadata'.
+        type: str
+      edpm_neutron_ovn_agent_DEFAULT_state_path:
+        default: /var/lib/neutron
+        description: >
+          Where to store Neutron state files.
+          Used when edpm_neutron_ovn_agent_agent_extensions includes 'metadata'.
+        type: str
       edpm_neutron_ovn_agent_agent_root_helper:
         default: sudo neutron-rootwrap /etc/neutron/rootwrap.conf
         description: Neutron OVN agent root_helper command
         type: str
       edpm_neutron_ovn_agent_agent_extensions:
-        default: ''
+        default: 'metadata'
         description: Neutron OVN agent loaded extensions
         type: str
+      edpm_neutron_ovn_metadata_extension_enabled:
+        default: true
+        description: >
+          Whether the metadata extension is enabled. Automatically derived
+          if edpm_neutron_ovn_agent_agent_extensions includes 'metadata'
+        type: bool
       edpm_neutron_ovn_agent_ovn_ovsdb_connection_timeout:
         default: '180'
         description: Timeout in seconds for the OVSDB connection transaction
