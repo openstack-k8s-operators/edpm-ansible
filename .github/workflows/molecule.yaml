@@ -17,7 +17,7 @@ on:
 jobs:
   run_molecule:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         tested_role:
         - edpm_ceph_client_files
