@@ -6,6 +6,9 @@
 # via driverctl. Runs before the main nmstate apply so devices are already
 # under their target kernel driver (or already detached from the host, e.g.
 # vfio-pci) by the time the network state is configured.
+#
+# NIC aliases (nic1, nic2, ...) in "name" are resolved via the derived
+# interface_mapping before the file is written, same as nmstate templates.
 
 - name: Ensure /var/lib/edpm-config exists
   ansible.builtin.file:
@@ -13,9 +16,34 @@
     state: directory
     mode: "0755"
 
+- name: Stat derived NIC mapping for driver bind
+  ansible.builtin.stat:
+    path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+  register: edpm_driver_bind_mapping_stat
+
+- name: Read derived NIC mapping for driver bind
+  ansible.builtin.slurp:
+    path: "{{ edpm_network_config_derived_nic_mapping_file }}"
+  register: edpm_driver_bind_mapping_slurp
+  when: edpm_driver_bind_mapping_stat.stat.exists | default(false)
+
+- name: Resolve NIC aliases in driver bind template
+  ansible.builtin.set_fact:
+    edpm_driver_bind_resolved: >-
+      {{
+        edpm_network_config_driver_bind
+        | osp.edpm.edpm_safe_from_yaml
+        | osp.edpm.edpm_substitute_nic_aliases(
+            (edpm_driver_bind_mapping_slurp.content | b64decode | from_yaml | default({})).get('interface_mapping', {})
+            if edpm_driver_bind_mapping_slurp is defined
+            and edpm_driver_bind_mapping_slurp.content is defined
+            else {}
+          )
+      }}
+
 - name: Write edpm_network_config_driver_bind template
   ansible.builtin.copy:
-    content: "{{ edpm_network_config_driver_bind }}"
+    content: "{{ edpm_driver_bind_resolved | to_nice_yaml }}"
     dest: /var/lib/edpm-config/.driver_bind_in.yaml
     mode: "0644"
 
