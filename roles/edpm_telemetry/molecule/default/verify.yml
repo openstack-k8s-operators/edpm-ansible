@@ -85,7 +85,7 @@
           - "'/etc/ceilometer/ceilometer.conf.d/02-ceilometer-host-specific.conf:ro' in _container_content"
           - "'Volume=/run/libvirt:/run/libvirt:shared,ro' in _container_content"
           - "'Volume=/etc/hosts:/etc/hosts:ro' in _container_content"
-          - "'Volume=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro' in _container_content"
+          - "'ca-bundle.trust.crt' not in _container_content"
           - "'Volume=/etc/localtime:/etc/localtime:ro' in _container_content"
           - "'Volume=/etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro' in _container_content"
           - "'Volume=/dev/log:/dev/log' in _container_content"
