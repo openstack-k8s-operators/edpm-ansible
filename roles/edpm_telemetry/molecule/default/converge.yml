@@ -4,7 +4,112 @@
   gather_facts: false
   tasks:
     - name: Test edpm_telemetry role
-      ansible.builtin.include_role:
-        name: "osp.edpm.edpm_telemetry"
-      vars:
-        telemetry_test: true
+      block:
+        - name: Run the role
+          ansible.builtin.include_role:
+            name: "osp.edpm.edpm_telemetry"
+          vars:
+            telemetry_test: true
+      rescue:
+        - name: Container list
+          become: true
+          ansible.builtin.command: podman ps -a --format "table {% raw %}{{.Names}}\t{{.Status}}\t{{.ExitCode}}{% endraw %}"
+          register: container_list
+          failed_when: false
+
+        - name: Show container list
+          ansible.builtin.debug:
+            var: container_list.stdout_lines
+
+        - name: Ceilometer container logs
+          become: true
+          ansible.builtin.command: podman logs ceilometer_agent_compute
+          register: cel_logs
+          failed_when: false
+
+        - name: Show ceilometer logs
+          ansible.builtin.debug:
+            var: cel_logs.stdout_lines
+
+        - name: Ceilometer stderr
+          ansible.builtin.debug:
+            var: cel_logs.stderr_lines
+
+        - name: Ceilometer inspect
+          become: true
+          ansible.builtin.command: podman inspect ceilometer_agent_compute
+          register: cel_inspect
+          failed_when: false
+
+        - name: Show inspect
+          ansible.builtin.debug:
+            var: cel_inspect.stdout
+
+        - name: Podman version and info
+          become: true
+          ansible.builtin.shell: |
+            podman --version
+            podman info 2>&1 | head -40
+          register: podman_info
+          failed_when: false
+
+        - name: Show podman info
+          ansible.builtin.debug:
+            var: podman_info.stdout_lines
+
+        - name: Check SELinux and security
+          become: true
+          ansible.builtin.shell: |
+            getenforce 2>/dev/null || echo "SELinux not available"
+            aa-status 2>/dev/null | head -5 || echo "AppArmor not available or not root"
+          register: security_info
+          failed_when: false
+
+        - name: Show security info
+          ansible.builtin.debug:
+            var: security_info.stdout_lines
+
+        - name: Check volume source files exist
+          become: true
+          ansible.builtin.shell: |
+            echo "--- kolla config ---"
+            cat /var/lib/kolla/config_files/ceilometer_agent_compute.json 2>&1 || echo "missing"
+            echo "--- config dir ---"
+            ls -la /var/lib/openstack/telemetry/ 2>&1 || echo "missing"
+            echo "--- /dev/log ---"
+            ls -la /dev/log 2>&1 || echo "missing"
+            echo "--- host CA bundle ---"
+            ls -la /etc/pki/tls/certs/ca-bundle.trust.crt 2>&1 || echo "missing"
+            echo "--- ca-trust anchors ---"
+            ls -la /etc/pki/ca-trust/source/anchors/ 2>&1 || echo "missing"
+          register: volume_files
+          failed_when: false
+
+        - name: Show volume sources
+          ansible.builtin.debug:
+            var: volume_files.stdout_lines
+
+        - name: Test start without security_opt
+          become: true
+          ansible.builtin.shell: |
+            IMG=$(podman inspect ceilometer_agent_compute --format '{% raw %}{{.ImageName}}{% endraw %}' 2>/dev/null)
+            [ -z "$IMG" ] && echo "Cannot determine image" && exit 0
+            podman rm -f ceilometer_test 2>/dev/null || true
+            echo "Trying as root without security_opt..."
+            podman run --name ceilometer_test --rm \
+              --user root \
+              -v /var/lib/openstack/telemetry:/var/lib/kolla/config_files/src:z \
+              -v /var/lib/kolla/config_files/ceilometer_agent_compute.json:/var/lib/kolla/config_files/config.json:z \
+              -e KOLLA_CONFIG_STRATEGY=COPY_ALWAYS \
+              "$IMG" kolla_start 2>&1 | tail -30
+            echo "exit: $?"
+          register: test_start
+          failed_when: false
+
+        - name: Show test start result
+          ansible.builtin.debug:
+            var: test_start.stdout_lines
+
+        - name: Fail after diagnostics
+          ansible.builtin.fail:
+            msg: "Role failed - see diagnostics above"
