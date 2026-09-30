@@ -18,16 +18,20 @@
 - name: Converge
   hosts: all
   vars:
-      ovs_pre_update_version: "{{molecule_yml['provisioner']['env']['ovs_pre_update_version']}}"
+    ovs_target_packages: "{{ (molecule_yml['provisioner']['env']['ovs_target_packages']).split(',') }}"
   tasks:
-    - name: OVS update when specified version already set to a specific version
+    - name: set bootc fact
+      set_fact:
+        ansible_local:
+          bootc: false
+    - name: Call openvswitch update role to swap to a different ovs stream without the wrapper package
       ansible.builtin.import_role:
         name: osp.edpm.edpm_ovs
         tasks_from: update
       vars:
-        # Setting an explicit reload, but expecting no-op since no update should occur
-        edpm_ovs_reload_after_update: true
-        # ovs_pre_update_version will prepare the test instance with the specified
-        # version of ovs. Setting the same version to update to during converge should
-        # result in no-op since the specific version is already installed.
-        edpm_ovs_packages: "{{ ovs_pre_update_version.split(',') }}"
+        # prepare installed ovs_pre_update_version (an older FDP stream, e.g.
+        # openvswitch3.1). This exercises updating across FDP streams (which
+        # Conflict with, rather than Obsolete, each other) directly via
+        # edpm_ovs_packages/dnf --allowerasing, with no rdo-openvswitch/
+        # rhoso-openvswitch wrapper package involved.
+        edpm_ovs_packages: "{{ ovs_target_packages }}"

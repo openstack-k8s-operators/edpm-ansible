@@ -16,11 +16,19 @@ argument_specs:
         description: The list of ovs services to run.
         default:
           - "openvswitch"
+      edpm_ovs_version:
+        type: str
+        default: "3.5"
+        description: >-
+          The FDP openvswitch stream version to install/update to. Used to
+          compute the default edpm_ovs_packages (openvswitch<version>)
+          without depending on the rdo-openvswitch/rhoso-openvswitch wrapper
+          package.
       edpm_ovs_packages:
         type: list
         description: The list of packages to install for ovs.
         default:
-          - openvswitch
+          - "openvswitch{{ edpm_ovs_version }}"
       edpm_ovs_reload_after_update:
         type: bool
         description: Whether to reload the openvswitch service after an update is complete

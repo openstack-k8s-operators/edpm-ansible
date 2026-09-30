@@ -6,7 +6,15 @@
     _exclude_packages_always:
       - kernel
       - kernel-core
-      - openvswitch
+      # openvswitch is now installed as an explicit stream package (e.g.
+      # openvswitch3.5) rather than via the rdo-openvswitch/rhoso-openvswitch
+      # wrapper, so exclude by glob (which also matches the bare
+      # "openvswitch" name) to keep excluding it regardless of which stream
+      # is currently installed. python3-openvswitch is not installed by
+      # edpm_ovs, but is still excluded since os-net-config currently
+      # installs it; drop this once os-net-config is no longer in use.
+      - "openvswitch*"
+      - "python3-openvswitch*"
   ansible.builtin.dnf:  # noqa: package-latest
     name: "{{ edpm_update_services_include_packages }}"
     state: latest
