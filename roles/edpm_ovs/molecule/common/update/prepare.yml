@@ -18,7 +18,11 @@
   hosts: all
   become: true
   vars:
-    ovs_pre_update_version: "{{molecule_yml['provisioner']['env']['ovs_pre_update_version']}}"
+    # A comma-separated list of package names/NVRs to install before the
+    # update, e.g. "openvswitch3.1". When left unset, no override is passed
+    # to the role, so it installs using its own edpm_ovs_packages/
+    # edpm_ovs_version defaults.
+    ovs_pre_update_version: "{{ molecule_yml['provisioner']['env']['ovs_pre_update_version'] | default('', true) }}"
   pre_tasks:
     - name: Include base pre_tasks
       ansible.builtin.include_tasks:
@@ -36,7 +40,7 @@
       ansible.builtin.import_role:
         name:  osp.edpm.edpm_ovs
       vars:
-        edpm_ovs_packages: ["{{ovs_pre_update_version}}"]
+        edpm_ovs_packages: "{{ ovs_pre_update_version.split(',') if ovs_pre_update_version else omit }}"
 
     - name: Create a working directory for storing test variables
       ansible.builtin.file:
