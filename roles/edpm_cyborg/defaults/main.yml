@@ -30,7 +30,7 @@ edpm_cyborg_image_download_retries: "{{ edpm_download_retries | default(5) }}"
 # dest dir is on the target host
 edpm_cyborg_config_src: /var/lib/openstack/configs/{{ edpm_cyborg_service_name }}
 edpm_cyborg_config_dest: /var/lib/openstack/{{ edpm_cyborg_service_name }}
-edpm_cyborg_agent_image: "quay.io/openstack-k8s-operators/openstack-cyborg-agent:master-latest"
+edpm_cyborg_agent_image: "quay.io/openstack-s2i-containers/openstack-cyborg-agent:master-latest"
 
 # TLS CA bundle source directory
 edpm_cyborg_tls_ca_src_dir: "/var/lib/openstack/cacerts/{{ edpm_cyborg_service_name }}"
