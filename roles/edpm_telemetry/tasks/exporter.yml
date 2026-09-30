@@ -1,5 +1,6 @@
 ---
 
+# just testing the telemetry molecule github action
 - name: Deploy health check script
   ansible.builtin.copy:
     src: "healthchecks/{{ edpm_telemetry_healthcheck_sources[exporter] }}/"

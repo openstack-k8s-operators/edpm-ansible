@@ -1,3 +1,4 @@
+#test
 ---
 - name: Validate extra bind mounts if specified
   when: edpm_nova_extra_bind_mounts | length > 0
