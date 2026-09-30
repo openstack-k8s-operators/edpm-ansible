@@ -36,7 +36,6 @@ edpm_container_standalone_common_volumes:
   - /etc/pki/ca-trust/extracted:/etc/pki/ca-trust/extracted:ro
   - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
   - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
-  - /etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro
   - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
   # Syslog socket
   - /dev/log:/dev/log

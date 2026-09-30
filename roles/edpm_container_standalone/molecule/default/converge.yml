@@ -18,6 +18,8 @@
 - name: Deploy services and verify state tracking
   hosts: all
   gather_facts: false
+  vars_files:
+    - ../../defaults/main.yml
   pre_tasks:
     - name: Gather user fact
       ansible.builtin.setup:
@@ -31,6 +33,11 @@
         ansible_user: "{{ ansible_user_id | default(lookup('env', 'USER')) }}"
       when:
         - ansible_user is undefined
+    - name: Verify common volumes omit the removed CA bundle
+      ansible.builtin.assert:
+        that:
+          - "'/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/ca-bundle.trust.crt:ro' not in edpm_container_standalone_common_volumes"
+          - "'/etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro' in edpm_container_standalone_common_volumes"
   tasks:
     # Deploy a service with single container
     - name: Deploy service1
