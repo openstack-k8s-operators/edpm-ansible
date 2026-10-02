@@ -22,7 +22,7 @@ env:
 jobs:
 
   check-secrets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check secrets are set
         id: have-secrets
@@ -33,7 +33,7 @@ jobs:
 
   build-openstack-ansibleee-runner:
     name: Build openstack-ansibleee-runner image using buildah
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [check-secrets]
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
