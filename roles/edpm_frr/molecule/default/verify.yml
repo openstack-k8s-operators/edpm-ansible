@@ -42,6 +42,7 @@
           - "'Exec=bash -c' in _frr_container_content"
           - "'KOLLA_CONFIG_STRATEGY' not in _frr_container_content"
           - "'/var/lib/kolla/config_files' not in _frr_container_content"
+          - "'ca-bundle.trust.crt' not in _frr_container_content"
           - "'Volume=/var/lib/openstack/frr/etc/frr/frr.conf:/etc/frr/frr.conf:ro' in _frr_container_content"
           - "'Volume=/var/lib/openstack/frr/etc/frr/daemons:/etc/frr/daemons:ro' in _frr_container_content"
           - "'Requires=edpm_frr_init.service' in _frr_container_content"
