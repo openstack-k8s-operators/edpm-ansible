@@ -22,4 +22,7 @@ volumes:
   - "{{ edpm_telemetry_config_dest }}/podman_exporter.yaml:/etc/podman_exporter/podman_exporter.yaml:z"
   - "{{ edpm_telemetry_certs }}:/etc/podman_exporter/tls:z"
 {% endif %}
+{% if ca_bundle_exists|bool %}
+  - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
+{% endif %}
   - /run/podman/podman.sock:/run/podman/podman.sock:rw,z
