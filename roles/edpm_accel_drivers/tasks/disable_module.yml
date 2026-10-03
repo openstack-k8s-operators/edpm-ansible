@@ -3,6 +3,7 @@
 - name: Remove GPU module if loaded
   become: true
   ansible.builtin.command: modprobe -r {{ module_name }}
+  failed_when: false
   changed_when: false
 
 - name: Blacklist GPU module
