@@ -8,8 +8,23 @@
     - name: Verify systemd units exist and are enabled
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
+        - {"name": "edpm_nvidia_sriov_manage.target", "running": false}
         - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
         - {"name": "edpm_nvidia_mig_apply_1.service", "running": false}
+
+    - name: Read edpm_nvidia_sriov_manage.target unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/edpm_nvidia_sriov_manage.target
+      register: _edpm_accel_drivers_nvidia_sriov_manage_target_content
+
+    - name: Verify sriov_manage target aggregates per-GPU sriov_manage units
+      ansible.builtin.assert:
+        that:
+          - "'Requires=edpm_nvidia_sriov_manage_0.path' in (_edpm_accel_drivers_nvidia_sriov_manage_target_content.content | b64decode)"
+          - "'Requires=edpm_nvidia_sriov_manage_1.path' in (_edpm_accel_drivers_nvidia_sriov_manage_target_content.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage_0.service' in (_edpm_accel_drivers_nvidia_sriov_manage_target_content.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage_1.service' in (_edpm_accel_drivers_nvidia_sriov_manage_target_content.content | b64decode)"
+        fail_msg: "edpm_nvidia_sriov_manage.target does not aggregate expected sriov_manage instances"
 
     - name: Read edpm_nvidia_mig_apply_0 systemd unit file
       ansible.builtin.slurp:
@@ -21,6 +36,14 @@
         that: "'nvidia-smi mig -i 0 -cgi 14,14,14,14' in (_edpm_accel_drivers_nvidia_mig_unit_content_0.content | b64decode)"
         fail_msg: "edpm_nvidia_mig_apply_0.service does not contain expected MIG command for GPU 0 and geometry 14,14,14,14"
 
+    - name: Verify first MIG apply service depends on sriov_manage target
+      ansible.builtin.assert:
+        that:
+          - "'Wants=edpm_nvidia_sriov_manage.target' in (_edpm_accel_drivers_nvidia_mig_unit_content_0.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage.target' in (_edpm_accel_drivers_nvidia_mig_unit_content_0.content | b64decode)"
+          - "'edpm_nvidia_sriov_manage_0' not in (_edpm_accel_drivers_nvidia_mig_unit_content_0.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_0.service must want edpm_nvidia_sriov_manage.target, not require it, not individual sriov_manage instances"
+
     - name: Read edpm_nvidia_mig_apply_1 systemd unit file
       ansible.builtin.slurp:
         src: /etc/systemd/system/edpm_nvidia_mig_apply_1.service
@@ -30,3 +53,37 @@
       ansible.builtin.assert:
         that: "'nvidia-smi mig -i 1 -cgi 2g.12gb,2g.12gb' in (_edpm_accel_drivers_nvidia_mig_unit_content_1.content | b64decode)"
         fail_msg: "edpm_nvidia_mig_apply_1.service does not contain expected MIG command for GPU 1 and geometry 2g.12gb,2g.12gb"
+
+    - name: Verify second MIG apply service depends on sriov_manage target
+      ansible.builtin.assert:
+        that:
+          - "'Wants=edpm_nvidia_sriov_manage.target' in (_edpm_accel_drivers_nvidia_mig_unit_content_1.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage.target' in (_edpm_accel_drivers_nvidia_mig_unit_content_1.content | b64decode)"
+          - "'edpm_nvidia_sriov_manage_1' not in (_edpm_accel_drivers_nvidia_mig_unit_content_1.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_1.service must want edpm_nvidia_sriov_manage.target, not require it, not individual sriov_manage instances"
+
+    - name: Read edpm_nvidia_mig_apply_0 path unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/edpm_nvidia_mig_apply_0.path
+      register: _edpm_accel_drivers_nvidia_mig_path_content_0
+
+    - name: Verify first MIG apply path does not depend on sriov_manage target
+      ansible.builtin.assert:
+        that:
+          - "'Requires=edpm_nvidia_sriov_manage.target' not in (_edpm_accel_drivers_nvidia_mig_path_content_0.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage.target' not in (_edpm_accel_drivers_nvidia_mig_path_content_0.content | b64decode)"
+          - "'edpm_nvidia_sriov_manage_0' not in (_edpm_accel_drivers_nvidia_mig_path_content_0.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_0.path must not depend on edpm_nvidia_sriov_manage.target, not individual sriov_manage instances"
+
+    - name: Read edpm_nvidia_mig_apply_1 path unit file
+      ansible.builtin.slurp:
+        src: /etc/systemd/system/edpm_nvidia_mig_apply_1.path
+      register: _edpm_accel_drivers_nvidia_mig_path_content_1
+
+    - name: Verify second MIG apply path does not depend on sriov_manage target
+      ansible.builtin.assert:
+        that:
+          - "'Requires=edpm_nvidia_sriov_manage.target' not in (_edpm_accel_drivers_nvidia_mig_path_content_1.content | b64decode)"
+          - "'After=edpm_nvidia_sriov_manage.target' not in (_edpm_accel_drivers_nvidia_mig_path_content_1.content | b64decode)"
+          - "'edpm_nvidia_sriov_manage_1' not in (_edpm_accel_drivers_nvidia_mig_path_content_1.content | b64decode)"
+        fail_msg: "edpm_nvidia_mig_apply_1.path must not depend on edpm_nvidia_sriov_manage.target, not individual sriov_manage instances"

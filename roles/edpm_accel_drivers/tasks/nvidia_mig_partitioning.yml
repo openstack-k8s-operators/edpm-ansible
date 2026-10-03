@@ -1,45 +1,88 @@
 ---
-- name: Install systemd unit to control sriov-manage
+- name: Collect GPU BDFs
   become: true
-  ansible.builtin.copy:
-    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage@.service"
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      [Unit]
-      After = nvidia-vgpu-mgr.service
-      After = nvidia-vgpud.service
-      After = systemd-udevd.service
-      Description = Enable Nvidia GPU virtual functions. Should be triggered via edpm_nvidia_sriov_manage@.path to ensure GPU is ready for sriov operations.
-      [Service]
-      Type = oneshot
-      User = root
-      Group = root
-      ExecStart = /usr/lib/nvidia/sriov-manage -e %i
-      TimeoutSec = 120
-      Slice = system.slice
-      CPUAccounting = True
-      BlockIOAccounting = True
-      MemoryAccounting = True
-      TasksAccounting = True
-      RemainAfterExit = True
+  ansible.builtin.shell:
+    cmd: set -o pipefail && nvidia-smi -i {{ idx }} --query-gpu=pci.bus_id --format=csv,noheader,nounits | cut -c 5-
+  loop: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+  loop_control:
+    loop_var: idx
+  register: _edpm_accel_drivers_nvidia_sriov_bdfs_result
+  failed_when: _edpm_accel_drivers_nvidia_sriov_bdfs_result.rc != 0 or not _edpm_accel_drivers_nvidia_sriov_bdfs_result.stdout.startswith('0000')
+  changed_when: false
 
-- name: Install systemd unit to cause sriov-manage to run when sriov_numvfs appears
+- name: Set fact for all GPU BDFs
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_sriov_bdfs: "{{ _edpm_accel_drivers_nvidia_sriov_bdfs_result.results | map(attribute='stdout') | map('trim') | list }}"
+    _edpm_accel_drivers_nvidia_sriov_bdf_bases:
+      "{{ _edpm_accel_drivers_nvidia_sriov_bdfs_result.results |
+      map(attribute='stdout') | map('trim') |
+      map('regex_replace', '^([0-9a-fA-F]+:[0-9a-fA-F]+):.*$', '\\1') | list }}"
+
+- name: Verify virtfn0 BDF exists for each GPU device
+  ansible.builtin.stat:
+    path: "/sys/bus/pci/devices/{{ _edpm_accel_drivers_nvidia_sriov_bdfs[idx] }}/virtfn0"
+  loop: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+  loop_control:
+    loop_var: idx
+  register: _edpm_accel_drivers_nvidia_sriov_vf0_bdf_exists_result
+
+- name: Enable (if missing) VFs on devices in geometry list to collect the 1st VF PCI address
   become: true
-  ansible.builtin.copy:
-    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage@.path"
-    owner: root
-    group: root
+  ansible.builtin.shell:
+    cmd: /usr/lib/nvidia/sriov-manage -e {{ _edpm_accel_drivers_nvidia_sriov_bdfs[idx] }}
+  loop: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+  loop_control:
+    loop_var: idx
+  changed_when: false
+  when: not _edpm_accel_drivers_nvidia_sriov_vf0_bdf_exists_result.results[idx].stat.exists
+
+- name: Collect PCI BDFs for 1st VF of each GPU device
+  become: true
+  ansible.builtin.command:
+    cmd: readlink -e /sys/bus/pci/devices/{{ _edpm_accel_drivers_nvidia_sriov_bdfs[idx] }}/virtfn0
+  register: _edpm_accel_drivers_nvidia_mig_vf0_pci_addresses
+  changed_when: false
+  loop: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+  loop_control:
+    loop_var: idx
+  failed_when: >
+    {{
+      not (_edpm_accel_drivers_nvidia_mig_vf0_pci_addresses.stdout | trim).split('/')[-1]
+      .startswith(_edpm_accel_drivers_nvidia_sriov_bdf_bases[idx]) or
+      _edpm_accel_drivers_nvidia_mig_vf0_pci_addresses.rc != 0
+    }}
+
+- name: Set fact for 1st VF PCI addresses of each GPU device
+  ansible.builtin.set_fact:
+    _edpm_accel_drivers_nvidia_mig_vf0_bdfs:
+      "{{ _edpm_accel_drivers_nvidia_mig_vf0_pci_addresses.results |
+      map(attribute='stdout') | map('trim') | map('split', '/') | map('last') | list }}"
+
+- name: Install sriov manage services for each GPU device
+  ansible.builtin.include_tasks: nvidia_mig_sriov_gpu.yml
+  loop: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+  loop_control:
+    index_var: _edpm_accel_drivers_nvidia_mig_gpu_index
+  vars:
+    _edpm_accel_drivers_nvidia_sriov_bdf: "{{ _edpm_accel_drivers_nvidia_sriov_bdfs[_edpm_accel_drivers_nvidia_mig_gpu_index] }}"
+    _edpm_accel_drivers_nvidia_mig_vf0_bdf: "{{ _edpm_accel_drivers_nvidia_mig_vf0_bdfs[_edpm_accel_drivers_nvidia_mig_gpu_index] }}"
+
+- name: Install edpm_nvidia_sriov_manage.target
+  become: true
+  register: _edpm_accel_drivers_nvidia_sriov_manage_target_installed
+  ansible.builtin.template:
+    src: edpm_nvidia_sriov_manage.target.j2
+    dest: /etc/systemd/system/edpm_nvidia_sriov_manage.target
     mode: '0644'
-    content: |
-      [Unit]
-      After = nvidia-vgpu-mgr.service
-      After = nvidia-vgpud.service
-      After = systemd-udevd.service
-      Description = Wait for sriov_numvfs to exist before running sriov-manage
-      [Path]
-      PathExists=/sys/bus/pci/devices/%i/sriov_numvfs
+  vars:
+    indices: "{{ range(0, _edpm_accel_drivers_config.features.nvidia_mig.geometries | length) | list }}"
+
+- name: Enable edpm_nvidia_sriov_manage.target
+  become: true
+  ansible.builtin.systemd:
+    name: edpm_nvidia_sriov_manage.target
+    enabled: true
+    daemon_reload: "{{ _edpm_accel_drivers_nvidia_sriov_manage_target_installed.changed | default(false) | bool }}"
 
 - name: Remove MIG units and reset GPUs no longer in geometry list
   ansible.builtin.include_tasks: nvidia_mig_partitioning_cleanup.yml
@@ -51,3 +94,5 @@
     index_var: _edpm_accel_drivers_nvidia_mig_gpu_index
   vars:
     _edpm_accel_drivers_nvidia_mig_geometry: "{{ item }}"
+    _edpm_accel_drivers_nvidia_mig_bdf_sriov: "{{ _edpm_accel_drivers_nvidia_sriov_bdfs[_edpm_accel_drivers_nvidia_mig_gpu_index] }}"
+    _edpm_accel_drivers_nvidia_mig_vf0_bdf: "{{ _edpm_accel_drivers_nvidia_mig_vf0_bdfs[_edpm_accel_drivers_nvidia_mig_gpu_index] }}"
