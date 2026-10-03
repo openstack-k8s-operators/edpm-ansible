@@ -16,6 +16,18 @@
   ansible.builtin.dnf:
     name: "{{ edpm_ovs_packages }}"
     state: present
+    # edpm_ovs_packages names the concrete openvswitchN.N package(s)
+    # directly rather than the rdo-openvswitch/rhoso-openvswitch wrapper
+    # (see defaults/main.yml). Each stream Conflicts with every other
+    # stream instead of Obsoleting it, so if an older stream is already
+    # installed (e.g. a host updating from openvswitch3.3 to the new
+    # openvswitch3.5 default), this install would otherwise fail to
+    # resolve. allowerasing lets dnf erase the conflicting, previously
+    # installed stream package(s) as part of this transaction; unlike
+    # update.yml this path is not required to avoid a service
+    # stop/disable, since the next task below ensures the service ends up
+    # enabled and running regardless.
+    allowerasing: true
   register: edpm_ovs_package_install
   until: edpm_ovs_package_install is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
