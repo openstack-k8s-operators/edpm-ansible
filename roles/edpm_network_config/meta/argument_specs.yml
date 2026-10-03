@@ -8,7 +8,10 @@ argument_specs:
         type: list
         default:
           - NetworkManager-ovs
-        description: Packages needed by nmstate (via system-role)
+          - python3-pyyaml
+        description: >
+          Packages needed by nmstate (via system-role) on RHEL-family hosts, including
+          python3-pyyaml for edpm_derived_nic_mapping.py on the managed host.
       edpm_network_config_download_delay:
         type: int
         default: 5
@@ -55,7 +58,32 @@ argument_specs:
         default: true
       edpm_network_config_os_net_config_mappings:
         type: dict
-        description: "Per node and/or per node group configuration map. Used by the edpm_os_net_config_mappings module."
+        description: >
+          Legacy role variable: per-node / node-group NIC mapping. Applies to BOTH
+          edpm_network_config_tool values (nmstate and os-net-config) — it is not gated by that
+          variable and is merged with edpm_network_config_mappings in nic_mapping.yml (the latter
+          wins on duplicate keys). The merged dict is passed to the edpm_os_net_config_mappings
+          Ansible module as net_config_data_lookup, which resolves nic1/nic2/... to real interfaces
+          by MAC address or dmiString+id match and writes the result to
+          /etc/os-net-config/mapping.yaml (os-net-config path) or
+          /var/lib/edpm-config/template_nic_mapping.yaml (nmstate path).
+          If this and edpm_network_config_mappings are both left at their default ({}), or neither
+          matches this host, no mapping file is written. In that case the os-net-config path falls
+          back to os-net-config's own built-in default nic1/nic2/... numbering (embedded interfaces
+          such as em/eth/eno first, then other active NICs, both ordered alphanumerically); the
+          nmstate path has no equivalent built-in fallback, so nic aliases in
+          edpm_network_config_template are only resolved when a mapping is supplied here (or via
+          edpm_network_config_mappings) — otherwise use real interface names in the template.
+        default: {}
+      edpm_network_config_mappings:
+        type: dict
+        description: >
+          Optional additional or overriding NIC mapping for the nmstate and os-net-config paths
+          (merged in nic_mapping.yml). Merged with edpm_network_config_os_net_config_mappings; this
+          variable wins on duplicate keys. See edpm_network_config_os_net_config_mappings above for
+          how the merged mapping is used and what happens when no mapping is provided/matched.
+          Must be a YAML mapping (dict). Do not use a block literal (|) after the key — that
+          produces a string and role validation will fail.
         default: {}
       edpm_network_config_purge_provider:
         type: str
@@ -77,8 +105,46 @@ argument_specs:
         default: false
       edpm_network_config_template:
         type: str
-        description: "Which settings template should be rendered."
+        description: >
+          Nmstate desired-state YAML (phase 2). With edpm_network_config_tool=nmstate, applied after
+          edpm_network_config_nmstate_sriov_pf_template when that is set. For os-net-config, the os-net-config
+          network config template.
         default: ""
+      edpm_network_config_nmstate_device_map_file:
+        type: str
+        description: >
+          Path to nmstate device_map.yaml recording, for every physical network device
+          (PCI ethernet NIC, SR-IOV VF, etc.), its current name, PCI address and bound
+          kernel driver. Refreshed after a successful apply (nmstate tool path only).
+        default: /var/lib/edpm-config/nmstate_device_map.yaml
+      edpm_network_config_driver_bind:
+        type: str
+        description: >
+          Optional YAML string with an "interfaces" list of {name, pci_address, driver}
+          entries. Before the nmstate apply, each entry's name/pci_address pair is
+          validated against live sysfs (falling back to device_map.yaml when the netdev
+          is no longer present); a mismatch fails the run. Once validated, the given
+          driver is bound at pci_address using driverctl (nmstate tool path only).
+        default: ""
+      edpm_network_config_nmstate_sriov_pf_template:
+        type: str
+        description: >
+          Nmstate desired-state YAML phase 1 (SR-IOV VF creation on PF). Set ethernet.sr-iov.total-vfs
+          only; do not include per-VF vfs settings here. Optional; when non-empty, applied before
+          edpm_network_config_template on the nmstate tool path.
+        default: ""
+      edpm_network_config_nmstate_sriov_vf_wait:
+        type: bool
+        description: After phase 1, wait until sysfs sriov_numvfs matches total-vfs in the SR-IOV template.
+        default: true
+      edpm_network_config_nmstate_sriov_vf_wait_timeout:
+        type: int
+        description: Seconds to wait for SR-IOV VFs to appear after phase 1.
+        default: 60
+      edpm_network_config_nmstate_sriov_vf_wait_delay:
+        type: int
+        description: Seconds between SR-IOV VF wait polls.
+        default: 2
       edpm_bond_interface_ovs_options:
         type: str
         description: "Binding options to be rendered in a template"
