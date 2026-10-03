@@ -106,3 +106,9 @@
     /usr/bin/ovs-vsctl get open_vswitch . external_ids:hostname
   register: output
   failed_when: output.stdout != 'edpm-0.localdomain'
+
+- name: Verify system-id is a UUID in external_id
+  ansible.builtin.shell: >
+    /usr/bin/ovs-vsctl get open_vswitch . external_ids:system-id
+  register: output
+  failed_when: output.stdout != '"572cb2ee-c4d3-5e40-81b7-bb0cb922a53b"'
