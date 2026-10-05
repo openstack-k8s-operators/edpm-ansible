@@ -33,7 +33,8 @@ jobs:
 
   build-openstack-ansibleee-runner:
     name: Build openstack-ansibleee-runner image using buildah
-    runs-on: ubuntu-22.04
+    # ubuntu-22.04 ships buildah 1.23.1, which cannot build the EL10 base image.
+    runs-on: ubuntu-24.04
     needs: [check-secrets]
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
