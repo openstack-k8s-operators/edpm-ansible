@@ -8,5 +8,11 @@
   ],
   "enabledManagers": [
     "github-actions"
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-runners"],
+      "enabled": false
+    }
   ]
 }
