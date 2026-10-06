@@ -22,9 +22,10 @@ provisioner:
   log: true
   config_options:
     interpreter_python: auto_silent
-    callbacks_enabled: profile_tasks, timer, yaml
+    callbacks_enabled: profile_tasks, timer
   env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
+    ANSIBLE_STDOUT_CALLBACK: default
+    ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
 
 verifier:
   name: ansible

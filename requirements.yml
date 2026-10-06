@@ -17,6 +17,7 @@
 collections:
   - ansible.posix
   - community.crypto
-  - community.general
+  - name: community.general
+    version: ">=1.0.0,<12.0.0"
   - containers.podman
   - fedora.linux_system_roles

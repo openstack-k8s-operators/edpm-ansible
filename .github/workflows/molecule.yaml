@@ -67,7 +67,7 @@ jobs:
         fi
     - name: Install ansible
       if: steps.check_role.outputs.modified == 'true'
-      run: pip install ansible
+      run: pip install 'ansible-core<2.19'
     - name: Install collections
       if: steps.check_role.outputs.modified == 'true'
       run: ansible-galaxy collection install --force -r requirements.yml
