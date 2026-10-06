@@ -30,6 +30,8 @@
         - edpm-ansible-molecule-edpm_ovs
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
+        - edpm-ansible-molecule-edpm_telemetry
+        - edpm-ansible-molecule-edpm_telemetry_logging
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
         - openstack-k8s-operators-content-provider
         - adoption-standalone-to-crc-ceph-provider:
