@@ -24,8 +24,8 @@ provisioner:
     interpreter_python: auto_silent
     callbacks_enabled: profile_tasks, timer, yaml
   env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-
+    ANSIBLE_STDOUT_CALLBACK: default
+    ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
 verifier:
   name: ansible
 
