@@ -18,6 +18,34 @@
   ansible.builtin.set_fact:
     _edpm_frr_role_path: "{{ role_path }}"
 
+- name: Gather service facts to check for OVN controller
+  ansible.builtin.service_facts:
+
+- name: Remove FRR-OVN BindsTo drop-ins
+  become: true
+  when: >-
+    not (edpm_frr_ovn_bind | default(true)) or
+    ansible_facts['services']['edpm_ovn_controller.service']['status']
+    | default('not-found')
+    not in ['enabled', 'disabled', 'static', 'indirect', 'generated']
+  block:
+    - name: Remove FRR BindsTo drop-in
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_frr.service.d/ovn-bind.conf
+        state: absent
+      register: _frr_dropin_removed
+
+    - name: Remove OVN BindsTo drop-in
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_ovn_controller.service.d/frr-bind.conf
+        state: absent
+      register: _ovn_dropin_removed
+
+    - name: Reload systemd after removing drop-ins
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: _frr_dropin_removed.changed or _ovn_dropin_removed.changed
+
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run frr init container
   ansible.builtin.include_role:
@@ -40,3 +68,44 @@
     edpm_container_state_append: true
     edpm_container_standalone_quadlet_defs:
       frr: "{{ _edpm_frr_role_path }}/templates/quadlet/frr.container.j2"
+
+- name: Create FRR-OVN BindsTo drop-ins when peer is present
+  become: true
+  when:
+    - edpm_frr_ovn_bind | default(true)
+    - >-
+      ansible_facts['services']['edpm_ovn_controller.service']['status']
+      | default('not-found')
+      in ['enabled', 'disabled', 'static', 'indirect', 'generated']
+  block:
+    - name: Create FRR service drop-in directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_frr.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Create FRR BindsTo OVN drop-in
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/edpm_frr.service.d/ovn-bind.conf
+        mode: "0644"
+        content: |
+          [Unit]
+          BindsTo=edpm_ovn_controller.service
+
+    - name: Create OVN controller service drop-in directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_ovn_controller.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Create OVN BindsTo FRR drop-in
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/edpm_ovn_controller.service.d/frr-bind.conf
+        mode: "0644"
+        content: |
+          [Unit]
+          BindsTo=edpm_frr.service
+
+    - name: Reload systemd to activate BindsTo drop-ins
+      ansible.builtin.systemd:
+        daemon_reload: true
