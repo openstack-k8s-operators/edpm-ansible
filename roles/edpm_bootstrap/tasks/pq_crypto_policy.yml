@@ -36,11 +36,24 @@
   when: >-
     (_edpm_bootstrap_fips_enabled.content | default('') | b64decode | trim) != '1'
   block:
+    # el10 crypto-policies renamed the PQ key exchange from SNTRUP to KEM-ECDH;
+    # the SNTRUP value no longer resolves there and update-crypto-policies
+    # rejects the policy with AlgorithmEmptyMatchError.
+    - name: Gather the distro major version for the PQ kex value
+      ansible.builtin.setup:
+        filter: distribution_major_version
+
+    - name: Select the PQ key exchange value for this distro
+      ansible.builtin.set_fact:
+        _edpm_bootstrap_pq_kex: >-
+          {{ 'KEM-ECDH' if ansible_facts.distribution_major_version | int >= 10
+             else 'SNTRUP' }}
+
     - name: Deploy the SNTRUP crypto-policies subpolicy module
       become: true
       ansible.builtin.copy:
         dest: /etc/crypto-policies/policies/modules/SNTRUP.pmod
-        content: "key_exchange = +SNTRUP\n"
+        content: "key_exchange = +{{ _edpm_bootstrap_pq_kex }}\n"
         owner: root
         group: root
         mode: "0644"

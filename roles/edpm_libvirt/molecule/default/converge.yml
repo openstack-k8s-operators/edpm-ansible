@@ -18,11 +18,110 @@
       set_fact:
         ansible_local:
           bootc: false
-  roles:
-    - role: osp.edpm.edpm_libvirt
-      vars:
-        edpm_libvirt_tls_cert_src_dir: /tmp/pki
-        edpm_libvirt_tls_certs_enabled: true
-        edpm_libvirt_password_path: /tmp/libvirtpw
-        edpm_libvirt_log_filters_override:
-            virtqemud: "1:qemu 2:libvirt 3:object 4:json"
+  tasks:
+    # TEMPORARY DIAGNOSTIC: on CentOS 10 the "Restart libvirt services" handler fails for
+    # virtnodedevd and virtproxyd ("control process exited with error code"). A podman
+    # container repro starts both fine, so the cause needs the journal from a real run.
+    # verify.yml never executes because the play aborts in the handler, so the dump lives
+    # in this rescue block. Remove once diagnosed.
+    - name: Install and configure libvirt
+      block:
+        - name: Run edpm_libvirt role
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_libvirt
+          vars:
+            edpm_libvirt_tls_cert_src_dir: /tmp/pki
+            edpm_libvirt_tls_certs_enabled: true
+            edpm_libvirt_password_path: /tmp/libvirtpw
+            edpm_libvirt_restart_services:
+              - virtlogd
+              - virtqemud
+              - virtsecretd
+            edpm_libvirt_log_filters_override:
+              virtqemud: "1:qemu 2:libvirt 3:object 4:json"
+      rescue:
+        - name: Collect libvirt systemd diagnostics
+          become: true
+          ansible.builtin.shell: |
+            set +x
+            for u in virtnodedevd virtproxyd virtqemud virtsecretd virtlogd; do
+              echo "### $u.service is-active: $(systemctl is-active $u.service)"
+              systemctl show $u.service -p ActiveState,SubState,Result,ExecMainStatus,ExecMainCode
+              systemctl show $u.service -p NRestarts,StartLimitHit,TriggerLimitHit,LoadState,UnitFileState
+              systemctl status $u.service --no-pager -l 2>&1 | head -25
+              journalctl -u $u.service --no-pager -n 40 2>&1
+            done
+            echo "### edpm_libvirt.target"
+            systemctl show edpm_libvirt.target -p ActiveState,SubState,Wants,After
+            systemctl list-dependencies --no-pager edpm_libvirt.target 2>&1 | head -25
+            echo "### all libvirt units"
+            systemctl list-units --all --no-pager --no-legend 'libvirt*' 'virt*' 2>&1
+            echo "### rendered daemon configs"
+            for f in virtnodedevd virtproxyd virtqemud virtsecretd virtlogd; do
+              echo "--- /etc/libvirt/$f.conf"
+              cat /etc/libvirt/$f.conf 2>&1
+            done
+            echo "### TLS material (virtproxyd exits if listen_tls has no cert)"
+            ls -l /etc/pki/libvirt /etc/pki/libvirt/private /etc/pki/libvirt-routed \
+                 /etc/pki/libvirt-vproxy /etc/pki/qemu /tmp/pki 2>&1
+            echo "### versions"
+            rpm -q libvirt-daemon-driver-nodedev libvirt-daemon libvirt-client systemd dbus-broker 2>&1
+            echo "### conf file perms/owner/SELinux labels (DAC ground truth)"
+            ls -ldZ /etc/libvirt 2>&1
+            ls -lZ /etc/libvirt/*.conf 2>&1
+            echo "### conf file mtime vs ctime (ctime>mtime => chmod/chown after write)"
+            stat -c '%n mode=%a owner=%U:%G mtime=%y ctime=%z' /etc/libvirt /etc/libvirt/virt*.conf 2>&1
+            echo "### runtime user/group/SELinux context of libvirt daemons"
+            ps -e -o pid,user,group,context,comm 2>/dev/null | grep -E 'virt(qemu|nodedev|proxy|secret|log)d'
+            echo "### root groups (dac_read_search depends on these)"
+            id 2>&1
+            echo "### pure-DAC test as libvirt user (no SELinux context change)"
+            runuser -l libvirt -c 'cat /etc/libvirt/virtnodedevd.conf >/dev/null' 2>&1 \
+              && echo "libvirt-user: READABLE" || echo "libvirt-user: DENIED"
+            echo "### node systemd drop-ins for virtnodedevd (User=/capability overrides)"
+            systemctl cat virtnodedevd.service 2>&1 | head -60
+            echo "### tmpfiles.d rules touching libvirt"
+            grep -ri libvirt /etc/tmpfiles.d /usr/lib/tmpfiles.d 2>/dev/null | head -20
+            echo "### libvirt package install times (was a rpm txn after role write?)"
+            for p in libvirt-daemon libvirt-daemon-driver-nodedev libvirt-daemon-driver-qemu \
+                     libvirt-daemon-driver-secret libvirt-daemon-log libvirt-daemon-proxy; do
+              rpm -q --last "$p" 2>&1
+            done
+            echo "### selinux / avc"
+            getenforce 2>&1
+            journalctl -k --no-pager --grep=avc -n 20 2>&1
+            (ausearch -m avc --start boot 2>/dev/null || grep avc /var/log/audit/audit.log 2>/dev/null) \
+              | grep -E 'virtnodedevd|virtproxyd|virtqemud|virtsecretd|virtlogd' | tail -50
+            echo "### runcon test: replay config read in each daemon SELinux context"
+            for d in virtqemud virtnodedevd virtproxyd virtsecretd virtlogd; do
+              if runcon -t "${d}_t" cat "/etc/libvirt/${d}.conf" >/dev/null 2>&1; then
+                echo "${d}.conf: READABLE by ${d}_t";
+              else
+                echo "${d}.conf: DENIED for ${d}_t";
+              fi;
+            done
+            echo "### priority<=3 journal"
+            journalctl --no-pager -p 3 -n 60 2>&1
+            echo "### collection copy actually executed (stale-cache check)"
+            COLL=$(find /home /usr/share -xdev -type d -path '*ansible_collections/osp/edpm' 2>/dev/null | head -1)
+            echo "collection root: $COLL"
+            if [ -n "$COLL" ]; then
+              echo "--- handlers/main.yml (Restart libvirt services task as executed)"
+              sed -n '15,45p' "$COLL/roles/edpm_libvirt/handlers/main.yml"
+              echo "--- does the executed copy support the restart-list override?"
+              grep -c edpm_libvirt_restart_services "$COLL/roles/edpm_libvirt/handlers/main.yml" \
+                "$COLL/roles/edpm_libvirt/defaults/main.yml" 2>&1
+              echo "--- molecule converge.yml as executed"
+              grep -A6 edpm_libvirt_restart_services "$COLL/roles/edpm_libvirt/molecule/default/converge.yml" 2>&1
+            fi
+          register: libvirt_diag
+          changed_when: false
+          failed_when: false
+
+        - name: Show libvirt systemd diagnostics
+          ansible.builtin.debug:
+            var: libvirt_diag.stdout_lines
+
+        - name: Fail converge after diagnostics
+          ansible.builtin.fail:
+            msg: "edpm_libvirt converge failed; systemd diagnostics printed above"

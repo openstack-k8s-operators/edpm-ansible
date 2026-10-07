@@ -7,7 +7,7 @@ log: true
 platforms:
   - name: centos
     hostname: centos
-    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi10/ubi-init"}
     registry:
       url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
     dockerfile: Dockerfile.j2
@@ -33,6 +33,7 @@ provisioner:
   env:
     ANSIBLE_STDOUT_CALLBACK: default
     ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
+
 scenario:
   test_sequence:
     - destroy
