@@ -33,6 +33,16 @@
     state: directory
     mode: "0755"
 
+- name: "Remove legacy service files that shadow quadlet for {{ edpm_container_standalone_service }}"
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/edpm_{{ item.key }}.service"
+    state: absent
+  loop: "{{ edpm_container_standalone_quadlet_defs | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: _edpm_kolla_cleanup
+
 - name: "Render Quadlet templates for {{ edpm_container_standalone_service }}"
   become: true
   ansible.builtin.template:
@@ -73,7 +83,8 @@
   become: true
   ansible.builtin.systemd:
     daemon_reload: true
-  when: _edpm_changed_containers | length > 0  # noqa: no-handler
+  when: _edpm_changed_containers | length > 0 or
+        _edpm_kolla_cleanup.results | selectattr('changed') | list | length > 0  # noqa: no-handler
 
 - name: "Restart changed Quadlet containers for {{ edpm_container_standalone_service }}"
   become: true
