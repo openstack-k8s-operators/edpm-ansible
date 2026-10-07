@@ -42,6 +42,8 @@
     mode: "0644"
   loop:
     - edpm_derived_nic_mapping.py
+    - edpm_driver_bind.py
+    - edpm_nmstate_device_map.py
 
 - name: Create EDPM NIC mapping file (nmstate path)
   become: true
