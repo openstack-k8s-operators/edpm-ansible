@@ -13,6 +13,12 @@
     state: directory
     mode: "0755"
 
+- name: Install nmstate driver_bind helper script
+  ansible.builtin.copy:
+    src: edpm_driver_bind.py
+    dest: /var/lib/edpm-config/edpm_driver_bind.py
+    mode: "0644"
+
 - name: Write edpm_network_config_driver_bind template
   ansible.builtin.copy:
     content: "{{ edpm_network_config_driver_bind }}"
@@ -24,7 +30,7 @@
   ansible.builtin.command:
     argv:
       - python3
-      - "{{ role_path }}/files/edpm_driver_bind.py"
+      - "/var/lib/edpm-config/edpm_driver_bind.py"
       - -f
       - /var/lib/edpm-config/.driver_bind_in.yaml
       - -m
