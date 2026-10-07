@@ -48,6 +48,24 @@
     group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: "0755"
 
+- name: Ensure persistent lib directories exist
+  tags:
+    - update
+    - neutron_ovn
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    setype: "container_file_t"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: "{{ item.mode | default(omit) }}"
+  loop:
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/kill_scripts", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/ovn-agent-proxy", "mode": "0755"}
+    - {'path': "{{ edpm_neutron_ovn_agent_lib_dir }}/external/pids", "mode": "0755"}
+
 - name: Check if old config directory exists
   tags:
     - update
