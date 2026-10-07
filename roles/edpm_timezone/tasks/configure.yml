@@ -49,4 +49,4 @@
 
 - name: Set fact for timezone result
   ansible.builtin.set_fact:
-    _timezone_result_changed: _timezone_result.changed
+    _timezone_result_changed: "{{ _timezone_result.changed }}"
