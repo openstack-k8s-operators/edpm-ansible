@@ -34,6 +34,17 @@
     state: directory
     mode: "0755"
 
+- name: Install nmstate network helper scripts
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/var/lib/edpm-config/{{ item }}"
+    mode: "0644"
+  loop:
+    - edpm_derived_nic_mapping.py
+    - edpm_driver_bind.py
+    - edpm_nmstate_device_map.py
+
 - name: Create EDPM NIC mapping file (nmstate path)
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
@@ -90,7 +101,7 @@
       ansible.builtin.command:
         argv:
           - python3
-          - "{{ role_path }}/files/edpm_derived_nic_mapping.py"
+          - /var/lib/edpm-config/edpm_derived_nic_mapping.py
           - "-f"
           - "{{ edpm_network_config_derived_nic_mapping_file }}"
       register: edpm_derived_nic_mapping_result
