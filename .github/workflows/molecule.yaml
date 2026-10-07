@@ -17,7 +17,7 @@ on:
 jobs:
   run_molecule:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         tested_role:
         - edpm_ceph_client_files
@@ -48,18 +48,21 @@ jobs:
         - env_data
         - edpm_pre_adoption_validation
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout repository
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
       with:
         python-version: '3.14'
-    - name: Check whether the role is modified
+    - name: Check whether the role or the molecule harness is modified
       id: check_role
       run: |
         git fetch origin $GITHUB_BASE_REF
-        if [[ $(git diff --name-only origin/$GITHUB_BASE_REF roles | grep "${{ matrix.tested_role }}/") ]]; then
+        harness='^(\.github/|molecule/|plugins/|molecule-requirements\.txt$|requirements\.yml$)'
+        if grep -qE "$harness" <<<"$(git diff --name-only origin/$GITHUB_BASE_REF)"; then
+          echo "modified=true" >> $GITHUB_OUTPUT
+        elif grep -q "${{ matrix.tested_role }}/" <<<"$(git diff --name-only origin/$GITHUB_BASE_REF roles)"; then
           echo "modified=true" >> $GITHUB_OUTPUT
         else
           echo "modified=false" >> $GITHUB_OUTPUT
@@ -73,6 +76,23 @@ jobs:
     - name: Install molecule deps
       if: steps.check_role.outputs.modified == 'true'
       run: pip install -r molecule-requirements.txt
+    - name: Unload host AppArmor profiles that reach into the instances
+      if: steps.check_role.outputs.modified == 'true'
+      # Rootless podman cannot choose an AppArmor profile, so the host unix-chkpwd and rsyslogd
+      # profiles get attached to instance processes on ubuntu-24.04:
+      # https://bugs.launchpad.net/apparmor/+bug/2067900
+      run: |
+        set -e
+        for name in unix-chkpwd rsyslogd; do
+          for path in $(compgen -G "/etc/apparmor.d/$name" || compgen -G "/etc/apparmor.d/*$name*"); do
+            sudo apparmor_parser -R "$path" || true
+            sudo rm -f "$path"
+          done
+        done
+        if sudo grep -qwE 'unix-chkpwd|rsyslogd' /sys/kernel/security/apparmor/profiles; then
+          echo '::error::target apparmor profile is still loaded, refusing to run molecule'
+          exit 1
+        fi
     - name: Run molecule test
       if: steps.check_role.outputs.modified == 'true'
       run: |

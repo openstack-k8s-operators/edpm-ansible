@@ -13,7 +13,8 @@ provisioner:
             ansible_host: localhost
   log: true
   env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
+    ANSIBLE_STDOUT_CALLBACK: default
+    ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
     ANSIBLE_ROLES_PATH: "${ANSIBLE_ROLES_PATH}:${HOME}/zuul-jobs/roles"
 
 scenario:
