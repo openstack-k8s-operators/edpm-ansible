@@ -212,14 +212,16 @@ PCI driver binding (driverctl)
 Set ``edpm_network_config_driver_bind`` (nmstate tool path only) to bind a
 kernel driver at a specific PCI address before the main nmstate apply runs,
 e.g. to hand a NIC to ``vfio-pci`` for DPDK/SR-IOV passthrough, or to return
-one to its native driver:
+one to its native driver. ``name`` may be a real interface name or an EDPM
+NIC alias (``nic1``, ``nic2``, ...); aliases are resolved via the derived
+NIC mapping before ``.driver_bind_in.yaml`` is written:
 
 .. code-block:: yaml
 
     edpm_network_config_driver_bind: |
       ---
       interfaces:
-        - name: eno12399np0
+        - name: nic2
           pci_address: "0000:8a:00.0"
           driver: vfio-pci
 
