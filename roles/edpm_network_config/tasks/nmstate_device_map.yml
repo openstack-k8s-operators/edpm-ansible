@@ -10,11 +10,17 @@
     state: directory
     mode: "0755"
 
+- name: Install nmstate device_map helper script
+  ansible.builtin.copy:
+    src: edpm_nmstate_device_map.py
+    dest: /var/lib/edpm-config/edpm_nmstate_device_map.py
+    mode: "0644"
+
 - name: Generate nmstate device_map
   ansible.builtin.command:
     argv:
       - python3
-      - "{{ role_path }}/files/edpm_nmstate_device_map.py"
+      - /var/lib/edpm-config/edpm_nmstate_device_map.py
       - -o
       - "{{ edpm_network_config_nmstate_device_map_file }}"
   changed_when: false
