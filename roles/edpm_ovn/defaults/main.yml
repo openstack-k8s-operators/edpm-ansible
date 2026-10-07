@@ -134,3 +134,5 @@ edpm_ovn_resource_provider_inventory_defaults: {}
 #   Mixed with FQDN: { "br-ex": "custom-name", "br-storage": "{{ ansible_facts['fqdn'] }}" }
 #   Override only some: { "br-ex": "custom-name" }  # other providers use auto-generated FQDN
 edpm_ovn_resource_provider_hypervisors: {}
+
+edpm_frr_ovn_bind: true
