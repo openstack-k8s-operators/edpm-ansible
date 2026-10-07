@@ -140,10 +140,12 @@ argument_specs:
         type: str
         description: >
           Optional YAML string with an "interfaces" list of {name, pci_address, driver}
-          entries. Before the nmstate apply, each entry's name/pci_address pair is
-          validated against live sysfs (falling back to device_map.yaml when the netdev
-          is no longer present); a mismatch fails the run. Once validated, the given
-          driver is bound at pci_address using driverctl (nmstate tool path only).
+          entries. NIC aliases in name (nic1, nic2, ...) are resolved to real interface
+          names via the derived NIC mapping before write/apply. Before the nmstate apply,
+          each entry's name/pci_address pair is validated against live sysfs (falling back
+          to device_map.yaml when the netdev is no longer present); a mismatch fails the
+          run. Once validated, the given driver is bound at pci_address using driverctl
+          (nmstate tool path only).
         default: ""
       edpm_network_config_vf_driver_bind_script:
         type: str
