@@ -19,8 +19,7 @@
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
-        - runc
-        - containernetworking-plugins
+        - crun
 
 - name: Prepare
   hosts: all

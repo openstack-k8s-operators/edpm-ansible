@@ -26,7 +26,7 @@
       edpm_kernel_extra_modules:
         dummy: {}
       edpm_kernel_extra_packages:
-        - 'kmod-kvdo'
+        - 'lvm2'
       edpm_kernel_sysctl_extra_settings:
         kernel.ftrace_dump_on_oops:
           value: 1

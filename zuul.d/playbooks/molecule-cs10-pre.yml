@@ -1,0 +1,13 @@
+---
+- name: "Run zuul.d/playbooks/molecule-cs10-pre.yml"
+  hosts: "{{ cifmw_zuul_target_host | default('controller') }}"
+  gather_facts: false
+  tasks:
+    # Keep last: pip swaps the ansible tree under the running process.
+    - name: Upgrade ansible-core in the molecule venv
+      ansible.builtin.command:
+        cmd: >-
+          {{ ansible_user_dir }}/test-python/bin/pip3 install --upgrade
+          'ansible-core>=2.19'
+      register: cs10_upgrade
+      changed_when: "'Successfully installed' in cs10_upgrade.stdout"
