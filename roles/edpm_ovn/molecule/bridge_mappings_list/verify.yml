@@ -12,3 +12,19 @@
         /usr/bin/ovs-vsctl get open_vswitch . external_ids:ovn-bridge-mappings
       register: output
       failed_when: output.stdout != '"datacentre:br-ex,tenant:br-tenant"'
+
+    - name: Read ovn-chassis-mac-mappings with list bridge mappings
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/ovs-vsctl
+          - get
+          - open_vswitch
+          - .
+          - external_ids:ovn-chassis-mac-mappings
+      register: chassis_mac_mappings
+      changed_when: false
+
+    - name: Verify a chassis MAC mapping is generated for each physnet
+      ansible.builtin.assert:
+        that:
+          - chassis_mac_mappings.stdout is match('^"datacentre:(?:[0-9a-f]{2}:){5}[0-9a-f]{2},tenant:(?:[0-9a-f]{2}:){5}[0-9a-f]{2}"$')

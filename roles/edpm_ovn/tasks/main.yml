@@ -13,6 +13,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+- name: Validate bridge mappings type
+  ansible.builtin.assert:
+    that:
+      - (edpm_ovn_bridge_mappings is string) or (edpm_ovn_bridge_mappings | type_debug == 'list')
+    fail_msg: edpm_ovn_bridge_mappings must be a string or a list of bridge mapping strings.
+
 - name: Include host prep tasks
   ansible.builtin.import_tasks: install.yml
 
