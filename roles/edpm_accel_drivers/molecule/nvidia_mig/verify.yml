@@ -8,8 +8,15 @@
     - name: Verify systemd units exist and are enabled
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
       loop:
-        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
-        - {"name": "edpm_nvidia_mig_apply_1.service", "running": false}
+        - {"name": "edpm_nvidia_sriov_manage.target", "enabled": "static", "active": ["active"]}
+        - {"name": "edpm_nvidia_mig_apply_0.path", "enabled": "enabled", "active": ["active"]}
+        - {"name": "edpm_nvidia_mig_apply_1.path", "enabled": "enabled", "active": ["active"]}
+        - {"name": "edpm_nvidia_mig_apply_0.service", "enabled": "disabled", "active": ["inactive"]}
+        - {"name": "edpm_nvidia_mig_apply_1.service", "enabled": "disabled", "active": ["inactive"]}
+        - {"name": "edpm_nvidia_sriov_manage_0.path", "enabled": "enabled", "active": ["active"]}
+        - {"name": "edpm_nvidia_sriov_manage_1.path", "enabled": "enabled", "active": ["active"]}
+        - {"name": "edpm_nvidia_sriov_manage_0.service", "enabled": "disabled", "active": ["inactive"]}
+        - {"name": "edpm_nvidia_sriov_manage_1.service", "enabled": "disabled", "active": ["inactive"]}
 
     - name: Read edpm_nvidia_mig_apply_0 systemd unit file
       ansible.builtin.slurp:

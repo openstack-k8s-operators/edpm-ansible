@@ -5,12 +5,6 @@
   vars:
     test_helper_dir: "../../../../molecule/test-helpers"
   tasks:
-    - name: Verify systemd units exist and are enabled
-      ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
-      loop:
-        - {"name": "edpm_nvidia_mig_apply_0.service", "running": false}
-        - {"name": "edpm_nvidia_mig_apply_1.service", "running": false}
-
     - name: Read edpm_nvidia_mig_apply_0 systemd unit file
       ansible.builtin.slurp:
         src: /etc/systemd/system/edpm_nvidia_mig_apply_0.service
