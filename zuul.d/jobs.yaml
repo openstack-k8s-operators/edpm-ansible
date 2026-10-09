@@ -4,6 +4,15 @@
     name: edpm-ansible-molecule-base
     abstract: true
     parent: cifmw-molecule-base
+    # CentOS Stream 10 runs Python 3.12; the centos-stream-9 nodeset runs 3.9,
+    # which cannot run ansible-core 2.19+ at all.
+    nodeset: centos-stream-10
+    # ci-framework pins ansible-core==2.15.13 through test-requirements.txt and
+    # molecule has no hook to override it, so the pin is upgraded here after the
+    # parent's setup_molecule ran. 2.19+ rejects non-boolean and
+    # double-templated conditionals, which is what these jobs need to catch.
+    pre-run:
+      - zuul.d/playbooks/molecule-cs10-pre.yml
     required-projects:
       - openstack-k8s-operators/install_yamls
       - github.com/openstack-k8s-operators/ci-framework

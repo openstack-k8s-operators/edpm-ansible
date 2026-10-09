@@ -1,5 +1,5 @@
 ---
-# Copyright 2019 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,15 +13,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
-test_deps_extra_packages: []
-test_deps_setup_edpm: true
-test_deps_mirrors_file_path: /etc/ci/mirror_info.sh
-test_deps_setup_stream: true
-test_deps_setup_ceph: false
-test_deps_delorean_repo_url: "https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-podified/delorean.repo"
-test_deps_repo_setup_dist: ubi9
-test_deps_repo_setup_promotion: current-podified
-# Value to use for the bootc fact
-test_deps_bootc_fact: false
+test_deps_repo: https://trunk.rdoproject.org/centos10-master/current
+test_deps_delorean_repo_url: https://trunk.rdoproject.org/centos10/current/delorean.repo
+test_deps_yaml_packages:
+  - python3-pyyaml
+test_deps_selinux_packages:
+  - python3-libselinux
+test_deps_edpm_packages:
+  - python3-openstacksdk
+  - openssh
+# el10 podified content is published under centos10/current, not ubi9/current-podified
+test_deps_repo_setup_dist: centos10
+test_deps_repo_setup_promotion: current

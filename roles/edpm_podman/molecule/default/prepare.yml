@@ -32,8 +32,7 @@
   roles:
     - role: ../../../../molecule/common/test_deps
       test_deps_extra_packages:
-        - runc
-        - containernetworking-plugins
+        - crun
     - role: osp.edpm.env_data
   post_tasks:
     - name: pull an image
