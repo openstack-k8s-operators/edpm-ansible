@@ -1,5 +1,5 @@
 ---
-# Copyright 2023 Red Hat, Inc.
+# Copyright 2025 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,4 +14,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# Tasks for 19.0.x -> 20 minor_updates only
+- name: Login to container registries if needed
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_podman
+    tasks_from: login.yml
+    apply:
+      become: true
+  tags:
+    - edpm_podman
+    - edpm_upgrade_services
+
+- name: Apply 18->19 upgrade for edpm_neutron_ovn role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_ovn
+    tasks_from: upgrade.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_ovn
+    - edpm_upgrade_services
+  when: '"neutron-ovn" in edpm_upgrade_services_running_services'
