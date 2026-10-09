@@ -73,3 +73,6 @@
         content: "0"
         dest: /var/lib/edpm-config/nmstate.returncode
         mode: "0644"
+
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml
