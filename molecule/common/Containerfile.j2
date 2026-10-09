@@ -12,7 +12,6 @@ RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10
     cd repo-setup && \
     pip install -r requirements.txt && \
     python3 setup.py install && \
-    dnf clean all -y && \
-    chmod 0400 /etc/shadow /etc/gshadow
+    dnf clean all -y
 
 CMD [ '/sbin/init' ]
