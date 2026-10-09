@@ -5,10 +5,14 @@
     verify_podman_running: "{{ item.running | default(true) }}"
   block:
 
+    # --rm plus Restart=always leaves the container briefly absent while systemd recreates it.
     - name: Check if podman container exists {{ verify_podman_container_name }}
       become: true
       ansible.builtin.command: podman ps -a --filter name=^{{verify_podman_container_name}}\$ --format \{\{.Names\}\}
       register: containers
+      until: containers.rc == 0 and containers.stdout_lines | length == 1
+      retries: 10
+      delay: 2
 
     - name: Assert podman container exists {{ verify_podman_container_name }}
       ansible.builtin.assert:
@@ -23,6 +27,11 @@
       become: true
       ansible.builtin.command: podman ps --filter name={{verify_podman_container_name}} --format \{\{.Status\}\}
       register: running_containers
+      until: running_containers.rc == 0
+             and running_containers.stdout_lines | length == 1
+             and 'Up' in running_containers.stdout_lines | first
+      retries: 10
+      delay: 2
 
     - name: Assert podman container is running {{ verify_podman_container_name }}
       when: verify_podman_running
