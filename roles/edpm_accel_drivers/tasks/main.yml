@@ -9,12 +9,6 @@
 - name: Setup configuration and build enabled vendors list
   ansible.builtin.import_tasks: setup_config.yml
 
-- name: Pin kernel version for driver compatibility
-  when:
-    - _edpm_accel_drivers_config.kernel_pin.enabled | bool
-    - _edpm_accel_drivers_config.kernel_pin.version | length > 0
-  ansible.builtin.import_tasks: kernel_pin.yml
-
 - name: Install GPU drivers for enabled vendors
   ansible.builtin.include_tasks: driver_install.yml
   loop: "{{ _edpm_accel_drivers_enabled_vendors }}"
