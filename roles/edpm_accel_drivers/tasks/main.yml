@@ -29,8 +29,14 @@
     state: absent
 
 - name: Run boot configuration tasks
-  when: _edpm_accel_drivers_enabled_vendors | length > 0
   ansible.builtin.import_tasks: boot_config.yml
+  when: >
+    _edpm_accel_drivers_enabled_vendors | length > 0 and (
+    _edpm_accel_drivers_install_packages_changed | default(false) | bool or
+    _edpm_accel_drivers_nvidia_from_run_result is defined and
+    _edpm_accel_drivers_nvidia_from_run_result.changed | bool or
+    _edpm_accel_drivers_blacklist_module_changed | default(false) | bool
+    )
 
 - name: Configure MIG partitioning on NVIDIA GPU
   when: _edpm_accel_drivers_config.features.nvidia_mig.manage | bool
