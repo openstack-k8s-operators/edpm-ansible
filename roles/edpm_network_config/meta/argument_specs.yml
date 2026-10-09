@@ -114,8 +114,8 @@ argument_specs:
         type: str
         description: >
           Path to nmstate device_map.yaml recording, for every physical network device
-          (PCI ethernet NIC, SR-IOV VF, etc.), its current name, PCI address and bound
-          kernel driver. Refreshed after a successful apply (nmstate tool path only).
+          (PCI ethernet NIC, SR-IOV VF, etc.), its current name, PCI address, MAC
+          address, and bound kernel driver. Refreshed after a successful apply (nmstate tool path only).
         default: /var/lib/edpm-config/nmstate_device_map.yaml
       edpm_network_config_driver_bind:
         type: str
