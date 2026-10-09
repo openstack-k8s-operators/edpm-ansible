@@ -1,8 +1,8 @@
 ---
 # Build/refresh a device_map.yaml recording, for every physical network
-# device (PCI ethernet NIC, SR-IOV VF, ...), its current PCI address and
-# bound kernel driver. This is observational only: no filtering or skip
-# decisions are made here.
+# device (PCI ethernet NIC, SR-IOV VF, ...), its current PCI address, MAC
+# address, and bound kernel driver. This is observational only: no filtering
+# or skip decisions are made here.
 
 - name: Ensure /var/lib/edpm-config exists
   ansible.builtin.file:
