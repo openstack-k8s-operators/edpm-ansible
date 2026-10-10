@@ -8,12 +8,28 @@
     path: "{{working_directory}}"
     state: absent
 
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: rpm
+
+- name: Find installed openvswitch packages
+  ansible.builtin.set_fact:
+    _installed_ovs_packages: >-
+      {{ ansible_facts.packages.keys()
+         | select('match', '^(python3-)?(rdo-|rhoso-)?openvswitch.*')
+         | list }}
+
+# openvswitch is no longer installed as a single unversioned package name
+# (that only existed via the rdo-openvswitch/rhoso-openvswitch wrapper), so
+# discover and remove whatever stream package(s) are actually installed
+# instead of a hardcoded name.
 - name: Uninstall openvswitch from the test instance
   become: true
   ansible.builtin.dnf:
-    name: openvswitch
+    name: "{{ _installed_ovs_packages }}"
     autoremove: true
     state: absent
+  when: _installed_ovs_packages | length > 0
 
 - name: Clean dnf cache
   become: true

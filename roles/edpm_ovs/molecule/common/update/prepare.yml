@@ -18,7 +18,11 @@
   hosts: all
   become: true
   vars:
-    ovs_pre_update_version: "{{molecule_yml['provisioner']['env']['ovs_pre_update_version']}}"
+    # A comma-separated list of package names/NVRs to install before the
+    # update, e.g. "openvswitch3.1". When left unset, no override is passed
+    # to the role, so it installs using its own edpm_ovs_packages/
+    # edpm_ovs_version defaults.
+    ovs_pre_update_version: "{{ molecule_yml['provisioner']['env']['ovs_pre_update_version'] | default('', true) }}"
   pre_tasks:
     - name: Include base pre_tasks
       ansible.builtin.include_tasks:
@@ -32,11 +36,26 @@
       ansible.builtin.include_tasks:
         file: ../prepare_base.yml
 
-    - name: Import edpm_ovs role to install ovs before update
-      ansible.builtin.import_role:
-        name:  osp.edpm.edpm_ovs
+    # Passing "omit" as the value of a vars: key on import_role/include_role
+    # does not make the role fall back to its own default: the key is still
+    # considered set (to the omit placeholder), which shadows
+    # edpm_ovs_packages's default in defaults/main.yml, and the placeholder
+    # only gets stripped once it reaches a module parameter directly - so
+    # edpm_ovs's dnf tasks end up with an empty package name and silently do
+    # nothing. Use include_role (dynamic) with when: instead, so the whole
+    # role invocation - and therefore the vars: key - is skipped entirely
+    # when there is no override, letting the role's own default apply.
+    - name: Import edpm_ovs role to install a pinned ovs version before update
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_ovs
       vars:
-        edpm_ovs_packages: ["{{ovs_pre_update_version}}"]
+        edpm_ovs_packages: "{{ ovs_pre_update_version.split(',') }}"
+      when: ovs_pre_update_version | length > 0
+
+    - name: Import edpm_ovs role to install ovs before update using role defaults
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_ovs
+      when: ovs_pre_update_version | length == 0
 
     - name: Create a working directory for storing test variables
       ansible.builtin.file:

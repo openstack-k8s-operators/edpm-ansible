@@ -15,16 +15,14 @@ provisioner:
   log: true
   name: ansible
   env:
-    # Left unset so prepare installs using the role's own default
-    # edpm_ovs_version/edpm_ovs_packages, matching what converge updates to,
-    # so no update should occur.
-    ovs_pre_update_version: ""
+    ovs_pre_update_version: "openvswitch3.4"
+    ovs_target_packages: "openvswitch3.5"
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"
     cleanup: ../common/update/cleanup.yml
 scenario:
-  name: update_no_op
+  name: update_cross_stream
   test_sequence:
     - dependency
     - destroy
