@@ -1,0 +1,148 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+- name: Prepare test_deps
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_setup_edpm: true
+      test_deps_setup_stream: true
+      test_deps_edpm_packages:
+        - centos-stream-release
+        - openvswitch
+        - libibverbs
+        - podman
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - ansible.builtin.include_role:
+        name: osp.edpm.env_data
+
+    # The openvswitch kernel module needs to be loaded on the host
+    - name: install and modprobe openvswitch
+      shell: |
+        sudo dnf -y install openvswitch
+        sudo modprobe openvswitch
+      delegate_to: localhost
+      run_once: true
+
+    # Create a test CA and pre-generate a node certificate to simulate
+    # what cert-manager + edpm_install_certs would produce. The cert is
+    # placed on the EDPM node at the path where edpm_install_certs copies
+    # it (as tls.crt / tls.key).
+    - name: Create test RBAC CA directory
+      ansible.builtin.file:
+        path: /tmp/ovn-rbac-test-ca
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Generate test RBAC CA private key
+      ansible.builtin.command:
+        cmd: >
+          openssl genrsa
+          -out /tmp/ovn-rbac-test-ca/tls.key 2048
+        creates: /tmp/ovn-rbac-test-ca/tls.key
+      delegate_to: localhost
+      run_once: true
+
+    - name: Generate test RBAC CA certificate
+      ansible.builtin.command:
+        cmd: >
+          openssl req -new -x509
+          -key /tmp/ovn-rbac-test-ca/tls.key
+          -out /tmp/ovn-rbac-test-ca/tls.crt
+          -days 365
+          -subj "/CN=OVN SB DB Test CA"
+        creates: /tmp/ovn-rbac-test-ca/tls.crt
+      delegate_to: localhost
+      run_once: true
+
+    - name: Generate node private key
+      ansible.builtin.command:
+        cmd: >
+          openssl genrsa
+          -out /tmp/ovn-rbac-test-ca/node.key 2048
+        creates: /tmp/ovn-rbac-test-ca/node.key
+      delegate_to: localhost
+      run_once: true
+
+    - name: Generate node CSR with CN=UUID5(canonical_hostname)
+      ansible.builtin.command:
+        cmd: >
+          openssl req -new
+          -key /tmp/ovn-rbac-test-ca/node.key
+          -out /tmp/ovn-rbac-test-ca/node.csr
+          -subj "/CN={{ canonical_hostname | to_uuid(namespace='6ba7b810-9dad-11d1-80b4-00c04fd430c8') }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Sign node certificate with test CA
+      ansible.builtin.command:
+        cmd: >
+          openssl x509 -req
+          -in /tmp/ovn-rbac-test-ca/node.csr
+          -CA /tmp/ovn-rbac-test-ca/tls.crt
+          -CAkey /tmp/ovn-rbac-test-ca/tls.key
+          -CAserial /tmp/ovn-rbac-test-ca/ca.srl
+          -CAcreateserial
+          -out /tmp/ovn-rbac-test-ca/node.crt
+          -days 365
+          -sha256
+      delegate_to: localhost
+      run_once: true
+
+    # Place certs on the EDPM node as edpm_install_certs would.
+    - name: Create RBAC cert directory on EDPM node
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/openstack/certs/ovn/rbac
+        state: directory
+        mode: "0755"
+
+    - name: Copy RBAC certificate to EDPM node
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/ovn-rbac-test-ca/node.crt
+        dest: /var/lib/openstack/certs/ovn/rbac/tls.crt
+        mode: "0600"
+
+    - name: Copy RBAC private key to EDPM node
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/ovn-rbac-test-ca/node.key
+        dest: /var/lib/openstack/certs/ovn/rbac/tls.key
+        mode: "0600"
+
+    # Create the CA cert file at the path that the ovn_controller container
+    # expects to bind-mount when TLS is enabled.
+    - name: Create OVN certs directory on EDPM node
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/openstack/certs/ovn/default
+        state: directory
+        mode: "0755"
+
+    - name: Copy CA cert to EDPM node
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/ovn-rbac-test-ca/tls.crt
+        dest: /var/lib/openstack/certs/ovn/default/ca.crt
+        mode: "0644"
+
+  post_tasks: []
