@@ -1,0 +1,34 @@
+---
+# Apply one nmstate desired-state document via linux_system_roles.network.
+# Caller sets edpm_nmstate_apply_template (YAML string) and edpm_nmstate_apply_phase (label for logs).
+# Caller may set edpm_nmstate_apply_interface_mapping (dict of nicN -> real name) to substitute
+# NIC aliases (including sriov:<pf_name>:<vf_id> port references) before applying.
+#
+# Caller may set edpm_nmstate_apply_skip_role_setup: true to skip the rest of the
+# fedora.linux_system_roles.network role (package installs for NetworkManager/nmstate/
+# python3-libnmstate, service enable, a no-op network_connections call since we never
+# set network_connections, a connectivity re-test ping, and sr_fingerprint bookkeeping)
+# and call the network_state module directly instead. Only safe when an earlier phase
+# in the same run already executed the full role, so those packages/service are already
+# known-good; nmstate_tool.yml sets this for the second phase in a two-step SR-IOV apply.
+
+- name: Render network_state variable [nmstate {{ edpm_nmstate_apply_phase }}] (NIC aliases only under nmstate iface keys)
+  ansible.builtin.set_fact:
+    network_state: >-
+      {{
+        edpm_nmstate_apply_template
+        | osp.edpm.edpm_safe_from_yaml
+        | osp.edpm.edpm_substitute_nic_aliases(edpm_nmstate_apply_interface_mapping | default({}))
+      }}
+
+- name: Load system-roles.network tasks [nmstate {{ edpm_nmstate_apply_phase }}]
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
+  register: edpm_nmstate_apply_result
+  when: not (edpm_nmstate_apply_skip_role_setup | default(false))
+
+- name: Apply nmstate state directly [nmstate {{ edpm_nmstate_apply_phase }}] (role setup already done earlier this run)
+  fedora.linux_system_roles.network_state:
+    desired_state: "{{ network_state }}"
+  register: edpm_nmstate_apply_result
+  when: edpm_nmstate_apply_skip_role_setup | default(false)
