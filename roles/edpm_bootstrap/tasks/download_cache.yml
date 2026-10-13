@@ -19,6 +19,7 @@
 
 - name: Download legacy network service package
   when:
+    - (edpm_network_config_tool is defined) and (edpm_network_config_tool == 'os-net-config')
     - (edpm_bootstrap_legacy_network_packages | length) > 0
   ansible.builtin.dnf:
     name: "{{ edpm_bootstrap_legacy_network_packages }}"
