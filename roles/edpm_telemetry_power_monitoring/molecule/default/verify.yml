@@ -67,3 +67,35 @@
         fail_msg: "config_hash or volume mismatch in ceilometer_agent_ipmi .container file"
       vars:
         _container_content: "{{ _ceilometer_ipmi_container.content | b64decode }}"
+
+    - name: Gather selinux facts (verify)
+      ansible.builtin.setup:
+        gather_subset:
+          - '!all'
+          - '!min'
+          - selinux
+
+    - name: Re-check ceilometer_polling_t availability (verify)
+      ansible.builtin.command:
+        cmd: >-
+          python3 -c "import selinux, sys;
+          sys.exit(0 if selinux.security_check_context('system_u:system_r:ceilometer_polling_t:s0') == 0 else 1)"
+      register: _verify_polling_type
+      changed_when: false
+      failed_when: false
+
+    - name: Verify ceilometer_polling_t security-opt matches loaded-policy state
+      ansible.builtin.assert:
+        that:
+          - >-
+            (_expected and ('--security-opt label=type:ceilometer_polling_t' in _container_content))
+            or (not _expected and ('--security-opt label=type:ceilometer_polling_t' not in _container_content))
+          # the unconditional parts of the PodmanArgs line are always present
+          - "'--privileged' in _container_content"
+          - "'--log-driver=journald' in _container_content"
+        fail_msg: "ceilometer_polling_t security-opt does not match loaded-policy availability"
+      vars:
+        _container_content: "{{ _ceilometer_ipmi_container.content | b64decode }}"
+        _expected: >-
+          {{ (ansible_facts.selinux.status | default('disabled') == 'enabled')
+             and ((_verify_polling_type.rc | default(1)) == 0) }}
