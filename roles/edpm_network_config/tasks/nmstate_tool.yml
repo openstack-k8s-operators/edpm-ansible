@@ -132,6 +132,15 @@
       register: nmstate_returncode_slurp
       when: nmstate_returncode_stat.stat.exists
 
+# Snapshot physical NICs before driver_bind so devices about to leave sysfs
+# (e.g. PF rebound to vfio-pci) are recorded for later derive passthrough keep.
+# Post-apply refresh below then retains them and updates the driver field.
+- name: Refresh nmstate device_map before PCI driver bind
+  ansible.builtin.include_tasks: nmstate_device_map.yml
+  when:
+    - not ansible_check_mode | bool
+    - edpm_network_config_driver_bind | trim | length > 0
+
 - name: Validate and bind PCI drivers before applying network state
   ansible.builtin.include_tasks: driver_bind.yml
   when: edpm_network_config_driver_bind | trim | length > 0

@@ -78,10 +78,12 @@ or ``nicN`` aliases. Before apply, ``nicN`` values under nmstate interface
 keys are substituted from the derived NIC mapping
 (``edpm_substitute_nic_aliases``).
 
-After a successful apply, the role refreshes
+The role refreshes
 ``edpm_network_config_nmstate_device_map_file`` (default
 ``/var/lib/edpm-config/nmstate_device_map.yaml``) with the PCI address, MAC,
-and bound kernel driver of each physical network device. This map is
+and bound kernel driver of each physical network device immediately before
+``edpm_network_config_driver_bind`` (so NICs about to leave sysfs are
+captured) and again after a successful nmstate apply. This map is
 observational; other nmstate-path helpers can use it as a fallback when a
 netdev is no longer present in sysfs.
 
