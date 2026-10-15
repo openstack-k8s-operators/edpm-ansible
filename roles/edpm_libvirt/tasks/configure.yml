@@ -151,6 +151,25 @@
     - ansible_facts.selinux.status == "enabled"
     - run_libvirt.rc == 0
 
+# RHOSO 19 does not include openstack-selinux package.
+# It also has SELinux set to permissive mode.
+# This check allows RHOSO 19 to run in permissive mode but may
+# result in inaccurate SELinux logs. This will be removed
+# in RHOSO 19 GA.
+- name: Check if os_enable_vtpm SELinux boolean exists
+  tags:
+    - configure
+    - libvirt
+  ansible.builtin.stat:
+    path: /sys/fs/selinux/booleans/os_enable_vtpm
+  register: os_enable_vtpm_boolean
+  failed_when:
+    - ansible_facts.selinux.mode == "enforcing"
+    - not os_enable_vtpm_boolean.stat.exists
+  when:
+    - ansible_facts.selinux is defined
+    - ansible_facts.selinux.status == "enabled"
+
 - name: Enable os_enable_vtpm SELinux boolean for vTPM
   tags:
     - configure
@@ -163,6 +182,8 @@
   when:
     - ansible_facts.selinux is defined
     - ansible_facts.selinux.status == "enabled"
+    - ansible_facts.selinux.mode == "enforcing"
+    - os_enable_vtpm_boolean.stat.exists
 
 - name: Move libvirt TLS files to the right location on the compute node
   tags:
