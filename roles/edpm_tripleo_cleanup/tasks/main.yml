@@ -94,3 +94,11 @@
         cmd: /usr/bin/systemctl reset-failed {{ item }}  # noqa: command-instead-of-module no-changed-when
       loop: "{{ tripleo_services }}"
       failed_when: false
+
+- name: Cleanup os-net-config return code file
+  tags:
+    - adoption
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/tripleo-config/os-net-config.returncode
+    state: absent
