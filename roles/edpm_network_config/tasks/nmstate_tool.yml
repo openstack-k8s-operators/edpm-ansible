@@ -180,6 +180,12 @@
         name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
       register: nmstate_result
 
+    # Refresh before writing success rc so a failed map refresh leaves
+    # nmstate.returncode unset/non-zero and the block remains retryable.
+    - name: Refresh nmstate device_map (physical device PCI/driver identity)
+      ansible.builtin.include_tasks: nmstate_device_map.yml
+      when: not (nmstate_result.failed | default(false))
+
     - name: Write rc of nmstate run
       ansible.builtin.copy:
         content: "{{ '1' if (nmstate_result.failed | default(false)) else '0' }}"
