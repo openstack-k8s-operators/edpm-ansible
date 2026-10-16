@@ -34,6 +34,11 @@ edpm_ovs_dpdk_vhost_postcopy_support: false
 edpm_ovs_dpdk_vhost_postcopy_ovs_options: "--mlockall=no"
 edpm_ovs_dpdk_shared_mem_pool: ""
 edpm_ovs_dpdk_pmd_sleep_max: ""
+# Arbitrary extra OvS other_config settings not covered by a dedicated variable
+# above, e.g. {smc-enable: true, pmd-rxq-assign: group, pmd-rxq-isolate: false}.
+# See ovs-vswitchd.conf.db(5) for the full list of other_config keys. Dedicated
+# variables above take precedence over this for any overlapping keys.
+edpm_ovs_dpdk_other_config: {}
 
 # OVN bridge datapath type
 edpm_ovn_datapath_type: "netdev"
