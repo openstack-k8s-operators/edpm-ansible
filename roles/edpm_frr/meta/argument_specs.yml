@@ -196,6 +196,15 @@ argument_specs:
           - /run/frr:/run/frr:shared,z
         description: List of FRR volumes in a mountpoint form.
         type: list
+      edpm_frr_ovn_bind:
+        default: true
+        description: >
+          When true and the peer service quadlet is present, create
+          a bidirectional BindsTo systemd relationship between FRR
+          and OVN controller services via drop-in files. If the peer
+          is not yet deployed, the binding is deferred until the peer
+          role runs.
+        type: bool
       edpm_frr_watchfrr:
         default: true
         description: ''
