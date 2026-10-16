@@ -10,6 +10,11 @@ repos:
         pass_filenames: false
         always_run: true
         verbose: true
+        args: [
+          "-vv",               # Extra verbose output for diffs
+          "--tb=short",        # Shorter, cleaner tracebacks (or use "long" if you want everything)
+          "--showlocals",      # Show local variable values in the traceback
+        ]
         additional_dependencies:
           - pytest
           - oslotest
