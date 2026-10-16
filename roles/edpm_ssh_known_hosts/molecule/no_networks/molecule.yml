@@ -25,8 +25,8 @@ provisioner:
               instance:
   log: true
   env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
-
+    ANSIBLE_STDOUT_CALLBACK: default
+    ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
 scenario:
   test_sequence:
     - destroy
