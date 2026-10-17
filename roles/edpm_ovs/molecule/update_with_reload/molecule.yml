@@ -15,7 +15,12 @@ provisioner:
   log: true
   name: ansible
   env:
-    ovs_pre_update_version: rdo-openvswitch-3.2
+    # Must be older than the role's default edpm_ovs_version so that
+    # converge's update to the default actually has something to do -
+    # otherwise the update check finds no changes, the update block (and the
+    # reload task nested inside it) never runs, and the "reloaded" assertion
+    # in verify.yml would fail since the service was never touched.
+    ovs_pre_update_version: "openvswitch3.4"
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"

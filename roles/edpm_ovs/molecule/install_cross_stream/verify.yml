@@ -1,0 +1,32 @@
+---
+- name: Verify ovs stream swap via the install path
+  become: true
+  hosts: all
+  vars:
+    ovs_pre_install_version: "{{ molecule_yml['provisioner']['env']['ovs_pre_install_version'] }}"
+    # Must track edpm_ovs_version's default in defaults/main.yml.
+    ovs_default_target_package: "openvswitch3.5"
+  tasks:
+    - name: Gather installed package facts
+      ansible.builtin.package_facts:
+        manager: rpm
+
+    - name: Assert the older ovs stream package was removed
+      ansible.builtin.assert:
+        that: ovs_pre_install_version not in ansible_facts.packages
+        fail_msg: >-
+          {{ ovs_pre_install_version }} is still installed after converging
+          with the role's default edpm_ovs_packages
+
+    - name: Assert the default ovs stream package is installed
+      ansible.builtin.assert:
+        that: ovs_default_target_package in ansible_facts.packages
+        fail_msg: "{{ ovs_default_target_package }} was not installed by the role"
+
+    - name: Ensure openvswitch systemd services are in expected states
+      ansible.builtin.include_tasks: ../../../../molecule/test-helpers/verify_systemd_unit.yaml
+      loop:
+        - {"name": "openvswitch.service",
+            "osp_service": false,
+            "enabled": "enabled",
+            "active":  ["active"]}

@@ -1,0 +1,36 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+platforms:
+  - name: compute-1
+    groups:
+      - compute
+provisioner:
+  log: true
+  name: ansible
+  env:
+    ovs_pre_update_version: "openvswitch3.4"
+    ovs_target_packages: "openvswitch3.5"
+  playbooks:
+    prepare: "../common/update/prepare.yml"
+    verify: "../common/update/verify.yml"
+    cleanup: ../common/update/cleanup.yml
+scenario:
+  name: update_cross_stream
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
+verifier:
+  name: ansible

@@ -4,6 +4,14 @@
   ansible.builtin.dnf:  # noqa: package-latest
     name: "{{ edpm_ovs_packages }}"
     state: latest
+    # edpm_ovs_packages now names the concrete openvswitchN.N packages
+    # directly (see defaults/main.yml) instead of the rdo-openvswitch/
+    # rhoso-openvswitch wrapper. Every stream Conflicts with every other
+    # stream rather than Obsoleting it, so allowerasing is required here too,
+    # otherwise this check would fail to resolve (rather than simply report
+    # no changes) whenever edpm_ovs_packages points at a different stream
+    # than what is currently installed.
+    allowerasing: true
   check_mode: true
   register: ovs_update_check
 
@@ -29,8 +37,24 @@
       # OVS rpm scriptlets which would stop and disable OVS services during
       # a standard update. Further info:
       # https://github.com/openstack-k8s-operators/dev-docs/blob/main/ovs-update.md#rpm-packaging
+      #
+      # "install" (not "update") plus --allowerasing is used because
+      # edpm_ovs_packages names the concrete openvswitchN.N package(s)
+      # directly rather than the rdo-openvswitch/rhoso-openvswitch wrapper
+      # package. Each stream
+      # (e.g. openvswitch3.1, openvswitch3.2) Conflicts with every other
+      # stream instead of Obsoleting it, so moving to a different stream is a
+      # package rename plain "dnf update" cannot perform: it would either
+      # refuse the transaction (conflict) or silently do nothing (update of a
+      # not-yet-installed name is a no-op). --allowerasing lets dnf erase the
+      # conflicting, previously installed stream package(s) as part of the
+      # same noscripts transaction, so crossing streams still never triggers
+      # a service stop/disable. When the installed and target packages share
+      # the same name (the common same-stream patch update case),
+      # --allowerasing has no effect and this behaves exactly like a plain
+      # update.
       ansible.builtin.shell: >
-        dnf update -y {{ " ".join(edpm_ovs_packages) }} --cacheonly --setopt=tsflags=noscripts
+        dnf install -y {{ " ".join(edpm_ovs_packages) }} --cacheonly --setopt=tsflags=noscripts --allowerasing
       register: update_ovs_result
       changed_when: update_ovs_result.rc == 0
       failed_when: update_ovs_result.rc != 0
