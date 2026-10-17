@@ -1,0 +1,51 @@
+---
+# Build Quadlet volume mounts for nova.conf.d and provider configs.
+# Shared by configure.yml (deploy) and install.yml (update-services).
+
+- name: Initialize config volume mount lists
+  ansible.builtin.set_fact:
+    edpm_nova_conf_d_volumes: []
+    edpm_nova_provider_volumes: []
+
+# Numbered fragments only — excludes nova-blank.conf (mounted as nova.conf).
+- name: Find nova.conf.d fragments
+  become: true
+  ansible.builtin.find:
+    paths: "{{ edpm_nova_config_dest }}"
+    patterns:
+      - "[0-9]*-*.conf"
+    file_type: file
+  register: _edpm_nova_conf_fragments
+  changed_when: false
+
+- name: Find provider config files
+  become: true
+  ansible.builtin.find:
+    paths: "{{ edpm_nova_config_dest }}"
+    patterns:
+      - "provider*.yaml"
+    file_type: file
+  register: _edpm_nova_provider_files
+  changed_when: false
+
+- name: Build nova.conf.d volume mounts
+  vars:
+    _name: "{{ item.path | basename }}"
+  ansible.builtin.set_fact:
+    edpm_nova_conf_d_volumes: >-
+      {{ edpm_nova_conf_d_volumes +
+         [item.path ~ ':/etc/nova/nova.conf.d/' ~ _name ~ ':ro'] }}
+  loop: "{{ _edpm_nova_conf_fragments.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+
+- name: Build provider config volume mounts
+  vars:
+    _name: "{{ item.path | basename }}"
+  ansible.builtin.set_fact:
+    edpm_nova_provider_volumes: >-
+      {{ edpm_nova_provider_volumes +
+         [item.path ~ ':/etc/nova/provider_config/' ~ _name ~ ':ro'] }}
+  loop: "{{ _edpm_nova_provider_files.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"

@@ -15,6 +15,14 @@
   ansible.builtin.set_fact:
     _edpm_nova_role_path: "{{ role_path }}"
 
+# update-services calls install.yml without configure.yml; rebuild mounts
+# before rendering Quadlets so 01-nova.conf etc. are not dropped.
+- name: Build nova config volume mounts
+  tags:
+    - install
+    - nova
+  ansible.builtin.import_tasks: build_config_volumes.yml
+
 - name: Deploy nova init container
   tags:
     - install
