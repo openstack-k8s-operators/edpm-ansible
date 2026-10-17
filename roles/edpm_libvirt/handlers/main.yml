@@ -20,7 +20,7 @@
     name: "{{ item }}.service"
     state: restarted
     daemon_reload: true
-  loop: "{{ edpm_libvirt_services }}"
+  loop: "{{ edpm_libvirt_restart_services }}"
   listen: "Restart libvirt"
 
 - name: Restart edpm_libvirt.target

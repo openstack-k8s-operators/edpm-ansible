@@ -9,7 +9,9 @@
             nvidia_gpu:
               enabled: true
               repo:
-                url: "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/"
-                gpgkey: "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$basearch/D42D0685.pub"
-                module_stream: "open-dkms"
+                url: "https://developer.download.nvidia.com/compute/cuda/repos/rhel10/"
+                gpgkey: "https://developer.download.nvidia.com/compute/cuda/repos/rhel10/$basearch/CDF6BA43.pub"
+                # rhel10 CUDA repo publishes no modulemd, so no module stream can be
+                # enabled. Its kmods are DKMS-only, which is why EPEL is added in prepare.yml.
+                module_stream: ""
                 package_name: "nvidia-open"
