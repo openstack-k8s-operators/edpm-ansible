@@ -17,6 +17,7 @@ volumes:
   - "{{ edpm_telemetry_config_dest }}/openstack_network_exporter.yaml:/etc/openstack_network_exporter/openstack_network_exporter.yaml:z"
 {% if tls_cert_exists|bool %}
   - "{{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z"
+  - "{{ edpm_telemetry_config_dest }}/web_config.yaml:/etc/openstack_network_exporter/web_config.yaml:z"
 {% endif %}
 {% if telemetry_test is not defined or not telemetry_test | bool %}
   - /var/run/openvswitch:/run/openvswitch:rw,z
