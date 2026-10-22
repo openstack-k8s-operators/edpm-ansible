@@ -1,0 +1,12 @@
+---
+argument_specs:
+  # ./roles/edpm_upgrade_services/tasks/main.yml entry point
+  main:
+    short_description: The main entry point for the edpm_upgrade_services role.
+    options:
+      edpm_upgrade_services_running_services:
+        type: list
+        default: edpm_service_types
+        description: >
+          Used to select which list of service types are upgraded
+          on the machine. The list is provided by openstack-operator.
