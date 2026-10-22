@@ -149,7 +149,7 @@
 
     - name: Set boot_file_entry_check fact
       ansible.builtin.set_fact:
-        boot_file_entry_present: grep_edpm_kernel_args.rc == 0
+        boot_file_entry_present: "{{ grep_edpm_kernel_args.rc == 0 }}"
 
     - name: Add kernel args to boot entries  # noqa: risky-shell-pipe
       ansible.builtin.shell: |

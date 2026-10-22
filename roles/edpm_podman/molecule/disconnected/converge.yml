@@ -22,7 +22,6 @@
       include_role:
         name: osp.edpm.edpm_podman
         tasks_from: install.yml
-        vars_from: "redhat.yml"
       vars:
         edpm_podman_disconnected_ocp: true
         edpm_podman_registries_conf: |
