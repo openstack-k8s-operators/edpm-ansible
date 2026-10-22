@@ -41,6 +41,16 @@
     path: "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem"
   register: ca_bundle_stat_res
 
+- name: Check that tls.crt exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.crt"
+  register: tls_crt_stat
+
+- name: Check that tls.key exists
+  ansible.builtin.stat:
+    path: "{{ edpm_telemetry_certs }}/tls.key"
+  register: tls_key_stat
+
 - name: Render ceilometer config template
   tags:
     - edpm_telemetry_power_monitoring
@@ -49,6 +59,8 @@
     dest: "{{ edpm_telemetry_config_dest }}/ceilometer-host-specific.conf"
     setype: "container_file_t"
     mode: "0644"
+  vars:
+    tls_cert_exists: "{{ tls_crt_stat.stat.exists and tls_key_stat.stat.exists }}"
 
 - name: Copy static config files
   tags:
@@ -98,17 +110,6 @@
     setype: container_file_t
     remote_src: "{{ telemetry_test | default('false') }}"
   loop: "{{ configs }}"
-
-- name: Check that tls.crt exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.crt"
-  register: tls_crt_stat
-
-- name: Check that tls.key exists
-  ansible.builtin.stat:
-    path: "{{ edpm_telemetry_certs }}/tls.key"
-  register: tls_key_stat
-
 
 - name: Configure tls if present
   when:

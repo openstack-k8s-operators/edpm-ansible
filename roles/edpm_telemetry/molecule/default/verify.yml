@@ -49,6 +49,16 @@
         that:
           - "'edpm-0.localdomain' in host_specific_config.content | b64decode"
 
+    - name: Assert prometheus TLS is enabled in host specific config when certs exist
+      ansible.builtin.assert:
+        that:
+          - "'prometheus_tls_enable = True' in _host_specific"
+          - "'prometheus_tls_certfile = /etc/ceilometer/tls/tls.crt' in _host_specific"
+          - "'prometheus_tls_keyfile = /etc/ceilometer/tls/tls.key' in _host_specific"
+          - "'prometheus_tls_client_ca = /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem' in _host_specific"
+      vars:
+        _host_specific: "{{ host_specific_config.content | b64decode }}"
+
     - name: Verify config_hash is populated for ceilometer
       become: true
       ansible.builtin.shell: >-

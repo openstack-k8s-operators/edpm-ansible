@@ -1,2 +1,10 @@
 [DEFAULT]
 host = {{ canonical_hostname }}
+
+{% if tls_cert_exists | bool %}
+[polling]
+prometheus_tls_enable = True
+prometheus_tls_certfile = /etc/ceilometer/tls/tls.crt
+prometheus_tls_keyfile = /etc/ceilometer/tls/tls.key
+prometheus_tls_client_ca = /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+{% endif %}
