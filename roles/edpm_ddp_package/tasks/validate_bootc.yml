@@ -1,0 +1,176 @@
+---
+- name: Require a DDP profile selection for bootc validation
+  ansible.builtin.assert:
+    that:
+      - (edpm_ddp_package | string | length) > 0
+    fail_msg: >-
+      Bootc DDP validation requires edpm_ddp_package to name the profile baked
+      into the image. Add the vendor-supported .pkg to the image and set this
+      value to its profile directory before running the role.
+
+- name: Check the selected bootc DDP profile directory
+  ansible.builtin.stat:
+    path: "{{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}"
+  register: ddp_bootc_profile_directory
+
+- name: Require the selected bootc DDP profile directory
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_profile_directory.stat.exists
+      - ddp_bootc_profile_directory.stat.isdir
+    fail_msg: >-
+      Bootc DDP profile directory {{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}
+      is missing. Bake the selected vendor-supported .pkg into the image under
+      this profile directory and regenerate the image initramfs; the role does
+      not install or change firmware on bootc.
+
+- name: Find candidate packages in the selected bootc DDP profile
+  ansible.builtin.find:
+    paths: "{{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}"
+    patterns: "ice[_-]?*.pkg*"
+    file_type: file
+  register: ddp_bootc_profile_packages
+
+- name: Require a package in the selected bootc DDP profile
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_profile_packages.files | length > 0
+    fail_msg: >-
+      No ice*.pkg* DDP package was found in profile
+      {{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}. Bake the selected
+      vendor-supported .pkg into that profile directory and the image initramfs.
+
+- name: Select the latest package in the bootc DDP profile
+  ansible.builtin.set_fact:
+    ddp_bootc_selected_package: >-
+      {{ ddp_bootc_profile_packages.files | map(attribute='path') | list | community.general.version_sort | last }}
+
+- name: Check the canonical bootc DDP path
+  ansible.builtin.stat:
+    path: "{{ edpm_ddp_package_path }}/ddp/ice.pkg"
+    follow: false
+  register: ddp_bootc_canonical_stat
+
+- name: Require a canonical bootc DDP symlink
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_canonical_stat.stat.exists
+      - ddp_bootc_canonical_stat.stat.islnk
+    fail_msg: >-
+      {{ edpm_ddp_package_path }}/ddp/ice.pkg must be a symlink to the selected
+      package in the bootc image. Bake the link into a new image; the role does
+      not create or change it at runtime.
+
+- name: Resolve the canonical bootc DDP path
+  ansible.builtin.command:
+    argv:
+      - readlink
+      - -e
+      - --
+      - "{{ edpm_ddp_package_path }}/ddp/ice.pkg"
+  register: ddp_bootc_canonical_realpath
+  changed_when: false
+  failed_when: false
+
+- name: Resolve the selected bootc DDP package
+  ansible.builtin.command:
+    argv:
+      - readlink
+      - -e
+      - --
+      - "{{ ddp_bootc_selected_package }}"
+  register: ddp_bootc_selected_realpath
+  changed_when: false
+  failed_when: false
+
+- name: Require the canonical bootc DDP path to select the configured profile
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_canonical_realpath.rc == 0
+      - ddp_bootc_selected_realpath.rc == 0
+      - ddp_bootc_canonical_realpath.stdout == ddp_bootc_selected_realpath.stdout
+    fail_msg: >-
+      {{ edpm_ddp_package_path }}/ddp/ice.pkg does not resolve to the latest package
+      selected from {{ edpm_ddp_package_path }}/{{ edpm_ddp_package }}. Bake the
+      matching profile and canonical link into a new image; the role is
+      validation-only on bootc.
+
+- name: Identify the running bootc kernel
+  ansible.builtin.command:
+    argv:
+      - uname
+      - -r
+  register: ddp_bootc_running_kernel
+  changed_when: false
+  failed_when: false
+
+- name: Require a running bootc kernel version
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_running_kernel.rc == 0
+      - ddp_bootc_running_kernel.stdout | trim | length > 0
+    fail_msg: >-
+      Unable to identify the running kernel with uname -r; refusing to claim
+      that DDP is present in the booted image's initramfs.
+
+- name: Set the running bootc initramfs path
+  ansible.builtin.set_fact:
+    ddp_bootc_initramfs_path: "/usr/lib/modules/{{ ddp_bootc_running_kernel.stdout | trim }}/initramfs.img"
+
+- name: Check the running bootc initramfs
+  ansible.builtin.stat:
+    path: "{{ ddp_bootc_initramfs_path }}"
+  register: ddp_bootc_initramfs_stat
+
+- name: Require the running bootc initramfs
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_initramfs_stat.stat.exists
+      - ddp_bootc_initramfs_stat.stat.isreg
+      - ddp_bootc_initramfs_stat.stat.size | int > 0
+    fail_msg: >-
+      The booted kernel initramfs {{ ddp_bootc_initramfs_path }} is missing or
+      empty. Rebuild the bootc image with the selected DDP payload included in
+      its initramfs, switch to that image, and reboot.
+
+- name: Calculate the canonical bootc DDP file SHA-256
+  ansible.builtin.command:
+    argv:
+      - sha256sum
+      - --
+      - "{{ edpm_ddp_package_path }}/ddp/ice.pkg"
+  register: ddp_bootc_runtime_sha256
+  changed_when: false
+
+- name: Extract and hash the canonical DDP file from the running bootc initramfs
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && lsinitrd -f
+      {{ (edpm_ddp_package_path ~ '/ddp/ice.pkg') | quote }}
+      {{ ddp_bootc_initramfs_path | quote }} | sha256sum
+    executable: /bin/bash
+  register: ddp_bootc_initramfs_sha256
+  changed_when: false
+  failed_when: false
+
+- name: Require the bootc initramfs DDP payload to match the runtime file
+  ansible.builtin.assert:
+    that:
+      - ddp_bootc_initramfs_sha256.rc == 0
+      - >-
+        (ddp_bootc_initramfs_sha256.stdout.split() | first | default('')) ==
+        (ddp_bootc_runtime_sha256.stdout.split() | first | default(''))
+    fail_msg: >-
+      The canonical DDP payload in {{ ddp_bootc_initramfs_path }} is missing or
+      its SHA-256 differs from {{ edpm_ddp_package_path }}/ddp/ice.pkg. Bake the
+      selected package into the bootc image initramfs, switch to that image, and
+      reboot. The role will not modify firmware or rebuild initramfs on bootc.
+
+- name: Report bootc DDP initramfs validation scope
+  ansible.builtin.debug:
+    msg: >-
+      Bootc DDP validation passed: the selected profile's canonical runtime
+      payload matches the payload extracted from {{ ddp_bootc_initramfs_path }}
+      for running kernel {{ ddp_bootc_running_kernel.stdout | trim }}. This
+      validates only the booted image's initramfs payload; it does not validate
+      hardware compatibility or actual driver acceptance.
