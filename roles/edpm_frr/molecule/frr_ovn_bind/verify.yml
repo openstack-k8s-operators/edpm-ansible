@@ -1,0 +1,193 @@
+---
+# Copyright 2026 Red Hat, LLC.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Verify FRR and OVN BindsTo relationship
+  gather_facts: false
+  hosts: all
+  become: true
+  tasks:
+    - name: Verify BindsTo drop-in for FRR
+      block:
+        - name: Read FRR BindsTo drop-in
+          ansible.builtin.slurp:
+            src: /etc/systemd/system/edpm_frr.service.d/ovn-bind.conf
+          register: _frr_dropin
+
+        - name: Assert FRR drop-in contains BindsTo
+          ansible.builtin.assert:
+            that:
+              - "'BindsTo=edpm_ovn_controller.service' in (_frr_dropin.content | b64decode)"
+            fail_msg: "BindsTo directive missing from FRR drop-in"
+
+    - name: Verify BindsTo drop-in for OVN
+      block:
+        - name: Read OVN BindsTo drop-in
+          ansible.builtin.slurp:
+            src: /etc/systemd/system/edpm_ovn_controller.service.d/frr-bind.conf
+          register: _ovn_dropin
+
+        - name: Assert OVN drop-in contains BindsTo
+          ansible.builtin.assert:
+            that:
+              - "'BindsTo=edpm_frr.service' in (_ovn_dropin.content | b64decode)"
+            fail_msg: "BindsTo directive missing from OVN drop-in"
+
+    - name: Verify both services are managed by systemd
+      block:
+        - name: Check FRR service exists
+          ansible.builtin.systemd:
+            name: edpm_frr.service
+          register: _frr_service
+
+        - name: Check OVN controller service exists
+          ansible.builtin.systemd:
+            name: edpm_ovn_controller.service
+          register: _ovn_service
+
+        - name: Assert both services exist
+          ansible.builtin.assert:
+            that:
+              - _frr_service is defined
+              - _ovn_service is defined
+            fail_msg: "One or both services are not registered with systemd"
+
+    - name: Verify systemd binding behavior
+      block:
+        - name: Ensure both services are running
+          ansible.builtin.systemd:
+            name: "{{ item }}"
+            state: started
+          loop:
+            - edpm_frr.service
+            - edpm_ovn_controller.service
+
+        - name: Wait for services to stabilize
+          ansible.builtin.pause:
+            seconds: 5
+
+        - name: Verify both services are active
+          ansible.builtin.command: systemctl is-active {{ item }}
+          register: _initial_status
+          loop:
+            - edpm_frr.service
+            - edpm_ovn_controller.service
+          failed_when: _initial_status.stdout != "active"
+
+        - name: Stop FRR service
+          ansible.builtin.systemd:
+            name: edpm_frr.service
+            state: stopped
+
+        - name: Wait for binding to take effect
+          ansible.builtin.pause:
+            seconds: 3
+
+        - name: Verify OVN controller stopped due to BindsTo
+          ansible.builtin.command: systemctl is-active edpm_ovn_controller.service
+          register: _ovn_status
+          failed_when: _ovn_status.stdout == "active"
+
+        - name: Restart both services for next test
+          ansible.builtin.systemd:
+            name: "{{ item }}"
+            state: started
+          loop:
+            - edpm_frr.service
+            - edpm_ovn_controller.service
+
+        - name: Wait for services to stabilize again
+          ansible.builtin.pause:
+            seconds: 5
+
+        - name: Stop OVN controller
+          ansible.builtin.systemd:
+            name: edpm_ovn_controller.service
+            state: stopped
+
+        - name: Wait for binding to take effect
+          ansible.builtin.pause:
+            seconds: 3
+
+        - name: Verify FRR stopped due to BindsTo
+          ansible.builtin.command: systemctl is-active edpm_frr.service
+          register: _frr_status
+          failed_when: _frr_status.stdout == "active"
+
+        - name: Restart both services after tests
+          ansible.builtin.systemd:
+            name: "{{ item }}"
+            state: started
+          loop:
+            - edpm_frr.service
+            - edpm_ovn_controller.service
+
+    - name: Verify stale drop-in cleanup when peer service is removed
+      block:
+        - name: Stop OVN controller service
+          ansible.builtin.systemd:
+            name: edpm_ovn_controller.service
+            state: stopped
+          failed_when: false
+
+        - name: Remove OVN controller quadlet to simulate absent peer
+          ansible.builtin.file:
+            path: /etc/containers/systemd/edpm_ovn_controller.container
+            state: absent
+
+        - name: Remove OVN controller systemd unit to simulate absent peer
+          ansible.builtin.file:
+            path: /etc/systemd/system/edpm_ovn_controller.service
+            state: absent
+
+        - name: Reload systemd so the service is no longer known
+          ansible.builtin.systemd:
+            daemon_reload: true
+
+        - name: Verify OVN controller service is not found
+          ansible.builtin.command: systemctl show edpm_ovn_controller.service --property=LoadState --value
+          register: _ovn_loadstate
+          changed_when: false
+          failed_when: _ovn_loadstate.stdout != 'not-found'
+
+        - name: Re-run FRR role with binding enabled but peer absent
+          ansible.builtin.include_role:
+            name: "osp.edpm.edpm_frr"
+          vars:
+            edpm_frr_ovn_bind: true
+            edpm_frr_bgp_peers:
+              - 10.64.0.1
+
+        - name: Check FRR BindsTo drop-in was removed
+          ansible.builtin.stat:
+            path: /etc/systemd/system/edpm_frr.service.d/ovn-bind.conf
+          register: _frr_dropin_after
+
+        - name: Assert FRR drop-in is absent
+          ansible.builtin.assert:
+            that:
+              - not _frr_dropin_after.stat.exists
+            fail_msg: "Stale FRR BindsTo drop-in was not cleaned up"
+
+        - name: Check OVN BindsTo drop-in was removed
+          ansible.builtin.stat:
+            path: /etc/systemd/system/edpm_ovn_controller.service.d/frr-bind.conf
+          register: _ovn_dropin_after
+
+        - name: Assert OVN drop-in is absent
+          ansible.builtin.assert:
+            that:
+              - not _ovn_dropin_after.stat.exists
+            fail_msg: "Stale OVN BindsTo drop-in was not cleaned up"
