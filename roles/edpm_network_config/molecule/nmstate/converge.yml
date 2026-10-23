@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-- name: Converge
+- name: Converge (single-pass nmstate)
   hosts: all
   gather_facts: false
   vars:
@@ -49,3 +49,186 @@
         - ansible_user is undefined
   roles:
     - role: osp.edpm.edpm_network_config
+
+# Podman has no SR-IOV hardware: phase 1 uses a second dummy without ethernet.sr-iov
+# and VF wait is off so nmstate apply is not blocked. This still exercises phase 1
+# apply, role-setup skip on phase 2, and nmstate.returncode. VF wait polling and
+# timeout are covered in the fake-sysfs play below.
+- name: Converge (two-step nmstate apply / skip role setup)
+  hosts: all
+  gather_facts: false
+  vars:
+    edpm_network_config_tool: nmstate
+    edpm_network_config_update: true
+    edpm_network_config_nmstate_sriov_vf_wait: false
+    edpm_network_config_nmstate_sriov_pf_template: |
+      ---
+      interfaces:
+        - name: dummy1
+          type: dummy
+          state: up
+          ipv4:
+            enabled: false
+          ipv6:
+            enabled: false
+    edpm_network_config_template: |
+      ---
+      interfaces:
+        - name: dummy0
+          type: dummy
+          state: up
+          ipv4:
+            address:
+              - ip: 192.168.180.2
+                prefix-length: 24
+            dhcp: false
+            enabled: true
+          ipv6:
+            enabled: false
+        - name: dummy1
+          type: dummy
+          state: up
+          ipv4:
+            address:
+              - ip: 192.168.181.2
+                prefix-length: 24
+            dhcp: false
+            enabled: true
+          ipv6:
+            enabled: false
+  roles:
+    - role: osp.edpm.edpm_network_config
+
+- name: Exercise SR-IOV VF wait against fake sysfs (poll + timeout)
+  hosts: all
+  gather_facts: false
+  vars:
+    edpm_molecule_sriov_sysfs: /tmp/edpm-molecule-sysfs/class/net
+    edpm_molecule_sriov_numvfs: "{{ edpm_molecule_sriov_sysfs }}/testpf0/device/sriov_numvfs"
+  tasks:
+    # Use set_fact (not play vars): the two-step play above may have left
+    # edpm_nmstate_sriov_phase_state as a host fact, which outranks play vars.
+    - name: Point VF wait at fake sysfs and non-empty PF wait list
+      ansible.builtin.set_fact:
+        edpm_network_config_nmstate_sriov_sysfs_class_net: "{{ edpm_molecule_sriov_sysfs }}"
+        edpm_network_config_nmstate_sriov_vf_wait_timeout: 10
+        edpm_network_config_nmstate_sriov_vf_wait_delay: 1
+        edpm_nmstate_sriov_phase_state:
+          interfaces:
+            - name: testpf0
+              type: ethernet
+              state: up
+              ethernet:
+                sr-iov:
+                  total-vfs: 2
+
+    - name: Create fake sysfs tree for SR-IOV VF wait
+      become: true
+      ansible.builtin.file:
+        path: "{{ edpm_molecule_sriov_sysfs }}/testpf0/device"
+        state: directory
+        mode: "0755"
+
+    # Polling: start below total-vfs, then raise the count while wait retries.
+    - name: Seed sriov_numvfs below phase-1 total-vfs
+      become: true
+      ansible.builtin.copy:
+        content: "0\n"
+        dest: "{{ edpm_molecule_sriov_numvfs }}"
+        mode: "0644"
+
+    - name: Raise sriov_numvfs to expected count after a short delay
+      become: true
+      ansible.builtin.shell: |
+        sleep 2
+        printf '2\n' > "{{ edpm_molecule_sriov_numvfs }}"
+      async: 30
+      poll: 0
+      changed_when: false
+
+    - name: Run nmstate SR-IOV VF wait until sysfs catches up
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_network_config
+        tasks_from: nmstate_wait_sriov_vfs.yml
+
+    # Timeout: leave count mismatched and expect the wait assert to fail.
+    - name: Reset sriov_numvfs below total-vfs for timeout case
+      become: true
+      ansible.builtin.copy:
+        content: "0\n"
+        dest: "{{ edpm_molecule_sriov_numvfs }}"
+        mode: "0644"
+
+    - name: Shorten VF wait timeout for failure case
+      ansible.builtin.set_fact:
+        edpm_network_config_nmstate_sriov_vf_wait_timeout: 2
+        edpm_network_config_nmstate_sriov_vf_wait_delay: 1
+
+    - name: Run nmstate SR-IOV VF wait expecting timeout
+      block:
+        - name: Wait with mismatched sriov_numvfs
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_network_config
+            tasks_from: nmstate_wait_sriov_vfs.yml
+
+        - name: Fail if VF wait succeeded with mismatched sriov_numvfs
+          ansible.builtin.fail:
+            msg: SR-IOV VF wait should have timed out when sriov_numvfs stayed at 0
+      rescue:
+        - name: Assert VF wait timed out as expected
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_result is defined
+              - "'Fail if VF wait succeeded' not in (ansible_failed_result.msg | default(''))"
+            fail_msg: >-
+              Expected nmstate_wait_sriov_vfs.yml to time out; got
+              {{ ansible_failed_result.msg | default(ansible_failed_result) }}
+
+- name: Verify nmstate single-pass and two-step results
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read nmstate return code
+      become: true
+      ansible.builtin.slurp:
+        path: /var/lib/edpm-config/nmstate.returncode
+      register: nmstate_rc
+
+    - name: Assert nmstate.returncode is success
+      ansible.builtin.assert:
+        that:
+          - (nmstate_rc.content | b64decode | trim) == "0"
+        fail_msg: "nmstate.returncode was not 0 after two-step apply"
+
+    - name: Show dummy0 address
+      ansible.builtin.command:
+        argv:
+          - ip
+          - -4
+          - -o
+          - addr
+          - show
+          - dummy0
+      register: dummy0_addr
+      changed_when: false
+
+    - name: Show dummy1 address
+      ansible.builtin.command:
+        argv:
+          - ip
+          - -4
+          - -o
+          - addr
+          - show
+          - dummy1
+      register: dummy1_addr
+      changed_when: false
+
+    - name: Assert dummy interfaces from single-pass and two-step applies
+      ansible.builtin.assert:
+        that:
+          - "'192.168.180.2' in dummy0_addr.stdout"
+          - "'192.168.181.2' in dummy1_addr.stdout"
+        fail_msg: >-
+          Expected dummy0=192.168.180.2 and dummy1=192.168.181.2;
+          got dummy0={{ dummy0_addr.stdout }} dummy1={{ dummy1_addr.stdout }}
