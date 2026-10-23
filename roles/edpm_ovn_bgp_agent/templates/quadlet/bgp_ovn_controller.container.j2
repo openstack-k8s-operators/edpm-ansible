@@ -16,7 +16,7 @@
 [Unit]
 Description=OVN Controller container (EDPM OVN BGP Agent)
 After=openvswitch.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 
 [Container]
 ContainerName=bgp_ovn_controller

@@ -21,7 +21,7 @@
 [Unit]
 Description=OVN BGP Agent container (EDPM)
 After=openvswitch.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 PartOf=edpm_frr.service
 
 [Container]

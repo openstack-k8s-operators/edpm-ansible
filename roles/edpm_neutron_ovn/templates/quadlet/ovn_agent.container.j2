@@ -20,7 +20,8 @@
 [Unit]
 Description=Neutron OVN Agent container (EDPM)
 After=openvswitch.service edpm_ovn_agent_init.service
-Requires=openvswitch.service edpm_ovn_agent_init.service
+Wants=openvswitch.service
+Requires=edpm_ovn_agent_init.service
 
 [Container]
 ContainerName=ovn_agent
