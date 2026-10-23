@@ -27,13 +27,14 @@ edpm_ovs_download_retries: "{{ edpm_download_retries | default(5) }}"
 edpm_ovs_services:
   - openvswitch
 edpm_ovs_packages:
-  # main ovs packages
-  # NOTE: pin ovs version here in the future if
-  # we want to use a specific version i.e. for adoption.
-  # NOTE: pin the wrapper package (rdo-openvswitch or rhoso-openvswitch), not
-  # openvswitchVER, e.g.:
-  # - rdo-openvswitch-3.1
-  # Otherwise, we will always get the latest version.
-  - openvswitch
+  # The FDP openvswitch "stream" package to install/update to, selected
+  # directly instead of going through the rdo-openvswitch/rhoso-openvswitch
+  # wrapper package. Bump this whenever the platform's default OVS stream
+  # changes.
+  # NOTE: to pin an exact version (e.g. for adoption, to avoid an unwanted
+  # upgrade), override with an exact NVR, e.g.:
+  # edpm_ovs_packages:
+  #   - openvswitch3.1-3.1.4-1.el9s
+  - "openvswitch3.5"
 # whether to reload the openvswitch service after an update is complete
 edpm_ovs_reload_after_update: false
