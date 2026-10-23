@@ -1,12 +1,38 @@
 ---
 
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: rpm
+  tags:
+    - edpm_update_services
+
 - name: Apply essential package updates required by services
   become: true
   vars:
-    _exclude_packages_always:
-      - kernel
-      - kernel-core
-      - openvswitch
+    # The rdo-openvswitch/rhoso-openvswitch wrapper Obsoletes every older
+    # openvswitchN.N (and python3-openvswitchN.N) stream/wrapper build, so
+    # while it is installed a plain "dnf update" can silently cross FDP
+    # stream boundaries (e.g. 3.4 -> 3.5), which erases the old stream
+    # package (a real removal, stopping the service) and installs the new
+    # one (which does not start it back up). Exclude openvswitch and
+    # python3-openvswitch here in that case; any stream change is instead
+    # performed safely by edpm_ovs's dedicated update task, invoked
+    # separately as part of edpm_update_system. Once the wrapper is not
+    # installed, a same-stream update can only bump within the pinned
+    # openvswitchN.N package name, which per its scriptlets never stops or
+    # restarts the running service, so it is safe to update like any other
+    # package.
+    _ovs_wrapper_installed: >-
+      {{
+        (ansible_facts.packages.keys() | list
+          | intersect(['rdo-openvswitch', 'rhoso-openvswitch']))
+        | length > 0
+      }}
+    _exclude_packages_always: >-
+      {{
+        ['kernel', 'kernel-core']
+        + (['openvswitch*', 'python3-openvswitch*'] if _ovs_wrapper_installed else [])
+      }}
   ansible.builtin.dnf:  # noqa: package-latest
     name: "{{ edpm_update_services_include_packages }}"
     state: latest

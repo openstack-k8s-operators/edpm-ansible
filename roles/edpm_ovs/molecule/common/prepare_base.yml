@@ -10,6 +10,17 @@
     ./venv/bin/repo-setup -d centos10 current -b master
     popd
     rm -rf repo-setup-main
+- name: Exclude legacy openvswitch wrapper package from dnf resolution
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    line: exclude=rdo-openvswitch
+  # The RDO repos enabled above still carry the rdo-openvswitch wrapper
+  # package, which Obsoletes every openvswitchN.N stream package. Left
+  # unexcluded, dnf's default obsoletes handling would silently substitute
+  # it (and whichever stream it depends on) in place of the edpm_ovs role's
+  # concrete stream package installs/updates, which this test environment
+  # is not meant to exercise.
 - name: set /etc/localtime
   become: true
   ansible.builtin.file:
