@@ -13,6 +13,11 @@ platforms:
       - compute
 provisioner:
   name: ansible
+  playbooks:
+    prepare: ../nvidia_mig/prepare.yml
+    converge: ../nvidia_mig/converge.yml
+    verify: ../nvidia_mig/verify.yml
+    cleanup: ../nvidia_mig/cleanup.yml
 verifier:
   name: ansible
 scenario:
@@ -22,3 +27,4 @@ scenario:
     - prepare
     - converge
     - verify
+    - cleanup
