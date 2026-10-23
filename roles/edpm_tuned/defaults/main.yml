@@ -27,6 +27,7 @@ edpm_tuned_profile: "throughput-performance"
 edpm_tuned_custom_profile: ""
 edpm_tuned_isolated_cores: ""
 edpm_tuned_max_power_cstate: ""
+edpm_tuned_rollback: "not_on_exit"
 
 # Default tuned packages to install
 edpm_tuned_system_packages_default:
