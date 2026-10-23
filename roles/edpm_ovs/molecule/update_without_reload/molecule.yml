@@ -15,7 +15,7 @@ provisioner:
   log: true
   name: ansible
   env:
-    ovs_pre_update_version: rdo-openvswitch-3.2
+    ovs_pre_update_version: "openvswitch3.5"
   playbooks:
     prepare: "../common/update/prepare.yml"
     verify: "../common/update/verify.yml"
