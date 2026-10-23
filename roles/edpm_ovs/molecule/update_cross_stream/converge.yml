@@ -1,0 +1,37 @@
+---
+# Copyright 2024 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Converge
+  hosts: all
+  vars:
+    ovs_target_packages: "{{ (molecule_yml['provisioner']['env']['ovs_target_packages']).split(',') }}"
+  tasks:
+    - name: set bootc fact
+      set_fact:
+        ansible_local:
+          bootc: false
+    - name: Call openvswitch update role to swap to a different ovs stream without the wrapper package
+      ansible.builtin.import_role:
+        name: osp.edpm.edpm_ovs
+        tasks_from: update
+      vars:
+        # prepare installed ovs_pre_update_version (an older FDP stream, e.g.
+        # openvswitch3.1). This exercises updating across FDP streams (which
+        # Conflict with, rather than Obsolete, each other) directly via
+        # edpm_ovs_packages/dnf --allowerasing, with no rdo-openvswitch/
+        # rhoso-openvswitch wrapper package involved.
+        edpm_ovs_packages: "{{ ovs_target_packages }}"
