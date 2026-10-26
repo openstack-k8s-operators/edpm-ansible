@@ -34,6 +34,20 @@ edpm_multipathd_recheck_wwid: true
 edpm_multipathd_skip_kpartx: true
 edpm_multipathd_user_friendly_names: false
 
+# "skip_kpartx yes" in the defaults section suppresses the partition device
+# nodes on every multipath map, including the one backing the node's own root
+# filesystem. On a node that boots from SAN that leaves dracut unable to find
+# the root partition, so carve those maps out by WWID instead. (OSPRH-33446)
+edpm_multipathd_skip_kpartx_autodetect_boot_devices: true
+# Additional WWIDs to exempt, for boot critical maps the autodetection cannot
+# see (for example a map that is only assembled later in the boot sequence).
+edpm_multipathd_skip_kpartx_exceptions: []
+
+# The initramfs embeds a copy of /etc/multipath.conf, so it has to be rebuilt
+# whenever the configuration changes or the node boots with a stale copy.
+edpm_multipathd_regenerate_initramfs: true
+edpm_multipathd_rebuild_initramfs_command: "dracut --force --regenerate-all"
+
 # This may be overridden to deploy a custom multipath.conf file.
 edpm_multipathd_custom_config_file: ''
 
