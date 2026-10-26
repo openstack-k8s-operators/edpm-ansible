@@ -1,0 +1,19 @@
+[Unit]
+After = nvidia-vgpu-mgr.service
+After = nvidia-vgpud.service
+After = systemd-udevd.service
+Before = edpm_nvidia_sriov_manage.target
+Description = Enable Nvidia GPU virtual functions. Should be triggered via edpm_nvidia_sriov_manage_{{ idx }}.path to ensure GPU is ready for sriov operations.
+[Service]
+Type = oneshot
+# Override the command to execute via a shell environment
+ExecStart = /bin/bash -c '/usr/lib/nvidia/sriov-manage -e {{ bdf }}'
+# Handle the edge case where VFs are created on PCI path but mdevs have been yet populated.
+# Cannot recover from that utterly broken state, require a reboot. Ignore if GPU device does not need MDEVs.
+ExecStartPost = /bin/bash -c 'if [ ! -d /sys/class/mdev_bus/{{ vf0_bdf }} ]; then echo "WARNING: missing mdevs after VFs enabled on GPU {{ idx }}" >&2; fi'
+TimeoutSec = 180
+RemainAfterExit = True
+Restart=on-failure
+RestartSec=10s
+[Install]
+WantedBy = edpm_nvidia_sriov_manage.target
