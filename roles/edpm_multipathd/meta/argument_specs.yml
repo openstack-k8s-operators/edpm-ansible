@@ -47,6 +47,36 @@ argument_specs:
         description: >-
           Whether to enable assigning a user friendly name to each path.
         type: bool
+      edpm_multipathd_skip_kpartx_autodetect_boot_devices:
+        default: true
+        description: >-
+          Whether to detect the multipath devices backing the boot critical
+          filesystems of the node and exempt them from skip_kpartx. Without
+          the exemption a node that boots from SAN has no partition device
+          nodes for its root map and drops to the dracut emergency shell.
+        type: bool
+      edpm_multipathd_skip_kpartx_exceptions:
+        default: []
+        description: >-
+          Additional WWIDs to exempt from skip_kpartx, for boot critical
+          multipath maps that the autodetection cannot see. These are merged
+          with the autodetected WWIDs.
+        type: list
+      edpm_multipathd_regenerate_initramfs:
+        default: true
+        description: >-
+          Whether to rebuild the initramfs when /etc/multipath.conf changes on
+          a node whose boot path uses multipath. The initramfs embeds a copy of
+          the configuration, so without this the node keeps booting with the
+          previous one.
+        type: bool
+      edpm_multipathd_rebuild_initramfs_command:
+        default: 'dracut --force --regenerate-all'
+        description: >-
+          The command used to rebuild the initramfs. All installed kernels are
+          regenerated because the update workflow installs a new kernel before
+          this role runs.
+        type: str
       edpm_multipathd_custom_config_file:
         default: ''
         description: >-

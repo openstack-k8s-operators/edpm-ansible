@@ -14,6 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when:
+    - ansible_local is not defined
+
 - name: Run multipathd install tasks with root privileges
   become: true
   block:
@@ -77,6 +86,40 @@
       when:
         - not (edpm_multipathd_enable|bool)
 
+    # A global "skip_kpartx yes" also hides the partitions of the map holding
+    # the node's own root filesystem, which makes a boot from SAN node drop to
+    # the dracut emergency shell. Collect the WWIDs of the maps behind the boot
+    # critical mount points so they can be exempted. (OSPRH-33446)
+    - name: Detect multipath devices backing boot critical filesystems
+      when:
+        - edpm_multipathd_skip_kpartx_autodetect_boot_devices | bool
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          for mnt in / /boot /boot/efi; do
+              # --nofsroot drops the "[/subvol]" suffix findmnt appends for
+              # btrfs subvolumes and bind mounts, which is not a block device.
+              src=$(findmnt -no SOURCE --nofsroot --target "${mnt}" 2>/dev/null) || continue
+              # -s walks the dependency tree downwards, so this resolves both
+              # a partition on a multipath map and LVM stacked on top of one.
+              lsblk -nspo KNAME,TYPE "${src}" 2>/dev/null | awk '$2 == "mpath" {print $1}'
+          done | sort -u | while read -r dev; do
+              uuid=$(cat "/sys/class/block/${dev##*/}/dm/uuid" 2>/dev/null) || continue
+              printf '%s\n' "${uuid#mpath-}"
+          done | sort -u
+        executable: /bin/bash
+      register: boot_mpath_wwids
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Build the list of WWIDs exempt from skip_kpartx
+      ansible.builtin.set_fact:
+        multipathd_kpartx_exceptions: >-
+          {{ (boot_mpath_wwids.stdout_lines | default([]))
+             | union(edpm_multipathd_skip_kpartx_exceptions)
+             | select('string') | reject('equalto', '') | list }}
+
     - name: Configure /etc/multipath.conf variables
       ansible.builtin.lineinfile:
         path: /etc/multipath.conf
@@ -92,6 +135,31 @@
       loop_control:
         index_var: multipath_var_index
 
+    # Attributes in the multipaths section take precedence over the ones in
+    # the defaults section, so this re-enables kpartx for the boot devices
+    # only. The block is appended after the defaults section on purpose: the
+    # lineinfile task above matches the first indented occurrence of each
+    # variable, which has to remain the one in the defaults section.
+    - name: Preserve kpartx partition maps on boot critical multipath devices
+      ansible.builtin.blockinfile:
+        path: /etc/multipath.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK edpm_multipathd boot devices"
+        mode: "0644"
+        state: "{{ (multipathd_kpartx_exceptions | length > 0) | ternary('present', 'absent') }}"
+        block: |
+          multipaths {
+          {% for wwid in multipathd_kpartx_exceptions %}
+                  multipath {
+                          wwid "{{ wwid }}"
+                          skip_kpartx no
+                  }
+          {% endfor %}
+          }
+
+    - name: Validate the resulting multipath configuration
+      ansible.builtin.command: multipath -t
+      changed_when: false
+
     - name: Record the new multipath configuration
       ansible.builtin.stat:
         path: /etc/multipath.conf
@@ -106,3 +174,17 @@
       changed_when: true
       notify:
         - Restart multipathd
+
+    # dracut embeds /etc/multipath.conf in the initramfs, so the node would
+    # otherwise keep booting with the previous configuration until some
+    # unrelated package update rebuilds it. --regenerate-all is required
+    # because the update workflow installs a new kernel before this role runs,
+    # and that kernel's initramfs is the one the node will boot from.
+    - name: Regenerate initramfs so the boot path matches /etc/multipath.conf
+      when:
+        - edpm_multipathd_regenerate_initramfs | bool
+        - multipathd_kpartx_exceptions | length > 0
+        - not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum
+        - ansible_local.bootc is not defined or not ansible_local.bootc
+      ansible.builtin.command: "{{ edpm_multipathd_rebuild_initramfs_command }}"
+      changed_when: true
