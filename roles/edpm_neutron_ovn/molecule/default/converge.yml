@@ -26,3 +26,31 @@
         edpm_ovn_dbs:
           - "{{ ansible_host }}"
         edpm_neutron_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_neutron_ovn_unbound_conf_src: /tmp/ovn-agent-unbound.conf
+        edpm_neutron_ovn_unbound_conf_content: |
+          server:
+              cache-max-negative-ttl: 0
+
+    - name: Verify ovn_agent Unbound configuration is in the quadlet file
+      become: true
+      block:
+        - name: Read installed Unbound configuration
+          ansible.builtin.slurp:
+            src: /tmp/ovn-agent-unbound.conf
+          register: _ovn_agent_unbound_conf
+
+        - name: Verify installed Unbound configuration content
+          ansible.builtin.assert:
+            that:
+              - "'cache-max-negative-ttl: 0' in (_ovn_agent_unbound_conf.content | b64decode)"
+
+        - name: Read rendered quadlet file
+          ansible.builtin.slurp:
+            src: /etc/containers/systemd/edpm_ovn_agent.container
+          register: _ovn_agent_quadlet
+
+        - name: Verify Unbound volume and environment are in the quadlet file
+          ansible.builtin.assert:
+            that:
+              - "'Volume=/tmp/ovn-agent-unbound.conf:/etc/unbound/ovn-agent.conf:ro,z' in (_ovn_agent_quadlet.content | b64decode)"
+              - "'Environment=OVS_UNBOUND_CONF=/etc/unbound/ovn-agent.conf' in (_ovn_agent_quadlet.content | b64decode)"

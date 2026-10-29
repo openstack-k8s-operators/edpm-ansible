@@ -16,6 +16,7 @@
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=
+# Unbound configuration checksum: {{ edpm_neutron_ovn_unbound_conf_content | hash('sha256') }}
 
 [Unit]
 Description=Neutron OVN Agent container (EDPM)
@@ -35,6 +36,10 @@ Exec=/usr/bin/neutron-ovn-agent
 {% for vol in _ovn_agent_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_neutron_ovn_unbound_conf_content | length > 0 -%}
+Volume={{ edpm_neutron_ovn_unbound_conf_src }}:{{ edpm_neutron_ovn_unbound_conf_dest }}:ro,z
+Environment=OVS_UNBOUND_CONF={{ edpm_neutron_ovn_unbound_conf_dest }}
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]
