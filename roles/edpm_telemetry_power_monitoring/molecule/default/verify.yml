@@ -49,7 +49,7 @@
       ansible.builtin.assert:
         that:
           - "'# config_hash=' in _container_content"
-          - "_container_content | regex_search('# config_hash=.+')"
+          - _container_content is search('# config_hash=.+')
           - "'Exec=/usr/bin/ceilometer-polling' in _container_content"
           - "'KOLLA_CONFIG_STRATEGY' not in _container_content"
           - "'/var/lib/kolla/config_files' not in _container_content"

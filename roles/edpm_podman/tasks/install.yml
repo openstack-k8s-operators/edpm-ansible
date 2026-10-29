@@ -189,10 +189,16 @@
             mode: "0644"
             setype: cert_t
 
+        - name: Check for existing container policy
+          ansible.builtin.stat:
+            path: /etc/containers/policy.json
+          register: edpm_podman_policy_stat
+
         - name: Read current container policy
           ansible.builtin.slurp:
             src: /etc/containers/policy.json
           register: edpm_podman_policy_current
+          when: edpm_podman_policy_stat.stat.exists
 
         - name: Build per-source-registry sigstore policy entries
           ansible.builtin.set_fact:
@@ -231,9 +237,15 @@
             mode: "0644"
             backup: true
           vars:
+            edpm_podman_policy_base: >-
+              {{ {'default': [{'type': 'insecureAcceptAnything'}],
+                  'transports': {'docker': {
+                      'registry.redhat.io': [{'type': 'signedBy', 'keyType': 'GPGKeys', 'keyPath': '/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release'}],
+                      'registry.access.redhat.com': [{'type': 'signedBy', 'keyType': 'GPGKeys', 'keyPath': '/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release'}]}}} }}
             edpm_podman_updated_policy: >-
               {{
-                (edpm_podman_policy_current.content | b64decode | from_json)
+                (edpm_podman_policy_base if not edpm_podman_policy_stat.stat.exists
+                 else (edpm_podman_policy_current.content | b64decode | from_json))
                 | combine(
                     {
                       'transports': {

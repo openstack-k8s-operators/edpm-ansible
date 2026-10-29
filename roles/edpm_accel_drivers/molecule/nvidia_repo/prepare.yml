@@ -4,3 +4,14 @@
   roles:
     - role: ../../../../molecule/common/test_deps
     - role: env_data
+  tasks:
+    # el10 NVIDIA kmods are DKMS-only and the role's DKMS detection keys on
+    # module_stream/package_name, neither of which mentions dkms on el10.
+    - name: Add EPEL repository for dkms
+      become: true
+      ansible.builtin.yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: "https://download.fedoraproject.org/pub/epel/{{ ansible_facts['distribution_major_version'] }}/Everything/$basearch/"
+        gpgcheck: true
+        gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"

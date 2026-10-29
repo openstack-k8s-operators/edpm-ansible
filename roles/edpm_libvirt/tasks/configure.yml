@@ -54,8 +54,8 @@
     src: "{{ item.src }}"
     dest: "/etc/{{ item.dest }}"
     mode: "{{ item.mode | default('0640') }}"
-    owner: "{{ 'libvirt' | default(ansible_user) | default(ansible_user_id) }}"
-    group: "{{ 'libvirt' | default(ansible_user) | default(ansible_user_id) }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
   loop:
     - {"src": "virtlogd.conf", "dest": "libvirt/virtlogd.conf"}
     - {"src": "virtnodedevd.conf", "dest": "libvirt/virtnodedevd.conf"}
