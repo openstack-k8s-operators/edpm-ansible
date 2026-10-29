@@ -45,6 +45,8 @@
       - "'Network=host' in _quadlet_text"
       - "'PodmanArgs=--privileged' in _quadlet_text"
       - "'Exec=/usr/bin/ovn-controller' in _quadlet_text"
+      - "'Volume=/tmp/ovn-controller-unbound.conf:/etc/unbound/ovn-controller.conf:ro,z' in _quadlet_text"
+      - "'Environment=OVS_UNBOUND_CONF=/etc/unbound/ovn-controller.conf' in _quadlet_text"
       - "_quadlet_text is not regex('Exec=.*Volume=')"
       - "'KOLLA_CONFIG_STRATEGY' not in _quadlet_text"
       - "'[Service]' in _quadlet_text"
@@ -59,6 +61,17 @@
     that:
       - "_quadlet_text is regex('# config_hash=.+')"
     fail_msg: "config_hash was not injected into Quadlet file"
+
+- name: Verify Unbound configuration file content was installed
+  become: true
+  ansible.builtin.slurp:
+    src: /tmp/ovn-controller-unbound.conf
+  register: _unbound_conf_content
+
+- name: Assert Unbound configuration content
+  ansible.builtin.assert:
+    that:
+      - "'cache-max-negative-ttl: 0' in (_unbound_conf_content.content | b64decode)"
 
 - name: Verify staged file exists in rendering directory
   become: true
