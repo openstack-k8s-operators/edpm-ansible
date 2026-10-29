@@ -23,6 +23,15 @@ volumes:
         edpm_neutron_ovn_volumes +
         edpm_neutron_ovn_tls_volumes %}
 {%- endif -%}
+{%- if edpm_neutron_ovn_unbound_conf_content | length > 0 %}
+{%- set edpm_neutron_ovn_volumes =
+        edpm_neutron_ovn_volumes +
+        [edpm_neutron_ovn_unbound_conf_src ~ ':' ~ edpm_neutron_ovn_unbound_conf_dest ~ ':ro,z'] %}
+{%- endif -%}
   {{ edpm_neutron_ovn_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+{% if edpm_neutron_ovn_unbound_conf_content | length > 0 %}
+  OVS_UNBOUND_CONF: "{{ edpm_neutron_ovn_unbound_conf_dest }}"
+  EDPM_OVN_UNBOUND_CONF_CHECKSUM: "{{ edpm_neutron_ovn_unbound_conf_content | hash('sha256') }}"
+{% endif %}
