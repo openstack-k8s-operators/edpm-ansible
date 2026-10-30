@@ -18,6 +18,11 @@
   hosts: all
   gather_facts: false
   become: true
+  vars:
+    edpm_ovn_controller_unbound_conf_src: /tmp/ovn-controller-unbound.conf
+    edpm_ovn_controller_unbound_conf_content: |
+      server:
+          cache-max-negative-ttl: 0
   tasks:
     - ansible.builtin.include_role:
         name: "osp.edpm.edpm_ovn"
