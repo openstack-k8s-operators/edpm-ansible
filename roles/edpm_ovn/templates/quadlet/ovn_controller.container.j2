@@ -14,6 +14,7 @@
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=
+# Unbound configuration checksum: {{ edpm_ovn_controller_unbound_conf_content | hash('sha256') }}
 
 [Unit]
 Description=OVN Controller container (EDPM)
@@ -33,6 +34,10 @@ Exec=/usr/bin/ovn-controller --pidfile unix:/run/openvswitch/db.sock{{ ' -p /etc
 {% for vol in edpm_ovn_controller_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_ovn_controller_unbound_conf_content | length > 0 -%}
+Volume={{ edpm_ovn_controller_unbound_conf_src }}:{{ edpm_ovn_controller_unbound_conf_dest }}:ro,z
+Environment=OVS_UNBOUND_CONF={{ edpm_ovn_controller_unbound_conf_dest }}
+{% endif -%}
 {% if edpm_ovn_healthcheck -%}
 Volume=/var/lib/openstack/healthchecks/ovn_controller:/openstack:ro,z
 PodmanArgs=--health-cmd="/openstack/healthcheck"

@@ -27,3 +27,31 @@
           - "{{ ansible_host }}"
         edpm_neutron_metadata_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
         edpm_neutron_metadata_agent_sidecar_debug: true
+        edpm_neutron_metadata_unbound_conf_src: /tmp/ovn-metadata-unbound.conf
+        edpm_neutron_metadata_unbound_conf_content: |
+          server:
+              cache-max-negative-ttl: 0
+
+    - name: Verify ovn_metadata_agent Unbound configuration is in the quadlet file
+      become: true
+      block:
+        - name: Read installed Unbound configuration
+          ansible.builtin.slurp:
+            src: /tmp/ovn-metadata-unbound.conf
+          register: _ovn_metadata_unbound_conf
+
+        - name: Verify installed Unbound configuration content
+          ansible.builtin.assert:
+            that:
+              - "'cache-max-negative-ttl: 0' in (_ovn_metadata_unbound_conf.content | b64decode)"
+
+        - name: Read rendered quadlet file
+          ansible.builtin.slurp:
+            src: /etc/containers/systemd/edpm_ovn_metadata_agent.container
+          register: _ovn_metadata_quadlet
+
+        - name: Verify Unbound volume and environment are in the quadlet file
+          ansible.builtin.assert:
+            that:
+              - "'Volume=/tmp/ovn-metadata-unbound.conf:/etc/unbound/ovn-metadata.conf:ro,z' in (_ovn_metadata_quadlet.content | b64decode)"
+              - "'Environment=OVS_UNBOUND_CONF=/etc/unbound/ovn-metadata.conf' in (_ovn_metadata_quadlet.content | b64decode)"
