@@ -186,3 +186,68 @@
       cifmw_install_yamls_vars_patch_cs10:
         dataplane_repo_setup_repo: current
         dataplane_repo_setup_branch: master
+
+# Local content provider that builds and publishes the EDPM bootc image
+# from the s2i-openstack-containers repo. A Zuul job can only
+# depend on jobs that run in its own buildset, so the s2i content provider
+# cannot be referenced directly; instead this job inherits from it and runs
+# in edpm-ansible's pipeline. It pauses with its registry available and
+# returns the s2i_content_provider_* facts consumed by the deploy job.
+- job:
+    name: edpm-ansible-s2i-content-provider
+    parent: s2i-openstack-container-content-provider
+    description: |
+      Build the s2i EDPM bootc image for
+      edpm-ansible-crc-podified-edpm-baremetal-bootc-s2i.
+    # No override-checkout here: the s2i repo must follow the natural
+    # (speculative) checkout so a Depends-On that adds the edpm/edpm-bootc
+    # image is included. Pinning to main would discard that change and the
+    # image would be unknown until the s2i PR merges.
+    required-projects:
+      - openstack-k8s-operators/s2i-openstack-containers
+    vars:
+      # Only build the EDPM bootc host image, not every maintained image.
+      s2i_ci_images:
+        - edpm/edpm-bootc
+
+# Deploy a bootc baremetal node using the EDPM bootc image built and
+# published by edpm-ansible-s2i-content-provider (OSPRH-38444) instead of
+# building the image locally. Consumes the s2i_content_provider_* facts
+# returned by that paused content provider.
+- job:
+    name: edpm-ansible-crc-podified-edpm-baremetal-bootc-s2i
+    parent: cifmw-crc-podified-edpm-baremetal-bootc
+    dependencies: ["edpm-ansible-s2i-content-provider"]
+    required-projects:
+      - openstack-k8s-operators/s2i-openstack-containers
+    vars:
+      # Do not build the bootc image locally; consume the s2i-built one.
+      cifmw_edpm_build_images_bootc: false
+      # The s2i content provider only publishes the bootc container image,
+      # not a qcow2. Use the PassThrough provisioning path so Ironic deploys
+      # directly from the OCI container image instead of a provision server
+      # serving a qcow2. Clear BAREMETAL_OS_IMG (set to the qcow2 filename by
+      # the parent and deep-merged here by Zuul) since passthrough has no
+      # qcow2 to serve.
+      cifmw_install_yamls_vars:
+        BAREMETAL_OS_IMG_TYPE: passthrough
+        BAREMETAL_OS_IMG: ""
+      # Append the s2i content provider registry to the CRC insecure and
+      # allowed lists so the bootc container image can be pulled from it.
+      cifmw_crc_additional_insecure_registries:
+        - "{{ s2i_content_provider_registry_ip }}:5001"
+      cifmw_crc_additional_allowed_registries:
+        - "{{ s2i_content_provider_registry_ip }}:5001"
+      # Point edpm_prepare at the s2i-published edpm-bootc container image
+      # rather than the quay.io fallback. The s2i content provider publishes
+      # images at <registry>:5001/<namespace>/<image>:<tag> and the EDPM host
+      # image is edpm/edpm-bootc. PassThrough consumes it as an oci:// ref.
+      cifmw_update_containers_edpm_image_url: >-
+        oci://{{
+          s2i_content_provider_registry_ip ~ ':5001/' ~
+          s2i_ci_content.namespace ~ '/edpm-bootc:' ~
+          s2i_ci_content.tag
+        }}
+      cifmw_install_yamls_vars_patch_cs10:
+        dataplane_repo_setup_repo: current
+        dataplane_repo_setup_branch: master
