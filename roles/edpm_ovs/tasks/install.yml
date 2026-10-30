@@ -8,6 +8,19 @@
   when:
     - ansible_local is not defined
 
+- name: Check if installing ovs packages requires erasing a conflicting stream
+  tags:
+    - install
+    - ovs
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ edpm_ovs_packages }}"
+    state: present
+  check_mode: true
+  register: edpm_ovs_install_check
+  ignore_errors: true
+  when: ansible_local.bootc is not defined or not ansible_local.bootc
+
 - name: Install ovs packages
   tags:
     - install
@@ -20,7 +33,36 @@
   until: edpm_ovs_package_install is succeeded
   retries: "{{ edpm_ovs_download_retries }}"
   delay: "{{ edpm_ovs_download_delay }}"
-  when: ansible_local.bootc is not defined or not ansible_local.bootc
+  when:
+    - ansible_local.bootc is not defined or not ansible_local.bootc
+    - edpm_ovs_install_check is succeeded
+
+- name: Install ovs packages, erasing a conflicting older stream without running its scriptlets
+  tags:
+    - install
+    - ovs
+  become: true
+  # edpm_ovs_packages names the concrete openvswitchN.N package(s) directly
+  # rather than the rdo-openvswitch/rhoso-openvswitch wrapper (see
+  # defaults/main.yml), and each stream Conflicts with every other stream
+  # instead of Obsoleting it, so the plain install above fails to resolve
+  # when an older stream is already present (e.g. openvswitch3.3). Call dnf
+  # via the shell module (the ansible dnf module doesn't support --setopt)
+  # to allow that erase via allowerasing, while disabling scriptlets via
+  # noscripts so the erased package's %preun/%postun don't stop/disable
+  # openvswitch.service and disrupt dependent services (e.g.
+  # ovn-controller). The common fresh-install/same-stream case above never
+  # takes this path, so its scriptlets keep running normally - which
+  # matters, since e.g. the package's %post sets up /run/openvswitch's
+  # ownership via tmpfiles.
+  ansible.builtin.shell: >
+    dnf install -y {{ " ".join(edpm_ovs_packages) }} --cacheonly --setopt=tsflags=noscripts --allowerasing
+  register: edpm_ovs_package_install
+  changed_when: edpm_ovs_package_install.rc == 0
+  failed_when: edpm_ovs_package_install.rc != 0
+  when:
+    - ansible_local.bootc is not defined or not ansible_local.bootc
+    - edpm_ovs_install_check is failed
 
 - name: Ensure ovs services are enabled and running
   tags:

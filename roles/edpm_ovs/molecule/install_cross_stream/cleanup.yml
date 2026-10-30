@@ -1,0 +1,8 @@
+---
+- name: Cleanup after install_cross_stream test
+  hosts: all
+  become: true
+  tasks:
+    - name: Include base cleanup tasks
+      ansible.builtin.include_tasks:
+        file: ../common/cleanup_base.yml
