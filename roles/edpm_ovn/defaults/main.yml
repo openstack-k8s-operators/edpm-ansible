@@ -65,6 +65,17 @@ edpm_ovn_controller_common_volumes:
   - /var/lib/openvswitch/ovn:/run/ovn:shared,z
   - /var/lib/kolla/config_files/ovn_controller.json:/var/lib/kolla/config_files/config.json:ro
 
+# Host-side Unbound configuration for ovn-controller DNS resolution. The file is
+# mounted read-only and selected with OVS_UNBOUND_CONF. It defaults to lowering
+# cache-max-negative-ttl to 30s (libunbound defaults to 3600s) so a stale negative
+# (NXDOMAIN) DNS answer is not cached for long after a transient DNS outage.
+# Set edpm_ovn_controller_unbound_conf_content to "" to disable the file and mount.
+edpm_ovn_controller_unbound_conf_src: "{{ edpm_ovn_config_src }}/ovn-controller-unbound.conf"
+edpm_ovn_controller_unbound_conf_dest: "/etc/unbound/ovn-controller.conf"
+edpm_ovn_controller_unbound_conf_content: |
+  server:
+      cache-max-negative-ttl: 30
+
 edpm_ovn_controller_tls_cacert_bundle_src: "/var/lib/openstack/cacerts/{{ edpm_ovn_service_name }}/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_bundle_dest: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 edpm_ovn_controller_tls_cacert_volumes: []

@@ -20,6 +20,23 @@ argument_specs:
         default: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn:current-podified
         description: ''
         type: str
+      edpm_neutron_metadata_unbound_conf_src:
+        default: '{{ edpm_neutron_metadata_config_src }}/ovn-metadata-unbound.conf'
+        description: Host path where the optional ovn-metadata-agent Unbound configuration file is created.
+        type: str
+      edpm_neutron_metadata_unbound_conf_dest:
+        default: /etc/unbound/ovn-metadata.conf
+        description: Container path for the optional ovn-metadata-agent Unbound configuration file.
+        type: str
+      edpm_neutron_metadata_unbound_conf_content:
+        default: |
+          server:
+              cache-max-negative-ttl: 30
+        description: |
+          Content of the ovn-metadata-agent Unbound configuration file.
+          Defaults to lowering cache-max-negative-ttl to 30s (libunbound defaults to 3600s).
+          Set to an empty string to disable the file and mount.
+        type: str
       edpm_neutron_metadata_agent_lib_dir:
         default: "/var/lib/neutron"
         description: |

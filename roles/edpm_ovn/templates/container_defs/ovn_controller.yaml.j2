@@ -8,6 +8,11 @@
         edpm_ovn_controller_volumes +
         edpm_ovn_controller_tls_volumes %}
 {%- endif -%}
+{%- if edpm_ovn_controller_unbound_conf_content | length > 0 %}
+{%- set edpm_ovn_controller_volumes =
+        edpm_ovn_controller_volumes +
+        [edpm_ovn_controller_unbound_conf_src ~ ':' ~ edpm_ovn_controller_unbound_conf_dest ~ ':ro,z'] %}
+{%- endif -%}
 image: "{{ edpm_ovn_controller_agent_image }}"
 net: host
 privileged: true
@@ -26,3 +31,7 @@ cpuset_cpus: "{{ edpm_ovn_cpu_set }}"
 volumes: {{ edpm_ovn_controller_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
+{% if edpm_ovn_controller_unbound_conf_content | length > 0 %}
+  OVS_UNBOUND_CONF: "{{ edpm_ovn_controller_unbound_conf_dest }}"
+  EDPM_OVN_UNBOUND_CONF_CHECKSUM: "{{ edpm_ovn_controller_unbound_conf_content | hash('sha256') }}"
+{% endif %}
