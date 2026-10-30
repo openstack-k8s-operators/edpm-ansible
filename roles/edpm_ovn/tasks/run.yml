@@ -59,6 +59,13 @@
   ansible.builtin.include_tasks:
     file: healthchecks.yml
 
+- name: Clean up FRR-OVN bindings before starting OVN controller
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_frr
+    tasks_from: ovn_bind_cleanup.yml
+  vars:
+    _edpm_frr_ovn_peer_service: edpm_frr.service
+
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run ovn_controller container
   ansible.builtin.include_role:
@@ -69,3 +76,10 @@
     edpm_service_name: "{{ edpm_ovn_service_name }}"
     edpm_container_standalone_quadlet_defs:
       ovn_controller: "{{ _edpm_ovn_role_path }}/templates/quadlet/ovn_controller.container.j2"
+
+- name: Configure FRR-OVN bindings after starting OVN controller
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_frr
+    tasks_from: ovn_bind.yml
+  vars:
+    _edpm_frr_ovn_peer_service: edpm_frr.service
