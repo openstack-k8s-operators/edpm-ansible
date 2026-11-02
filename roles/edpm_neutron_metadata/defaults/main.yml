@@ -25,6 +25,17 @@ edpm_neutron_metadata_common_volumes:
   - "{{ edpm_neutron_metadata_agent_lib_dir }}/ovn_metadata_haproxy_wrapper:/usr/local/bin/haproxy:ro"
   - "{{ edpm_neutron_metadata_agent_lib_dir }}/kill_scripts:/etc/neutron/kill_scripts:ro"
 
+# Host-side Unbound configuration for ovn-metadata-agent DNS resolution. The file is
+# mounted read-only and selected with OVS_UNBOUND_CONF. It defaults to lowering
+# cache-max-negative-ttl to 30s (libunbound defaults to 3600s) so a stale negative
+# (NXDOMAIN) DNS answer is not cached for long after a transient DNS outage.
+# Set edpm_neutron_metadata_unbound_conf_content to "" to disable the file and mount.
+edpm_neutron_metadata_unbound_conf_src: "{{ edpm_neutron_metadata_config_src }}/ovn-metadata-unbound.conf"
+edpm_neutron_metadata_unbound_conf_dest: "/etc/unbound/ovn-metadata.conf"
+edpm_neutron_metadata_unbound_conf_content: |
+  server:
+      cache-max-negative-ttl: 30
+
 # Sidecar containers settings
 edpm_neutron_metadata_agent_sidecar_debug: false
 edpm_neutron_metadata_agent_sidecar_haproxy_image_name: "{{ edpm_neutron_metadata_agent_image }}"

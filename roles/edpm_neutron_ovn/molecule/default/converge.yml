@@ -26,3 +26,35 @@
         edpm_ovn_dbs:
           - "{{ ansible_host }}"
         edpm_neutron_ovn_config_src: "{{lookup('env', 'MOLECULE_SCENARIO_DIRECTORY')}}/test-data"
+        edpm_neutron_ovn_unbound_conf_src: /tmp/ovn-agent-unbound.conf
+        edpm_neutron_ovn_unbound_conf_content: |
+          server:
+              cache-max-negative-ttl: 0
+
+    - name: Verify ovn_agent Unbound configuration is passed to the container
+      become: true
+      block:
+        - name: Read installed Unbound configuration
+          ansible.builtin.slurp:
+            src: /tmp/ovn-agent-unbound.conf
+          register: _ovn_agent_unbound_conf
+
+        - name: Verify installed Unbound configuration content
+          ansible.builtin.assert:
+            that:
+              - "'cache-max-negative-ttl: 0' in (_ovn_agent_unbound_conf.content | b64decode)"
+
+        - name: Read ovn_agent startup configuration
+          ansible.builtin.slurp:
+            src: /var/lib/edpm-config/container-startup-config/ovn_agent/ovn_agent.json
+          register: _ovn_agent_startup_config
+
+        - name: Decode ovn_agent startup configuration
+          ansible.builtin.set_fact:
+            _ovn_agent_startup_config_json: "{{ _ovn_agent_startup_config.content | b64decode | from_json }}"
+
+        - name: Verify Unbound environment and mount
+          ansible.builtin.assert:
+            that:
+              - _ovn_agent_startup_config_json.environment.OVS_UNBOUND_CONF == '/etc/unbound/ovn-agent.conf'
+              - "'/tmp/ovn-agent-unbound.conf:/etc/unbound/ovn-agent.conf:ro,z' in _ovn_agent_startup_config_json.volumes"

@@ -7,6 +7,34 @@
       ansible.builtin.include_tasks:
         file: ../default/verify-tasks.yml
 
+    - name: Verify ovn_controller Unbound configuration is passed to the container
+      become: true
+      block:
+        - name: Read installed Unbound configuration
+          ansible.builtin.slurp:
+            src: /tmp/ovn-controller-unbound.conf
+          register: _ovn_controller_unbound_conf
+
+        - name: Verify installed Unbound configuration content
+          ansible.builtin.assert:
+            that:
+              - "'cache-max-negative-ttl: 0' in (_ovn_controller_unbound_conf.content | b64decode)"
+
+        - name: Read ovn_controller startup configuration
+          ansible.builtin.slurp:
+            src: /var/lib/edpm-config/container-startup-config/ovn_controller/ovn_controller.json
+          register: _ovn_controller_startup_config
+
+        - name: Decode ovn_controller startup configuration
+          ansible.builtin.set_fact:
+            _ovn_controller_startup_config_json: "{{ _ovn_controller_startup_config.content | b64decode | from_json }}"
+
+        - name: Verify Unbound environment and mount
+          ansible.builtin.assert:
+            that:
+              - _ovn_controller_startup_config_json.environment.OVS_UNBOUND_CONF == '/etc/unbound/ovn-controller.conf'
+              - "'/tmp/ovn-controller-unbound.conf:/etc/unbound/ovn-controller.conf:ro,z' in _ovn_controller_startup_config_json.volumes"
+
     - name: Verify hw-offload
       ansible.builtin.shell: >
         /usr/bin/ovs-vsctl get open_vswitch . other_config:hw-offload

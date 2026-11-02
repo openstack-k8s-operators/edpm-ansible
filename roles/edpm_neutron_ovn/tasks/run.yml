@@ -27,6 +27,30 @@
           - "{{ edpm_neutron_ovn_tls_cacert_bundle_src }}:{{ edpm_neutron_ovn_tls_cacert_bundle_dest }}:ro,z"
       when: cacert_bundle_exists.stat.exists
 
+- name: Configure ovn_agent Unbound configuration when provided
+  become: true
+  when: edpm_neutron_ovn_unbound_conf_content | length > 0
+  block:
+    - name: Stat ovn_agent Unbound configuration directory
+      ansible.builtin.stat:
+        path: "{{ edpm_neutron_ovn_unbound_conf_src | dirname }}"
+      register: _ovn_agent_unbound_dir
+
+    - name: Create ovn_agent Unbound configuration directory when missing
+      ansible.builtin.file:
+        path: "{{ edpm_neutron_ovn_unbound_conf_src | dirname }}"
+        state: directory
+        mode: "0755"
+      when: not _ovn_agent_unbound_dir.stat.exists
+
+    - name: Write ovn_agent Unbound configuration
+      ansible.builtin.copy:
+        dest: "{{ edpm_neutron_ovn_unbound_conf_src }}"
+        content: "{{ edpm_neutron_ovn_unbound_conf_content }}"
+        owner: root
+        group: root
+        mode: "0644"
+
 - name: Ensure /var/local/libexec/edpm-start-podman-container exists
   ansible.builtin.import_role:
     name: edpm_container_manage
