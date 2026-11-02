@@ -142,6 +142,13 @@
     vars:
       TEST_RUN: edpm_telemetry_power_monitoring
 - job:
+    name: edpm-ansible-molecule-edpm_leapp_upgrade
+    parent: edpm-ansible-molecule-base
+    files:
+     - ^roles/edpm_leapp_upgrade/(defaults|files|handlers|library|lookup_plugins|module_utils|molecule|tasks|templates|vars).*
+    vars:
+      TEST_RUN: edpm_leapp_upgrade
+- job:
     name: edpm-ansible-tempest-multinode
     parent: openstack-operator-tempest-multinode
 - job:

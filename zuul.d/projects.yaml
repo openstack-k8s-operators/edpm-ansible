@@ -31,4 +31,5 @@
         - edpm-ansible-molecule-edpm_tripleo_cleanup
         - edpm-ansible-molecule-edpm_tuned
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
+        - edpm-ansible-molecule-edpm_leapp_upgrade
         - openstack-k8s-operators-content-provider
