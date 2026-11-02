@@ -1,0 +1,62 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# ============================================================================
+# Leapp OS Upgrade - Copr Repository
+# ============================================================================
+#
+# Equivalent of "dnf copr enable @oamg/leapp epel-<n>-x86_64", written
+# directly as a repository file instead of shelling out to the dnf Copr
+# plugin: it avoids the dnf-plugins-core dependency, it is idempotent, and it
+# sidesteps the chroot guessing of the plugin, which derives "rhel-<n>" from
+# /etc/os-release and fails because @oamg/leapp has no RHEL chroot.
+#
+# This has to run before infra.leapp, which installs leapp-upgrade from
+# whatever repositories are already enabled on the node.
+
+- name: Gather distribution facts if needed
+  when: "'distribution_major_version' not in ansible_facts"
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "distribution"
+
+- name: Import the GPG key of Copr project {{ edpm_leapp_upgrade_copr_project }}
+  become: true
+  ansible.builtin.rpm_key:
+    key: "{{ _edpm_leapp_copr_gpgkey }}"
+    state: present
+
+- name: Enable Copr project {{ edpm_leapp_upgrade_copr_project }}
+  become: true
+  ansible.builtin.yum_repository:
+    name: "{{ _edpm_leapp_copr_id }}"
+    file: "{{ _edpm_leapp_copr_file }}"
+    description: "Copr repo for {{ _edpm_leapp_copr_name }} owned by {{ _edpm_leapp_copr_owner }}"
+    baseurl: "{{ _edpm_leapp_copr_baseurl }}"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "{{ _edpm_leapp_copr_gpgkey }}"
+    repo_gpgcheck: false
+    # Mirrors the repository file published by Copr. An unreachable Copr
+    # therefore does not fail the run, it falls back to the distribution
+    # build of leapp-upgrade.
+    skip_if_unavailable: true
+    state: present
+    owner: root
+    group: root
+    mode: "0644"
