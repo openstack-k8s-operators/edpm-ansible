@@ -30,6 +30,7 @@ PodmanArgs=--pid=host
 PodmanArgs=--cgroupns=host
 {% if edpm_neutron_metadata_healthcheck -%}
 PodmanArgs=--health-cmd="/openstack/healthcheck"
+PodmanArgs=--health-interval=60s --health-timeout=25s --health-retries=3 --health-start-period=180s
 Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:/openstack:ro,z
 {% endif -%}
 Exec=/usr/bin/neutron-ovn-metadata-agent
