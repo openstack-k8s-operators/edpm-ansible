@@ -24,6 +24,11 @@ Exec=/usr/bin/neutron-sriov-nic-agent
 {% for vol in _sriov_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_neutron_sriov_healthcheck -%}
+Volume=/var/lib/openstack/healthchecks/neutron_sriov:/openstack:ro,z
+PodmanArgs=--health-cmd="/openstack/healthcheck"
+PodmanArgs=--health-interval=60s --health-timeout=25s --health-retries=3 --health-start-period=180s
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]
