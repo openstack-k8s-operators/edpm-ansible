@@ -1,0 +1,13 @@
+#!/bin/bash
+# Copyright 2026 Red Hat, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+if pgrep --ns "$$" --nslist mnt -r R,S,D -f \
+    '(^|[[:space:]/])neutron-sriov-nic-agent([[:space:]]|$)' >/dev/null; then
+    exit 0
+fi
+
+echo "ERROR: neutron_sriov healthcheck: neutron-sriov-nic-agent is not running in this container" >&2
+exit 1
