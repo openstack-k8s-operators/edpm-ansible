@@ -32,6 +32,9 @@
   ansible.builtin.set_fact:
     _edpm_ovn_bgp_agent_role_path: "{{ role_path }}"
 
+- name: Configure ovn_bgp_agent healthcheck
+  ansible.builtin.include_tasks: healthchecks.yml
+
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run ovn_bgp_agent container
   ansible.builtin.include_role:
