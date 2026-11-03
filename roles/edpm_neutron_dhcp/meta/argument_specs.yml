@@ -174,3 +174,8 @@ argument_specs:
         default: 300
         description: ''
         type: int
+      edpm_neutron_dhcp_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection
