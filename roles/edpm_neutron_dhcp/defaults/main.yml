@@ -95,3 +95,5 @@ edpm_neutron_dhcp_agent_DEFAULT_dhcp_broadcast_reply: false
 edpm_neutron_dhcp_agent_AGENT_root_helper: 'sudo neutron-rootwrap /etc/neutron/rootwrap.conf'
 edpm_neutron_dhcp_agent_AGENT_report_interval: 30
 edpm_neutron_dhcp_agent_AGENT_availability_zone: 'nova'
+
+edpm_neutron_dhcp_healthcheck: true
