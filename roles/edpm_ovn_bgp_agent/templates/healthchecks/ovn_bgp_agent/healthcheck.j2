@@ -1,0 +1,138 @@
+#!/bin/bash
+# Copyright 2026 Red Hat, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+config_dir=/etc/ovn-bgp-agent
+
+fail() {
+    echo "ERROR: ovn_bgp_agent healthcheck: $*" >&2
+    exit 1
+}
+
+agent_running() {
+    # Match only a live agent process in this container's mount namespace.
+    pgrep --ns "$$" --nslist mnt -r R,S,D -f \
+        '(^|[[:space:]/])ovn-bgp-agent([[:space:]]|$)' >/dev/null
+}
+
+config_value() {
+    # oslo.config loads config-dir files in name order, with later values
+    # overriding earlier ones.
+    awk -v wanted_section="$1" -v wanted_key="$2" '
+        FNR == 1 { section = "" }
+        /^[[:space:]]*[#;]/ { next }
+        /^[[:space:]]*\[[^]]+\][[:space:]]*$/ {
+            section = $0
+            sub(/^[[:space:]]*\[/, "", section)
+            sub(/\][[:space:]]*$/, "", section)
+            next
+        }
+        section == wanted_section && index($0, "=") {
+            key = $0
+            sub(/=.*/, "", key)
+            gsub(/[[:space:]]/, "", key)
+            if (key == wanted_key) {
+                value = $0
+                sub(/^[^=]*=[[:space:]]*/, "", value)
+                sub(/[[:space:]]*[#;].*$/, "", value)
+                sub(/[[:space:]]+$/, "", value)
+                result = value
+            }
+        }
+        END { print result }
+    ' "$config_dir"/*.conf
+}
+
+ovn_remote() {
+    local config_key="$1" external_id="$2" remote
+
+    remote=$(config_value ovn "$config_key") || fail "cannot read $config_key"
+    if [[ -z "$remote" ]]; then
+        command -v ovs-vsctl >/dev/null || fail 'ovs-vsctl is not installed'
+        remote=$(ovs-vsctl --timeout=5 --db="$ovsdb_remote" --bare \
+            get Open_vSwitch . "external_ids:$external_id") ||
+            fail "cannot read OVS external_ids:$external_id"
+        remote=${remote#\"}
+        remote=${remote%\"}
+    fi
+    [[ -n "$remote" && "$remote" != '[]' ]] ||
+        fail "OVN connection $config_key / $external_id is not configured"
+    printf '%s\n' "$remote"
+}
+
+check_schema() {
+    local remote="$1" schema="$2" tls_prefix="$3"
+    local -a tls_options=()
+
+    if [[ "$remote" == ssl:* && -n "$tls_prefix" ]]; then
+        local key cert ca
+        key=$(config_value ovn "${tls_prefix}_private_key")
+        cert=$(config_value ovn "${tls_prefix}_certificate")
+        ca=$(config_value ovn "${tls_prefix}_ca_cert")
+        key=${key:-/etc/pki/tls/private/ovn_bgp_agent.key}
+        cert=${cert:-/etc/pki/tls/certs/ovn_bgp_agent.crt}
+        ca=${ca:-/etc/ipa/ca.crt}
+        tls_options=(
+            "--private-key=$key"
+            "--certificate=$cert"
+            "--ca-cert=$ca"
+        )
+    fi
+
+    ovsdb-client --timeout=5 --no-leader-only "${tls_options[@]}" \
+        get-schema "$remote" "$schema" >/dev/null ||
+        fail "cannot query $schema database at $remote"
+}
+
+main() {
+    local driver exposing_method local_nb_remote
+    local schema remote tls_prefix external_id
+
+    agent_running || fail 'ovn-bgp-agent is not running in this container'
+    [[ -f "$config_dir/bgp-agent.conf" ]] ||
+        fail 'agent configuration is missing'
+    command -v ovsdb-client >/dev/null ||
+        fail 'ovsdb-client is not installed in the agent image'
+
+    ovsdb_remote=$(config_value DEFAULT ovsdb_connection) ||
+        fail 'cannot read OVSDB connection'
+    ovsdb_remote=${ovsdb_remote:-tcp:127.0.0.1:6640}
+    check_schema "$ovsdb_remote" Open_vSwitch ''
+
+    driver=$(config_value DEFAULT driver)
+    driver=${driver:-ovn_bgp_driver}
+    case "$driver" in
+        nb_ovn_bgp_driver)
+            schema=OVN_Northbound
+            remote=$(ovn_remote ovn_nb_connection ovn-nb-remote) || exit 1
+            tls_prefix=ovn_nb
+            ;;
+        ovn_bgp_driver|ovn_evpn_driver|ovn_stretched_l2_bgp_driver)
+            schema=OVN_Southbound
+            remote=$(ovn_remote ovn_sb_connection ovn-remote) || exit 1
+            tls_prefix=ovn_sb
+            ;;
+        *)
+            fail "unsupported BGP driver '$driver'"
+            ;;
+    esac
+    check_schema "$remote" "$schema" "$tls_prefix"
+
+    # The NB driver uses a second NB IDL only for the OVN exposing method.
+    exposing_method=$(config_value DEFAULT exposing_method)
+    if [[ "$driver" == nb_ovn_bgp_driver && "$exposing_method" == ovn ]]; then
+        local_nb_remote=$(config_value local_ovn_cluster ovn_nb_connection)
+        local_nb_remote=${local_nb_remote:-unix:/var/run/ovn/ovnnb_db.sock}
+        check_schema "$local_nb_remote" OVN_Northbound ovn_nb
+    fi
+
+    [[ -x /usr/bin/vtysh ]] || fail 'vtysh is not installed in the agent image'
+    timeout 5 /usr/bin/vtysh --vty_socket /run/frr/ -c 'show version' >/dev/null ||
+        fail 'FRR is not responding on its vty socket'
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main
+fi

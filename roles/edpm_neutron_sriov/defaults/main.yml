@@ -81,3 +81,5 @@ edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_default_hypervisor: ''
 edpm_neutron_sriov_agent_SRIOV_NIC_resource_provider_inventory_defaults: 'allocation_ratio:1.0,min_unit:1,step_size:1,reserved:0'
 # SRIOV_DRIVER
 edpm_neutron_sriov_agent_SRIOV_DRIVER_vnic_type_prohibit_list: ''
+
+edpm_neutron_sriov_healthcheck: true

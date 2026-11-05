@@ -56,6 +56,10 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Update ovn_agent health check script
+  ansible.builtin.include_tasks:
+    file: healthchecks.yml
+
 - name: Update ovn_agent sidecar scripts
   ansible.builtin.include_tasks:
     file: sidecar.yml

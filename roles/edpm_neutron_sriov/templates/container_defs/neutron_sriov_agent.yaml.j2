@@ -3,6 +3,11 @@ net: host
 privileged: true
 user: neutron
 restart: always
+{% if edpm_neutron_sriov_healthcheck %}
+healthcheck:
+  test: /openstack/healthcheck
+  mount: /var/lib/openstack/healthchecks/neutron_sriov
+{% endif %}
 volumes:
   {% set edpm_neutron_sriov_volumes = [] %}
   {%- set edpm_neutron_sriov_volumes =
