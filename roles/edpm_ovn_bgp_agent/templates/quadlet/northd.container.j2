@@ -16,7 +16,7 @@
 [Unit]
 Description=OVN Northd container (EDPM OVN BGP Agent)
 After=openvswitch.service edpm_nb_db_server.service edpm_sb_db_server.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 
 [Container]
 ContainerName=northd

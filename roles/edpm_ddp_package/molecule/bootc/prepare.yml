@@ -1,0 +1,19 @@
+---
+- name: Prepare bootc DDP validation scenario
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Verify lsinitrd is available for real initramfs inspection
+      ansible.builtin.command:
+        argv:
+          - lsinitrd
+          - --help
+      changed_when: false
+
+    - name: Verify cpio is available to create the test initramfs
+      ansible.builtin.command:
+        argv:
+          - cpio
+          - --version
+      changed_when: false

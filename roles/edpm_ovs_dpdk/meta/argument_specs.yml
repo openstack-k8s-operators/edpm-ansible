@@ -72,3 +72,12 @@ argument_specs:
         type: str
         default: ""
         description: PMD maximum sleep time
+      edpm_ovs_dpdk_other_config:
+        type: dict
+        default: {}
+        description: >
+          Arbitrary extra OvS other_config settings (key/value pairs) not covered
+          by a dedicated variable above, e.g. {smc-enable: true, pmd-rxq-assign:
+          group, pmd-rxq-isolate: false}. See ovs-vswitchd.conf.db(5) for the full
+          list of other_config keys. Dedicated variables above take precedence
+          over this for any overlapping keys.

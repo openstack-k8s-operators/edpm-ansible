@@ -1,0 +1,128 @@
+---
+- name: Snapshot the canonical DDP link before expected validation failure
+  ansible.builtin.stat:
+    path: /lib/firmware/intel/ice/ddp/ice.pkg
+    follow: false
+  register: ddp_expected_canonical_before
+
+- name: Resolve the canonical DDP link before expected validation failure
+  ansible.builtin.command:
+    argv:
+      - readlink
+      - -e
+      - --
+      - /lib/firmware/intel/ice/ddp/ice.pkg
+  register: ddp_expected_link_before
+  changed_when: false
+  failed_when: false
+
+- name: Snapshot selected profile package before expected validation failure
+  ansible.builtin.stat:
+    path: /lib/firmware/intel/ice/ddp-comm/ice-2.pkg
+    checksum_algorithm: sha256
+  register: ddp_expected_package_before
+
+- name: Snapshot initramfs before expected validation failure
+  ansible.builtin.stat:
+    path: "{{ ddp_test_initramfs }}"
+    checksum_algorithm: sha256
+  register: ddp_expected_initramfs_before
+
+- name: Snapshot initramfs checksum before expected validation failure
+  ansible.builtin.command:
+    argv:
+      - sha256sum
+      - --
+      - "{{ ddp_test_initramfs }}"
+  register: ddp_expected_initramfs_hash_before
+  changed_when: false
+  when: ddp_expected_initramfs_before.stat.exists
+
+- name: Expect the read-only bootc role validation to reject invalid image state
+  block:
+    - name: Run DDP role with the requested test profile
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_ddp_package
+      vars:
+        edpm_ddp_package: "{{ ddp_test_selection }}"
+
+    - name: Fail if invalid DDP state was accepted
+      ansible.builtin.fail:
+        msg: "The bootc DDP validation unexpectedly accepted this invalid test state."
+  rescue:
+    - name: Assert that validation failed for the expected reason
+      ansible.builtin.assert:
+        that:
+          - ansible_failed_result.msg is search(ddp_expected_failure_text)
+        fail_msg: >-
+          Expected validation failure containing '{{ ddp_expected_failure_text }}',
+          got {{ ansible_failed_result.msg | default('no failure message') }}.
+
+- name: Verify canonical link is unchanged after expected validation failure
+  ansible.builtin.stat:
+    path: /lib/firmware/intel/ice/ddp/ice.pkg
+    follow: false
+  register: ddp_expected_canonical_after
+
+- name: Resolve canonical link after expected validation failure
+  ansible.builtin.command:
+    argv:
+      - readlink
+      - -e
+      - --
+      - /lib/firmware/intel/ice/ddp/ice.pkg
+  register: ddp_expected_link_after
+  changed_when: false
+  failed_when: false
+
+- name: Verify selected profile package is unchanged after expected failure
+  ansible.builtin.stat:
+    path: /lib/firmware/intel/ice/ddp-comm/ice-2.pkg
+    checksum_algorithm: sha256
+  register: ddp_expected_package_after
+
+- name: Verify initramfs remains unchanged after expected validation failure
+  ansible.builtin.stat:
+    path: "{{ ddp_test_initramfs }}"
+    checksum_algorithm: sha256
+  register: ddp_expected_initramfs_after
+
+- name: Snapshot initramfs checksum after expected validation failure
+  ansible.builtin.command:
+    argv:
+      - sha256sum
+      - --
+      - "{{ ddp_test_initramfs }}"
+  register: ddp_expected_initramfs_hash_after
+  changed_when: false
+  when: ddp_expected_initramfs_after.stat.exists
+
+- name: Assert invalid bootc validation never mutates DDP image state
+  ansible.builtin.assert:
+    that:
+      - ddp_expected_canonical_after.stat.inode == ddp_expected_canonical_before.stat.inode
+      - ddp_expected_canonical_after.stat.lnk_source == ddp_expected_canonical_before.stat.lnk_source
+      - ddp_expected_link_after.stdout == ddp_expected_link_before.stdout
+      - ddp_expected_package_after.stat.inode == ddp_expected_package_before.stat.inode
+      - ddp_expected_package_after.stat.checksum == ddp_expected_package_before.stat.checksum
+      - ddp_expected_initramfs_after.stat.exists == ddp_expected_initramfs_before.stat.exists
+      - >-
+        (not ddp_expected_initramfs_before.stat.exists) or
+        (ddp_expected_initramfs_after.stat.inode == ddp_expected_initramfs_before.stat.inode)
+      - >-
+        (not ddp_expected_initramfs_before.stat.exists) or
+        (ddp_expected_initramfs_hash_after.stdout.split()[0] == ddp_expected_initramfs_hash_before.stdout.split()[0])
+
+- name: Check forbidden bootc runtime command markers after expected failure
+  ansible.builtin.stat:
+    path: "{{ ddp_test_spy_dir }}/{{ item }}.invoked"
+  loop:
+    - dracut
+    - modprobe
+  register: ddp_expected_command_spies
+
+- name: Assert invalid bootc state did not invoke dracut or modprobe
+  ansible.builtin.assert:
+    that:
+      - not item.stat.exists
+  loop: "{{ ddp_expected_command_spies.results }}"

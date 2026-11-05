@@ -1,0 +1,153 @@
+---
+- name: Verify bootc DDP validation failures
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    ddp_test_profile: ddp-comm
+    ddp_test_profile_dir: /lib/firmware/intel/ice/ddp-comm
+    ddp_test_canonical: /lib/firmware/intel/ice/ddp/ice.pkg
+    ddp_test_stage_dir: /tmp/ddp-initramfs-stage
+    ddp_test_spy_dir: /opt/ddp-test-spy
+  environment:
+    PATH: "{{ ddp_test_spy_dir }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  tasks:
+    - name: Gather local bootc facts
+      ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - "!min"
+          - local
+
+    - name: Confirm this test host follows the bootc role branch
+      ansible.builtin.assert:
+        that:
+          - ansible_local.bootc | bool
+
+    - name: Identify the kernel version inside the test node
+      ansible.builtin.command:
+        argv:
+          - uname
+          - -r
+      register: ddp_test_kernel_version_result
+      changed_when: false
+
+    - name: Set the test node's running initramfs path
+      ansible.builtin.set_fact:
+        ddp_test_initramfs: "/usr/lib/modules/{{ ddp_test_kernel_version_result.stdout }}/initramfs.img"
+
+    - name: Reject missing selected profile directory and package
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: missing-profile
+        ddp_expected_failure_text: "Bootc DDP profile directory"
+
+    - name: Reject an existing selected profile directory without a DDP package
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: empty-profile
+        ddp_expected_failure_text: "was found in profile"
+
+    - name: Point canonical DDP link at a different profile
+      ansible.builtin.file:
+        src: ../other-profile/ice-9.pkg
+        dest: "{{ ddp_test_canonical }}"
+        state: link
+        force: true
+
+    - name: Reject canonical link that does not resolve to selected profile
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: "{{ ddp_test_profile }}"
+        ddp_expected_failure_text: "does not resolve to the latest package"
+
+    - name: Restore canonical DDP link to the selected package
+      ansible.builtin.file:
+        src: "../{{ ddp_test_profile }}/ice-2.pkg"
+        dest: "{{ ddp_test_canonical }}"
+        state: link
+        force: true
+
+    - name: Replace initramfs fixture with a different DDP payload
+      ansible.builtin.copy:
+        content: mismatched DDP payload
+        dest: "{{ ddp_test_stage_dir }}/lib/firmware/intel/ice/ddp/ice.pkg"
+        mode: "0644"
+
+    - name: Rebuild initramfs fixture with mismatched DDP bytes
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail && cd {{ ddp_test_stage_dir | quote }} &&
+          find lib -print0 | cpio --null --create --format=newc |
+          gzip -c > {{ ddp_test_initramfs | quote }}
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Reject mismatched DDP payload in booted kernel initramfs
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: "{{ ddp_test_profile }}"
+        ddp_expected_failure_text: "SHA-256 differs"
+
+    - name: Restore matching DDP bytes in initramfs fixture
+      ansible.builtin.copy:
+        src: "{{ ddp_test_profile_dir }}/ice-2.pkg"
+        dest: "{{ ddp_test_stage_dir }}/lib/firmware/intel/ice/ddp/ice.pkg"
+        remote_src: true
+        mode: "0644"
+
+    - name: Rebuild initramfs fixture with matching DDP bytes
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail && cd {{ ddp_test_stage_dir | quote }} &&
+          find lib -print0 | cpio --null --create --format=newc |
+          gzip -c > {{ ddp_test_initramfs | quote }}
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Remove the DDP payload from the initramfs fixture
+      ansible.builtin.file:
+        path: "{{ ddp_test_stage_dir }}/lib/firmware/intel/ice/ddp/ice.pkg"
+        state: absent
+
+    - name: Rebuild initramfs fixture without a DDP payload
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail && cd {{ ddp_test_stage_dir | quote }} &&
+          find lib -print0 | cpio --null --create --format=newc |
+          gzip -c > {{ ddp_test_initramfs | quote }}
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Reject an initramfs that lacks the selected DDP payload
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: "{{ ddp_test_profile }}"
+        ddp_expected_failure_text: "SHA-256 differs"
+
+    - name: Restore matching DDP bytes to the initramfs fixture
+      ansible.builtin.copy:
+        src: "{{ ddp_test_profile_dir }}/ice-2.pkg"
+        dest: "{{ ddp_test_stage_dir }}/lib/firmware/intel/ice/ddp/ice.pkg"
+        remote_src: true
+        mode: "0644"
+
+    - name: Rebuild initramfs fixture with matching payload after missing-payload test
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail && cd {{ ddp_test_stage_dir | quote }} &&
+          find lib -print0 | cpio --null --create --format=newc |
+          gzip -c > {{ ddp_test_initramfs | quote }}
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Remove the booted kernel initramfs fixture
+      ansible.builtin.file:
+        path: "{{ ddp_test_initramfs }}"
+        state: absent
+
+    - name: Reject missing booted kernel initramfs
+      ansible.builtin.include_tasks: expect-validation-failure.yml
+      vars:
+        ddp_test_selection: "{{ ddp_test_profile }}"
+        ddp_expected_failure_text: "is missing or empty"

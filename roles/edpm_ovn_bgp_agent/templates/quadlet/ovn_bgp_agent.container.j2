@@ -21,7 +21,7 @@
 [Unit]
 Description=OVN BGP Agent container (EDPM)
 After=openvswitch.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 PartOf=edpm_frr.service
 
 [Container]
@@ -34,6 +34,11 @@ Exec=/usr/bin/ovn-bgp-agent --config-dir /etc/ovn-bgp-agent
 {% for vol in _ovn_bgp_agent_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_ovn_bgp_agent_healthcheck -%}
+Volume=/var/lib/openstack/healthchecks/ovn_bgp_agent:/openstack:ro,z
+PodmanArgs=--health-cmd="/openstack/healthcheck"
+PodmanArgs=--health-interval=60s --health-timeout=25s --health-retries=3 --health-start-period=180s
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]

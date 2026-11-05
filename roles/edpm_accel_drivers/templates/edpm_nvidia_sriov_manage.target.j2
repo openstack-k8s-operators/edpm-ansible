@@ -1,0 +1,8 @@
+[Unit]
+Description=Aggregation target for all NVIDIA SR-IOV manage services
+{% for idx in indices %}
+# NOTE: do not require/want sriov_manage_* services because intermittent errors fail the target permanently
+# Provide SR-IOV enablement -> MIG apply synchronization as best effort.
+After=edpm_nvidia_sriov_manage_{{ idx }}.service
+Requires=edpm_nvidia_sriov_manage_{{ idx }}.path
+{% endfor %}

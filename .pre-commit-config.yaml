@@ -4,11 +4,12 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest tests/test_nova_statedir_ownership.py
+        entry: pytest
         language: python
         types: [python]
         pass_filenames: false
         always_run: true
+        verbose: true
         additional_dependencies:
           - pytest
           - oslotest

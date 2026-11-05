@@ -26,7 +26,7 @@ ContainerName=ceilometer_agent_compute
 Image={{ edpm_telemetry_ceilometer_compute_image }}
 PublishPort={{ ctlplane_ip }}:9101:9101
 User=ceilometer
-PodmanArgs=--security-opt label=type:ceilometer_polling_t --log-driver=journald
+PodmanArgs={{ '--security-opt label=type:ceilometer_polling_t ' if edpm_telemetry_ceilometer_polling_type_available | default(false) | bool else '' }}--log-driver=journald
 {% if edpm_telemetry_healthcheck -%}
 PodmanArgs=--health-cmd="/openstack/healthcheck compute"
 Volume=/var/lib/openstack/healthchecks/ceilometer_agent_compute:/openstack:ro,z

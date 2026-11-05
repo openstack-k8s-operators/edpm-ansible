@@ -14,7 +14,7 @@
         fail_msg: "Systemd unit file for {{ item.name }} does not exist"
       when: item.osp_service | default(true)
     - name: Check if systemd unit is enabled {{ item.name }}
-      when: item.enabled | default(true)
+      when: item.enabled is not defined or item.enabled is not boolean or item.enabled | bool
       ansible.builtin.command: systemctl is-enabled {{ item.name }}
       register: unit_enabled
       failed_when: false
@@ -40,4 +40,4 @@
       ansible.builtin.assert:
         that:
           - unit_running.stdout in (item.active | default(['active']) | list)
-        fail_msg: "Systemd unit {{ item.name }} is not running"
+        fail_msg: "Systemd unit {{ item.name }} is not running (got '{{ unit_running.stdout }}')"

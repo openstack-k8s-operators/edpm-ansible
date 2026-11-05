@@ -116,8 +116,20 @@ class TestNeutronDHCP(unittest.TestCase):
         assert "Requires=edpm_neutron_dhcp_init.service" in content
         assert "KOLLA_CONFIG_STRATEGY" not in content
         assert "/var/lib/kolla/config_files" not in content
+        assert ("Volume=/var/lib/openstack/healthchecks/neutron_dhcp:"
+                "/openstack:ro,z") in content
+        assert 'PodmanArgs=--health-cmd="/openstack/healthcheck"' in content
         assert ("Volume=/var/lib/openstack/neutron-dhcp-agent/"
                 "01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro") in content
+
+    def test_dhcp_agent_healthcheck(self):
+        path = "/var/lib/openstack/healthchecks/neutron_dhcp/healthcheck"
+        healthcheck = self.host.file(path)
+        assert healthcheck.exists
+        assert self.host.run("test -x %s" % path).rc == 0
+        assert "pgrep --ns" in healthcheck.content_string
+        assert "neutron-dhcp-agent" in healthcheck.content_string
+        self.host.run_test("/bin/bash -n %s" % path)
 
     def test_dhcp_agent_init_container_file(self):
         file = self.host.file(

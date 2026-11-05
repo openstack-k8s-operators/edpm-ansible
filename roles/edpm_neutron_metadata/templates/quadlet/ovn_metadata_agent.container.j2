@@ -12,11 +12,13 @@
 
 # DO NOT REMOVE - used by container_config_hash module
 # config_hash=
+# Unbound configuration checksum: {{ edpm_neutron_metadata_unbound_conf_content | hash('sha256') }}
 
 [Unit]
 Description=Neutron OVN Metadata Agent container (EDPM)
 After=openvswitch.service edpm_ovn_metadata_agent_init.service
-Requires=openvswitch.service edpm_ovn_metadata_agent_init.service
+Wants=openvswitch.service
+Requires=edpm_ovn_metadata_agent_init.service
 
 [Container]
 ContainerName=ovn_metadata_agent
@@ -28,12 +30,17 @@ PodmanArgs=--pid=host
 PodmanArgs=--cgroupns=host
 {% if edpm_neutron_metadata_healthcheck -%}
 PodmanArgs=--health-cmd="/openstack/healthcheck"
+PodmanArgs=--health-interval=60s --health-timeout=25s --health-retries=3 --health-start-period=180s
 Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:/openstack:ro,z
 {% endif -%}
 Exec=/usr/bin/neutron-ovn-metadata-agent
 {% for vol in _metadata_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_neutron_metadata_unbound_conf_content | length > 0 -%}
+Volume={{ edpm_neutron_metadata_unbound_conf_src }}:{{ edpm_neutron_metadata_unbound_conf_dest }}:ro,z
+Environment=OVS_UNBOUND_CONF={{ edpm_neutron_metadata_unbound_conf_dest }}
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]

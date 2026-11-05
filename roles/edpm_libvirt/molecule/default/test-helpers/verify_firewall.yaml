@@ -36,7 +36,7 @@
     - name: Assert that output from greping for VNC contains the correct rule
       assert:
         that:
-          - item | regex_search('\s+tcp dport 5900-6923 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+          - item is search('\s+tcp dport 5900-6923 ct state new counter packets \d+ bytes \d+ accept comment\s+')
       loop: "{{ vnc_chain_exists.stdout_lines }}"
 
 - name: verify live migration nftables firewall rules
@@ -66,7 +66,7 @@
     - name: Assert that output from grepping for migration contains the correct rule
       assert:
         that:
-          - item | regex_search('\s+tcp dport 61152-61215 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+          - item is search('\s+tcp dport 61152-61215 ct state new counter packets \d+ bytes \d+ accept comment\s+')
       loop: "{{ migration_chain_exists.stdout_lines }}"
 
 - name: Verify libvirt tls nftables firewall rules
@@ -96,5 +96,5 @@
     - name: Assert that output from grepping for libvirt tls contains the correct rule
       assert:
         that:
-          - item | regex_search('\s+tcp dport 16514 ct state new counter packets \d+ bytes \d+ accept comment\s+')
+          - item is search('\s+tcp dport 16514 ct state new counter packets \d+ bytes \d+ accept comment\s+')
       loop: "{{ libvirt_tls_chain_exists.stdout_lines }}"

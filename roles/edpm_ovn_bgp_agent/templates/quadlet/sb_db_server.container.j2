@@ -16,7 +16,7 @@
 [Unit]
 Description=OVN SB DB Server container (EDPM OVN BGP Agent)
 After=openvswitch.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 
 [Container]
 ContainerName=sb_db_server

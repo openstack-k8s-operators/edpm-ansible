@@ -43,9 +43,15 @@
           - "'SNTRUP' in (pq_active_policy.stdout | trim).split(':')"
         fail_msg: "Active crypto-policy '{{ pq_active_policy.stdout | trim }}' does not include the SNTRUP subpolicy"
 
-    - name: Verify sshd back-end offers the sntrup761 PQ key exchange
+    - name: Select the PQ key exchange string expected on this distro
+      ansible.builtin.set_fact:
+        pq_verify_kex: >-
+          {{ 'mlkem768x25519-sha256' if ansible_facts['distribution_major_version'] | int >= 10
+             else 'sntrup761x25519-sha512' }}
+
+    - name: Verify sshd back-end offers the PQ key exchange
       ansible.builtin.command: >-
-        grep -q sntrup761 /etc/crypto-policies/back-ends/opensshserver.config
+        grep -q {{ pq_verify_kex }} /etc/crypto-policies/back-ends/opensshserver.config
       register: pq_sshd_backend
       failed_when: pq_sshd_backend.rc != 0
       changed_when: false

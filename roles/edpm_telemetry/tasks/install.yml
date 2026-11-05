@@ -51,6 +51,37 @@
   ansible.builtin.set_fact:
     _edpm_telemetry_role_path: "{{ role_path }}"
 
+# The ceilometer polling agent quadlet applies the custom SELinux type
+# ceilometer_polling_t, which is shipped by openstack-selinux. When that type is
+# not in the loaded policy (e.g. openstack-selinux is not installed), podman/crun
+# cannot transition into it and the container fails to start - regardless of
+# enforcing/permissive mode. Detect the type so the option is only emitted when
+# it is actually usable.
+- name: Gather SELinux facts
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - selinux
+
+- name: Check whether ceilometer_polling_t SELinux type is in the loaded policy
+  ansible.builtin.command:
+    cmd: >-
+      python3 -c "import selinux, sys;
+      sys.exit(0 if selinux.security_check_context('system_u:system_r:ceilometer_polling_t:s0') == 0 else 1)"
+  register: _ceilometer_polling_type_check
+  changed_when: false
+  failed_when: false
+  when:
+    - ansible_facts.selinux is defined
+    - ansible_facts.selinux.status | default('disabled') == 'enabled'
+
+- name: Decide whether ceilometer_polling_t confinement applies
+  ansible.builtin.set_fact:
+    edpm_telemetry_ceilometer_polling_type_available: >-
+      {{ (ansible_facts.selinux.status | default('disabled') == 'enabled')
+         and ((_ceilometer_polling_type_check.rc | default(1)) == 0) }}
+
 - name: Deploy enabled exporters
   ansible.builtin.include_tasks:
     file: exporter.yml

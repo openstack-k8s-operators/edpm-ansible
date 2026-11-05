@@ -8,7 +8,7 @@ driver:
 
 platforms:
   - name: instance
-    image: "${EDPM_ANSIBLE_MOLECULE_IMAGE:-'ubi9/ubi-init'}"
+    image: "${EDPM_ANSIBLE_MOLECULE_IMAGE:-'ubi10/ubi-init'}"
     registry:
       url: "${EDPM_ANSIBLE_MOLECULE_REGISTRY:-'registry.access.redhat.com'}"
     command: /sbin/init
@@ -22,10 +22,11 @@ provisioner:
   log: true
   config_options:
     interpreter_python: auto_silent
-    callbacks_enabled: profile_tasks, timer, yaml
+    callbacks_enabled: profile_tasks, timer
   env:
     ANSIBLE_STDOUT_CALLBACK: default
     ANSIBLE_CALLBACK_RESULT_FORMAT: yaml
+
 verifier:
   name: ansible
 

@@ -28,6 +28,81 @@
         - "/etc/libvirt"
     - name: ensure firewall is configured
       ansible.builtin.include_tasks: "test-helpers/verify_firewall.yaml"
+    # TEMPORARY DIAGNOSTIC: virtnodedevd.service lands in 'failed' on CentOS 10. Converge
+    # passes because edpm_libvirt.target's Wants= is non-fatal, so the failure only shows
+    # up in the assert below. A podman container repro starts the daemon fine, so the
+    # journal from a real run is the only way to identify the cause. Remove once diagnosed.
+    - name: Collect libvirt systemd diagnostics
+      become: true
+      ansible.builtin.shell: |
+        set +x
+        for u in virtnodedevd virtproxyd virtqemud virtsecretd virtlogd; do
+          echo "### $u.service is-active: $(systemctl is-active $u.service)"
+          systemctl show $u.service -p ActiveState,SubState,Result,ExecMainStatus,ExecMainCode
+          systemctl show $u.service -p NRestarts,StartLimitHit,TriggerLimitHit,LoadState,UnitFileState
+          systemctl status $u.service --no-pager -l 2>&1 | head -25
+          journalctl -u $u.service --no-pager -n 40 2>&1
+        done
+        echo "### edpm_libvirt.target"
+        systemctl show edpm_libvirt.target -p ActiveState,SubState,Wants,After
+        systemctl list-dependencies --no-pager edpm_libvirt.target 2>&1 | head -25
+        journalctl -u edpm_libvirt.target --no-pager -n 20 2>&1
+        echo "### all libvirt units"
+        systemctl list-units --all --no-pager --no-legend 'libvirt*' 'virt*' 2>&1
+        echo "### rendered daemon configs"
+        for f in virtnodedevd virtproxyd virtqemud virtsecretd virtlogd; do
+          echo "--- /etc/libvirt/$f.conf"
+          cat /etc/libvirt/$f.conf 2>&1
+        done
+        echo "### TLS material (virtproxyd exits at startup if listen_tls has no cert)"
+        ls -l /etc/pki/libvirt /etc/pki/libvirt/private /etc/pki/libvirt-routed \
+             /etc/pki/libvirt-vproxy /etc/pki/qemu /tmp/pki 2>&1
+        echo "### versions"
+        rpm -q libvirt-daemon-driver-nodedev libvirt-daemon libvirt-client systemd dbus-broker 2>&1
+        echo "### conf file perms/owner/SELinux labels (DAC ground truth)"
+        ls -ldZ /etc/libvirt 2>&1
+        ls -lZ /etc/libvirt/*.conf 2>&1
+        echo "### conf file mtime vs ctime (ctime>mtime => chmod/chown after write)"
+        stat -c '%n mode=%a owner=%U:%G mtime=%y ctime=%z' /etc/libvirt /etc/libvirt/virt*.conf 2>&1
+        echo "### runtime user/group/SELinux context of libvirt daemons"
+        ps -e -o pid,user,group,context,comm 2>/dev/null | grep -E 'virt(qemu|nodedev|proxy|secret|log)d'
+        echo "### root groups (dac_read_search depends on these)"
+        id 2>&1
+        echo "### pure-DAC test as libvirt user (no SELinux context change)"
+        runuser -l libvirt -c 'cat /etc/libvirt/virtnodedevd.conf >/dev/null' 2>&1 \
+          && echo "libvirt-user: READABLE" || echo "libvirt-user: DENIED"
+        echo "### node systemd drop-ins for virtnodedevd (User=/capability overrides)"
+        systemctl cat virtnodedevd.service 2>&1 | head -60
+        echo "### tmpfiles.d rules touching libvirt"
+        grep -ri libvirt /etc/tmpfiles.d /usr/lib/tmpfiles.d 2>/dev/null | head -20
+        echo "### libvirt package install times (was a rpm txn after role write?)"
+        for p in libvirt-daemon libvirt-daemon-driver-nodedev libvirt-daemon-driver-qemu \
+                 libvirt-daemon-driver-secret libvirt-daemon-log libvirt-daemon-proxy; do
+          rpm -q --last "$p" 2>&1
+        done
+        echo "### selinux / avc"
+        getenforce 2>&1
+        journalctl -k --no-pager --grep=avc -n 20 2>&1
+        (ausearch -m avc --start boot 2>/dev/null || grep avc /var/log/audit/audit.log 2>/dev/null) \
+          | grep -E 'virtnodedevd|virtproxyd|virtqemud|virtsecretd|virtlogd' | tail -50
+        echo "### runcon test: replay config read in each daemon SELinux context"
+        for d in virtqemud virtnodedevd virtproxyd virtsecretd virtlogd; do
+          if runcon -t "${d}_t" cat "/etc/libvirt/${d}.conf" >/dev/null 2>&1; then
+            echo "${d}.conf: READABLE by ${d}_t";
+          else
+            echo "${d}.conf: DENIED for ${d}_t";
+          fi;
+        done
+        echo "### priority<=3 journal"
+        journalctl --no-pager -p 3 -n 60 2>&1
+      register: libvirt_diag
+      changed_when: false
+      failed_when: false
+
+    - name: Show libvirt systemd diagnostics
+      ansible.builtin.debug:
+        var: libvirt_diag.stdout_lines
+
     - name: ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_systemd_unit.yaml"
       loop:

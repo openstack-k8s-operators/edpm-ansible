@@ -1,0 +1,38 @@
+---
+- name: Install systemd unit to control sriov-manage
+  register: _edpm_accel_drivers_nvidia_sriov_manage_service_installed
+  become: true
+  ansible.builtin.template:
+    src: edpm_nvidia_sriov_manage.service.j2
+    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}.service"
+    mode: '0644'
+  vars:
+    bdf: "{{ _edpm_accel_drivers_nvidia_sriov_bdf }}"
+    idx: "{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}"
+    vf0_bdf: "{{ _edpm_accel_drivers_nvidia_mig_vf0_bdf }}"
+
+- name: Install systemd unit to cause sriov-manage to run when sriov_numvfs appears
+  become: true
+  register: _edpm_accel_drivers_nvidia_sriov_manage_path_installed
+  ansible.builtin.template:
+    src: edpm_nvidia_sriov_manage.path.j2
+    dest: "/etc/systemd/system/edpm_nvidia_sriov_manage_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}.path"
+    mode: '0644'
+  vars:
+    bdf: "{{ _edpm_accel_drivers_nvidia_sriov_bdf }}"
+
+- name: Disable (trigger only) edpm_nvidia_sriov_manage service for physical GPU {{ _edpm_accel_drivers_nvidia_mig_gpu_index }}
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_nvidia_sriov_manage_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}.service"
+    enabled: false
+    masked: false
+    daemon_reload: "{{ _edpm_accel_drivers_nvidia_sriov_manage_service_installed.changed | default(false) | bool }}"
+
+- name: Enable edpm_nvidia_sriov_manage path activation for physical GPU {{ _edpm_accel_drivers_nvidia_mig_gpu_index }}
+  become: true
+  ansible.builtin.systemd:
+    name: "edpm_nvidia_sriov_manage_{{ _edpm_accel_drivers_nvidia_mig_gpu_index }}.path"
+    enabled: true
+    masked: false
+    daemon_reload: "{{ _edpm_accel_drivers_nvidia_sriov_manage_path_installed.changed | default(false) | bool }}"

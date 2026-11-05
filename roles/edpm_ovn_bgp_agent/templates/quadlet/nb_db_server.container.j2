@@ -16,7 +16,7 @@
 [Unit]
 Description=OVN NB DB Server container (EDPM OVN BGP Agent)
 After=openvswitch.service
-Requires=openvswitch.service
+Wants=openvswitch.service
 
 [Container]
 ContainerName=nb_db_server

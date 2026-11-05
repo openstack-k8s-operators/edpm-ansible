@@ -32,6 +32,11 @@ edpm_libvirt_services:
   - virtproxyd
   - virtqemud
   - virtsecretd
+# Services actively restarted by the "Restart libvirt" handler. Defaults to all
+# managed services. The socket-activated on-demand daemons (virtnodedevd,
+# virtproxyd) cannot start standalone without udev/dbus, so molecule overrides
+# this to the always-on daemons.
+edpm_libvirt_restart_services: "{{ edpm_libvirt_services }}"
 # List of services to stop during adoption
 # (container nova_virtlod is handled separetly)
 edpm_libvirt_old_tripleo_compute_sevices:

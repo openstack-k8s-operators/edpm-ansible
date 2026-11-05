@@ -109,6 +109,22 @@ class TestNeutronMetadata(unittest.TestCase):
     def test_metadata_agent_container_is_running(self):
         assert self.host.podman(OVN_METADATA_AGENT_CONTAINER).is_running
 
+    def test_metadata_agent_healthcheck(self):
+        path = "/var/lib/openstack/healthchecks/ovn_metadata_agent/healthcheck"
+        healthcheck = self.host.file(path)
+        assert healthcheck.exists
+        assert self.host.run("test -x %s" % path).rc == 0
+        assert "neutron-ovn-metadata-agent" in healthcheck.content_string
+        assert "OVN_Southbound" in healthcheck.content_string
+        self.host.run_test("/bin/bash -n %s" % path)
+
+        quadlet = self.host.file(
+            "/etc/containers/systemd/edpm_ovn_metadata_agent.container"
+        ).content_string
+        assert 'PodmanArgs=--health-cmd="/openstack/healthcheck"' in quadlet
+        assert ("Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:"
+                "/openstack:ro,z") in quadlet
+
     def test_default_root_helper_works(self):
         ansible_vars = self.host.ansible(
             "include_vars",

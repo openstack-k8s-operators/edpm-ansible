@@ -69,7 +69,7 @@
   block:
     - name: Fetch latest repo version
       ansible.builtin.uri:
-        url: https://trunk.rdoproject.org/centos{{ ansible_facts['distribution_major_version'] }}/current-podified/delorean.repo
+        url: "{{ test_deps_delorean_repo_url }}"
         return_content: true
       register: edpm_packages
 
@@ -107,8 +107,11 @@
         python3 setup.py install
 
     - name: Create repos
-      ansible.builtin.command: /usr/local/bin/repo-setup -d ubi9 {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }} \
-          -b master current-podified {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
+      ansible.builtin.command: >-
+        /usr/local/bin/repo-setup -d {{ test_deps_repo_setup_dist }}
+        {{ test_deps_setup_stream | ternary('--stream', '--no-stream', omit) }}
+        -b master {{ test_deps_repo_setup_promotion }}
+        {{ test_deps_setup_ceph | ternary('ceph', '', omit) }}
 
     - name: Look for redhat-release rpm
       ansible.builtin.shell: |

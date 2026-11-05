@@ -39,6 +39,16 @@ argument_specs:
         description: >
           String which specifies maximum powerstate for idling cores
           for example, C6|140.
+      edpm_tuned_rollback:
+        type: str
+        default: "not_on_exit"
+        choices:
+          - auto
+          - not_on_exit
+        description: >
+          Rollback strategy written to /etc/tuned/tuned-main.conf.
+          auto restores tuned settings on daemon exit (tuned default),
+          not_on_exit keeps them across daemon restarts.
       edpm_tuned_system_packages_default:
         type: list
         description: >

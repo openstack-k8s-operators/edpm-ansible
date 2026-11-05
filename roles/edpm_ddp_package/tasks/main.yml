@@ -21,13 +21,14 @@
       - "!min"
       - "local"
 
-- name: Fail if bootc
-  ansible.builtin.debug:
-    msg: The edpm_ddp_package role can not be used on a bootc system.
-  failed_when: ansible_local.bootc | bool
+- name: Validate baked DDP package on bootc
+  ansible.builtin.include_tasks: validate_bootc.yml
+  when: ansible_local.bootc | default(false) | bool
 
 - name: Apply user provided DDP package
-  when: edpm_ddp_package | string != "" and edpm_ddp_package | string != "ddp"
+  when:
+    - not (ansible_local.bootc | default(false) | bool)
+    - edpm_ddp_package | string != "" and edpm_ddp_package | string != "ddp"
   block:
     - name: List DDP packages
       ansible.builtin.find:

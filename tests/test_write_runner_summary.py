@@ -70,7 +70,12 @@ def test_latest_run_dir_uses_most_recent_artifacts(tmp_path):
         tmp_path, "newer-run", 3, {"host-a": 1, "host-b": 1}, {}, {}
     )
 
-    os.utime(newer_run, None)
+    # Set explicit, clearly separated mtimes so the comparison does not
+    # depend on wall-clock ordering, which can tie on filesystems with
+    # coarse mtime resolution when the two directories are created in
+    # quick succession.
+    os.utime(older_run, (1_000_000_000, 1_000_000_000))
+    os.utime(newer_run, (1_000_000_100, 1_000_000_100))
     selected_run = write_runner_summary._latest_run_dir(tmp_path / "artifacts")
 
     assert older_run != newer_run

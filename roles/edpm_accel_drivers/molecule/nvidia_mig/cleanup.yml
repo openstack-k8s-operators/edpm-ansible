@@ -1,0 +1,19 @@
+---
+- name: Cleanup
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Restore readlink binary
+      become: true
+      ansible.builtin.copy:
+        src: /usr/bin/readlink.bak
+        dest: /usr/bin/readlink
+        mode: '0755'
+        force: true
+        remote_src: true
+
+    - name: Remove readlink backup
+      become: true
+      ansible.builtin.file:
+        path: /usr/bin/readlink.bak
+        state: absent

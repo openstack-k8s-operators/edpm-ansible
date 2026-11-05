@@ -8,7 +8,7 @@ driver:
 platforms:
 - command: /sbin/init
   dockerfile: ../../../../molecule/common/Containerfile.j2
-  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+  image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi10/ubi-init"}
   name: edpm-0.localdomain
   privileged: true
   registry:
