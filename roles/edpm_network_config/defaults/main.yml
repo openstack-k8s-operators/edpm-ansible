@@ -77,11 +77,14 @@ edpm_network_config_mappings: {}
 # Resolved NIC mapping (mapped_nics); written by files/edpm_derived_nic_mapping.py on nmstate path.
 # Removed on derive failure so unresolved MAC/name values are not reused for alias substitution.
 edpm_network_config_derived_nic_mapping_file: /var/lib/edpm-config/derived_nic_mapping.yaml
+# Path to nmstate device_map.yaml: name -> PCI address/MAC/driver for physical
+# network devices (nmstate tool path only). Refreshed after a successful apply;
+# retains names whose netdev left sysfs while the PCI BDF remains vfio-pci bound.
+# Consulted by edpm_derived_nic_mapping.py to keep nicN aliases stable across
+# passthrough runs instead of dropping an alias and reshuffling others.
+edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
 edpm_network_config_safe_defaults: false
 edpm_network_config_template: ""
-# Path to nmstate device_map.yaml: name -> PCI address/MAC/driver for physical
-# network devices (nmstate tool path only). Refreshed after a successful apply.
-edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: false

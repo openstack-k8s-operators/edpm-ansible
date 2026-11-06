@@ -47,33 +47,18 @@
   become: true
   ansible.builtin.import_tasks: nic_mapping.yml
 
+# edpm_network_config_derived_nic_mapping_file (-f) is intentionally NEVER overwritten
+# with the raw user mapping before edpm_derived_nic_mapping.py runs: the script reads it
+# as the *previous* run's derived mapping (stability fallback for aliases whose target
+# NIC has since been handed to vfio-pci, confirmed via -m/device_map.yaml) while the
+# operator's fresh mapping is passed separately via -u/--user-mapping and always wins.
 # Check mode: derived NIC mapping is not regenerated here; apply still slurps any
 # existing derived file so alias substitution can use the prior mapping.
-- name: Copy user NIC mapping to derived input and run mapped_nics
+- name: Run derived NIC mapping (edpm_derived_nic_mapping.py)
   become: true
   when: not ansible_check_mode | bool
 
   block:
-    - name: Stat user NIC mapping file
-      ansible.builtin.stat:
-        path: "{{ edpm_network_config_mapping_file }}"
-      register: edpm_user_nic_mapping_stat
-
-    - name: Copy user_nic_mapping.yaml to derived_nic_mapping.yaml
-      ansible.builtin.copy:
-        src: "{{ edpm_network_config_mapping_file }}"
-        dest: "{{ edpm_network_config_derived_nic_mapping_file }}"
-        remote_src: true
-        force: true
-        mode: "0644"
-      when: edpm_user_nic_mapping_stat.stat.exists | default(false)
-
-    - name: Remove stale derived NIC mapping when template mapping file is absent
-      ansible.builtin.file:
-        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
-        state: absent
-      when: not (edpm_user_nic_mapping_stat.stat.exists | default(false))
-
     - name: Check that Python3 can import yaml (requires python3-pyyaml on the node)
       ansible.builtin.command:
         argv:
@@ -100,23 +85,25 @@
           - /var/lib/edpm-config/edpm_derived_nic_mapping.py
           - "-f"
           - "{{ edpm_network_config_derived_nic_mapping_file }}"
+          - "-u"
+          - "{{ edpm_network_config_mapping_file }}"
+          - "-m"
+          - "{{ edpm_network_config_nmstate_device_map_file }}"
       register: edpm_derived_nic_mapping_result
       changed_when: >-
         'edpm_derived_nic_mapping_changed=yes' in (edpm_derived_nic_mapping_result.stdout | default(''))
 
   rescue:
-    - name: Remove derived NIC mapping after failed derivation
-      ansible.builtin.file:
-        path: "{{ edpm_network_config_derived_nic_mapping_file }}"
-        state: absent
-
+    # Do not delete the prior derived file: edpm_derived_nic_mapping.py only
+    # writes after a successful derive, so on-disk state is still the last good
+    # mapping (passthrough / auto_aliases). Wiping it would force nicN reshuffles
+    # on the next successful run. The play fails here, so apply does not use it.
     - name: Re-raise derived NIC mapping failure
       ansible.builtin.fail:
         msg: >-
-          Derived NIC mapping failed; removed
-          {{ edpm_network_config_derived_nic_mapping_file }} so unresolved
-          MAC/name values are not used for nmstate alias substitution.
-          See tasks above for the underlying error.
+          Derived NIC mapping failed; left
+          {{ edpm_network_config_derived_nic_mapping_file }} unchanged
+          (last successful derive). See tasks above for the underlying error.
 
 - name: Check nmstate return code for conditional logic
   become: true
