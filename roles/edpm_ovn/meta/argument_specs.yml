@@ -62,6 +62,15 @@ argument_specs:
           This variable allows overriding the automatic FQDN mapping with custom hypervisor names.
           Examples: { "br-ex": "compute-01", "rp_tunnelled": "compute-01-tunnel" }
         type: dict
+      edpm_frr_ovn_bind:
+        default: true
+        description: >
+          When true and the peer service is known to systemd, create
+          a bidirectional BindsTo systemd relationship between FRR
+          and OVN controller services via drop-in files. If the peer
+          is not yet deployed, the binding is deferred until the peer
+          role runs.
+        type: bool
       edpm_ovn_bridge:
         default: br-int
         description: >

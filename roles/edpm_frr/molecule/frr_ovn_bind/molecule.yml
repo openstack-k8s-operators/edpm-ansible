@@ -1,0 +1,56 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: collections.yml
+driver:
+  name: podman
+platforms:
+  - command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    name: frr-first
+    privileged: true
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    ulimits:
+      - host
+  - command: /sbin/init
+    dockerfile: ../../../../molecule/common/Containerfile.j2
+    image: ${EDPM_ANSIBLE_MOLECULE_IMAGE:-"ubi9/ubi-init"}
+    name: ovn-first
+    privileged: true
+    registry:
+      url: ${EDPM_ANSIBLE_MOLECULE_REGISTRY:-"registry.access.redhat.com"}
+    ulimits:
+      - host
+provisioner:
+  log: true
+  name: ansible
+  inventory:
+    hosts:
+      all:
+        hosts:
+          frr-first:
+            canonical_hostname: edpm-0.localdomain
+            ctlplane_ip: "10.0.0.1"
+            edpm_frr_ovn_bind_role_order:
+              - edpm_frr
+              - edpm_ovn
+          ovn-first:
+            canonical_hostname: edpm-1.localdomain
+            ctlplane_ip: "10.0.0.2"
+            edpm_frr_ovn_bind_role_order:
+              - edpm_ovn
+              - edpm_frr
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
+verifier:
+  name: ansible

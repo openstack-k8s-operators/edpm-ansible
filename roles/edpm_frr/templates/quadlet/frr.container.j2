@@ -27,6 +27,7 @@ Volume={{ vol }}
 Label=managed_by=edpm_ansible
 
 [Service]
+ExecStop=-/usr/bin/podman exec frr /usr/libexec/frr/frrinit.sh stop
 Restart=always
 TimeoutStartSec=900
 TimeoutStopSec=84
