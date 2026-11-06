@@ -132,6 +132,43 @@
       register: nmstate_returncode_slurp
       when: nmstate_returncode_stat.stat.exists
 
+# Same apply gate as the nmstate configure block below: do not rebind NICs
+# on a no-op run (update false and prior apply succeeded). On failure, write
+# a nonzero nmstate.returncode so a later run with update=false still retries
+# (binding alone does not enter the configure block's rescue).
+- name: Validate and bind PCI drivers before applying network state
+  when:
+    - edpm_network_config_driver_bind | trim | length > 0
+    - (edpm_network_config_update) or
+      (nmstate_returncode_stat.stat.exists and
+      ((nmstate_returncode_slurp.content | b64decode | int) != 0)) or
+      (not nmstate_returncode_stat.stat.exists)
+  block:
+    # All driver_bind.yml tasks need root; escalate once on the include.
+    - name: Run PCI driver bind tasks
+      ansible.builtin.include_tasks:
+        file: driver_bind.yml
+        apply:
+          become: true
+  rescue:
+    - name: Ensure /var/lib/edpm-config exists after driver bind failure
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/edpm-config
+        state: directory
+        mode: "0755"
+
+    - name: Write failure rc after driver bind failure
+      become: true
+      ansible.builtin.copy:
+        content: "1"
+        dest: /var/lib/edpm-config/nmstate.returncode
+        mode: "0644"
+
+    - name: Re-raise driver bind failure
+      ansible.builtin.fail:
+        msg: "PCI driver binding failed; see tasks above."
+
 - name: Configure network with network role from system roles [nmstate]
   become: true
   # The conditions here are when we want to apply the NetworkConfig:
