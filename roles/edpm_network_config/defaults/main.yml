@@ -82,6 +82,15 @@ edpm_network_config_template: ""
 # Path to nmstate device_map.yaml: name -> PCI address/MAC/driver for physical
 # network devices (nmstate tool path only). Refreshed after a successful apply.
 edpm_network_config_nmstate_device_map_file: /var/lib/edpm-config/nmstate_device_map.yaml
+# Phase 1 (optional): nmstate YAML to create SR-IOV VFs on PF(s) (total-vfs only).
+# Per-VF vfs settings belong in edpm_network_config_template (phase 2).
+edpm_network_config_nmstate_sriov_pf_template: ""
+# After phase 1, poll sysfs until each PF's sriov_numvfs matches total-vfs from the SR-IOV template.
+edpm_network_config_nmstate_sriov_vf_wait: true
+edpm_network_config_nmstate_sriov_vf_wait_timeout: 60
+edpm_network_config_nmstate_sriov_vf_wait_delay: 2
+# Sysfs class/net root used by the VF wait (override in molecule / tests only).
+edpm_network_config_nmstate_sriov_sysfs_class_net: /sys/class/net
 edpm_bond_interface_ovs_options: "bond_mode=active-backup"
 edpm_dns_search_domains: []
 edpm_network_config_nonconfigured_cleanup: false
