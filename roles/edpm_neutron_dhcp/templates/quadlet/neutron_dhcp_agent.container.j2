@@ -27,6 +27,11 @@ Exec=/usr/bin/neutron-dhcp-agent
 {% for vol in _dhcp_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if edpm_neutron_dhcp_healthcheck -%}
+Volume=/var/lib/openstack/healthchecks/neutron_dhcp:/openstack:ro,z
+PodmanArgs=--health-cmd="/openstack/healthcheck"
+PodmanArgs=--health-interval=60s --health-timeout=25s --health-retries=3 --health-start-period=180s
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]

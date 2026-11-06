@@ -31,6 +31,9 @@
   ansible.builtin.set_fact:
     _edpm_neutron_sriov_role_path: "{{ role_path }}"
 
+- name: Configure neutron_sriov healthcheck
+  ansible.builtin.include_tasks: healthchecks.yml
+
 # TODO(quadlet-migration): Remove use_quadlet flag once all services are migrated.
 - name: Run neutron-sriov-agent init container
   ansible.builtin.include_role:
