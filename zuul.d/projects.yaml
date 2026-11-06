@@ -14,6 +14,10 @@
               - openstack-k8s-operators-content-provider
         - edpm-ansible-crc-podified-edpm-baremetal
         - edpm-ansible-crc-podified-edpm-baremetal-bootc
+        - edpm-ansible-s2i-content-provider
+        - edpm-ansible-crc-podified-edpm-baremetal-bootc-s2i:
+            dependencies:
+              - edpm-ansible-s2i-content-provider
         - edpm-ansible-molecule-edpm_accel_drivers
         - edpm-ansible-molecule-edpm_bootstrap
         - edpm-ansible-molecule-edpm_cleanup
