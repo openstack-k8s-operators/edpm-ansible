@@ -20,3 +20,4 @@ collections:
   - community.general
   - containers.podman
   - fedora.linux_system_roles
+  - infra.leapp

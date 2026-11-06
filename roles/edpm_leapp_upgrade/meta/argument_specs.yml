@@ -1,0 +1,120 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+argument_specs:
+  main:
+    short_description: In-place OS upgrade of EDPM nodes via the infra.leapp collection
+    description:
+      - Thin EDPM wrapper around the upstream infra.leapp collection that
+        upgrades EDPM nodes in place (RHEL 9 to RHEL 10).
+      - The role owns the EDPM pre-flight validation, the collection FQCN
+        indirection and a small set of defaults; everything else is delegated
+        to the infra.leapp.analysis and infra.leapp.upgrade roles, which
+        together handle the full upgrade lifecycle including preparation,
+        execution, reboot, and post-upgrade tasks.
+      - All upstream C(leapp_*) variables can be passed through directly and
+        are documented in the infra.leapp collection.
+    version_added: "0.0.1"
+    options:
+      edpm_leapp_upgrade_validate:
+        description:
+          - Run the EDPM pre-flight validation phase.
+        type: bool
+        default: true
+      edpm_leapp_upgrade_analysis:
+        description:
+          - Run the leapp pre-upgrade analysis phase (infra.leapp.analysis).
+          - Also decides whether infra.leapp.upgrade requires the analysis
+            report to be present (leapp_check_analysis_results).
+        type: bool
+        default: true
+      edpm_leapp_upgrade_fail_on_inhibitors:
+        description:
+          - Fail the run when the pre-upgrade analysis reports upgrade
+            inhibitors.
+        type: bool
+        default: true
+      edpm_leapp_upgrade_source_major_version:
+        description:
+          - Minimum source RHEL major version eligible for the upgrade.
+        type: str
+        default: "9"
+      edpm_leapp_upgrade_source_min_version:
+        description:
+          - Minimum source RHEL minor version eligible for the upgrade.
+        type: str
+        default: "9.6"
+      edpm_leapp_upgrade_clean_stale_logs:
+        description:
+          - Archive a stale I(/var/log/leapp/ansible_leapp_*.log) left behind
+            by an aborted run. The upstream roles refuse to start while such
+            a log exists, which would make a retried deployment fail on the
+            stale lock instead of the real problem.
+        type: bool
+        default: true
+      edpm_leapp_upgrade_copr_enabled:
+        description:
+          - Enable a Copr repository on the node before infra.leapp installs
+            the leapp packages.
+          - infra.leapp has no Copr support of its own; it installs
+            C(leapp-upgrade) from whatever repositories are already enabled,
+            so the Copr has to be configured before the analysis phase runs.
+        type: bool
+        default: false
+      edpm_leapp_upgrade_copr_project:
+        description:
+          - Copr project to enable, in I(owner/project) form. Group projects
+            keep their leading C(@), as in the C(dnf copr enable) argument.
+          - Only used when C(edpm_leapp_upgrade_copr_enabled) is true.
+        type: str
+        default: "@oamg/leapp"
+      edpm_leapp_upgrade_copr_chroot:
+        description:
+          - Copr chroot to pull the builds from.
+          - RHEL is not a Copr chroot, so C(dnf copr enable @oamg/leapp)
+            fails on RHEL unless the chroot is given explicitly. The EPEL
+            chroot matching the source RHEL major version is the one to use;
+            C(@oamg/leapp) builds for epel-7, epel-8 and epel-9 only, so this
+            must stay pinned to the source OS rather than the target.
+          - Only used when C(edpm_leapp_upgrade_copr_enabled) is true.
+        type: str
+        default: "epel-{{ ansible_facts['distribution_major_version'] }}-$basearch"
+      edpm_leapp_upgrade_copr_remove_after_upgrade:
+        description:
+          - Remove the Copr repository again once infra.leapp.upgrade has
+            finished, so that an EPEL 9 Copr is not left configured on an
+            upgraded RHEL 10 node.
+          - Only used when C(edpm_leapp_upgrade_copr_enabled) is true.
+        type: bool
+        default: true
+      edpm_leapp_upgrade_copy_reports:
+        description:
+          - Forwarded to infra.leapp as leapp_copy_reports; copy the leapp
+            reports from the node to the controller.
+        type: bool
+        default: true
+      edpm_leapp_upgrade_workdir_controller:
+        description:
+          - Forwarded to infra.leapp as leapp_workdir_controller; directory
+            on the controller where collected reports are written.
+          - Defaults to I(edpm_leapp_reports) in the home directory of the
+            controller process. The upstream default, C({{ playbook_dir }}),
+            is not usable in EDPM because the playbook is served from the
+            collection mounted read-only in the AnsibleEE pod.
+          - When the directory cannot be created the role falls back to
+            I($TMPDIR/edpm_leapp_reports) rather than failing the upgrade.
+        type: str
+        default: "{{ lookup('env', 'HOME') }}/edpm_leapp_reports"

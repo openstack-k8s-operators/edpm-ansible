@@ -1,0 +1,42 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# Internal variables, not intended for modification.
+
+# Last-resort location for the leapp reports on the controller, used when
+# edpm_leapp_upgrade_workdir_controller cannot be created (read-only mount in
+# the AnsibleEE pod, wrong ownership, ...).
+_edpm_leapp_workdir_fallback: >-
+  {{ [lookup('ansible.builtin.env', 'TMPDIR') | default('/tmp', true),
+      'edpm_leapp_reports'] | ansible.builtin.path_join }}
+
+# Copr repository coordinates derived from edpm_leapp_upgrade_copr_project.
+# These reproduce what "dnf copr enable" writes, so the repository id and the
+# file name stay interchangeable with the dnf Copr plugin.
+_edpm_leapp_copr_owner: "{{ edpm_leapp_upgrade_copr_project | regex_replace('/.*$', '') }}"
+_edpm_leapp_copr_name: "{{ edpm_leapp_upgrade_copr_project | regex_replace('^[^/]*/', '') }}"
+
+# The dnf Copr plugin prefixes group owners ("@oamg") with "group_" and drops
+# the "@" when it builds the repository id.
+_edpm_leapp_copr_repo_owner: "{{ ('group_' + _edpm_leapp_copr_owner[1:]) if _edpm_leapp_copr_owner.startswith('@') else _edpm_leapp_copr_owner }}"
+_edpm_leapp_copr_id: "copr:copr.fedorainfracloud.org:{{ _edpm_leapp_copr_repo_owner }}:{{ _edpm_leapp_copr_name }}"
+
+# dnf writes the repository to /etc/yum.repos.d/_<repo id>.repo
+_edpm_leapp_copr_file: "_{{ _edpm_leapp_copr_id }}"
+
+_edpm_leapp_copr_results: "https://download.copr.fedorainfracloud.org/results/{{ edpm_leapp_upgrade_copr_project }}"
+_edpm_leapp_copr_baseurl: "{{ _edpm_leapp_copr_results }}/{{ edpm_leapp_upgrade_copr_chroot }}/"
+_edpm_leapp_copr_gpgkey: "{{ _edpm_leapp_copr_results }}/pubkey.gpg"

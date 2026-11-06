@@ -33,4 +33,5 @@
         - edpm-ansible-molecule-edpm_telemetry
         - edpm-ansible-molecule-edpm_telemetry_logging
         - edpm-ansible-molecule-edpm_telemetry_power_monitoring
+        - edpm-ansible-molecule-edpm_leapp_upgrade
         - openstack-k8s-operators-content-provider
