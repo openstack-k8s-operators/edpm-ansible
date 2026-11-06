@@ -66,4 +66,27 @@
           ansible.builtin.assert:
             that: pids_before_update.content | b64decode | split('\n') | sort() ==
                   pids_after_update.stdout_lines | sort()
-          when: scenario_name in ("update_without_reload", "update_no_op", "update_when_pinned_version_already_present")
+          when: scenario_name in ("update_without_reload", "update_no_op",
+                                   "update_when_pinned_version_already_present", "update_cross_stream")
+
+    - name: Verify ovs stream package swap happened without the wrapper package
+      when: scenario_name == "update_cross_stream"
+      vars:
+        ovs_pre_update_packages: "{{ (molecule_yml['provisioner']['env']['ovs_pre_update_version']).split(',') }}"
+        ovs_target_packages: "{{ (molecule_yml['provisioner']['env']['ovs_target_packages']).split(',') }}"
+      block:
+        - name: Gather installed package facts
+          ansible.builtin.package_facts:
+            manager: rpm
+
+        - name: Assert the previous ovs stream packages were removed
+          ansible.builtin.assert:
+            that: item not in ansible_facts.packages
+            fail_msg: "{{ item }} is still installed after the ovs stream swap"
+          loop: "{{ ovs_pre_update_packages }}"
+
+        - name: Assert the target ovs stream packages are installed
+          ansible.builtin.assert:
+            that: item in ansible_facts.packages
+            fail_msg: "{{ item }} was not installed by the ovs stream swap"
+          loop: "{{ ovs_target_packages }}"

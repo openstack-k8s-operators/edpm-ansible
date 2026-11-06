@@ -30,4 +30,4 @@
         # ovs_pre_update_version will prepare the test instance with the specified
         # version of ovs. Setting the same version to update to during converge should
         # result in no-op since the specific version is already installed.
-        edpm_ovs_packages: ["{{ ovs_pre_update_version }}"]
+        edpm_ovs_packages: "{{ ovs_pre_update_version.split(',') }}"

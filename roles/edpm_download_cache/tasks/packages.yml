@@ -38,6 +38,15 @@
     - edpm_kernel
     - download_cache
 
+- name: Download packages for edpm_ovs role
+  when: '"configure-network" in edpm_download_cache_running_services'
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_ovs
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_ovs
+    - download_cache
+
 - name: Download packages for edpm_network_config role
   when: '"configure-network" in edpm_download_cache_running_services'
   ansible.builtin.include_role:
