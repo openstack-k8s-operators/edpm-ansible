@@ -59,15 +59,18 @@
       - "system"
 
 - name: Configure FRR
+  become: true
   ansible.builtin.template:
     src: config/frr.conf.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
+    force: "{{ edpm_frr_overwrite_config }}"
     mode: '0644'
     selevel: s0
     setype: container_file_t
   register: _frr_config_result
 
 - name: Configure FRR daemons
+  become: true
   ansible.builtin.template:
     src: config/daemons.j2
     dest: "{{ edpm_frr_config_basedir }}/etc/frr/daemons"
@@ -75,3 +78,13 @@
     selevel: s0
     setype: container_file_t
   register: _frr_daemons_result
+
+- name: Configure FRR vtysh
+  become: true
+  ansible.builtin.template:
+    src: config/vtysh.conf.j2
+    dest: "{{ edpm_frr_config_basedir }}/etc/frr/vtysh.conf"
+    mode: '0644'
+    selevel: s0
+    setype: container_file_t
+  register: _frr_vtysh_result

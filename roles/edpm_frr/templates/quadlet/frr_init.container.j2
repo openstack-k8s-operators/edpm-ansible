@@ -14,8 +14,9 @@ Image={{ edpm_frr_image }}
 Network=none
 User=root
 PodmanArgs=--security-opt label=disable --log-driver=journald
-Exec=/usr/bin/chown -R frr:frrvty /run/frr
+Exec=/usr/bin/chown -R frr:frrvty /run/frr /etc/frr
 Volume=/run/frr:/run/frr:shared,z
+Volume={{ edpm_frr_config_basedir }}/etc/frr:/etc/frr:rw,z
 Label=managed_by=edpm_ansible
 
 [Service]

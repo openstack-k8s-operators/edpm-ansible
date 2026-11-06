@@ -48,47 +48,72 @@
     path: "{{ edpm_frr_config_basedir }}/etc/frr"
     state: directory
     setype: "container_file_t"
-    owner: "{{ ansible_user | default(ansible_user_id) }}"
-    group: "{{ ansible_user | default(ansible_user_id) }}"
     mode: "0755"
 
-- name: Check if old config directory exists
+- name: Migrate old FRR configuration
   tags:
     - update
     - frr
-  ansible.builtin.stat:
-    path: "/var/lib/config-data/ansible-generated/frr"
-  register: edpm_frr_old_config_dir
-
-- name: Move config files from old location to new location
-  tags:
-    - update
-    - frr
-  become: true
-  when:
-    - edpm_frr_old_config_dir.stat.exists
-    - edpm_frr_old_config_dir.stat.isdir
+  vars:
+    _edpm_frr_legacy_config_dir: /var/lib/config-data/ansible-generated/frr
   block:
-    - name: Find config files in old location
-      ansible.builtin.find:
-        paths: "/var/lib/config-data/ansible-generated/frr"
-        file_type: file
-        recurse: true
-      register: edpm_frr_old_config_files
+    - name: Check if old config directory exists
+      become: true
+      ansible.builtin.stat:
+        path: "{{ _edpm_frr_legacy_config_dir }}"
+      register: edpm_frr_old_config_dir
 
-    - name: Copy config files to new location
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ edpm_frr_config_basedir }}/{{ item.path | regex_replace('^.*/frr/', '') }}"
-        remote_src: true
-        setype: "container_file_t"
-        mode: "0644"
-      loop: "{{ edpm_frr_old_config_files.files }}"
+    - name: Move config files from old location to new location
+      become: true
       when:
-        - edpm_frr_old_config_files.files is defined
-        - edpm_frr_old_config_files.files | length > 0
+        - edpm_frr_old_config_dir.stat.exists
+        - edpm_frr_old_config_dir.stat.isdir
+      block:
+        - name: Check old and current FRR configurations
+          ansible.builtin.stat:
+            path: "{{ item }}"
+            checksum_algorithm: sha256
+          loop:
+            - "{{ _edpm_frr_legacy_config_dir }}/etc/frr/frr.conf"
+            - "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf"
+            - "{{ _edpm_frr_legacy_config_dir }}/etc/frr/vtysh.conf"
+            - "{{ edpm_frr_config_basedir }}/etc/frr/vtysh.conf"
+          register: _edpm_frr_config_stats
 
-    - name: Remove old config directory
-      ansible.builtin.file:
-        path: "/var/lib/config-data/ansible-generated/frr"
-        state: absent
+        - name: Identify conflicting FRR configurations
+          ansible.builtin.set_fact:
+            _edpm_frr_legacy_config_conflict: >-
+              {{ (_edpm_frr_config_stats.results[0].stat.exists and
+                  _edpm_frr_config_stats.results[1].stat.exists and
+                  _edpm_frr_config_stats.results[0].stat.checksum != _edpm_frr_config_stats.results[1].stat.checksum) or
+                 (_edpm_frr_config_stats.results[2].stat.exists and
+                  _edpm_frr_config_stats.results[3].stat.exists and
+                  _edpm_frr_config_stats.results[2].stat.checksum != _edpm_frr_config_stats.results[3].stat.checksum) }}
+
+        - name: Find config files in old location
+          ansible.builtin.find:
+            paths: "{{ _edpm_frr_legacy_config_dir }}"
+            file_type: file
+            recurse: true
+          register: edpm_frr_old_config_files
+
+        - name: Copy config files to new location
+          ansible.builtin.copy:
+            src: "{{ item.path }}"
+            dest: "{{ edpm_frr_config_basedir }}/{{ item.path[(_edpm_frr_legacy_config_dir | length + 1):] }}"
+            remote_src: true
+            force: "{{ item.path not in [_edpm_frr_legacy_config_dir ~ '/etc/frr/frr.conf', _edpm_frr_legacy_config_dir ~ '/etc/frr/vtysh.conf'] }}"
+            setype: "container_file_t"
+            mode: "0644"
+          loop: "{{ edpm_frr_old_config_files.files }}"
+
+        - name: Preserve old config directory when FRR configurations differ
+          ansible.builtin.debug:
+            msg: "Existing FRR configuration was preserved; different legacy configuration files remain in {{ _edpm_frr_legacy_config_dir }}."
+          when: _edpm_frr_legacy_config_conflict
+
+        - name: Remove old config directory when FRR configurations do not conflict
+          ansible.builtin.file:
+            path: "{{ _edpm_frr_legacy_config_dir }}"
+            state: absent
+          when: not _edpm_frr_legacy_config_conflict
