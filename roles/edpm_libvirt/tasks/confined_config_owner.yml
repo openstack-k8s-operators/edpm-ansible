@@ -1,0 +1,29 @@
+---
+# RHEL 10 virtproxyd_t/virtnodedevd_t/virtsecretd_t are not allowed
+# dac_override, so a root daemon cannot read 0640 files owned by libvirt.
+# virtsecretd.conf is policy-backed (no live A/B). virtlogd_t has
+# dac_override and stays libvirt. RHEL 9 is unchanged.
+- name: Gather distribution fact
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "distribution"
+
+- name: Allow confined libvirt daemons to read their configs on RHEL 10
+  tags:
+    - configure
+    - libvirt
+  become: true
+  when: ansible_facts['distribution_major_version'] is version('10', '>=')
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+  loop:
+    - /etc/libvirt/virtproxyd.conf
+    - /etc/libvirt/virtnodedevd.conf
+    - /etc/libvirt/virtsecretd.conf
+    - /etc/sasl2/libvirt.conf
+  notify:
+    - Restart libvirt
