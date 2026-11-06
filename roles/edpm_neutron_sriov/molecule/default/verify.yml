@@ -21,6 +21,39 @@
       loop:
         - {"name": "edpm_neutron_sriov_agent.service"}
 
+    - name: Verify SR-IOV healthcheck script is installed and executable
+      become: true
+      ansible.builtin.stat:
+        path: /var/lib/openstack/healthchecks/neutron_sriov/healthcheck
+      register: _sriov_healthcheck
+
+    - name: Assert SR-IOV healthcheck script is executable
+      ansible.builtin.assert:
+        that:
+          - _sriov_healthcheck.stat.exists
+          - _sriov_healthcheck.stat.executable
+
+    - name: Check SR-IOV healthcheck script syntax
+      become: true
+      ansible.builtin.command:
+        argv:
+          - /bin/bash
+          - -n
+          - /var/lib/openstack/healthchecks/neutron_sriov/healthcheck
+      changed_when: false
+
+    - name: Read SR-IOV agent startup configuration
+      become: true
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/container-startup-config/neutron_sriov_agent/neutron_sriov_agent.json
+      register: _sriov_startup_config
+
+    - name: Verify SR-IOV agent healthcheck is configured
+      ansible.builtin.assert:
+        that:
+          - (_sriov_startup_config.content | b64decode | from_json).healthcheck.test == '/openstack/healthcheck'
+          - (_sriov_startup_config.content | b64decode | from_json).healthcheck.mount == '/var/lib/openstack/healthchecks/neutron_sriov'
+
     - name: ensure podman container exists and are running
       ansible.builtin.include_tasks: "{{test_helper_dir}}/verify_podman.yaml"
       loop:

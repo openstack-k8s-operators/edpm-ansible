@@ -32,6 +32,9 @@
     name: osp.edpm.edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Configure ovn_bgp_agent healthcheck
+  ansible.builtin.include_tasks: healthchecks.yml
+
 - name: Run ovn_bgp_agent container
   ansible.builtin.include_role:
     name: osp.edpm.edpm_container_standalone

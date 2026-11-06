@@ -7,6 +7,11 @@ user: root
 restart: always
 depends_on:
   - openvswitch.service
+{% if edpm_neutron_ovn_healthcheck %}
+healthcheck:
+  test: /openstack/healthcheck
+  mount: /var/lib/openstack/healthchecks/ovn_agent
+{% endif %}
 volumes:
   {% set edpm_neutron_ovn_volumes = [] %}
   {%- set edpm_neutron_ovn_volumes =

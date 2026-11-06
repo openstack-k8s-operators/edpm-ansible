@@ -145,3 +145,8 @@ argument_specs:
           - "/var/lib/openstack/certs/ovn-bgp-agent/default/ca.crt:/etc/pki/tls/certs/ovndbca.crt:ro,z"
           - "/var/lib/openstack/certs/ovn-bgp-agent/default/tls.crt:/etc/pki/tls/certs/ovndb.crt:ro,z"
           - "/var/lib/openstack/certs/ovn-bgp-agent/default/tls.key:/etc/pki/tls/private/ovndb.key:ro,Z"
+      edpm_ovn_bgp_agent_healthcheck:
+        type: bool
+        default: true
+        description: |
+          Enable container health check injection

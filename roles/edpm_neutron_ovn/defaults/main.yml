@@ -95,3 +95,5 @@ edpm_neutron_ovn_agent_ovn_evpn_child_vxlan_port: '49152'
 edpm_neutron_ovn_agent_frr_vty_socket: '/run/frr'
 edpm_neutron_ovn_evpn_local_ip: ''
 edpm_neutron_ovn_evpn_vxlan_port: 4789
+
+edpm_neutron_ovn_healthcheck: true

@@ -112,6 +112,15 @@ class TestNeutronDHCP(unittest.TestCase):
         assert self.host.file(
             "/var/lib/kolla/config_files/neutron_dhcp_agent.json").exists
 
+    def test_dhcp_agent_healthcheck(self):
+        path = "/var/lib/openstack/healthchecks/neutron_dhcp/healthcheck"
+        healthcheck = self.host.file(path)
+        assert healthcheck.exists
+        assert self.host.run("test -x %s" % path).rc == 0
+        assert "pgrep --ns" in healthcheck.content_string
+        assert "neutron-dhcp-agent" in healthcheck.content_string
+        self.host.run_test("/bin/bash -n %s" % path)
+
     def test_neutron_dhcp_agent_conf_was_copied_into_container(self):
         assert self.host.file(
             "/var/lib/openstack/neutron-dhcp-agent/"

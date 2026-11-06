@@ -28,3 +28,36 @@
       loop:
         - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/bgp-agent.conf to /etc/ovn-bgp-agent/bgp-agent.conf"
         - "Copying /var/lib/kolla/config_files/src/etc/ovn-bgp-agent/10-neutron-ovn.conf to /etc/ovn-bgp-agent/10-neutron-ovn.conf"
+
+    - name: Verify ovn_bgp_agent healthcheck script is installed and executable
+      become: true
+      ansible.builtin.stat:
+        path: /var/lib/openstack/healthchecks/ovn_bgp_agent/healthcheck
+      register: _ovn_bgp_agent_healthcheck
+
+    - name: Assert ovn_bgp_agent healthcheck script is executable
+      ansible.builtin.assert:
+        that:
+          - _ovn_bgp_agent_healthcheck.stat.exists
+          - _ovn_bgp_agent_healthcheck.stat.executable
+
+    - name: Check ovn_bgp_agent healthcheck script syntax
+      become: true
+      ansible.builtin.command:
+        argv:
+          - /bin/bash
+          - -n
+          - /var/lib/openstack/healthchecks/ovn_bgp_agent/healthcheck
+      changed_when: false
+
+    - name: Read ovn_bgp_agent startup configuration
+      become: true
+      ansible.builtin.slurp:
+        src: /var/lib/edpm-config/container-startup-config/ovn_bgp_agent/ovn_bgp_agent.json
+      register: _ovn_bgp_agent_startup_config
+
+    - name: Verify ovn_bgp_agent healthcheck is configured
+      ansible.builtin.assert:
+        that:
+          - (_ovn_bgp_agent_startup_config.content | b64decode | from_json).healthcheck.test == '/openstack/healthcheck'
+          - (_ovn_bgp_agent_startup_config.content | b64decode | from_json).healthcheck.mount == '/var/lib/openstack/healthchecks/ovn_bgp_agent'
