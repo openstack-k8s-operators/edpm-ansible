@@ -10,9 +10,14 @@
 # Virtual netdevs (bond, bridge, dummy, vlan, veth, loopback, ...) have no
 # "device" symlink in sysfs and are skipped.
 #
-# This is intentionally minimal: no filtering/skip policy, no persistence
-# merge logic. It just answers "what physical devices does this host have,
-# and what is their current PCI/MAC/driver identity right now?".
+# Persistence for vfio-pci passthrough: when a prior device_map entry's netdev
+# has left /sys/class/net (typical after binding the PF/VF to vfio-pci for
+# DPDK/SR-IOV), keep that name -> pci/mac entry if the recorded PCI BDF is
+# still bound to vfio-pci and is not already visible under another live
+# netdev name. edpm_derived_nic_mapping.py relies on that name key to confirm
+# intentional passthrough across runs; a pure live snapshot would drop the
+# entry on the first refresh after bind and break alias stability on the
+# next derive.
 
 from __future__ import annotations
 
@@ -30,6 +35,7 @@ except ImportError as exc:
     ) from exc
 
 SYS_CLASS_NET = os.environ.get("EDPM_TEST_SYS_CLASS_NET", "/sys/class/net")
+PCI_DEVICES = os.environ.get("EDPM_TEST_PCI_DEVICES", "/sys/bus/pci/devices")
 
 
 def _utc_now() -> str:
@@ -83,7 +89,76 @@ def _mac_address(sys_class_net: str, name: str) -> Optional[str]:
     return mac or None
 
 
-def build_device_map(sys_class_net: Optional[str] = None) -> dict:
+def _live_driver_for_pci(
+    pci_address: Optional[str], pci_devices: Optional[str] = None
+) -> Optional[str]:
+    if not pci_address:
+        return None
+    base = pci_devices or PCI_DEVICES
+    driver_link = os.path.join(base, pci_address, "driver")
+    try:
+        return os.path.basename(os.readlink(driver_link))
+    except OSError:
+        return None
+
+
+def _load_previous_device_map(path: str) -> dict:
+    if not path or not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh) or {}
+    except (OSError, yaml.YAMLError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _retain_vfio_passthrough(
+    live_devices: dict,
+    previous: Optional[dict],
+    pci_devices: Optional[str] = None,
+) -> dict:
+    """Keep prior name keys whose netdev left sysfs but PCI is still vfio-pci.
+
+    Without this, the first refresh after a vfio bind drops the name from
+    device_map.yaml and the next edpm_derived_nic_mapping.py run can no longer
+    confirm intentional passthrough.
+    """
+    retained: dict = {}
+    prev_devices = (previous or {}).get("devices") or {}
+    if not isinstance(prev_devices, dict):
+        return retained
+
+    live_pcis = {
+        info.get("pci")
+        for info in live_devices.values()
+        if isinstance(info, dict) and info.get("pci")
+    }
+
+    for name, info in prev_devices.items():
+        if name in live_devices:
+            continue
+        if not isinstance(info, dict):
+            continue
+        pci = info.get("pci")
+        if not pci or pci in live_pcis:
+            # No BDF to confirm, or the function moved to another live netdev name.
+            continue
+        if _live_driver_for_pci(pci, pci_devices) != "vfio-pci":
+            continue
+        retained[name] = {
+            "pci": pci,
+            "mac": info.get("mac"),
+            "driver": "vfio-pci",
+        }
+    return retained
+
+
+def build_device_map(
+    sys_class_net: Optional[str] = None,
+    previous: Optional[dict] = None,
+    pci_devices: Optional[str] = None,
+) -> dict:
     base = sys_class_net or SYS_CLASS_NET
     devices: dict = {}
 
@@ -97,6 +172,7 @@ def build_device_map(sys_class_net: Optional[str] = None) -> dict:
                 "driver": _driver(base, name),
             }
 
+    devices.update(_retain_vfio_passthrough(devices, previous, pci_devices))
     return {"devices": devices, "updated": _utc_now()}
 
 
@@ -113,7 +189,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    device_map = build_device_map()
+    previous = _load_previous_device_map(args.output) if args.output else {}
+    device_map = build_device_map(previous=previous)
 
     if args.output:
         os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
