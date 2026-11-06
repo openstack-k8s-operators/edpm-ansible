@@ -59,6 +59,7 @@ edpm_frr_defaults: traditional
 edpm_frr_hostname: "{{ ansible_facts['hostname'] | default('') }}"
 edpm_frr_log_level: informational
 edpm_frr_log_timestamp_precision: 3
+edpm_frr_overwrite_config: false
 edpm_frr_version: 7.0
 edpm_frr_watchfrr: true
 edpm_frr_watchfrr_options: ''
@@ -81,8 +82,7 @@ edpm_frr_volumes:
   - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
   - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
   - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
-  - "{{ edpm_frr_config_basedir }}/etc/frr/frr.conf:/etc/frr/frr.conf:ro"
-  - "{{ edpm_frr_config_basedir }}/etc/frr/daemons:/etc/frr/daemons:ro"
+  - "{{ edpm_frr_config_basedir }}/etc/frr:/etc/frr:rw,z"
   - /run/frr:/run/frr:shared,z
 
 # seconds between retries for download tasks

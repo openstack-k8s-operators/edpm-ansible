@@ -170,6 +170,10 @@ argument_specs:
         default: 3
         description: ''
         type: int
+      edpm_frr_overwrite_config:
+        default: false
+        description: Overwrite an existing FRR configuration with the role template.
+        type: bool
       edpm_frr_ovn_vrf_advertise:
         default: ''
         description: VRF name for OVN-BGP extension, used to advertise BGP routes to workload IP addresses
@@ -191,8 +195,7 @@ argument_specs:
           - /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors:ro
           - /etc/pki/tls/certs/ca-bundle.crt:/etc/pki/tls/certs/ca-bundle.crt:ro
           - /etc/pki/tls/cert.pem:/etc/pki/tls/cert.pem:ro
-          - /var/lib/openstack/frr/etc/frr/frr.conf:/etc/frr/frr.conf:ro
-          - /var/lib/openstack/frr/etc/frr/daemons:/etc/frr/daemons:ro
+          - /var/lib/openstack/frr/etc/frr:/etc/frr:rw,z
           - /run/frr:/run/frr:shared,z
         description: List of FRR volumes in a mountpoint form.
         type: list
