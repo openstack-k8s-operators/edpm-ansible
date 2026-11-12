@@ -1,3 +1,89 @@
 #!/bin/bash
+# Copyright 2026 Red Hat, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-true
+config_dir=/etc/neutron.conf.d
+
+fail() {
+    echo "ERROR: ovn_metadata_agent healthcheck: $*" >&2
+    exit 1
+}
+
+agent_running() {
+    # The PID namespace is shared with the host, but the mount namespace is
+    # specific to this container.
+    pgrep --ns "$$" --nslist mnt -r R,S,D -f \
+        '(^|[[:space:]/])neutron-ovn-metadata-agent([[:space:]]|$)' >/dev/null
+}
+
+config_value() {
+    # Neutron loads config-dir files in name order; later files can override
+    # values from the generated agent configuration.
+    awk -v wanted_section="$1" -v wanted_key="$2" '
+        FNR == 1 { section = "" }
+        /^[[:space:]]*[#;]/ { next }
+        /^[[:space:]]*\[[^]]+\][[:space:]]*$/ {
+            section = $0
+            sub(/^[[:space:]]*\[/, "", section)
+            sub(/\][[:space:]]*$/, "", section)
+            next
+        }
+        section == wanted_section && index($0, "=") {
+            key = $0
+            sub(/=.*/, "", key)
+            gsub(/[[:space:]]/, "", key)
+            if (key == wanted_key) {
+                value = $0
+                sub(/^[^=]*=[[:space:]]*/, "", value)
+                sub(/[[:space:]]*[#;].*$/, "", value)
+                sub(/[[:space:]]+$/, "", value)
+                result = value
+            }
+        }
+        END { print result }
+    ' "$config_dir"/*.conf
+}
+
+main() {
+    local ovs_remote sb_remote key cert ca
+    local -a tls_options=()
+
+    agent_running || fail 'neutron-ovn-metadata-agent is not running in this container'
+    [[ -f "$config_dir/01-neutron-ovn-metadata-agent.conf" ]] ||
+        fail 'agent configuration is missing'
+    command -v ovsdb-client >/dev/null ||
+        fail 'ovsdb-client is not installed in the agent image'
+
+    ovs_remote=$(config_value ovs ovsdb_connection) ||
+        fail 'cannot read OVSDB connection'
+    ovs_remote=${ovs_remote:-tcp:127.0.0.1:6640}
+    ovsdb-client --timeout=10 --no-leader-only get-schema "$ovs_remote" \
+        Open_vSwitch >/dev/null || fail 'cannot query local Open_vSwitch database'
+
+    sb_remote=$(config_value ovn ovn_sb_connection) ||
+        fail 'cannot read SB connection'
+    [[ -n "$sb_remote" ]] ||
+        fail 'OVN Southbound connection is not configured'
+    if [[ ",$sb_remote," == *ssl:* ]]; then
+        key=$(config_value ovn ovn_sb_private_key) ||
+            fail 'cannot read SB private key setting'
+        cert=$(config_value ovn ovn_sb_certificate) ||
+            fail 'cannot read SB certificate setting'
+        ca=$(config_value ovn ovn_sb_ca_cert) ||
+            fail 'cannot read SB CA setting'
+        tls_options=(
+            "--private-key=${key:-/etc/pki/tls/private/ovndb.key}"
+            "--certificate=${cert:-/etc/pki/tls/certs/ovndb.crt}"
+            "--ca-cert=${ca:-/etc/pki/tls/certs/ovndbca.crt}"
+        )
+    fi
+    ovsdb-client --timeout=10 --no-leader-only "${tls_options[@]}" \
+        get-schema "$sb_remote" OVN_Southbound >/dev/null ||
+        fail 'cannot query OVN Southbound database'
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main
+fi
