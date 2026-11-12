@@ -20,3 +20,9 @@
   gather_facts: false
   roles:
     - role: "edpm_growvols"
+      vars:
+        # growvols cannot run in a container (it needs a block device at /),
+        # --help exercises the install + run path and exits 0 safely
+        growvols_args: "--help"
+        # gdisk is not available in the UBI repos used by the molecule image
+        edpm_growvols_packages: []
