@@ -27,6 +27,11 @@ depends_on:
   - openvswitch.service
 part_of:
   - edpm_frr.service
+{% if edpm_ovn_bgp_agent_healthcheck %}
+healthcheck:
+  test: /openstack/healthcheck
+  mount: /var/lib/openstack/healthchecks/ovn_bgp_agent
+{% endif %}
 volumes: {{ edpm_ovn_bgp_agent_volumes }}
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS

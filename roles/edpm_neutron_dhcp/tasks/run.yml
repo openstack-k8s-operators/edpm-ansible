@@ -36,6 +36,9 @@
   ansible.builtin.include_tasks:
     file: sidecar.yml
 
+- name: Configure neutron_dhcp healthcheck
+  ansible.builtin.include_tasks: healthchecks.yml
+
 - name: Run neutron-dhcp-agent container
   debugger: on_failed
   ansible.builtin.include_role:

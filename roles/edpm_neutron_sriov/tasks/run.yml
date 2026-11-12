@@ -32,6 +32,9 @@
     name: edpm_container_manage
     tasks_from: shutdown.yml
 
+- name: Configure neutron_sriov healthcheck
+  ansible.builtin.include_tasks: healthchecks.yml
+
 - name: Run neutron-sriov-agent container
   debugger: on_failed
   ansible.builtin.include_role:

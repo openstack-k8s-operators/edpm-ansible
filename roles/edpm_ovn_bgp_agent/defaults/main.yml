@@ -129,3 +129,5 @@ edpm_ovn_bgp_agent_local_ovn_northd_volumes:
 
 edpm_ovn_bgp_agent_local_ovn_cluster_tls_volumes: "{{ edpm_ovn_bgp_agent_tls_volumes }}"
 edpm_ovn_bgp_agent_local_ovn_cluster_tls_cacert_volumes: "{{ edpm_ovn_bgp_agent_tls_cacert_volumes }}"
+
+edpm_ovn_bgp_agent_healthcheck: true
