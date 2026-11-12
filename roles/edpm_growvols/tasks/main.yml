@@ -14,6 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+- name: Gather ansible_local facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "local"
+  when: ansible_local is not defined
 
 - name: Output growvols_args
   ansible.builtin.debug:
@@ -28,12 +35,22 @@
   become: true
   register: find_growvols
 
+- name: Set fact whether growvols is enabled
+  ansible.builtin.set_fact:
+    growvols_enabled: >-
+      {{ ansible_local.edpm_growvols.general.enabled | default(false) | bool or
+         (ansible_local.edpm_growvols is not defined and find_growvols.rc == 0) }}
+
 - name: Run growvols block
-  when: find_growvols.rc == 0
+  when: growvols_enabled
   block:
+    - name: Install growvols
+      when: find_growvols.rc != 0
+      ansible.builtin.include_tasks: install.yml
+
     - name: Setting growvols path
       ansible.builtin.set_fact:
-        growvols_path: "{{ find_growvols.stdout_lines[0] }}"
+        growvols_path: "{{ find_growvols.stdout_lines[0] | default('/usr/local/sbin/growvols') }}"
 
     - name: "Running {{ growvols_path + growvols_args }}"
       ansible.builtin.shell: >-

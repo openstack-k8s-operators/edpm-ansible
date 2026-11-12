@@ -30,5 +30,7 @@
       - run-os
       - reboot-os
     edpm_download_cache_podman_auth_file: ""
+    # gdisk is not available in the UBI repos used by the molecule image
+    edpm_growvols_packages: []
   roles:
     - role: "edpm_download_cache"
