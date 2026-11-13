@@ -1,6 +1,6 @@
 # Quadlet container file for node_exporter
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _node_exporter_volumes = edpm_telemetry_node_exporter_common_volumes -%}
 {%- if tls_cert_exists | bool -%}
 {%- set _node_exporter_volumes = _node_exporter_volumes +
@@ -22,9 +22,10 @@ ContainerName=node_exporter
 Image={{ edpm_telemetry_node_exporter_image }}
 PublishPort={{ ctlplane_ip }}:9100:9100
 User=root
-PodmanArgs=--privileged --log-driver=journald
+PodmanArgs=--privileged
+LogDriver=journald
 {% if edpm_telemetry_healthcheck -%}
-PodmanArgs=--health-cmd="/openstack/healthcheck node_exporter"
+HealthCmd=/openstack/healthcheck node_exporter
 Volume=/var/lib/openstack/healthchecks/node_exporter:/openstack:ro,z
 {% endif -%}
 Environment=OS_ENDPOINT_TYPE=internal

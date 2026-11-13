@@ -121,7 +121,7 @@ class TestNeutronMetadata(unittest.TestCase):
         quadlet = self.host.file(
             "/etc/containers/systemd/edpm_ovn_metadata_agent.container"
         ).content_string
-        assert 'PodmanArgs=--health-cmd="/openstack/healthcheck"' in quadlet
+        assert 'HealthCmd=/openstack/healthcheck' in quadlet
         assert ("Volume=/var/lib/openstack/healthchecks/ovn_metadata_agent:"
                 "/openstack:ro,z") in quadlet
 

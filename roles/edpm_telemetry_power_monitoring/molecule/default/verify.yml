@@ -88,11 +88,11 @@
       ansible.builtin.assert:
         that:
           - >-
-            (_expected and ('--security-opt label=type:ceilometer_polling_t' in _container_content))
-            or (not _expected and ('--security-opt label=type:ceilometer_polling_t' not in _container_content))
-          # the unconditional parts of the PodmanArgs line are always present
-          - "'--privileged' in _container_content"
-          - "'--log-driver=journald' in _container_content"
+            (_expected and ('SecurityLabelType=ceilometer_polling_t' in _container_content))
+            or (not _expected and ('SecurityLabelType=ceilometer_polling_t' not in _container_content))
+          # the unconditional parts are always present
+          - "'PodmanArgs=--privileged' in _container_content"
+          - "'LogDriver=journald' in _container_content"
         fail_msg: "ceilometer_polling_t security-opt does not match loaded-policy availability"
       vars:
         _container_content: "{{ _ceilometer_ipmi_container.content | b64decode }}"

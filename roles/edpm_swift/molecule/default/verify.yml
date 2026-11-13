@@ -91,7 +91,7 @@
           - "'--privileged' in content"
           - "'--pid=host' in content"
           - "'--cgroupns=host' in content"
-          - "'--log-driver=journald' in content"
+          - "'LogDriver=journald' in content"
           - "'Exec=/usr/bin/swift-account-server' in content"
           - "'KOLLA_CONFIG_STRATEGY' not in content"
           - "'/var/lib/kolla/config_files' not in content"
