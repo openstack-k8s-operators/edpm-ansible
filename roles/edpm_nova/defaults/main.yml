@@ -32,6 +32,11 @@ edpm_nova_config_src: /var/lib/openstack/configs/{{ edpm_nova_service_name }}
 edpm_nova_config_dest: /var/lib/openstack/{{ edpm_nova_service_name }}
 edpm_nova_compute_image: "quay.io/podified-antelope-centos9/openstack-nova-compute:current-podified"
 
+# Podman shutdown timeout in seconds: Nova's default graceful_shutdown_timeout
+# (180 seconds) plus a 20 second buffer. Increase this when raising Nova's
+# graceful_shutdown_timeout. The systemd timeout adds another 20 seconds.
+edpm_nova_compute_stop_timeout: 200
+
 # Libvirt TLS
 edpm_nova_live_migration_tls: "{{ edpm_tls_certs_enabled | default(False) }}"
 edpm_nova_live_migration_native_tls: "{{ edpm_tls_certs_enabled | default(False) }}"

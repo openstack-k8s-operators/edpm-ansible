@@ -26,6 +26,7 @@ ContainerName=nova_compute
 Image={{ edpm_nova_compute_image }}
 Network=host
 User=nova
+StopTimeout={{ edpm_nova_compute_stop_timeout }}
 PodmanArgs=--privileged --pid=host --log-driver=journald
 Exec=/usr/bin/nova-compute
 {% for vol in _nova_compute_volumes -%}
@@ -39,7 +40,8 @@ Label=managed_by=edpm_ansible
 [Service]
 Restart=always
 TimeoutStartSec=900
-TimeoutStopSec=84
+# Allow Podman to finish stopping the container before systemd kills it.
+TimeoutStopSec={{ (edpm_nova_compute_stop_timeout | int) + 20 }}
 
 [Install]
 WantedBy=multi-user.target
