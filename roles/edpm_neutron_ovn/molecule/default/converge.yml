@@ -65,5 +65,5 @@
             that:
               - "'Volume=/tmp/ovn-agent-unbound.conf:/etc/unbound/ovn-agent.conf:ro,z' in (_ovn_agent_quadlet.content | b64decode)"
               - "'Environment=OVS_UNBOUND_CONF=/etc/unbound/ovn-agent.conf' in (_ovn_agent_quadlet.content | b64decode)"
-              - "'PodmanArgs=--health-cmd=\"/openstack/healthcheck\"' in (_ovn_agent_quadlet.content | b64decode)"
+              - "'HealthCmd=/openstack/healthcheck' in (_ovn_agent_quadlet.content | b64decode)"
               - "'Volume=/var/lib/openstack/healthchecks/ovn_agent:/openstack:ro,z' in (_ovn_agent_quadlet.content | b64decode)"

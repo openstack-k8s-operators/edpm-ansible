@@ -1,6 +1,6 @@
 # Quadlet container file for openstack_network_exporter
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _network_exporter_volumes = edpm_telemetry_network_exporter_common_volumes -%}
 {%- if tls_cert_exists | bool -%}
 {%- set _network_exporter_volumes = _network_exporter_volumes +
@@ -21,9 +21,10 @@ Description=OpenStack Network Exporter container (EDPM)
 ContainerName=openstack_network_exporter
 Image={{ edpm_telemetry_openstack_network_exporter_image }}
 PublishPort={{ ctlplane_ip }}:9105:9105
-PodmanArgs=--privileged --log-driver=journald
+PodmanArgs=--privileged
+LogDriver=journald
 {% if edpm_telemetry_healthcheck -%}
-PodmanArgs=--health-cmd="/openstack/healthcheck openstack-netwo"
+HealthCmd=/openstack/healthcheck openstack-netwo
 Volume=/var/lib/openstack/healthchecks/openstack_network_exporter:/openstack:ro,z
 {% endif -%}
 Environment=OS_ENDPOINT_TYPE=internal

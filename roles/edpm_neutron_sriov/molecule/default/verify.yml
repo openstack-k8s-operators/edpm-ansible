@@ -46,7 +46,7 @@
           - "'/var/lib/kolla/config_files' not in _sriov_container_content"
           - "'Volume=/var/lib/openstack/neutron-sriov-agent/01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro' in _sriov_container_content"
           - "'Volume=/var/lib/openstack/healthchecks/neutron_sriov:/openstack:ro,z' in _sriov_container_content"
-          - "'PodmanArgs=--health-cmd=\"/openstack/healthcheck\"' in _sriov_container_content"
+          - "'HealthCmd=/openstack/healthcheck' in _sriov_container_content"
           - "'Requires=edpm_neutron_sriov_agent_init.service' in _sriov_container_content"
       vars:
         _sriov_container_content: "{{ _quadlet_content.content | b64decode }}"
