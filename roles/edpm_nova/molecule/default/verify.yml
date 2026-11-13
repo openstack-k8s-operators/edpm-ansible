@@ -111,6 +111,8 @@
           - "'openstack-nova-compute' in compute_content"
           - "'Network=host' in compute_content"
           - "'User=nova' in compute_content"
+          - "'StopTimeout=200' in compute_content"
+          - "'TimeoutStopSec=220' in compute_content"
           - "'PodmanArgs=--privileged --pid=host --log-driver=journald' in compute_content"
           - "'Exec=/usr/bin/nova-compute' in compute_content"
           - "'KOLLA_CONFIG_STRATEGY' not in compute_content"
@@ -142,6 +144,25 @@
           - "'Volume=/var/lib/vendor_integration:/var/lib/vendor_integration:ro' in compute_content"
           - "'Volume=/opt/vendor_integration_2:/opt/vendor_integration_2:shared' in compute_content"
         fail_msg: "nova_compute Quadlet missing expected content"
+
+    - name: Inspect nova compute container stop timeout
+      become: true
+      ansible.builtin.command: podman inspect nova_compute
+      register: compute_inspect
+      changed_when: false
+
+    - name: Read nova compute systemd stop timeout
+      become: true
+      ansible.builtin.command: systemctl show edpm_nova_compute.service --property=TimeoutStopUSec --value
+      register: compute_systemd_stop_timeout
+      changed_when: false
+
+    - name: Verify effective nova compute shutdown timeouts
+      ansible.builtin.assert:
+        that:
+          - (compute_inspect.stdout | from_json)[0].Config.StopTimeout == 200
+          - compute_systemd_stop_timeout.stdout == '3min 40s'
+        fail_msg: "Nova compute requires a 200 second Podman timeout and a 220 second systemd timeout"
 
     - name: Slurp nova_nvme_cleaner Quadlet file
       become: true
