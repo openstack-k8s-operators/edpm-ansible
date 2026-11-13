@@ -22,3 +22,13 @@ growvols_args: >
   /var/log/audit=2GB
   /home=1GB
   /var=100%
+
+edpm_growvols_download_delay: "{{ edpm_download_delay | default(60) }}"
+edpm_growvols_download_retries: "{{ edpm_download_retries | default(5) }}"
+
+edpm_growvols_packages:
+  - gdisk
+  - lvm2
+  - parted
+  - xfsprogs
+  - util-linux

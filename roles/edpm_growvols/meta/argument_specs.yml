@@ -3,6 +3,14 @@ argument_specs:
   # ./roles/edpm_growvols/tasks/main.yml entry point
   main:
     short_description: The main entry point for the edpm_growvols role.
+    description:
+      - Grows LVM volumes into free disk space using the growvols utility,
+        which is shipped by this role or being baked into the image.
+      - A growvols that is already present is used as shipped by the image.
+      - If growvols is not baked into the the image, the fact file
+        /etc/ansible/facts.d/edpm_growvols.fact containing
+        `[general]/enabled=true` must be baked in. When the fact is true
+        and growvols is not installed yet, the role installs it and runs it.
     options:
       growvols_args:
         type: str
@@ -15,4 +23,22 @@ argument_specs:
           /var=100%
         description: |
           Arguments for the `growvols` utility.
-          Full documentation: https://docs.openstack.org/diskimage-builder/latest/elements/growvols/README.html
+          Full documentation: files/growvols.README.rst, or
+          https://docs.openstack.org/diskimage-builder/latest/elements/growvols/README.html
+      edpm_growvols_download_delay:
+        type: int
+        default: 60
+        description: The seconds between retries for failed download tasks
+      edpm_growvols_download_retries:
+        type: int
+        default: 5
+        description: The number of retries for failed download tasks
+      edpm_growvols_packages:
+        type: list
+        description: The list of packages to install for growvols.
+        default:
+          - gdisk
+          - lvm2
+          - parted
+          - xfsprogs
+          - util-linux

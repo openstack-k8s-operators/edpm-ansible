@@ -23,3 +23,17 @@
   gather_facts: false
   roles:
     - role: osp.edpm.env_data
+  tasks:
+    - name: Create directory for ansible custom facts
+      ansible.builtin.file:
+        state: directory
+        path: /etc/ansible/facts.d
+        mode: "0755"
+
+    - name: Write edpm_growvols fact file to simulate the image hint
+      ansible.builtin.copy:
+        dest: /etc/ansible/facts.d/edpm_growvols.fact
+        content: |
+          [general]
+          enabled=true
+        mode: "0644"
