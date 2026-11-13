@@ -169,6 +169,8 @@
     parent: openstack-k8s-operators-content-provider
     nodeset: centos-stream-10
     timeout: 7200
+    required-projects:
+      - openstack-k8s-operators/s2i-openstack-containers
     vars:
       cifmw_repo_setup_dist_major_version: 10
       cifmw_repo_setup_branch: master
@@ -178,6 +180,7 @@
       cifmw_edpm_build_images_force: true
       cifmw_edpm_build_images_base_image: quay.io/centos/centos:stream10-minimal
       cifmw_edpm_build_images_bootc: true
+      cifmw_edpm_build_images_bootc_use_s2i: true
       cifmw_edpm_build_images_bootc_base_image: quay.io/centos-bootc/centos-bootc:stream10
 
 - job:
@@ -197,6 +200,10 @@
     parent: cifmw-crc-podified-edpm-baremetal-bootc
     dependencies: ["edpm-ansible-content-provider-cs10"]
     vars:
+      # The s2i CS10 bootc image does not yet include openstack-selinux.
+      cifmw_edpm_deploy_baremetal_selinux_mode: permissive
+      cifmw_install_yamls_vars:
+        DATAPLANE_NETWORK_CONFIG_TOOL: nmstate
       cifmw_install_yamls_vars_patch_cs10:
         dataplane_repo_setup_repo: current
         dataplane_repo_setup_branch: master
