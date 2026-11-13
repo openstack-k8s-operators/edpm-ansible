@@ -41,6 +41,14 @@ argument_specs:
           This image is used to create the nova compute container
           on the compute node and generaly will be set via the container
           bundle by the dataplane operator.
+      edpm_nova_compute_stop_timeout:
+        type: int
+        default: 200
+        description: |
+          Podman stop timeout in seconds for nova-compute. Set this higher than
+          Nova's graceful_shutdown_timeout (180 seconds by default), allowing
+          a 20 second buffer. The systemd TimeoutStopSec is this value plus
+          20 seconds to allow Podman to finish stopping the container.
       edpm_nova_old_tripleo_compute_sevices:
         type: list
         default:
