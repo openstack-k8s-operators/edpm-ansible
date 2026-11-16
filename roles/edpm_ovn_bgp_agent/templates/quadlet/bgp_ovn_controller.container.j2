@@ -1,6 +1,6 @@
 # Quadlet container file for bgp_ovn_controller
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _bgp_ovn_controller_volumes = [] -%}
 {%- set _bgp_ovn_controller_volumes = _bgp_ovn_controller_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes
@@ -23,7 +23,8 @@ ContainerName=bgp_ovn_controller
 Image={{ edpm_ovn_bgp_agent_local_ovn_controller_image }}
 Network=host
 User=root
-PodmanArgs=--privileged --log-driver=journald
+PodmanArgs=--privileged
+LogDriver=journald
 {% if edpm_ovn_cpu_set | default(false) -%}
 PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
 {% endif -%}

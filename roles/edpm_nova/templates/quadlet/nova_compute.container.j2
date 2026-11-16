@@ -1,6 +1,6 @@
 # Quadlet container file for nova_compute
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _nova_compute_volumes = edpm_nova_compute_common_volumes +
         edpm_nova_conf_d_volumes +
         edpm_nova_provider_volumes -%}
@@ -26,7 +26,9 @@ ContainerName=nova_compute
 Image={{ edpm_nova_compute_image }}
 Network=host
 User=nova
-PodmanArgs=--privileged --pid=host --log-driver=journald
+PodmanArgs=--privileged
+PodmanArgs=--pid=host
+LogDriver=journald
 Exec=/usr/bin/nova-compute
 {% for vol in _nova_compute_volumes -%}
 Volume={{ vol }}

@@ -113,7 +113,7 @@
 - name: Verify healthcheck is configured in quadlet
   ansible.builtin.assert:
     that:
-      - "'--health-cmd=\"/openstack/healthcheck\"' in _quadlet_text"
+      - "'HealthCmd=/openstack/healthcheck' in _quadlet_text"
       - "'/var/lib/openstack/healthchecks/ovn_controller:/openstack:ro,z' in _quadlet_text"
     fail_msg: "Healthcheck not properly configured in quadlet file"
 

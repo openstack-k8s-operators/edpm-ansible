@@ -1,6 +1,6 @@
 # Quadlet container file for ceilometer_agent_compute
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _ceilometer_volumes = edpm_telemetry_ceilometer_common_volumes -%}
 {%- if ca_bundle_exists | bool -%}
 {%- set _ceilometer_volumes = _ceilometer_volumes +
@@ -26,9 +26,12 @@ ContainerName=ceilometer_agent_compute
 Image={{ edpm_telemetry_ceilometer_compute_image }}
 PublishPort={{ ctlplane_ip }}:9101:9101
 User=ceilometer
-PodmanArgs={{ '--security-opt label=type:ceilometer_polling_t ' if edpm_telemetry_ceilometer_polling_type_available | default(false) | bool else '' }}--log-driver=journald
+{% if edpm_telemetry_ceilometer_polling_type_available | default(false) | bool %}
+SecurityLabelType=ceilometer_polling_t
+{% endif %}
+LogDriver=journald
 {% if edpm_telemetry_healthcheck -%}
-PodmanArgs=--health-cmd="/openstack/healthcheck compute"
+HealthCmd=/openstack/healthcheck compute
 Volume=/var/lib/openstack/healthchecks/ceilometer_agent_compute:/openstack:ro,z
 {% endif -%}
 Exec=/usr/bin/ceilometer-polling --polling-namespaces compute --logfile /dev/stdout

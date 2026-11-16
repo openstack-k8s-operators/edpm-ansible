@@ -1,6 +1,6 @@
 # Quadlet container file for sb_db_server
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set _sb_db_volumes = [] -%}
 {%- set _sb_db_volumes = _sb_db_volumes
     + edpm_ovn_bgp_agent_local_ovn_cluster_common_volumes
@@ -23,7 +23,8 @@ ContainerName=sb_db_server
 Image={{ edpm_ovn_bgp_agent_local_ovn_sb_db_image }}
 Network=host
 User=root
-PodmanArgs=--privileged --log-driver=journald
+PodmanArgs=--privileged
+LogDriver=journald
 {% if edpm_ovn_cpu_set | default(false) -%}
 PodmanArgs=--cpuset-cpus={{ edpm_ovn_cpu_set }}
 {% endif -%}

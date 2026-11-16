@@ -1,6 +1,6 @@
 # Quadlet container file for cyborg_agent
 # Managed by edpm_container_standalone - do not edit manually
-# Podman 4.4+ keys only (RHEL 9.2 compat)
+# Podman 5+ quadlet keys (RHEL 9.5+)
 {%- set cyborg_agent_volumes = [
   '/etc/localtime:/etc/localtime:ro',
   '/lib/modules:/lib/modules:ro',
@@ -28,7 +28,8 @@ ContainerName=cyborg_agent
 Image={{ edpm_cyborg_agent_image }}
 Network=host
 User=cyborg
-PodmanArgs=--privileged --pid=host
+PodmanArgs=--privileged
+PodmanArgs=--pid=host
 LogDriver=journald
 Exec=/usr/bin/cyborg-agent
 {% for vol in cyborg_agent_volumes -%}

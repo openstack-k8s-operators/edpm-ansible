@@ -118,7 +118,7 @@ class TestNeutronDHCP(unittest.TestCase):
         assert "/var/lib/kolla/config_files" not in content
         assert ("Volume=/var/lib/openstack/healthchecks/neutron_dhcp:"
                 "/openstack:ro,z") in content
-        assert 'PodmanArgs=--health-cmd="/openstack/healthcheck"' in content
+        assert 'HealthCmd=/openstack/healthcheck' in content
         assert ("Volume=/var/lib/openstack/neutron-dhcp-agent/"
                 "01-rootwrap.conf:/etc/neutron/rootwrap.conf:ro") in content
 
