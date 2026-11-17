@@ -111,6 +111,16 @@ edpm_telemetry_ceilometer_tls_cacert_volumes:
   - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"
 edpm_telemetry_ceilometer_tls_volumes:
   - "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z"
+# Give ceilometer_agent_compute access to the NVIDIA GPUs of the node, needed
+# to poll the gpu.* and vgpu.* meters through NVML (see gpuEnabled in the
+# Ceilometer CR). Access is only granted on nodes that actually have
+# everything NVML needs: the NVML library, /dev/nvidiactl and at least one
+# /dev/nvidiaN device. Nodes without NVIDIA GPUs are left untouched, so this
+# can be safely enabled on a nodeset mixing GPU and non-GPU nodes.
+edpm_telemetry_ceilometer_gpu_enabled: false
+# Path of the NVIDIA NVML library on the node. It is mounted read-only at the
+# same path inside ceilometer_agent_compute.
+edpm_telemetry_ceilometer_gpu_nvml_library: /usr/lib64/libnvidia-ml.so.1
 
 # Node exporter volumes
 edpm_telemetry_node_exporter_common_volumes:

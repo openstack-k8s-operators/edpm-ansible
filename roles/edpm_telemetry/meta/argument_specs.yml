@@ -143,6 +143,23 @@ argument_specs:
         default:
           - "{{ edpm_telemetry_certs }}:/etc/ceilometer/tls:z"
         description: "List of TLS volume mounts for ceilometer_agent_compute, added when TLS certs exist"
+      edpm_telemetry_ceilometer_gpu_enabled:
+        type: bool
+        required: false
+        default: false
+        description: >
+          Give ceilometer_agent_compute access to the NVIDIA GPUs of the node,
+          needed to poll the gpu.* and vgpu.* meters through NVML. Access is
+          only granted on nodes where the NVML library, /dev/nvidiactl and at
+          least one /dev/nvidiaN device are all present; other nodes are left
+          untouched.
+      edpm_telemetry_ceilometer_gpu_nvml_library:
+        type: str
+        required: false
+        default: /usr/lib64/libnvidia-ml.so.1
+        description: >
+          Path of the NVIDIA NVML library on the node, mounted read-only at the
+          same path inside ceilometer_agent_compute when GPU access is granted.
       edpm_telemetry_node_exporter_common_volumes:
         type: list
         required: false

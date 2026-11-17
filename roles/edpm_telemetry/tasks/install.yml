@@ -82,6 +82,56 @@
       {{ (ansible_facts.selinux.status | default('disabled') == 'enabled')
          and ((_ceilometer_polling_type_check.rc | default(1)) == 0) }}
 
+# GPU access for ceilometer_agent_compute is all-or-nothing: it is only granted
+# when the node has the NVML library, /dev/nvidiactl and at least one
+# /dev/nvidiaN device (one per GPU, all of them are needed for NVML to report
+# every GPU). Otherwise the node is assumed to have no NVIDIA GPU and the
+# container is deployed without any GPU access.
+- name: Discover NVIDIA GPU resources
+  when: edpm_telemetry_ceilometer_gpu_enabled | bool
+  block:
+    - name: Check whether the NVML library is present
+      ansible.builtin.stat:
+        path: "{{ edpm_telemetry_ceilometer_gpu_nvml_library }}"
+        follow: true
+      register: _ceilometer_gpu_nvml_library_stat
+
+    - name: Check whether /dev/nvidiactl is present
+      ansible.builtin.stat:
+        path: /dev/nvidiactl
+      register: _ceilometer_gpu_nvidiactl_stat
+
+    - name: Discover NVIDIA GPU device nodes
+      ansible.builtin.find:
+        paths: /dev
+        patterns: '^nvidia[0-9]+$'
+        use_regex: true
+        file_type: any
+      register: _ceilometer_gpu_devices_find
+
+- name: Decide whether ceilometer_agent_compute gets GPU access
+  ansible.builtin.set_fact:
+    _edpm_telemetry_ceilometer_gpu_available: >-
+      {{ (edpm_telemetry_ceilometer_gpu_enabled | bool)
+         and (_ceilometer_gpu_nvml_library_stat.stat.exists | default(false))
+         and (_ceilometer_gpu_nvidiactl_stat.stat.exists | default(false))
+         and (_ceilometer_gpu_devices_find.files | default([]) | length > 0) }}
+    _edpm_telemetry_ceilometer_gpu_devices: >-
+      {{ ['/dev/nvidiactl']
+         + (_ceilometer_gpu_devices_find.files | default([])
+            | map(attribute='path') | sort) }}
+
+- name: Report NVIDIA GPU access for ceilometer_agent_compute
+  ansible.builtin.debug:
+    msg: >-
+      {{ 'Granting ceilometer_agent_compute access to ' ~
+         (_edpm_telemetry_ceilometer_gpu_devices | join(', ')) ~ ' and ' ~
+         edpm_telemetry_ceilometer_gpu_nvml_library
+         if _edpm_telemetry_ceilometer_gpu_available | bool else
+         'NVML library, /dev/nvidiactl or /dev/nvidiaN devices not found, '
+         ~ 'deploying ceilometer_agent_compute without GPU access' }}
+  when: edpm_telemetry_ceilometer_gpu_enabled | bool
+
 - name: Deploy enabled exporters
   ansible.builtin.include_tasks:
     file: exporter.yml
