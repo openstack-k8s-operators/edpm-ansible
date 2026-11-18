@@ -9,6 +9,15 @@
     - edpm_bootstrap
     - download_cache
 
+- name: Download packages for edpm_growvols role
+  when: '"bootstrap" in edpm_download_cache_running_services'
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_growvols
+    tasks_from: download_cache.yml
+  tags:
+    - edpm_growvols
+    - download_cache
+
 - name: Download packages for edpm_podman role
   when: ("install-os" in edpm_download_cache_running_services) or
         ("configure-os" in edpm_download_cache_running_services) or
