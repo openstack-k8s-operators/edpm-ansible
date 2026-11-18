@@ -20,7 +20,7 @@ argument_specs:
         type: list
         description: The list of packages to install for ovs.
         default:
-          - openvswitch
+          - "openvswitch3.5"
       edpm_ovs_reload_after_update:
         type: bool
         description: Whether to reload the openvswitch service after an update is complete

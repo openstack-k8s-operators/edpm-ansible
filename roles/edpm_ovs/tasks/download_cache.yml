@@ -13,6 +13,13 @@
     name: "{{ edpm_ovs_packages }}"
     download_only: true
     state: "{{ dnf_state | default(omit) }}"
+    # edpm_ovs_packages names the concrete openvswitchN.N package(s)
+    # directly rather than the rdo-openvswitch/rhoso-openvswitch wrapper
+    # (see defaults/main.yml). Each stream Conflicts with every other
+    # stream instead of Obsoleting it, so if an older stream is already
+    # installed, resolving this transaction (even just to download, via
+    # download_only) fails without allowerasing.
+    allowerasing: true
   become: true
   register: _install_packages_result
   until: _install_packages_result is succeeded
