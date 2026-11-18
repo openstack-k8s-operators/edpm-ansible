@@ -1,0 +1,76 @@
+---
+# Copyright 2026 Red Hat, LLC.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Stop peer service
+  ansible.builtin.systemd:
+    name: "{{ _edpm_frr_ovn_test_peer.unit }}.service"
+    state: stopped
+
+- name: Remove peer quadlet and systemd unit to simulate an absent peer
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/containers/systemd/{{ _edpm_frr_ovn_test_peer.unit }}.container"
+    - "/etc/systemd/system/{{ _edpm_frr_ovn_test_peer.unit }}.service"
+
+- name: Reload systemd so the peer is no longer known
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Verify peer service is not found
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - show
+      - "{{ _edpm_frr_ovn_test_peer.unit }}.service"
+      - --property=LoadState
+      - --value
+  register: _peer_loadstate
+  changed_when: false
+  failed_when: _peer_loadstate.stdout != 'not-found'
+
+- name: Re-run remaining role with binding enabled but peer absent
+  ansible.builtin.include_role:
+    name: "osp.edpm.{{ _edpm_frr_ovn_test_peer.remaining_role }}"
+    tasks_from: run.yml
+
+- name: Verify stale bindings are removed before starting the remaining service
+  ansible.builtin.include_tasks: verify_dropins.yml
+  vars:
+    _edpm_frr_ovn_expect_bindings: false
+
+- name: Verify remaining service can start without its peer
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ _edpm_frr_ovn_test_peer.remaining_unit }}.service"
+  register: _remaining_service_status
+  changed_when: false
+  until: _remaining_service_status.stdout == 'active'
+  retries: 10
+  delay: 1
+
+- name: Restore peer through its role
+  ansible.builtin.include_role:
+    name: "osp.edpm.{{ _edpm_frr_ovn_test_peer.role }}"
+    tasks_from: run.yml
+
+- name: Verify restored peer recreates both bindings
+  ansible.builtin.include_tasks: verify_dropins.yml
+  vars:
+    _edpm_frr_ovn_expect_bindings: true

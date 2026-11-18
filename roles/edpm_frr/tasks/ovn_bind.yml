@@ -1,0 +1,55 @@
+---
+# Copyright 2026 Red Hat, LLC.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Create FRR-OVN BindsTo drop-ins when peer is present
+  become: true
+  when:
+    - edpm_frr_ovn_bind | default(true)
+    - >-
+      ansible_facts['services'].get(_edpm_frr_ovn_peer_service, {}).get('status', 'not-found')
+      in ['enabled', 'disabled', 'static', 'indirect', 'generated']
+  block:
+    - name: Create FRR service drop-in directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_frr.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Create FRR BindsTo OVN drop-in
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/edpm_frr.service.d/ovn-bind.conf
+        mode: "0644"
+        content: |
+          [Unit]
+          BindsTo=edpm_ovn_controller.service
+
+    - name: Create OVN controller service drop-in directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/edpm_ovn_controller.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Create OVN BindsTo FRR drop-in
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/edpm_ovn_controller.service.d/frr-bind.conf
+        mode: "0644"
+        content: |
+          [Unit]
+          BindsTo=edpm_frr.service
+
+    - name: Reload systemd to activate BindsTo drop-ins
+      ansible.builtin.systemd:
+        daemon_reload: true
