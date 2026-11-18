@@ -43,8 +43,7 @@
           - "'KOLLA_CONFIG_STRATEGY' not in _frr_container_content"
           - "'/var/lib/kolla/config_files' not in _frr_container_content"
           - "'ca-bundle.trust.crt' not in _frr_container_content"
-          - "'Volume=/var/lib/openstack/frr/etc/frr/frr.conf:/etc/frr/frr.conf:ro' in _frr_container_content"
-          - "'Volume=/var/lib/openstack/frr/etc/frr/daemons:/etc/frr/daemons:ro' in _frr_container_content"
+          - "'Volume=/var/lib/openstack/frr/etc/frr:/etc/frr:rw,z' in _frr_container_content"
           - "'Requires=edpm_frr_init.service' in _frr_container_content"
       vars:
         _frr_container_content: "{{ _quadlet_content.content | b64decode }}"
@@ -61,10 +60,11 @@
         src: "/etc/containers/systemd/edpm_frr_init.container"
       register: _frr_init_quadlet_content
 
-    - name: Verify frr init container chowns the runtime directory
+    - name: Verify frr init container chowns the runtime and configuration directories
       ansible.builtin.assert:
         that:
-          - "'Exec=/usr/bin/chown -R frr:frrvty /run/frr' in _frr_init_container_content"
+          - "'Exec=/usr/bin/chown -R frr:frrvty /run/frr /etc/frr' in _frr_init_container_content"
+          - "'Volume=/var/lib/openstack/frr/etc/frr:/etc/frr:rw,z' in _frr_init_container_content"
           - "'User=root' in _frr_init_container_content"
           - "'Type=oneshot' in _frr_init_container_content"
       vars:
@@ -104,6 +104,15 @@
             that:
               - check_frr_daemons_file.stat.exists
             fail_msg: "File /var/lib/openstack/frr/etc/frr/daemons does not exist"
+        - name: Check if vtysh.conf exists
+          ansible.builtin.stat:
+            path: /var/lib/openstack/frr/etc/frr/vtysh.conf
+          register: check_frr_vtysh_file
+        - name: Assert vtysh.conf exists
+          ansible.builtin.assert:
+            that:
+              - check_frr_vtysh_file.stat.exists
+            fail_msg: "File /var/lib/openstack/frr/etc/frr/vtysh.conf does not exist"
 
     - name: Verify FRR BGP and BFD firewall rules are applied
       block:
@@ -189,6 +198,656 @@
         that:
           - frr_container_etc.stdout_lines | sort == ["daemons", "frr.conf", "vtysh.conf"]
         fail_msg: "Unexpected files in container /etc/frr: {{ frr_container_etc.stdout_lines }}"
+
+    - name: Verify FRR configuration persists across a service restart
+      become: true
+      block:
+        - name: Save the original FRR configuration
+          ansible.builtin.slurp:
+            src: /var/lib/openstack/frr/etc/frr/frr.conf
+          register: frr_original_config
+          no_log: true
+
+        - name: Replace the configuration as the FRR user
+          ansible.builtin.command:
+            argv:
+              - podman
+              - exec
+              - --user
+              - frr
+              - frr
+              - /bin/sh
+              - -c
+              - >-
+                cp /etc/frr/frr.conf /etc/frr/frr.conf.persistence-test &&
+                printf '\n! edpm-frr-persistence-test\n' >> /etc/frr/frr.conf.persistence-test &&
+                mv /etc/frr/frr.conf.persistence-test /etc/frr/frr.conf
+          changed_when: true
+
+        - name: Read the replaced configuration on the host
+          ansible.builtin.slurp:
+            src: /var/lib/openstack/frr/etc/frr/frr.conf
+          register: frr_replaced_config
+          no_log: true
+
+        - name: Assert the replacement reached the host
+          ansible.builtin.assert:
+            that:
+              - "'! edpm-frr-persistence-test' in (frr_replaced_config.content | b64decode)"
+
+        - name: Save a dynamic configuration change with vtysh
+          ansible.builtin.command:
+            argv:
+              - podman
+              - exec
+              - --user
+              - frr
+              - frr
+              - vtysh
+              - -c
+              - configure terminal
+              - -c
+              - route-map edpm-frr-persistence-test permit 10
+              - -c
+              - end
+              - -c
+              - write memory
+          changed_when: true
+
+        - name: Read the saved configuration on the host
+          ansible.builtin.slurp:
+            src: /var/lib/openstack/frr/etc/frr/frr.conf
+          register: frr_saved_config
+          no_log: true
+
+        - name: Assert vtysh saved the runtime change on the host
+          ansible.builtin.assert:
+            that:
+              - "'route-map edpm-frr-persistence-test permit 10' in (frr_saved_config.content | b64decode)"
+
+        - name: Restart FRR service
+          ansible.builtin.systemd:
+            name: edpm_frr.service
+            state: restarted
+
+        - name: Read the running configuration after restart
+          ansible.builtin.command:
+            argv: [podman, exec, --user, frr, frr, vtysh, -c, show running-config]
+          register: frr_running_config
+          changed_when: false
+          no_log: true
+          until: "'route-map edpm-frr-persistence-test permit 10' in (frr_running_config.stdout | default(''))"
+          retries: 10
+          delay: 2
+
+        - name: Assert the runtime change survived the restart
+          ansible.builtin.assert:
+            that:
+              - "'route-map edpm-frr-persistence-test permit 10' in frr_running_config.stdout"
+
+        - name: Gather the user fact for the update tasks
+          ansible.builtin.setup:
+            gather_subset: ['!all', '!min', user]
+
+        - name: Save vtysh configuration before the update
+          ansible.builtin.slurp:
+            src: /var/lib/openstack/frr/etc/frr/vtysh.conf
+          register: frr_vtysh_before_update
+
+        - name: Apply FRR update tasks
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+
+        - name: Update the FRR containers
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: run.yml
+
+        - name: Read vtysh configuration after the update
+          ansible.builtin.slurp:
+            src: /var/lib/openstack/frr/etc/frr/vtysh.conf
+          register: frr_vtysh_after_update
+
+        - name: Assert the update preserved vtysh configuration
+          ansible.builtin.assert:
+            that:
+              - frr_vtysh_after_update.content == frr_vtysh_before_update.content
+
+        - name: Read the running configuration after the update
+          ansible.builtin.command:
+            argv: [podman, exec, --user, frr, frr, vtysh, -c, show running-config]
+          register: frr_updated_running_config
+          changed_when: false
+          no_log: true
+          until: "'route-map edpm-frr-persistence-test permit 10' in (frr_updated_running_config.stdout | default(''))"
+          retries: 10
+          delay: 2
+
+        - name: Assert the runtime change survived the container update
+          ansible.builtin.assert:
+            that:
+              - "'route-map edpm-frr-persistence-test permit 10' in frr_updated_running_config.stdout"
+      always:
+        - name: Restore the original FRR configuration
+          ansible.builtin.copy:
+            content: "{{ frr_original_config.content | b64decode }}"
+            dest: /var/lib/openstack/frr/etc/frr/frr.conf
+            mode: '0644'
+          when: frr_original_config.content is defined
+          no_log: true
+
+        - name: Restart FRR with the original configuration
+          ansible.builtin.systemd:
+            name: edpm_frr.service
+            state: restarted
+          when: frr_original_config.content is defined
+
+    - name: Verify FRR configuration deployment behavior
+      become: true
+      block:
+        - name: Create an isolated configuration directory
+          ansible.builtin.tempfile:
+            state: directory
+            prefix: edpm-frr-config-test-
+          register: frr_test_dir
+
+        - name: Create the FRR configuration directory
+          ansible.builtin.file:
+            path: "{{ frr_test_dir.path }}/etc/frr"
+            state: directory
+            mode: '0755'
+
+        - name: Create the initial FRR configuration
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: configure.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_test_dir.path }}"
+            edpm_frr_bgp_peers: ['10.64.0.1']
+
+        - name: Assert the initial configuration was created
+          ansible.builtin.assert:
+            that:
+              - _frr_config_result is changed
+
+        - name: Add a runtime change to the configuration
+          ansible.builtin.lineinfile:
+            path: "{{ frr_test_dir.path }}/etc/frr/frr.conf"
+            line: '! edpm-frr-runtime-change'
+
+        - name: Change the vtysh configuration before redeployment
+          ansible.builtin.lineinfile:
+            path: "{{ frr_test_dir.path }}/etc/frr/vtysh.conf"
+            line: '! edpm-frr-vtysh-change'
+
+        - name: Reconfigure FRR with the default overwrite setting
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: configure.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_test_dir.path }}"
+            edpm_frr_bgp_peers: ['10.64.0.1']
+
+        - name: Read the preserved configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_test_dir.path }}/etc/frr/frr.conf"
+          register: frr_preserved_config
+          no_log: true
+
+        - name: Assert the runtime change was preserved
+          ansible.builtin.assert:
+            that:
+              - _frr_config_result is not changed
+              - "'! edpm-frr-runtime-change' in (frr_preserved_config.content | b64decode)"
+
+        - name: Read the regenerated vtysh configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_test_dir.path }}/etc/frr/vtysh.conf"
+          register: frr_vtysh_redeployed
+
+        - name: Assert redeployment regenerated vtysh configuration
+          ansible.builtin.assert:
+            that:
+              - "(frr_vtysh_redeployed.content | b64decode | trim) == 'service integrated-vtysh-config'"
+
+        - name: Reconfigure FRR with overwrite enabled
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: configure.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_test_dir.path }}"
+            edpm_frr_bgp_peers: ['10.64.0.1']
+            edpm_frr_overwrite_config: true
+
+        - name: Read the overwritten configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_test_dir.path }}/etc/frr/frr.conf"
+          register: frr_overwritten_config
+          no_log: true
+
+        - name: Assert the runtime change was replaced
+          ansible.builtin.assert:
+            that:
+              - _frr_config_result is changed
+              - "'! edpm-frr-runtime-change' not in (frr_overwritten_config.content | b64decode)"
+
+        - name: Reconfigure FRR again with overwrite enabled
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: configure.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_test_dir.path }}"
+            edpm_frr_bgp_peers: ['10.64.0.1']
+            edpm_frr_overwrite_config: true
+
+        - name: Assert an unchanged configuration is idempotent
+          ansible.builtin.assert:
+            that:
+              - _frr_config_result is not changed
+      always:
+        - name: Remove the isolated configuration directory
+          ansible.builtin.file:
+            path: "{{ frr_test_dir.path }}"
+            state: absent
+          when: frr_test_dir.path is defined
+
+    - name: Verify FRR configuration migration during updates
+      become: true
+      vars:
+        frr_migration_legacy_dir: /var/lib/config-data/ansible-generated/frr
+      block:
+        - name: Gather the user fact for the update tasks
+          ansible.builtin.setup:
+            gather_subset: ['!all', '!min', user]
+
+        - name: Create isolated migration directories
+          ansible.builtin.tempfile:
+            state: directory
+            prefix: edpm-frr-migration-test-
+          register: frr_migration_test_dir
+
+        - name: Check whether the legacy configuration directory already exists
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}"
+          register: frr_migration_existing_legacy_dir
+
+        - name: Require an unused legacy configuration directory
+          ansible.builtin.assert:
+            that:
+              - not frr_migration_existing_legacy_dir.stat.exists
+            fail_msg: "The migration test requires an unused legacy FRR configuration directory."
+
+        - name: Create the legacy configuration directory
+          ansible.builtin.file:
+            path: "{{ frr_migration_legacy_dir }}/etc/frr"
+            state: directory
+            mode: '0755'
+          register: frr_migration_legacy_created
+
+        - name: Create the current configuration directory
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr"
+            state: directory
+            mode: '0755'
+
+        - name: Create conflicting legacy and current configurations
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ item.directory }}/etc/frr/frr.conf"
+            mode: '0644'
+          loop:
+            - {directory: "{{ frr_migration_legacy_dir }}", content: legacy configuration}
+            - {directory: "{{ frr_migration_test_dir.path }}/new", content: persisted runtime configuration}
+
+        - name: Create conflicting legacy and current vtysh configurations
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ item.directory }}/etc/frr/vtysh.conf"
+            mode: '0644'
+          loop:
+            - {directory: "{{ frr_migration_legacy_dir }}", content: legacy vtysh configuration}
+            - {directory: "{{ frr_migration_test_dir.path }}/new", content: current vtysh configuration}
+
+        - name: Create conflicting legacy and current daemon configurations
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ item.directory }}/etc/frr/daemons"
+            mode: '0644'
+          loop:
+            - {directory: "{{ frr_migration_legacy_dir }}", content: legacy daemon configuration}
+            - {directory: "{{ frr_migration_test_dir.path }}/new", content: current daemon configuration}
+
+        - name: Migrate without replacing the current configuration
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Read the current and retained legacy configurations
+          ansible.builtin.slurp:
+            src: "{{ item }}/etc/frr/frr.conf"
+          loop:
+            - "{{ frr_migration_test_dir.path }}/new"
+            - "{{ frr_migration_legacy_dir }}"
+          register: frr_migration_conflict
+
+        - name: Assert both configurations were preserved
+          ansible.builtin.assert:
+            that:
+              - "(frr_migration_conflict.results[0].content | b64decode | trim) == 'persisted runtime configuration'"
+              - "(frr_migration_conflict.results[1].content | b64decode | trim) == 'legacy configuration'"
+
+        - name: Read the current and retained legacy vtysh configurations
+          ansible.builtin.slurp:
+            src: "{{ item }}/etc/frr/vtysh.conf"
+          loop:
+            - "{{ frr_migration_test_dir.path }}/new"
+            - "{{ frr_migration_legacy_dir }}"
+          register: frr_vtysh_migration_conflict
+
+        - name: Assert both vtysh configurations were preserved
+          ansible.builtin.assert:
+            that:
+              - "(frr_vtysh_migration_conflict.results[0].content | b64decode | trim) == 'current vtysh configuration'"
+              - "(frr_vtysh_migration_conflict.results[1].content | b64decode | trim) == 'legacy vtysh configuration'"
+
+        - name: Match legacy vtysh and daemon configurations to the current files
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/{{ item.name }}"
+            mode: '0644'
+          loop:
+            - {name: vtysh.conf, content: current vtysh configuration}
+            - {name: daemons, content: current daemon configuration}
+
+        - name: Migrate with only an FRR configuration conflict
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Check that the legacy FRR configuration remains
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}/etc/frr/frr.conf"
+          register: frr_old_config
+
+        - name: Assert the FRR conflict kept the legacy directory
+          ansible.builtin.assert:
+            that:
+              - _edpm_frr_legacy_config_conflict | bool
+              - frr_old_config.stat.exists
+
+        - name: Match the legacy FRR configuration and restore the vtysh conflict
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/{{ item.name }}"
+            mode: '0644'
+          loop:
+            - {name: frr.conf, content: persisted runtime configuration}
+            - {name: vtysh.conf, content: legacy vtysh configuration}
+
+        - name: Migrate with only a vtysh configuration conflict
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Check that the legacy vtysh configuration remains
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}/etc/frr/vtysh.conf"
+          register: frr_old_vtysh_config
+
+        - name: Assert the vtysh conflict kept the legacy directory
+          ansible.builtin.assert:
+            that:
+              - frr_old_vtysh_config.stat.exists
+
+        - name: Read the current daemon configuration after repeated updates
+          ansible.builtin.slurp:
+            src: "{{ frr_migration_test_dir.path }}/new/etc/frr/daemons"
+          register: frr_daemons_after_updates
+
+        - name: Assert the current daemon configuration was preserved
+          ansible.builtin.assert:
+            that:
+              - "(frr_daemons_after_updates.content | b64decode | trim) == 'current daemon configuration'"
+
+        - name: Match the legacy vtysh configuration to the current one
+          ansible.builtin.copy:
+            content: "current vtysh configuration\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/vtysh.conf"
+            mode: '0644'
+
+        - name: Create a daemon-only configuration conflict
+          ansible.builtin.copy:
+            content: "legacy daemon configuration\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/daemons"
+            mode: '0644'
+
+        - name: Migrate with only a daemon configuration conflict
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Read both daemon configurations after the update
+          ansible.builtin.slurp:
+            src: "{{ item }}/etc/frr/daemons"
+          loop:
+            - "{{ frr_migration_test_dir.path }}/new"
+            - "{{ frr_migration_legacy_dir }}"
+          register: frr_daemons_conflict
+
+        - name: Assert both daemon configurations were preserved
+          ansible.builtin.assert:
+            that:
+              - _edpm_frr_legacy_config_conflict | bool
+              - "(frr_daemons_conflict.results[0].content | b64decode | trim) == 'current daemon configuration'"
+              - "(frr_daemons_conflict.results[1].content | b64decode | trim) == 'legacy daemon configuration'"
+
+        - name: Resolve the daemon conflict for the symlink tests
+          ansible.builtin.copy:
+            content: "current daemon configuration\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/daemons"
+            mode: '0644'
+
+        - name: Create a target for the current vtysh configuration symlink
+          ansible.builtin.copy:
+            content: "current vtysh configuration\n"
+            dest: "{{ frr_migration_test_dir.path }}/vtysh-target"
+            mode: '0644'
+
+        - name: Replace the current vtysh configuration with a symlink
+          ansible.builtin.file:
+            src: "{{ frr_migration_test_dir.path }}/vtysh-target"
+            dest: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+            state: link
+            force: true
+
+        - name: Migrate with a symlinked current configuration
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Check the legacy directory after migration with a symlinked destination
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}"
+          register: frr_legacy_after_symlinked_destination
+
+        - name: Assert the legacy directory is retained for a symlinked destination
+          ansible.builtin.assert:
+            that:
+              - _edpm_frr_legacy_config_conflict | bool
+              - frr_legacy_after_symlinked_destination.stat.exists
+
+        - name: Restore the current vtysh configuration
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+            state: absent
+
+        - name: Create the current vtysh configuration
+          ansible.builtin.copy:
+            content: "current vtysh configuration\n"
+            dest: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+            mode: '0644'
+
+        - name: Create a target for the legacy FRR configuration symlink
+          ansible.builtin.copy:
+            content: "persisted runtime configuration\n"
+            dest: "{{ frr_migration_test_dir.path }}/frr-target"
+            mode: '0644'
+
+        - name: Replace the legacy FRR configuration with a symlink
+          ansible.builtin.file:
+            src: "{{ frr_migration_test_dir.path }}/frr-target"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/frr.conf"
+            state: link
+            force: true
+
+        - name: Remove the current FRR configuration
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/frr.conf"
+            state: absent
+
+        - name: Migrate with a symlinked legacy configuration and no destination
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Check the legacy directory after migration with a symlinked source
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}"
+          register: frr_legacy_after_symlinked_source
+
+        - name: Assert the legacy directory is retained for a symlinked source
+          ansible.builtin.assert:
+            that:
+              - _edpm_frr_legacy_config_conflict | bool
+              - frr_legacy_after_symlinked_source.stat.exists
+
+        - name: Remove the legacy FRR configuration symlink
+          ansible.builtin.file:
+            path: "{{ frr_migration_legacy_dir }}/etc/frr/frr.conf"
+            state: absent
+
+        - name: Restore the legacy configurations for the remaining migration test
+          ansible.builtin.copy:
+            content: "{{ item.content }}\n"
+            dest: "{{ frr_migration_legacy_dir }}/etc/frr/{{ item.name }}"
+            mode: '0644'
+          loop:
+            - {name: frr.conf, content: persisted runtime configuration}
+            - {name: vtysh.conf, content: legacy vtysh configuration}
+            - {name: daemons, content: legacy daemon configuration}
+
+        - name: Remove the current configuration to test migration
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/{{ item }}"
+            state: absent
+          loop: [frr.conf, vtysh.conf, daemons]
+
+        - name: Migrate the legacy configuration when the destination is missing
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Read the migrated configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_migration_test_dir.path }}/new/etc/frr/frr.conf"
+          register: frr_migrated_config
+
+        - name: Read the migrated vtysh configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+          register: frr_migrated_vtysh_config
+
+        - name: Read the migrated daemon configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_migration_test_dir.path }}/new/etc/frr/daemons"
+          register: frr_migrated_daemons
+
+        - name: Check that the old directory was removed
+          ansible.builtin.stat:
+            path: "{{ frr_migration_legacy_dir }}"
+          register: frr_old_config_dir
+
+        - name: Assert the legacy configuration was migrated
+          ansible.builtin.assert:
+            that:
+              - "(frr_migrated_config.content | b64decode | trim) == 'persisted runtime configuration'"
+              - "(frr_migrated_vtysh_config.content | b64decode | trim) == 'legacy vtysh configuration'"
+              - "(frr_migrated_daemons.content | b64decode | trim) == 'legacy daemon configuration'"
+              - not frr_old_config_dir.stat.exists
+
+        - name: Remove vtysh configuration to simulate an existing deployment
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+            state: absent
+
+        - name: Update FRR without a vtysh configuration
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Read the created vtysh configuration
+          ansible.builtin.slurp:
+            src: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+          register: frr_vtysh_created_by_update
+
+        - name: Assert the update created the integrated vtysh configuration
+          ansible.builtin.assert:
+            that:
+              - "(frr_vtysh_created_by_update.content | b64decode | trim) == 'service integrated-vtysh-config'"
+
+        - name: Record the created vtysh configuration metadata
+          ansible.builtin.stat:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+          register: frr_vtysh_before_repeat
+
+        - name: Repeat the FRR update
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_frr
+            tasks_from: update.yml
+          vars:
+            edpm_frr_config_basedir: "{{ frr_migration_test_dir.path }}/new"
+
+        - name: Record the vtysh configuration metadata after the repeated update
+          ansible.builtin.stat:
+            path: "{{ frr_migration_test_dir.path }}/new/etc/frr/vtysh.conf"
+          register: frr_vtysh_after_repeat
+
+        - name: Assert the existing vtysh configuration was not rewritten
+          ansible.builtin.assert:
+            that:
+              - frr_vtysh_after_repeat.stat.checksum == frr_vtysh_before_repeat.stat.checksum
+              - frr_vtysh_after_repeat.stat.mtime == frr_vtysh_before_repeat.stat.mtime
+      always:
+        - name: Remove the test legacy configuration directory
+          ansible.builtin.file:
+            path: "{{ frr_migration_legacy_dir }}"
+            state: absent
+          when:
+            - frr_migration_legacy_created is defined
+            - frr_migration_legacy_created is changed
+
+        - name: Remove isolated migration directories
+          ansible.builtin.file:
+            path: "{{ frr_migration_test_dir.path }}"
+            state: absent
+          when: frr_migration_test_dir.path is defined
 
     - name: Ensure systemd services are defined and functional
       ansible.builtin.include_tasks: "{{ test_helper_dir }}/verify_systemd_unit.yaml"
