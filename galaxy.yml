@@ -21,6 +21,7 @@ dependencies:
   ansible.posix: '*'
   community.general: '*'
   containers.podman: '*'
+  infra.leapp: '*'
 repository: https://github.com/openstack-k8s-operators/edpm-ansible
 documentation: https://openstack-k8s-operators.github.io/edpm-ansible
 homepage: https://github.com/openstack-k8s-operators/edpm-ansible

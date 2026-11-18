@@ -1,0 +1,100 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# ============================================================================
+# Leapp OS Upgrade - Pre leapp upgrade Validate Phase
+# ============================================================================
+
+- name: Gather distribution and kernel cmdline facts if needed
+  when:
+    - >-
+      'distribution' not in ansible_facts or
+      'cmdline' not in ansible_facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - "distribution"
+      - "cmdline"
+
+- name: Validate leapp upgrade prerequisites
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.distribution == 'RedHat'
+      - ansible_facts.distribution_major_version is version(edpm_leapp_upgrade_source_major_version, '>=')
+      - ansible_facts.distribution_version is version(edpm_leapp_upgrade_source_min_version, '>=')
+    fail_msg: >-
+      Leapp in-place upgrade is only supported on
+      RHEL {{ edpm_leapp_upgrade_source_min_version }} or newer. Current
+      distribution: {{ ansible_facts.distribution }},
+      version: {{ ansible_facts.distribution_version }}.
+
+- name: Validate kernel uses predictable network interface names
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.cmdline['net.ifnames'] | default('') != '0'
+    fail_msg: >-
+      Kernel command line disables predictable network interface names
+      (net.ifnames=0). Migrate the node to predictable NIC naming before
+      running the leapp upgrade, otherwise interface names may change
+      across the upgrade.
+
+- name: Validate ifcfg connections were migrated to nmstate
+  block:
+    - name: Get NetworkManager connection list
+      ansible.builtin.command: nmcli -f name,uuid,filename connection show
+      register: _nmcli_connections
+      changed_when: false
+
+    - name: Debug nmcli connections
+      ansible.builtin.debug:
+        var: _nmcli_connections.stdout_lines
+
+    - name: Assert no sysconfig connections remain
+      ansible.builtin.assert:
+        that:
+          - _nmcli_connections.stdout_lines | select('search', 'sysconfig') | list | length == 0
+        fail_msg: >
+          ifcfg was not migrated to nmstate. Please migrate ifcfg to nmstate before running leapp upgrade.
+
+- name: Archive stale leapp job logs from previous runs
+  when: edpm_leapp_upgrade_clean_stale_logs
+  become: true
+  block:
+    # infra.leapp.common refuses to start while an ansible_leapp_*.log file
+    # exists in /var/log/leapp. An aborted run leaves one behind and a
+    # retried deployment would fail on the stale lock instead of the real
+    # problem, so archive the leftovers (keeping the evidence) before the
+    # upstream roles run.
+    - name: Check whether the leapp reports directory exists
+      ansible.builtin.stat:
+        path: /var/log/leapp
+      register: _edpm_leapp_reports_dir
+
+    - name: Find stale leapp job logs
+      ansible.builtin.find:
+        paths: /var/log/leapp
+        patterns: ansible_leapp_*.log
+      when: _edpm_leapp_reports_dir.stat.exists
+      register: _edpm_leapp_stale_logs
+
+    - name: Archive stale leapp job logs
+      ansible.builtin.command:
+        cmd: "mv {{ item.path }} {{ item.path }}.{{ now(utc=true, fmt='%Y%m%dT%H%M%SZ') }}"
+      loop: "{{ _edpm_leapp_stale_logs.files | default([]) }}"
+      loop_control:
+        label: "{{ item.path }}"
+      changed_when: true

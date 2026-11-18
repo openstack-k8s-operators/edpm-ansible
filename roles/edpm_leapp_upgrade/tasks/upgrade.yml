@@ -1,0 +1,48 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# ============================================================================
+# Leapp OS Upgrade - Upgrade Phase
+# ============================================================================
+
+- name: Run leapp in-place OS upgrade
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_LEAPP_COLLECTION', default='infra.leapp') + '.upgrade' }}"
+    apply:
+      become: true
+  vars:
+    leapp_system_roles_collection: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') }}"
+    # Only require the pre-upgrade analysis report when the analysis phase
+    # of this role actually ran; infra.leapp.upgrade fails hard on a
+    # missing report when leapp_check_analysis_results is true.
+    leapp_check_analysis_results: "{{ edpm_leapp_upgrade_analysis }}"
+    leapp_copy_reports: "{{ edpm_leapp_upgrade_copy_reports }}"
+    leapp_workdir_controller: >-
+      {{ _edpm_leapp_workdir_controller | default(edpm_leapp_upgrade_workdir_controller, true) }}
+
+# The chroot is pinned to the source RHEL major version, so leaving the
+# repository behind would point an EPEL 9 Copr at an upgraded RHEL 10 node.
+# Removal is by repository id and file name only, both of which are
+# independent of the chroot and so still resolve after the upgrade.
+- name: Remove the leapp Copr repository after the upgrade
+  become: true
+  ansible.builtin.yum_repository:
+    name: "{{ _edpm_leapp_copr_id }}"
+    file: "{{ _edpm_leapp_copr_file }}"
+    state: absent
+  when:
+    - edpm_leapp_upgrade_copr_enabled | bool
+    - edpm_leapp_upgrade_copr_remove_after_upgrade | bool
