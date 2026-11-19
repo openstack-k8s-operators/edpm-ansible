@@ -1,0 +1,47 @@
+---
+# Phase 2: per-VF settings, bond, and L3 (after phase 1 created VFs).
+#
+# Use with edpm_network_config_template (nmstate tool path).
+# VF ports may use sriov:<pf>:<vf_id> or kernel names (e.g. eno12399np0v0).
+interfaces:
+  # Per-VF attributes on the PF (trust, spoof-check, rates, VLAN, etc.)
+  - name: eno12399np0
+    type: ethernet
+    state: up
+    ethernet:
+      sr-iov:
+        total-vfs: 2
+        vfs:
+          - id: 0
+            spoof-check: false
+            trust: true
+            min-tx-rate: 0
+            max-tx-rate: 0
+            vlan-id: 0
+            qos: 0
+          - id: 1
+            spoof-check: false
+            trust: true
+            min-tx-rate: 0
+            max-tx-rate: 0
+            vlan-id: 0
+            qos: 0
+
+  - name: bond-sriov0
+    type: bond
+    state: up
+    mtu: 1500
+    mac-address: 52:54:00:6f:00:10
+    link-aggregation:
+      mode: active-backup
+      options:
+        miimon: 100
+      port:
+        - sriov:eno12399np0:0
+        - sriov:eno12399np0:1
+    ipv4:
+      enabled: true
+      dhcp: false
+      address:
+        - ip: 192.168.100.10
+          prefix-length: 24
