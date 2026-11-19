@@ -1,0 +1,46 @@
+---
+# Copyright 2025 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Check if CA cert file exists
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: /var/lib/openstack/cacerts/bootstrap/tls-ca-bundle.pem
+  register: ca_file
+
+- name: Copy CA cert file if present
+  when: ca_file.stat.exists
+  become: true
+  block:
+    - name: Ensure that the CA destination directory exists
+      ansible.builtin.file:
+        path: "/etc/pki/ca-trust/source/anchors"
+        state: "directory"
+        setype: "cert_t"
+        owner: "root"
+        group: "root"
+        mode: "0755"
+
+    - name: Copy CA certs to the standard location on the compute node
+      ansible.builtin.copy:
+        src: "/var/lib/openstack/cacerts/bootstrap/tls-ca-bundle.pem"
+        dest: "/etc/pki/ca-trust/source/anchors/tls-ca-bundle.pem"
+        mode: '0644'
+        owner: root
+        group: root
+      notify: "update-ca-trust"
+
+- name: Flush handlers to update the CA trust store
+  ansible.builtin.meta: flush_handlers
