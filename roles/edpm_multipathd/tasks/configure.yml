@@ -206,9 +206,29 @@
           {% endfor %}
           }
 
+    # multipath -t exits 0 even when it cannot parse the file, reporting the
+    # problem on stderr only, so the return code is not a usable gate. A
+    # configuration it fully understands produces no stderr at all.
     - name: Validate the resulting multipath configuration
       ansible.builtin.command: multipath -t
+      register: multipathd_config_check
       changed_when: false
+      failed_when: multipathd_config_check.stderr | length > 0
+
+    # Parsing cleanly is not the same as having understood the exemptions, so
+    # confirm each one survived into the merged configuration. Without this a
+    # silently dropped entry would only surface as an unbootable node.
+    - name: Verify multipath accepted the boot device exemptions
+      ansible.builtin.assert:
+        that:
+          - exempt_wwid in multipathd_config_check.stdout
+        fail_msg: >-
+          multipath did not report an exemption for {{ exempt_wwid }} after it
+          was written to /etc/multipath.conf. Rebooting this node would leave
+          it without the partition devices for its boot disk.
+      loop: "{{ multipathd_kpartx_exceptions }}"
+      loop_control:
+        loop_var: exempt_wwid
 
     - name: Record the new multipath configuration
       ansible.builtin.stat:
