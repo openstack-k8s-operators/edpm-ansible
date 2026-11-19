@@ -1,8 +1,10 @@
 ---
 # Build/refresh a device_map.yaml recording, for every physical network
 # device (PCI ethernet NIC, SR-IOV VF, ...), its current PCI address, MAC
-# address, and bound kernel driver. This is observational only: no filtering or skip
-# decisions are made here.
+# address, and bound kernel driver. Observational only (no skip policy).
+# The helper merges prior entries whose netdev left sysfs but whose PCI BDF
+# is still bound to vfio-pci, so derived NIC mapping can keep those aliases
+# stable across subsequent runs.
 
 - name: Ensure /var/lib/edpm-config exists
   ansible.builtin.file:

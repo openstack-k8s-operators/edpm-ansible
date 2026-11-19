@@ -19,6 +19,22 @@
 
 """Substitute NIC aliases only under nmstate keys that reference interface names."""
 
+import re
+
+# nmstate's "refer to a VF by PF name + VF index" pseudo interface name; see
+# https://nmstate.io/features/iface_vf_id.html. The <pf_name> segment may itself
+# be an EDPM alias (e.g. "sriov:nic3:0") and needs the same substitution as a
+# plain interface name.
+_SRIOV_VF_REF_RE = re.compile(r"^sriov:(?P<pf_name>.+):(?P<vf_id>\d+)$")
+
+
+def _resolve_name(name: str, mapping: dict) -> str:
+    match = _SRIOV_VF_REF_RE.match(name)
+    if match:
+        pf_name = match.group("pf_name")
+        return "sriov:%s:%s" % (mapping.get(pf_name, pf_name), match.group("vf_id"))
+    return mapping.get(name, name)
+
 
 def _normalize_key(key: str) -> str:
     if not isinstance(key, str):
@@ -68,12 +84,12 @@ def _subst_value(key: str, value, mapping: dict):
             return [_walk_any(item, mapping) for item in value]
         return value
     if isinstance(value, str):
-        return mapping.get(value, value)
+        return _resolve_name(value, mapping)
     if isinstance(value, list):
         out = []
         for item in value:
             if isinstance(item, str):
-                out.append(mapping.get(item, item))
+                out.append(_resolve_name(item, mapping))
             elif isinstance(item, dict):
                 out.append(_walk_dict(item, mapping))
             elif isinstance(item, list):
