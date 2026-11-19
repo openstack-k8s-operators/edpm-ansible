@@ -37,9 +37,14 @@ not grow at all, and a warning will be printed. When space is underallocated
 the remaining space will be given to the root volume (mounted at /).
 
 The currently supported partition layout is:
+- A GPT partition table
 - Exactly one of the partitions containing an LVM group
 - The disk having unpartitioned space to grow with
 - The LVM logical volumes being formatted with XFS filesystems
+
+The partition table is inspected and extended with ``sfdisk`` from
+util-linux, which must provide the ``--json`` and ``--relocate`` options
+(util-linux 2.36 or later).
 
 Example usage:
 

@@ -17,6 +17,7 @@
 
 import argparse
 import collections
+import json
 import logging
 import os
 import re
@@ -55,22 +56,40 @@ PHYSICAL_EXTENT_BYTES = 4 * UNIT_BYTES['MiB']
 # Grow the thin pool metadata size to 1GiB
 POOL_METADATA_SIZE = UNIT_BYTES['GiB']
 
+# Alignment of the new partition start, matching the 1MiB default used by
+# the partitioning tools when the image is created.
+ALIGNMENT_BYTES = UNIT_BYTES['MiB']
+
+# Linux filesystem data partition type GUID for the new partition.
+GPT_TYPE_LINUX_FILESYSTEM = '0FC63DAF-8483-4772-8E79-3D69D8477DE4'
+
+# The backup GPT header and the partition entry array occupy the last 34
+# sectors of the device, so in a healthy table the last usable LBA is 34
+# sectors before the end of the disk.
+GPT_BACKUP_SECTORS = 34
+
+# Name of the partition growvols adds, used to find its device after the
+# partition table has been changed.
+GROWVOLS_PARTITION_NAME = 'growvols'
+
 
 class Command(object):
     """ An object to represent a command to run with associated comment """
 
     cmd = None
-
+    stdin = None
     comment = None
 
-    def __init__(self, cmd, comment=None):
+    def __init__(self, cmd, comment=None, stdin=None):
         self.cmd = cmd
+        self.stdin = stdin
         self.comment = comment
 
     def __repr__(self):
         if self.comment:
-            return "\n# %s\n%s" % (self.comment, printable_cmd(self.cmd))
-        return printable_cmd(self.cmd)
+            return "\n# %s\n%s" % (self.comment,
+                                   printable_cmd(self.cmd, self.stdin))
+        return printable_cmd(self.cmd, self.stdin)
 
 
 def parse_opts(argv):
@@ -178,10 +197,12 @@ def configure_logger(verbose=False, debug=False):
                         level=log_level)
 
 
-def printable_cmd(cmd):
+def printable_cmd(cmd, stdin=None):
     """Convert a command list to a log printable string"""
     cmd_quoted = [shlex.quote(c) for c in cmd]
-    return ' '.join(cmd_quoted)
+    if stdin is None:
+        return ' '.join(cmd_quoted)
+    return '%s <<EOF\n%sEOF' % (' '.join(cmd_quoted), stdin)
 
 
 def convert_bytes(num):
@@ -219,9 +240,9 @@ def shrink_bytes_for_alignment(num):
     return result
 
 
-def execute(cmd):
+def execute(cmd, stdin=None):
     """Run a command"""
-    LOG.info('Running: %s', printable_cmd(cmd))
+    LOG.info('Running: %s', printable_cmd(cmd, stdin))
 
     process = subprocess.Popen(
         cmd,
@@ -229,7 +250,7 @@ def execute(cmd):
         stderr=subprocess.PIPE,
         universal_newlines=True
     )
-    out, err = process.communicate()
+    out, err = process.communicate(input=stdin)
     if process.returncode != 0:
         error_msg = (
             'Running command failed: cmd "{}", stdout "{}",'
@@ -299,30 +320,63 @@ def find_disk(opts, devices):
     return device
 
 
+def read_partition_table(disk_name):
+    """Return the partition table of a disk, as reported by sfdisk"""
+    device = '/dev/%s' % disk_name
+    return json.loads(execute(['sfdisk', '--json', device]))['partitiontable']
+
+
 def grow_gpt(disk_name):
     device = '/dev/%s' % disk_name
-    output = execute(['sgdisk', '-v', device])
+    table = read_partition_table(disk_name)
 
-    search_str = "it doesn't reside\nat the end of the disk"
-    if search_str in output:
+    if table.get('label') != 'gpt':
+        raise Exception('growvols requires a GPT partition table on %s, '
+                        'found: %s' % (device, table.get('label')))
+
+    # blockdev --getsz reports the size in 512 byte units, while the
+    # partition table uses the logical sector size of the device.
+    device_sectors = (int(execute(['blockdev', '--getsz', device]).strip())
+                      * 512 // table['sectorsize'])
+
+    if table['lastlba'] < device_sectors - GPT_BACKUP_SECTORS:
         LOG.info('Fixing GPT structure, moving to end of device %s', device)
-        execute(['sgdisk', '-e', device])
+        execute(['sfdisk', '--no-reread', '--relocate', 'gpt-bak-std', device])
         execute(['partprobe'])
 
 
 def find_space(disk_name):
     LOG.info('Finding spare space to grow into')
-    dev_path = '/dev/%s' % disk_name
-    largest = execute([
-        'sgdisk',
-        '--first-aligned-in-largest',
-        '--end-of-largest',
-        dev_path])
-    start_end = largest.strip().split('\n')
-    sector_start = int(start_end[0])
-    sector_end = int(start_end[1])
-    size_sectors = sector_end - sector_start
-    return sector_start, sector_end, size_sectors
+    table = read_partition_table(disk_name)
+    align = max(1, ALIGNMENT_BYTES // table['sectorsize'])
+
+    # Walk the partitions in order to find the unpartitioned ranges.
+    free_ranges = []
+    free_start = table['firstlba']
+    for part in sorted(table.get('partitions', []),
+                       key=lambda p: p['start']):
+        part_start = part['start']
+        part_end = part_start + part['size'] - 1
+        if part_start > free_start:
+            free_ranges.append((free_start, part_start - 1))
+        free_start = max(free_start, part_end + 1)
+    if free_start <= table['lastlba']:
+        free_ranges.append((free_start, table['lastlba']))
+
+    # Use the largest range that is left after aligning its start.
+    largest = None
+    for start, end in free_ranges:
+        if start % align:
+            start += align - start % align
+        if start >= end:
+            continue
+        size_sectors = end - start
+        if largest is None or size_sectors > largest[2]:
+            largest = (start, end, size_sectors)
+
+    if largest is None:
+        return 0, 0, 0
+    return largest
 
 
 def find_devices():
@@ -351,46 +405,79 @@ def find_group(opts):
     return vg_names.pop()
 
 
+def parse_partition_name(disk_name, name):
+    """Split a partition device name into its naming template and number
+
+    Returns a (template, partnum) tuple, or None when the name is not a
+    partition of the disk.  The template is '%s%d' for SATA style names
+    and '%sp%d' where a 'p' separator is used, for example for NVMe and
+    multipath devices whose name ends in a digit.
+    """
+    if not name.startswith(disk_name):
+        return None
+    suffix = name[len(disk_name):]
+    if DIGITS_EOF_STR_RE.fullmatch(suffix):
+        return '%s%d', int(suffix)
+    if suffix.startswith('p') and DIGITS_EOF_STR_RE.fullmatch(suffix[1:]):
+        return '%sp%d', int(suffix[1:])
+    return None
+
+
 def find_next_partnum(devices, disk):
-    if disk['TYPE'] == 'disk':
-        disk_name = disk['KNAME']
-        return len([d for d in devices if d['PKNAME'] == disk_name]) + 1
-    if disk['TYPE'] == 'mpath':
-        max_partnum = 0
-        disk_name_length = len(disk['NAME'])
-        seen_devs = set()
-        for d in devices:
-            if d['PKNAME'] != disk['KNAME']:
-                continue
-            dev_name = d['NAME']
-            if dev_name in seen_devs:
-                continue
-            seen_devs.add(dev_name)
-            # Multipath device names may have a partition_delimiter between
-            # the base device name and the partition number. By default, if
-            # partition_delimiter is unset in the multipath configuration and
-            # the base name ends in a digit, a 'p' is inserted.
-            # A regular expression is used to reliably extract trailing
-            # digits, regardless the presence of a partition delimiter or not.
-            max_partnum = max(max_partnum,
-                              int(DIGITS_EOF_STR_RE.search(
-                                  dev_name[disk_name_length:]).group(0)))
-        return max_partnum + 1
+    """Return the partition number sfdisk will use for a new partition
+
+    sfdisk appends a new partition with the lowest unused partition
+    number, not necessarily the one after the last partition.
+    """
+    used = set()
+    for d in devices:
+        if d.get('TYPE') != 'part':
+            continue
+        parsed = parse_partition_name(disk['NAME'], d.get('NAME', ''))
+        if parsed:
+            used.add(parsed[1])
+
+    partnum = 1
+    while partnum in used:
+        partnum += 1
+    return partnum
 
 
 def find_next_device_name(devices, disk, partnum):
     disk_name = disk['NAME']
-    existing_partnum = partnum - 1
 
-    # try partition scheme for SATA etc, then NVMe
-    for part_template in '%s%d', '%sp%d':
-        part = part_template % (disk_name, existing_partnum)
-        LOG.debug('Looking for device %s' % part)
-        if find_device(devices, 'NAME', part):
-            return part_template % (disk_name, partnum)
+    # The new partition uses the lowest free partition number, not
+    # necessarily the one next to an existing partition, so the naming
+    # scheme is detected from any existing partition of the disk.
+    for d in devices:
+        if d.get('TYPE') != 'part':
+            continue
+        parsed = parse_partition_name(disk_name, d.get('NAME', ''))
+        if parsed:
+            return parsed[0] % (disk_name, partnum)
 
     raise Exception('Could not find partition naming scheme for %s'
                     % disk_name)
+
+
+def verify_grown_partition(disk_name, expected_start):
+    """Check that the planned partition was created as expected
+
+    sfdisk chooses the partition number, so make sure the partition the
+    following commands operate on is the one that was planned.
+    """
+    table = read_partition_table(disk_name)
+    for part in table.get('partitions', []):
+        if part.get('name') != GROWVOLS_PARTITION_NAME:
+            continue
+        if part['start'] != expected_start:
+            raise Exception(
+                'The %s partition on /dev/%s starts at sector %d, '
+                'expected %d' % (GROWVOLS_PARTITION_NAME, disk_name,
+                                 part['start'], expected_start))
+        return
+    raise Exception('The %s partition was not created on /dev/%s'
+                    % (GROWVOLS_PARTITION_NAME, disk_name))
 
 
 def prompt_user_for_confirmation(message):
@@ -596,12 +683,21 @@ def main(argv):
 
     commands = []
 
-    commands.append(Command([
-        'sgdisk',
-        '--new=%d:%d:%d' % (partnum, sector_start, sector_end),
-        '--change-name=%d:growvols' % partnum,
-        '/dev/%s' % disk_name
-    ], 'Create new partition %s' % devname))
+    # sfdisk appends the partition using the given start and size, both in
+    # sectors, and names it so that it can be found afterwards.  The size
+    # includes the last sector found, matching the previous sgdisk call.
+    partition_script = 'start=%d, size=%d, type=%s, name="%s"\n' % (
+        sector_start, size_sectors + 1, GPT_TYPE_LINUX_FILESYSTEM,
+        GROWVOLS_PARTITION_NAME)
+    commands.append(Command(
+        [
+            'sfdisk',
+            '--no-reread',
+            '--append',
+            '/dev/%s' % disk_name
+        ],
+        'Create new partition %s' % devname,
+        stdin=partition_script))
 
     if disk['TYPE'] == 'mpath':
         commands.append(Command(
@@ -680,7 +776,8 @@ def main(argv):
             '\nAre you sure you want to run these commands? [y/N] ')
     if yes:
         for cmd in commands:
-            execute(cmd.cmd)
+            execute(cmd.cmd, stdin=cmd.stdin)
+        verify_grown_partition(disk_name, sector_start)
 
     return 0
 
