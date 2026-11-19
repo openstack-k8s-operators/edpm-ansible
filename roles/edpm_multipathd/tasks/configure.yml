@@ -96,13 +96,20 @@
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
+          # Missing tools mean the answer is unknown, not "no boot devices".
+          # Fail loudly rather than report an empty list.
+          command -v findmnt >/dev/null || { echo "findmnt not found" >&2; exit 1; }
+          command -v lsblk >/dev/null || { echo "lsblk not found" >&2; exit 1; }
           for mnt in / /boot /boot/efi; do
               # --nofsroot drops the "[/subvol]" suffix findmnt appends for
               # btrfs subvolumes and bind mounts, which is not a block device.
               src=$(findmnt -no SOURCE --nofsroot --target "${mnt}" 2>/dev/null) || continue
+              # Skip anything that is not a block device, such as an overlay,
+              # tmpfs or NFS mount, which lsblk cannot resolve.
+              [ -b "${src}" ] || continue
               # -s walks the dependency tree downwards, so this resolves both
               # a partition on a multipath map and LVM stacked on top of one.
-              lsblk -nspo KNAME,TYPE "${src}" 2>/dev/null | awk '$2 == "mpath" {print $1}'
+              lsblk -nspo KNAME,TYPE "${src}" 2>/dev/null | awk '$2 == "mpath" {print $1}' || true
           done | sort -u | while read -r dev; do
               uuid=$(cat "/sys/class/block/${dev##*/}/dm/uuid" 2>/dev/null) || continue
               printf '%s\n' "${uuid#mpath-}"
@@ -110,7 +117,6 @@
         executable: /bin/bash
       register: boot_mpath_wwids
       changed_when: false
-      failed_when: false
       check_mode: false
 
     - name: Build the list of WWIDs exempt from skip_kpartx
@@ -119,6 +125,45 @@
           {{ (boot_mpath_wwids.stdout_lines | default([]))
              | union(edpm_multipathd_skip_kpartx_exceptions)
              | select('string') | reject('equalto', '') | list }}
+
+    - name: Check whether boot device exemptions are already in place
+      ansible.builtin.command:
+        cmd: >-
+          grep -q '^# BEGIN ANSIBLE MANAGED BLOCK edpm_multipathd boot devices'
+          /etc/multipath.conf
+      register: multipathd_existing_exemptions
+      changed_when: false
+      # A non-zero result here only means the block is not present yet.
+      failed_when: false
+      check_mode: false
+
+    - name: Report the detected boot device exemptions
+      ansible.builtin.debug:
+        msg: >-
+          detected={{ boot_mpath_wwids.stdout_lines | default([]) }}
+          configured={{ edpm_multipathd_skip_kpartx_exceptions }}
+          effective={{ multipathd_kpartx_exceptions }}
+          already_present={{ multipathd_existing_exemptions.rc == 0 }}
+        verbosity: 1
+
+    # Never let an empty detection remove exemptions that are already in
+    # place. On a node that still boots from SAN that strips the partition
+    # maps from its root device, and the next boot hangs in the initramfs
+    # with no way to repair it from the running system.
+    - name: Refuse to remove boot device exemptions that may still be needed
+      ansible.builtin.fail:
+        msg: >-
+          /etc/multipath.conf exempts boot devices from skip_kpartx, but no
+          boot multipath device was detected on this run. Removing the
+          exemption would leave this node unable to boot if it still boots
+          from SAN. Investigate why the detection returned nothing, or set
+          edpm_multipathd_skip_kpartx_autodetect_boot_devices to false and
+          list the WWIDs in edpm_multipathd_skip_kpartx_exceptions.
+      when:
+        - multipathd_kpartx_exceptions | length == 0
+        - multipathd_existing_exemptions.rc == 0
+        # A check mode run writes nothing, so there is no node to protect.
+        - not ansible_check_mode
 
     - name: Configure /etc/multipath.conf variables
       ansible.builtin.lineinfile:
