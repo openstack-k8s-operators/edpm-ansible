@@ -43,6 +43,14 @@ edpm_multipathd_skip_kpartx_autodetect_boot_devices: true
 # see (for example a map that is only assembled later in the boot sequence).
 edpm_multipathd_skip_kpartx_exceptions: []
 
+# The role refuses to remove the boot device exemptions when the detection
+# comes back empty, because that would silently leave a SAN booted node
+# unbootable. Set this to true to remove them deliberately, for example after
+# redeploying a node to boot from local storage. The initramfs is not rebuilt
+# for the removal: the stale per WWID entries only make kpartx create
+# partition nodes during early boot, which is harmless.
+edpm_multipathd_skip_kpartx_purge_exemptions: false
+
 # The initramfs embeds a copy of /etc/multipath.conf, so it has to be rebuilt
 # whenever the configuration changes or the node boots with a stale copy.
 edpm_multipathd_regenerate_initramfs: true

@@ -1,0 +1,56 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Converge
+  hosts: all
+  gather_facts: false
+  tasks:
+    # The test host does not boot from SAN, so the detection comes back empty
+    # while /etc/multipath.conf still carries the exemptions seeded by the
+    # prepare playbook. The role has to refuse the removal and explain how
+    # to do it deliberately. In check mode the guard is skipped by design,
+    # and the seeded state is gone by then anyway, so only assert for real.
+    - name: Expect the role to refuse removing the exemptions
+      when: not ansible_check_mode
+      block:
+        - name: Run the role without the purge override
+          ansible.builtin.include_role:
+            name: osp.edpm.edpm_multipathd
+        - name: The role must have refused above
+          ansible.builtin.fail:
+            msg: the role did not refuse the removal
+      rescue:
+        - name: The refusal must come from the removal guard
+          ansible.builtin.assert:
+            that:
+              - "'edpm_multipathd_skip_kpartx_purge_exemptions' in ansible_failed_result.msg"
+            fail_msg: >-
+              The role failed for a different reason than the removal guard:
+              {{ ansible_failed_result.msg }}
+
+    # The escape hatch: with the purge override the same empty detection must
+    # remove the block instead of failing.
+    - name: Purge the exemptions through the escape hatch
+      ansible.builtin.include_role:
+        name: osp.edpm.edpm_multipathd
+      vars:
+        edpm_multipathd_skip_kpartx_purge_exemptions: true
+        # The test host does not boot from SAN, so rebuilding its initramfs
+        # would be both pointless and disruptive. The purge cannot trigger a
+        # rebuild on its own either, because the regeneration is gated on a
+        # non-empty exception list.
+        edpm_multipathd_regenerate_initramfs: false

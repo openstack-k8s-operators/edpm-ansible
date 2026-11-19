@@ -144,12 +144,14 @@
           configured={{ edpm_multipathd_skip_kpartx_exceptions }}
           effective={{ multipathd_kpartx_exceptions }}
           already_present={{ multipathd_existing_exemptions.rc == 0 }}
+          purge={{ edpm_multipathd_skip_kpartx_purge_exemptions | bool }}
         verbosity: 1
 
-    # Never let an empty detection remove exemptions that are already in
-    # place. On a node that still boots from SAN that strips the partition
-    # maps from its root device, and the next boot hangs in the initramfs
-    # with no way to repair it from the running system.
+    # An empty detection is indistinguishable from a failed one, so never let
+    # it remove exemptions that are already in place: on a node that still
+    # boots from SAN the stripped file gets baked into the initramfs by the
+    # next kernel update and the following reboot drops to the dracut
+    # emergency shell. Deliberate removal goes through the purge variable.
     - name: Refuse to remove boot device exemptions that may still be needed
       ansible.builtin.fail:
         msg: >-
@@ -158,10 +160,13 @@
           exemption would leave this node unable to boot if it still boots
           from SAN. Investigate why the detection returned nothing, or set
           edpm_multipathd_skip_kpartx_autodetect_boot_devices to false and
-          list the WWIDs in edpm_multipathd_skip_kpartx_exceptions.
+          list the WWIDs in edpm_multipathd_skip_kpartx_exceptions. If the
+          node no longer boots from SAN and the exemptions should really be
+          removed, set edpm_multipathd_skip_kpartx_purge_exemptions to true.
       when:
         - multipathd_kpartx_exceptions | length == 0
         - multipathd_existing_exemptions.rc == 0
+        - not (edpm_multipathd_skip_kpartx_purge_exemptions | bool)
         # A check mode run writes nothing, so there is no node to protect.
         - not ansible_check_mode
 

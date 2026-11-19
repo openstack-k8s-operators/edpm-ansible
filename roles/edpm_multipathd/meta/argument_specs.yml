@@ -62,6 +62,16 @@ argument_specs:
           multipath maps that the autodetection cannot see. These are merged
           with the autodetected WWIDs.
         type: list
+      edpm_multipathd_skip_kpartx_purge_exemptions:
+        default: false
+        description: >-
+          Whether to remove the boot device exemptions from
+          /etc/multipath.conf when no boot multipath device is detected.
+          The role fails instead of removing them otherwise, so a node that
+          still boots from SAN is never left silently unbootable. Set this
+          only when the node is known to no longer boot from SAN. It has no
+          effect while any exemption is still detected or configured.
+        type: bool
       edpm_multipathd_regenerate_initramfs:
         default: true
         description: >-
