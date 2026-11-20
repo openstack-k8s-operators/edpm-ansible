@@ -213,6 +213,10 @@
       ansible.builtin.command: multipath -t
       register: multipathd_config_check
       changed_when: false
+      # The command is read only, so run it in check mode too: the WWID
+      # assert below reads its register, and a skipped command task has no
+      # stdout for it to check.
+      check_mode: false
       failed_when: multipathd_config_check.stderr | length > 0
 
     # Parsing cleanly is not the same as having understood the exemptions, so
@@ -250,11 +254,62 @@
     # unrelated package update rebuilds it. --regenerate-all is required
     # because the update workflow installs a new kernel before this role runs,
     # and that kernel's initramfs is the one the node will boot from.
-    - name: Regenerate initramfs so the boot path matches /etc/multipath.conf
+    #
+    # Everything above validates /etc/multipath.conf itself, so finish by
+    # proving the copy inside the image matches it: dracut installs the file
+    # verbatim unless hostonly_mode is strict, in which case its multipath
+    # module rewrites it, and a regeneration that omits it entirely would
+    # otherwise leave the node green on paper and without its root device on
+    # the next boot. lsinitrd -f exits 0 even when the file is missing from
+    # the image, so gate on the extracted content, not the return code.
+    - name: Keep the boot path in sync with /etc/multipath.conf
       when:
         - edpm_multipathd_regenerate_initramfs | bool
         - multipathd_kpartx_exceptions | length > 0
         - not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum
         - ansible_local.bootc is not defined or not ansible_local.bootc
-      ansible.builtin.command: "{{ edpm_multipathd_rebuild_initramfs_command }}"
-      changed_when: true
+        # The regeneration is a command task and would be skipped in check
+        # mode anyway, and the read back must not judge the stale image that
+        # would still be in place.
+        - not ansible_check_mode
+      block:
+        - name: Identify the kernel the node will boot next
+          ansible.builtin.shell:
+            cmd: |
+              set -o pipefail
+              kver=$(grubby --default-kernel 2>/dev/null | sed 's#.*/vmlinuz-##')
+              if [ -z "${kver}" ] || [ ! -d "/lib/modules/${kver}" ]; then
+                  kver=$(ls -1 /lib/modules 2>/dev/null | sort -V | tail -n1)
+              fi
+              if [ -z "${kver}" ]; then
+                  echo "Unable to identify the kernel the node will boot next" >&2
+                  exit 1
+              fi
+              printf '%s\n' "${kver}"
+            executable: /bin/bash
+          register: multipathd_boot_kver
+          changed_when: false
+
+        - name: Regenerate initramfs so the boot path matches /etc/multipath.conf
+          ansible.builtin.command: "{{ edpm_multipathd_rebuild_initramfs_command }}"
+          changed_when: true
+
+        - name: Read /etc/multipath.conf back from the regenerated initramfs
+          ansible.builtin.command: >-
+            lsinitrd /boot/initramfs-{{ multipathd_boot_kver.stdout }}.img
+            -f /etc/multipath.conf
+          register: multipathd_initramfs_conf
+          changed_when: false
+
+        - name: Verify the initramfs exempts the boot devices from skip_kpartx
+          ansible.builtin.assert:
+            that:
+              - "'skip_kpartx no' in multipathd_initramfs_conf.stdout"
+              - exempt_wwid in multipathd_initramfs_conf.stdout
+            fail_msg: >-
+              The initramfs for kernel {{ multipathd_boot_kver.stdout }} does
+              not carry the boot device exemptions from skip_kpartx, so this
+              node would not find its root device on the next boot.
+          loop: "{{ multipathd_kpartx_exceptions }}"
+          loop_control:
+            loop_var: exempt_wwid
