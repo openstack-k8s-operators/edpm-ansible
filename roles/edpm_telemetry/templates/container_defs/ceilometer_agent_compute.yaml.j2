@@ -4,7 +4,7 @@ restart: always
 command: kolla_start
 security_opt: label:type:ceilometer_polling_t
 ports:
-  - "{{ ctlplane_ip }}:9101:9101"
+  - "[{{ ctlplane_ip }}]:9101:9101"
 environment:
   KOLLA_CONFIG_STRATEGY: COPY_ALWAYS
   OS_ENDPOINT_TYPE: internal

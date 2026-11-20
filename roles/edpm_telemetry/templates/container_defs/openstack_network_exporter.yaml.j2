@@ -3,7 +3,7 @@ restart: always
 recreate: true
 privileged: true
 ports:
-  - "{{ ctlplane_ip }}:9105:9105"
+  - "[{{ ctlplane_ip }}]:9105:9105"
 command: []
 environment:
   OS_ENDPOINT_TYPE: internal
