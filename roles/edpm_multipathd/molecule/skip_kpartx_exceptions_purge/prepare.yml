@@ -1,0 +1,57 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+- name: Run the default prepare playbook
+  import_playbook: ../default/prepare.yml
+
+- name: Seed the state of a converged SAN boot deployment
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install the base multipath.conf
+      ansible.builtin.copy:
+        src: ../../files/multipath.conf
+        dest: /etc/multipath.conf
+        mode: "0644"
+
+    # Configure the defaults section the way the role leaves it, so the only
+    # thing a subsequent role run could want to change is the exemptions.
+    - name: Configure the defaults section
+      ansible.builtin.lineinfile:
+        path: /etc/multipath.conf
+        insertafter: '^defaults'
+        firstmatch: true
+        regexp: "^\\s+{{ item.var }}"
+        line: "        {{ item.var }} {{ item.value }}"
+      loop:
+        - {var: find_multipaths, value: 'yes'}
+        - {var: recheck_wwid, value: 'yes'}
+        - {var: skip_kpartx, value: 'yes'}
+        - {var: user_friendly_names, value: 'no'}
+
+    - name: Add the managed block with the boot device exemptions
+      ansible.builtin.blockinfile:
+        path: /etc/multipath.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK edpm_multipathd boot devices"
+        block: |
+          multipaths {
+                  multipath {
+                          wwid "3600000000000000000000000000000aa"
+                          skip_kpartx no
+                  }
+          }

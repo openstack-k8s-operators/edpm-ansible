@@ -26,3 +26,10 @@
 
     - name: Run multipathd
       ansible.builtin.include_tasks: run.yml
+
+# edpm_update_system runs before edpm_update_services, so by this point a new
+# kernel may already have been installed with an initramfs built from a stale
+# /etc/multipath.conf. Reconcile the configuration and rebuild the initramfs
+# here, before the node is rebooted into it. (OSPRH-33446)
+- name: Reconcile the multipath configuration
+  ansible.builtin.include_tasks: configure.yml
