@@ -34,3 +34,14 @@
     - edpm_neutron_ovn
     - edpm_upgrade_services
   when: '"neutron-ovn" in edpm_upgrade_services_running_services'
+
+- name: Apply 18->19 upgrade for edpm_neutron_dhcp role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_dhcp
+    tasks_from: upgrade.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_dhcp
+    - edpm_upgrade_services
+  when: '"neutron-dhcp" in edpm_upgrade_services_running_services'
