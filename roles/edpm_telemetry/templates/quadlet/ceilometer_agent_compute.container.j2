@@ -24,7 +24,7 @@ Description=Ceilometer Agent Compute container (EDPM)
 [Container]
 ContainerName=ceilometer_agent_compute
 Image={{ edpm_telemetry_ceilometer_compute_image }}
-PublishPort={{ ctlplane_ip }}:9101:9101
+PublishPort=[{{ ctlplane_ip }}]:9101:9101
 User=ceilometer
 {% if edpm_telemetry_ceilometer_polling_type_available | default(false) | bool %}
 SecurityLabelType=ceilometer_polling_t
