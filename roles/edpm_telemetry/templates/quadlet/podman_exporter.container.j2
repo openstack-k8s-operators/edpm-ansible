@@ -20,7 +20,7 @@ Description=Podman Exporter container (EDPM)
 [Container]
 ContainerName=podman_exporter
 Image={{ edpm_telemetry_podman_exporter_image }}
-PublishPort={{ ctlplane_ip }}:9882:9882
+PublishPort=[{{ ctlplane_ip }}]:9882:9882
 User=root
 PodmanArgs=--privileged --log-driver=journald
 {% if edpm_telemetry_healthcheck -%}
