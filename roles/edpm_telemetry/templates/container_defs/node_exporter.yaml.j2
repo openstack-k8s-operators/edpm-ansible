@@ -4,7 +4,7 @@ recreate: true
 user: root
 privileged: true
 ports:
-  - "{{ ctlplane_ip }}:9100:9100"
+  - "[{{ ctlplane_ip }}]:9100:9100"
 command:
 {% if tls_cert_exists|bool %}
   - --web.config.file=/etc/node_exporter/node_exporter.yaml
