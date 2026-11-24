@@ -45,3 +45,15 @@
     - edpm_neutron_dhcp
     - edpm_upgrade_services
   when: '"neutron-dhcp" in edpm_upgrade_services_running_services'
+
+- name: Apply upgrade for edpm_neutron_metadata role
+  ansible.builtin.include_role:
+    name: osp.edpm.edpm_neutron_metadata
+    tasks_from: upgrade.yml
+    apply:
+      become: true
+  tags:
+    - edpm_neutron_metadata
+    - edpm_upgrade_services
+  when: '"neutron-metadata" in edpm_upgrade_services_running_services'
+  
