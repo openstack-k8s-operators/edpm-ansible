@@ -25,11 +25,14 @@
         src: ../../files/multipath.conf
         dest: /etc/multipath.conf
 
+    # A valid keyword on purpose: the role fails the run when multipath
+    # cannot fully parse the resulting configuration, so an unknown keyword
+    # would fail the converge instead of surviving it.
     - name: Add a preexisting setting
       lineinfile:
         path: /etc/multipath.conf
         insertafter: '^defaults'
-        line: '        preexisting_variable preexisting_value'
+        line: '        polling_interval 21'
 
 - name: Run the default prepare playbook
   import_playbook: ../default/prepare.yml

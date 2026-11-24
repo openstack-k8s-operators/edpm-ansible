@@ -23,5 +23,5 @@
   gather_facts: false
   tasks:
     - name: Verify the preexisting setting is present
-      command: grep 'preexisting_variable preexisting_value' /etc/multipath.conf
+      command: grep 'polling_interval 21' /etc/multipath.conf
       changed_when: false
