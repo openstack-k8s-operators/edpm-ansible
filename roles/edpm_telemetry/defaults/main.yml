@@ -151,3 +151,5 @@ edpm_telemetry_network_exporter_tls_volumes:
 edpm_telemetry_network_exporter_ovs_volumes:
   - /var/run/openvswitch:/run/openvswitch:rw,z
   - /var/lib/openvswitch/ovn:/run/ovn:rw,z
+edpm_telemetry_network_exporter_tls_cacert_volumes:
+  - "{{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z"

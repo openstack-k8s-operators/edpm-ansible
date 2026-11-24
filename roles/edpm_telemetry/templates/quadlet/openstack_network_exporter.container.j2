@@ -6,6 +6,10 @@
 {%- set _network_exporter_volumes = _network_exporter_volumes +
         edpm_telemetry_network_exporter_tls_volumes -%}
 {%- endif -%}
+{%- if ca_bundle_exists | bool -%}
+{%- set _network_exporter_volumes = _network_exporter_volumes +
+        edpm_telemetry_network_exporter_tls_cacert_volumes -%}
+{%- endif -%}
 {%- if telemetry_test is not defined or not telemetry_test | bool -%}
 {%- set _network_exporter_volumes = _network_exporter_volumes +
         edpm_telemetry_network_exporter_ovs_volumes -%}
