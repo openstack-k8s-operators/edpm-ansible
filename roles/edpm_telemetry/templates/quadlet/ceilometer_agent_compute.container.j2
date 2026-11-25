@@ -13,6 +13,12 @@
 {%- if custom_ceilometer_conf.stat.exists | default(false) -%}
 {%- set _ceilometer_volumes = _ceilometer_volumes +
         edpm_telemetry_ceilometer_custom_conf_volumes -%}
+{%- endif -%}
+{%- set _ceilometer_gpu = _edpm_telemetry_ceilometer_gpu_available | default(false) | bool -%}
+{%- if _ceilometer_gpu -%}
+{%- set _ceilometer_volumes = _ceilometer_volumes +
+        [edpm_telemetry_ceilometer_gpu_nvml_library ~ ':' ~
+         edpm_telemetry_ceilometer_gpu_nvml_library ~ ':ro'] -%}
 {%- endif %}
 
 # DO NOT REMOVE - used by container_config_hash module
@@ -39,6 +45,11 @@ Environment=OS_ENDPOINT_TYPE=internal
 {% for vol in _ceilometer_volumes -%}
 Volume={{ vol }}
 {% endfor -%}
+{% if _ceilometer_gpu -%}
+{% for dev in _edpm_telemetry_ceilometer_gpu_devices -%}
+AddDevice={{ dev }}
+{% endfor -%}
+{% endif -%}
 Label=managed_by=edpm_ansible
 
 [Service]
