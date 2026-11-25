@@ -5,7 +5,8 @@ aliases:
   - slagle
   - rabi
   ci-approvers:
-  - rebtoor
+  - evallesp
+  - Valkyrie00
   - danpawlik
   - brjackma
   openstack-approvers:
