@@ -39,10 +39,28 @@ class TestNmstateDeviceMap(unittest.TestCase):
         os.makedirs(self.pci_devices)
         os.makedirs(self.pci_drivers)
         os.environ["EDPM_TEST_SYS_CLASS_NET"] = self.sys_class_net
+        os.environ["EDPM_TEST_PCI_DEVICES"] = self.pci_devices
         self.mod = _load_module()
 
     def tearDown(self):
         os.environ.pop("EDPM_TEST_SYS_CLASS_NET", None)
+        os.environ.pop("EDPM_TEST_PCI_DEVICES", None)
+
+    def _set_pci_driver(self, pci_bdf, driver):
+        pci_path = os.path.join(self.pci_devices, pci_bdf)
+        os.makedirs(pci_path, exist_ok=True)
+        driver_link = os.path.join(pci_path, "driver")
+        if os.path.islink(driver_link) or os.path.exists(driver_link):
+            os.remove(driver_link)
+        drv_path = os.path.join(self.pci_drivers, driver)
+        os.makedirs(drv_path, exist_ok=True)
+        os.symlink(drv_path, driver_link)
+
+    def _rm_netdev(self, name):
+        import shutil
+
+        shutil.rmtree(os.path.join(self.sys_class_net, name))
+
 
     def _mk_physical_netdev(self, name, pci_bdf, driver=None, mac=None):
         """A real NIC: netdev/device -> PCI device dir, optionally with a driver symlink."""
@@ -158,12 +176,96 @@ class TestNmstateDeviceMap(unittest.TestCase):
         self.assertIn("eno1", device_map["devices"])
         self.assertNotIn("dummy0", device_map["devices"])
 
+    def test_retains_previous_entry_when_netdev_gone_but_pci_bound_to_vfio(self):
+        # Run N-1 snapshot, then PF handed to vfio-pci (netdev leaves sysfs).
+        self._mk_physical_netdev(
+            "eno3np2", "0000:19:00.2", driver="i40e", mac="e4:43:4b:5c:96:62"
+        )
+        previous = self.mod.build_device_map(self.sys_class_net)
+        self._rm_netdev("eno3np2")
+        self._set_pci_driver("0000:19:00.2", "vfio-pci")
+
+        device_map = self.mod.build_device_map(
+            self.sys_class_net, previous=previous, pci_devices=self.pci_devices
+        )
+        self.assertEqual(
+            device_map["devices"]["eno3np2"],
+            {
+                "pci": "0000:19:00.2",
+                "mac": "e4:43:4b:5c:96:62",
+                "driver": "vfio-pci",
+            },
+        )
+
+    def test_drops_previous_entry_when_netdev_gone_and_not_vfio(self):
+        self._mk_physical_netdev("eno3np2", "0000:19:00.2", driver="i40e")
+        previous = self.mod.build_device_map(self.sys_class_net)
+        self._rm_netdev("eno3np2")
+        # PCI unbound / rebound to something other than vfio-pci.
+        self._set_pci_driver("0000:19:00.2", "i40e")
+
+        device_map = self.mod.build_device_map(
+            self.sys_class_net, previous=previous, pci_devices=self.pci_devices
+        )
+        self.assertNotIn("eno3np2", device_map["devices"])
+
+    def test_drops_previous_name_when_same_pci_visible_under_new_netdev(self):
+        self._mk_physical_netdev("eno3np2", "0000:19:00.2", driver="i40e")
+        previous = self.mod.build_device_map(self.sys_class_net)
+        self._rm_netdev("eno3np2")
+        # Same PCI BDF reappears under a new netdev name (rename); do not keep
+        # the stale name key even if we somehow still saw vfio on that BDF.
+        net_dir = os.path.join(self.sys_class_net, "ens3f2")
+        os.makedirs(net_dir)
+        os.symlink(
+            os.path.join(self.pci_devices, "0000:19:00.2"),
+            os.path.join(net_dir, "device"),
+        )
+        with open(os.path.join(net_dir, "address"), "w", encoding="utf-8") as fh:
+            fh.write("e4:43:4b:5c:96:62\n")
+
+        device_map = self.mod.build_device_map(
+            self.sys_class_net, previous=previous, pci_devices=self.pci_devices
+        )
+        self.assertNotIn("eno3np2", device_map["devices"])
+        self.assertIn("ens3f2", device_map["devices"])
+
+
+    def test_cli_retains_vfio_entry_across_refresh(self):
+        self._mk_physical_netdev(
+            "eno3np2", "0000:19:00.2", driver="i40e", mac="e4:43:4b:5c:96:62"
+        )
+        out_path = os.path.join(self.tmp, "device_map.yaml")
+        env = dict(os.environ)
+        subprocess.run(
+            [sys.executable, SCRIPT_PATH, "-o", out_path],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        self._rm_netdev("eno3np2")
+        self._set_pci_driver("0000:19:00.2", "vfio-pci")
+        subprocess.run(
+            [sys.executable, SCRIPT_PATH, "-o", out_path],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        device_map = self._load_yaml(out_path)
+        self.assertEqual(device_map["devices"]["eno3np2"]["driver"], "vfio-pci")
+        self.assertEqual(device_map["devices"]["eno3np2"]["pci"], "0000:19:00.2")
+
     @staticmethod
     def _load_yaml(path):
         import yaml
 
         with open(path, encoding="utf-8") as fh:
             return yaml.safe_load(fh)
+
 
 
 if __name__ == "__main__":
