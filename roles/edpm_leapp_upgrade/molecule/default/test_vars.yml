@@ -1,0 +1,8 @@
+---
+# A real leapp analysis or upgrade cannot run in a container, so the
+# scenario exercises the validation phase only. tests/test_molecule.py
+# turns this into "--skip-tags leapp_analysis,leapp_run", which also
+# proves the phases are reachable through their tags.
+test_skip_tags:
+  - leapp_analysis
+  - leapp_run

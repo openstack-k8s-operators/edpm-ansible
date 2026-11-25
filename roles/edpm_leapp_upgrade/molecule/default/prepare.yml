@@ -1,0 +1,54 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Prepare test_deps
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: ../../../../molecule/common/test_deps
+      test_deps_extra_packages:
+        - NetworkManager
+
+- name: Prepare NetworkManager and a stale leapp job log
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    # The validation phase queries connection profiles with nmcli, which
+    # needs the NetworkManager daemon running.
+    - name: Enable and start NetworkManager
+      ansible.builtin.service:
+        name: NetworkManager
+        state: started
+        enabled: true
+
+    # Simulate the leftover lock of an aborted run so that the stale-log
+    # guard in the validation phase is exercised.
+    - name: Create leapp reports directory
+      ansible.builtin.file:
+        path: /var/log/leapp
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Create a stale leapp job log
+      ansible.builtin.copy:
+        content: "log of an aborted leapp run\n"
+        dest: /var/log/leapp/ansible_leapp_upgrade.log
+        owner: root
+        group: root
+        mode: "0644"

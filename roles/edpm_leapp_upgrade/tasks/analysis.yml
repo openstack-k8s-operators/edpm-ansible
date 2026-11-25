@@ -1,0 +1,43 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# ============================================================================
+# Leapp OS Upgrade - Analysis Phase
+# ============================================================================
+
+- name: Run leapp pre-upgrade analysis
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_LEAPP_COLLECTION', default='infra.leapp') + '.analysis' }}"
+    apply:
+      become: true
+  vars:
+    leapp_system_roles_collection: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') }}"
+    leapp_copy_reports: "{{ edpm_leapp_upgrade_copy_reports }}"
+    leapp_workdir_controller: >-
+      {{ _edpm_leapp_workdir_controller | default(edpm_leapp_upgrade_workdir_controller, true) }}
+    # The generated host_vars/ and remediation playbook are written to the
+    # controller, which is an ephemeral AnsibleEE pod in EDPM, and the
+    # remediate role is not part of this workflow.
+    leapp_create_remediation_hostvars: false
+
+- name: Fail when leapp analysis reported upgrade inhibitors
+  ansible.builtin.assert:
+    that:
+      - not upgrade_inhibited
+    fail_msg: >-
+      Leapp pre-upgrade analysis found inhibitors. Review the report at
+      /var/log/leapp/leapp-report.txt on the node, remediate, and re-run.
+  when: edpm_leapp_upgrade_fail_on_inhibitors

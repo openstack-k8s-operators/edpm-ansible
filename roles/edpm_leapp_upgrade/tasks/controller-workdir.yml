@@ -1,0 +1,62 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+# ============================================================================
+# Leapp OS Upgrade - Controller Report Directory
+# ============================================================================
+# infra.leapp.common copies the leapp reports and job logs to
+# {{ leapp_workdir_controller }} on the controller. In EDPM the controller is
+# an AnsibleEE pod whose collection path is mounted read-only, so an
+# unwritable directory is a realistic outcome. Resolve and create the
+# directory up front: the copy happens at the very end of the analysis and
+# upgrade phases, and losing a multi-hour upgrade there - or being told about
+# it only then - is worse than putting the reports somewhere else.
+
+- name: Resolve the controller directory for leapp reports
+  delegate_to: localhost
+  # The controller is the AnsibleEE pod, running as an unprivileged UID
+  become: false
+  run_once: true
+  block:
+    - name: Ensure the configured controller reports directory exists
+      ansible.builtin.file:
+        path: "{{ edpm_leapp_upgrade_workdir_controller }}"
+        state: directory
+        mode: "0750"
+
+    - name: Use the configured controller reports directory
+      ansible.builtin.set_fact:
+        _edpm_leapp_workdir_controller: "{{ edpm_leapp_upgrade_workdir_controller }}"
+  rescue:
+    - name: Ensure the fallback controller reports directory exists
+      ansible.builtin.file:
+        path: "{{ _edpm_leapp_workdir_fallback }}"
+        state: directory
+        mode: "0750"
+
+    - name: Use the fallback controller reports directory
+      ansible.builtin.set_fact:
+        _edpm_leapp_workdir_controller: "{{ _edpm_leapp_workdir_fallback }}"
+
+    - name: Warn that the configured controller reports directory is unusable
+      ansible.builtin.debug:
+        msg: >-
+          Could not create {{ edpm_leapp_upgrade_workdir_controller }} on the
+          controller, leapp reports will be collected in
+          {{ _edpm_leapp_workdir_fallback }} instead. Set
+          edpm_leapp_upgrade_workdir_controller to a writable path to keep
+          them elsewhere; the reports also stay on the node under
+          /var/log/leapp.

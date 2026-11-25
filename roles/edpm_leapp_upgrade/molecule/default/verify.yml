@@ -1,0 +1,75 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Find archived leapp job logs
+      ansible.builtin.find:
+        paths: /var/log/leapp
+        patterns: ansible_leapp_upgrade.log.*
+      register: _verify_archived_logs
+
+    - name: Assert the stale leapp job log was archived
+      ansible.builtin.assert:
+        that:
+          - _verify_archived_logs.files | length == 1
+        fail_msg: >-
+          Expected the stale ansible_leapp_upgrade.log to be archived by the
+          validation phase, found
+          {{ _verify_archived_logs.files | map(attribute='path') | list }}.
+
+    - name: Check the original stale log
+      ansible.builtin.stat:
+        path: /var/log/leapp/ansible_leapp_upgrade.log
+      register: _verify_stale_log
+
+    - name: Assert the original stale log is gone
+      ansible.builtin.assert:
+        that:
+          - not _verify_stale_log.stat.exists
+
+    - name: Check the controller directory for leapp reports
+      ansible.builtin.stat:
+        path: >-
+          {{ [lookup('ansible.builtin.env', 'HOME') | default('/tmp', true),
+              'edpm_leapp_reports'] | ansible.builtin.path_join }}
+      delegate_to: localhost
+      become: false
+      register: _verify_controller_workdir
+
+    - name: Assert the controller reports directory was created up front
+      ansible.builtin.assert:
+        that:
+          - _verify_controller_workdir.stat.exists
+          - _verify_controller_workdir.stat.isdir
+        fail_msg: >-
+          Expected the role to create the controller reports directory before
+          running any phase, so that infra.leapp does not fail copying the
+          reports at the end of a multi-hour upgrade.
+
+    - name: Check for analysis phase artifacts
+      ansible.builtin.stat:
+        path: /var/log/leapp/ansible_leapp_analysis.log
+      register: _verify_analysis_log
+
+    - name: Assert the analysis phase did not run
+      ansible.builtin.assert:
+        that:
+          - not _verify_analysis_log.stat.exists
+        success_msg: The analysis and upgrade phases were skipped as intended.
