@@ -39,7 +39,6 @@ argument_specs:
         type: list
         description: The list of packages to install for growvols.
         default:
-          - gdisk
           - lvm2
           - parted
           - xfsprogs
