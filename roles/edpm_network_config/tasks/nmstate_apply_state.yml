@@ -1,0 +1,38 @@
+---
+# Apply one nmstate desired-state document via linux_system_roles.network.
+# Caller sets edpm_nmstate_apply_template (YAML string) and edpm_nmstate_apply_phase (label for logs).
+# Caller may set edpm_nmstate_apply_interface_mapping (dict of nicN -> real name) to substitute
+# NIC aliases before applying.
+#
+# Caller may set edpm_nmstate_apply_skip_role_setup: true to skip the rest of the
+# system-roles network role (package installs for NetworkManager/nmstate/
+# python3-libnmstate, service enable, a no-op network_connections call since we never
+# set network_connections, a connectivity re-test ping, and sr_fingerprint bookkeeping)
+# and call the network_state module directly instead. Only safe when an earlier phase
+# in the same run already executed the full role, so those packages/service are already
+# known-good; nmstate_tool.yml sets this for the second phase in a two-step SR-IOV apply.
+# Collection prefix matches include_role below (EDPM_SYSTEMROLES, default fedora.linux_system_roles).
+
+- name: Render network_state variable (NIC aliases only under nmstate iface keys) - {{ edpm_nmstate_apply_phase }}
+  ansible.builtin.set_fact:
+    network_state: >-
+      {{
+        edpm_nmstate_apply_template
+        | from_yaml
+        | osp.edpm.edpm_substitute_nic_aliases(edpm_nmstate_apply_interface_mapping | default({}))
+      }}
+
+- name: Load system-roles.network tasks - {{ edpm_nmstate_apply_phase }}
+  ansible.builtin.include_role:
+    name: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') + '.network' }}"
+  register: edpm_nmstate_apply_result
+  when: not (edpm_nmstate_apply_skip_role_setup | default(false))
+
+# Use action/args so the module FQCN is templated at runtime. A Jinja module key
+# is not resolved by ansible-core (seen with 2.21) and fails playbook parse.
+- name: Apply nmstate state directly (role setup already done earlier this run) - {{ edpm_nmstate_apply_phase }}
+  action: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') }}.network_state"
+  args:
+    desired_state: "{{ network_state }}"
+  register: edpm_nmstate_apply_result
+  when: edpm_nmstate_apply_skip_role_setup | default(false)
