@@ -1,0 +1,15 @@
+---
+# Call network_state directly. Included only when edpm_nmstate_apply_skip_role_setup
+# is true (phase 2 after a full system-roles.network run earlier in the same play).
+# Kept in its own file so the templated action FQCN is not parsed during phase 1
+# include_tasks of nmstate_apply_state.yml (ansible-core warns on unresolved Jinja
+# in the action name at plugin-load time).
+#
+# Use action/args so the module FQCN is templated at runtime. A Jinja module key
+# is not resolved by ansible-core (seen with 2.21) and fails playbook parse.
+
+- name: Apply nmstate state directly (role setup already done earlier this run) - {{ edpm_nmstate_apply_phase }}
+  action: "{{ lookup('ansible.builtin.env', 'EDPM_SYSTEMROLES', default='fedora.linux_system_roles') }}.network_state"
+  args:
+    desired_state: "{{ network_state }}"
+  register: edpm_nmstate_apply_result
