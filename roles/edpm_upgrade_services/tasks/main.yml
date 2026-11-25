@@ -1,5 +1,5 @@
 ---
-# Copyright 2025 Red Hat, Inc.
+# Copyright 2026 Red Hat, Inc.
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -24,7 +24,7 @@
     - edpm_podman
     - edpm_upgrade_services
 
-- name: Apply 18->19 upgrade for edpm_neutron_ovn role
+- name: Apply upgrade for edpm_neutron_ovn role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_ovn
     tasks_from: upgrade.yml
@@ -35,7 +35,7 @@
     - edpm_upgrade_services
   when: '"neutron-ovn" in edpm_upgrade_services_running_services'
 
-- name: Apply 18->19 upgrade for edpm_neutron_dhcp role
+- name: Apply upgrade for edpm_neutron_dhcp role
   ansible.builtin.include_role:
     name: osp.edpm.edpm_neutron_dhcp
     tasks_from: upgrade.yml
