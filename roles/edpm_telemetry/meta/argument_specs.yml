@@ -215,3 +215,7 @@ argument_specs:
           - /var/run/openvswitch:/run/openvswitch:rw,z
           - /var/lib/openvswitch/ovn:/run/ovn:rw,z
         description: "List of OVS/OVN volume mounts for openstack_network_exporter, added in production deployments"
+      edpm_telemetry_network_exporter_tls_cacert_volumes:
+        type: list
+        required: false
+        description: "List of CA bundle volume mounts for openstack_network_exporter, added when CA bundle exists"

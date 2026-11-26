@@ -183,6 +183,7 @@
           - "'Volume=/proc:/host/proc:ro' in _container_content"
           - "'Volume={{ edpm_telemetry_certs }}:/etc/openstack_network_exporter/tls:z' in _container_content"
           - "'Volume=/var/lib/openstack/healthchecks/openstack_network_exporter:/openstack:ro,z' in _container_content"
+          - "'Volume={{ edpm_telemetry_cacerts }}/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro,z' in _container_content"
         fail_msg: "Missing volume in network_exporter .container file"
       vars:
         _container_content: "{{ _network_exporter_container.content | b64decode }}"
