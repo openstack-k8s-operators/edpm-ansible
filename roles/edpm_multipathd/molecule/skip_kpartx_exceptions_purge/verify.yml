@@ -1,0 +1,49 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# The default verify playbook asserts the rest of the configuration is still
+# what the role mandates; the purge must not disturb anything else.
+- name: Run the default verify playbook
+  import_playbook: ../default/verify.yml
+
+- name: Verify (skip_kpartx exceptions purge)
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read /etc/multipath.conf
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/multipath.conf
+      register: multipath_conf
+
+    - name: Decode /etc/multipath.conf
+      ansible.builtin.set_fact:
+        multipath_conf_content: "{{ multipath_conf.content | b64decode }}"
+
+    - name: Verify the boot device exemptions were removed
+      ansible.builtin.assert:
+        that:
+          - "'BEGIN ANSIBLE MANAGED BLOCK edpm_multipathd boot devices' not in multipath_conf_content"
+          - "'skip_kpartx no' not in multipath_conf_content"
+        fail_msg: >-
+          /etc/multipath.conf still carries boot device exemptions after the
+          purge. Content was: {{ multipath_conf_content }}
+
+    - name: Verify multipathd accepts the resulting configuration
+      become: true
+      ansible.builtin.command: multipath -t
+      changed_when: false

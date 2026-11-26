@@ -1,0 +1,55 @@
+---
+# Copyright 2026 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+
+# The default verify playbook asserts that the defaults section still carries
+# "skip_kpartx yes", which is what the per WWID exemptions have to coexist
+# with: Cinder volumes keep the global setting, boot devices opt out of it.
+- name: Run the default verify playbook
+  import_playbook: ../default/verify.yml
+
+- name: Verify (skip_kpartx exceptions)
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Read /etc/multipath.conf
+      become: true
+      ansible.builtin.slurp:
+        src: /etc/multipath.conf
+      register: multipath_conf
+
+    - name: Extract the managed block
+      ansible.builtin.set_fact:
+        managed_block: >-
+          {{ (multipath_conf.content | b64decode).split(
+               '# BEGIN ANSIBLE MANAGED BLOCK edpm_multipathd boot devices')[1]
+             | default('', true) }}
+
+    - name: Verify a multipaths section was added for the exempt WWIDs
+      ansible.builtin.assert:
+        that:
+          - "'multipaths {' in managed_block"
+          - "'wwid \"360000000000000000000000000000001\"' in managed_block"
+          - "'wwid \"360000000000000000000000000000002\"' in managed_block"
+          - "managed_block.count('skip_kpartx no') == 2"
+        fail_msg: >-
+          /etc/multipath.conf does not exempt the boot devices from
+          skip_kpartx. Block was: {{ managed_block }}
+
+    - name: Verify multipathd accepts the resulting configuration
+      become: true
+      ansible.builtin.command: multipath -t
+      changed_when: false

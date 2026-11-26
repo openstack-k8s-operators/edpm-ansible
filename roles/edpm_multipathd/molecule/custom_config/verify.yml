@@ -23,5 +23,5 @@
   gather_facts: false
   tasks:
     - name: Verify the custom setting is present
-      command: grep 'custom_variable custom_value' /etc/multipath.conf
+      command: grep 'polling_interval 33' /etc/multipath.conf
       changed_when: false
