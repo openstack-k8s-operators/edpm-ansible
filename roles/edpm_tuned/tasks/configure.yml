@@ -90,6 +90,15 @@
     - (edpm_tuned_conf_stat_result.stat.exists | bool)
     - (edpm_tuned_profile == 'cpu-partitioning-powersave')
 
+- name: Configure tuned rollback behavior
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/tuned/tuned-main.conf
+    create: true
+    mode: '0644'
+    regexp: '^#?\s*rollback\s*=.*'
+    line: "rollback={{ edpm_tuned_rollback }}"
+
 - name: Enable tuned profile
   ansible.builtin.command: >-
     /usr/sbin/tuned-adm profile {{ edpm_tuned_profile }}
